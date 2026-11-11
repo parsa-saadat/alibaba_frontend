@@ -1,0 +1,13 @@
+export const logo_icon = 'ع';
+export const arrow_icon = '←';
+export const cart_icon = '🛒';
+export const menu_icon = '☰';
+export const profile_icon = '👤';
+export const search_icon = '🔍';
+export const bin_icon = '🗑️';
+export const cross_icon = '✕';
+export const exchange_icon = '⇄';
+export const express_icon = '🚚';
+export const quality_icon = '🛡️';
+export const support_icon = '🎧';
+export const toman_icon = 'تومان';
