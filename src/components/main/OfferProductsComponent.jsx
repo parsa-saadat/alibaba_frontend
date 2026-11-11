@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Flame, Timer } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Flame, Timer, ChevronLeft } from 'lucide-react';
 import ProductGridComponent from './ProductGridComponent';
 import TitleComponent from './TitleComponent';
 import { hasDiscount, toFa } from '../../utils/helpers/format';
@@ -27,11 +28,19 @@ function OfferProductsComponent({ products = [], loading = false }) {
   return (
     <section className="mt-8 card rounded-3xl p-5">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-        <TitleComponent partone="پیشنهادهای" parttwo="شگفت‌انگیز" icon={Flame} />
-        <span className="flex items-center gap-2 text-sm font-bold">
-          <Timer size={16} className="text-yellow" /> پایان تا:{' '}
-          <span dir="ltr">{toFa(countdown)}</span>
-        </span>
+        <div className="flex items-center gap-4 flex-wrap">
+          <TitleComponent partone="پیشنهادهای" parttwo="شگفت‌انگیز" icon={Flame} />
+          <span className="flex items-center gap-2 text-sm font-bold">
+            <Timer size={16} className="text-yellow" /> پایان تا:{' '}
+            <span dir="ltr">{toFa(countdown)}</span>
+          </span>
+        </div>
+        <Link
+          to="/products?discount=true"
+          className="text-sm font-bold flex items-center gap-1 text-yellow"
+        >
+          مشاهده همه <ChevronLeft size={15} />
+        </Link>
       </div>
       <ProductGridComponent
         products={deals}

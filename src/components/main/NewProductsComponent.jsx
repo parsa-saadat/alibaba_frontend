@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Sparkles, ChevronLeft } from 'lucide-react';
-import ProductGridComponent from './ProductGridComponent';
-import TitleComponent from './TitleComponent';
+import { Sparkles } from 'lucide-react';
+import ProductScrollerComponent from './ProductScrollerComponent';
 import { useShop } from '../../contexts/ShopContext';
 import { hasDiscount, ratingOf } from '../../utils/helpers/format';
 import { readList } from '../../utils/helpers/storage';
@@ -11,7 +9,7 @@ function NewProductsComponent({ products = [], loading = false }) {
   const { user, favorites } = useShop();
 
   const bestSellers = useMemo(
-    () => [...products].sort((a, b) => (b.sold_count ?? 0) - (a.sold_count ?? 0)).slice(0, 10),
+    () => [...products].sort((a, b) => (b.sold_count ?? 0) - (a.sold_count ?? 0)).slice(0, 14),
     [products],
   );
 
@@ -32,30 +30,19 @@ function NewProductsComponent({ products = [], loading = false }) {
       })
       .sort((a, b) => b.score - a.score)
       .map((x) => x.p)
-      .slice(0, 10);
+      .slice(0, 14);
   }, [products, user, favorites, bestSellers]);
 
   return (
-    <section className="mt-8">
-      <div className="flex items-end justify-between mb-4 flex-wrap gap-2">
-        <div>
-          <TitleComponent
-            partone={user ? 'پیشنهاد ویژه' : 'پرفروش‌ترین'}
-            parttwo={user ? 'برای شما' : 'محصولات'}
-            icon={Sparkles}
-          />
-          {user && (
-            <p className="text-xs muted mt-1">
-              بر اساس علاقه‌مندی‌ها، برندهای محبوب و بازدیدهای شما
-            </p>
-          )}
-        </div>
-        <Link to="/products" className="text-sm font-bold flex items-center gap-1 text-yellow">
-          همه محصولات <ChevronLeft size={15} />
-        </Link>
-      </div>
-      <ProductGridComponent products={personalised} loading={loading} columns={5} />
-    </section>
+    <ProductScrollerComponent
+      partone={user ? 'پیشنهاد ویژه' : 'پرفروش‌ترین'}
+      parttwo={user ? 'برای شما' : 'محصولات'}
+      icon={Sparkles}
+      subtitle={user ? 'بر اساس علاقه‌مندی‌ها، برندهای محبوب و بازدیدهای شما' : undefined}
+      products={personalised}
+      loading={loading}
+      moreTo="/products"
+    />
   );
 }
 

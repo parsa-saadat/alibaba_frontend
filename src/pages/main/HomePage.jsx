@@ -4,7 +4,10 @@ import HeaderComponent from '../../components/main/HeaderComponent';
 import OfferProductsComponent from '../../components/main/OfferProductsComponent';
 import NewProductsComponent from '../../components/main/NewProductsComponent';
 import FeaturedStoresComponent from '../../components/main/FeaturedStoresComponent';
+import InfiniteProductsComponent from '../../components/main/InfiniteProductsComponent';
 import OurPolicyComponent from '../../components/main/OurPolicyComponnet';
+import SectionTitle from '../../components/main/SectionTitle';
+import FloatingToolbarComponent from '../../components/main/FloatingToolbarComponent';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -29,12 +32,22 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    // تمام‌عرض شدن صفحه (بیرون از کانتینر layout)
+    <div dir="rtl" className="bg-white text-[#222]" style={{ marginInline: 'calc(50% - 50vw)' }}>
       <HeaderComponent products={products} categories={categories} loading={loading} />
-      <OfferProductsComponent products={products} loading={loading} />
-      <NewProductsComponent products={products} loading={loading} />
+
+      <div className="max-w-[1440px] mx-auto px-4">
+        <SectionTitle>پیشنهادهای ویژه برای شما</SectionTitle>
+        <div className="grid lg:grid-cols-2 gap-4 pb-8">
+          <OfferProductsComponent products={products} loading={loading} />
+          <NewProductsComponent products={products} loading={loading} />
+        </div>
+      </div>
+
       <FeaturedStoresComponent stores={stores} />
+      <InfiniteProductsComponent />
       <OurPolicyComponent />
+      <FloatingToolbarComponent />
     </div>
   );
 };
