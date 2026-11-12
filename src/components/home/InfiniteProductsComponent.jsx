@@ -6,7 +6,13 @@ import { API } from '../../config/api';
 import { getList } from '../../utils/helpers/response';
 
 const LIMIT = 24;
-const GRID = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3';
+
+/* سایزبندی گرید: تعداد ستون‌ها بر اساس عرض واقعی ظرف حساب می‌شود
+   (حداقل عرض هر کارت ۱۶۸px) تا در موبایل دو ستون و در دسکتاپ هفت ستون شود */
+const MIN_CARD_WIDTH = 168;
+const GRID_STYLE = {
+  gridTemplateColumns: `repeat(auto-fit, minmax(min(${MIN_CARD_WIDTH}px, 100%), 1fr))`,
+};
 
 function InfiniteProductsComponent() {
   const [items, setItems] = useState([]);
@@ -73,7 +79,7 @@ function InfiniteProductsComponent() {
       <div className="max-w-[1440px] mx-auto px-4">
         <SectionTitle>پیشنهاد برای شما</SectionTitle>
 
-        <div className={GRID}>
+        <div className="grid gap-3" style={GRID_STYLE}>
           {items.map((p) => (
             <ProductComponent key={p._id} product={p} />
           ))}

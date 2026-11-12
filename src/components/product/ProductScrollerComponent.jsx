@@ -4,6 +4,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TitleComponent from '../common/TitleComponent';
 import ProductComponent, { ProductSkeleton } from './ProductComponent';
 
+/* سایزبندی کارت‌ها — یک منبع واحد برای کارت و اسکلتون
+   تا هنگام بارگذاری، عرض کارت‌ها نپرد و صفحه نلرزد.
+   موبایل ۲۴۰ → تبلت ۲۵۶ → دسکتاپ ۲۶۸ → نمایشگر بزرگ ۲۹۸ */
+export const SCROLL_CARD_WIDTH =
+  'w-[240px] sm:w-[256px] lg:w-[268px] 2xl:w-[298px] shrink-0';
+
 function ProductScrollerComponent({
   partone,
   parttwo,
@@ -62,15 +68,12 @@ function ProductScrollerComponent({
         >
           {loading
             ? Array.from({ length: 6 }, (_, i) => (
-                <div key={i} className="w-[168px] sm:w-[196px] lg:w-[220px] 2xl:w-[248px] shrink-0">
+                <div key={i} className={`${SCROLL_CARD_WIDTH} flex`}>
                   <ProductSkeleton />
                 </div>
               ))
             : products.map((p) => (
-                <div
-                  key={p._id}
-                  className="w-[268px] sm:w-[256px] lg:w-[250px] 2xl:w-[298px] shrink-0 snap-start flex"
-                >
+                <div key={p._id} className={`${SCROLL_CARD_WIDTH} snap-start flex`}>
                   <ProductComponent product={p} />
                 </div>
               ))}

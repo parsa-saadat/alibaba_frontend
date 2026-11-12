@@ -3,13 +3,11 @@ import { Link } from 'react-router-dom';
 import {
   Heart,
   GitCompareArrows,
-  ShoppingCart,
   BadgeCheck,
   Check,
 } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
 import { getId } from '../../utils/helpers/response';
-import useCartQuantity from '../../hooks/useCartQuantity';
 import StorageImageComponent from '../common/StorageImageComponent';
 
 import {
@@ -49,15 +47,10 @@ function ProductComponent({ product }) {
   const rating = Number(ratingOf(product)) || 0;
   const sold = Number(product.sold_count) || 0;
 
-  const { qty, busy, increment, decrement, loggedIn, atMax } = useCartQuantity(id, {
-    stock,
-    soldOut,
-  });
-
   const circle =
     'w-8 h-8 rounded-full grid place-items-center border border-theme bg-[var(--card)]/90 backdrop-blur-sm  transition-colors hover:bg-[var(--card)]';
 
-  return (
+  return (                                                  
     <div className="card group relative flex flex-col h-full w-full rounded-xl p-3 ">
       {/* ───── تصویر ───── */}
       <div

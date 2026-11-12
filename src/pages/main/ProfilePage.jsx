@@ -13,10 +13,17 @@ import {
   Upload,
   RefreshCw,
   Loader2,
+  BadgeCheck,
 } from "lucide-react";
 import { useShop } from "../../contexts/ShopContext";
 import { authHeaders, getToken } from "../../utils/helpers/storage";
 import { toFa } from "../../utils/helpers/format";
+import {
+  userDisplayName,
+  userInitial,
+  isTrustedSeller,
+} from "../../utils/helpers/user";
+import { validateEmailSyntax } from "../../utils/validators/email.validator";
 import StorageImageComponent from "../../components/common/StorageImageComponent";
 import ImageLightboxComponent from "../../components/common/ImageLightboxComponent";
 import { nationalIDValidator } from "../../utils/validators/national_id.validator";
@@ -188,7 +195,12 @@ function ImageUploadSlot({
 /* ------------------------------------------------------------------ */
 function ProfilePage() {
   const { user, refreshUser, logout } = useShop();
-  const [username, setUsername] = useState("");
+  const [profile, setProfile] = useState({
+    username: "",
+    firstname: "",
+    lastname: "",
+    email: "",
+  });
   const [savingName, setSavingName] = useState(false);
 
   const [addresses, setAddresses] = useState([]);
@@ -222,7 +234,12 @@ function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      setUsername(user.username || "");
+      setProfile({
+        username: user.username || "",
+        firstname: user.firstname || "",
+        lastname: user.lastname || "",
+        email: user.email || "",
+      });
       loadAddresses();
     }
   }, [user, loadAddresses]);
@@ -239,21 +256,37 @@ function ProfilePage() {
     );
   }
 
-  /* ---------------- نام کاربری ---------------- */
-  const saveUsername = () => {
-    const name = username.trim();
-    if (!name) return toast.error("نام کاربری نمی‌تواند خالی باشد");
-    if (name === (user.username || ""))
-      return toast.info("تغییری برای ذخیره وجود ندارد");
+  /* ---------------- مشخصات کاربر ---------------- */
+  const saveProfile = () => {
+    const username = profile.username.trim();
+    const firstname = profile.firstname.trim();
+    const lastname = profile.lastname.trim();
+    const email = profile.email.trim();
+
+    if (!username) return toast.error("نام کاربری نمی‌تواند خالی باشد");
+    if (email && !validateEmailSyntax(email))
+      return toast.error("ایمیل وارد‌شده معتبر نیست");
+
+    const unchanged =
+      username === (user.username || "") &&
+      firstname === (user.firstname || "") &&
+      lastname === (user.lastname || "") &&
+      email === (user.email || "");
+    if (unchanged) return toast.info("تغییری برای ذخیره وجود ندارد");
+
     setSavingName(true);
     axios
-      .put(`${API}/user/${user._id}`, { username: name }, authHeaders())
+      .put(
+        `${API}/user/${user._id}`,
+        { username, firstname, lastname, email },
+        authHeaders(),
+      )
       .then(() => {
-        toast.success("نام کاربری به‌روزرسانی شد");
+        toast.success("مشخصات حساب به‌روزرسانی شد");
         refreshUser();
       })
       .catch((err) =>
-        toast.error(err.response?.data?.message || "خطا در ذخیره نام کاربری"),
+        toast.error(err.response?.data?.message || "خطا در ذخیره مشخصات"),
       )
       .finally(() => setSavingName(false));
   };
@@ -434,13 +467,23 @@ function ProfilePage() {
             className="w-16 h-16 rounded-2xl grid place-items-center font-black text-2xl"
             style={{ background: "var(--primary-color)", color: "var(--navy)" }}
           >
-            {(user.username || "ک")[0]}
+            {userInitial(user)}
           </div>
           <div>
-            <h1 className="font-black text-xl">
-              {user.username || "کاربر علی‌بازار"}
+            <h1 className="font-black text-xl flex items-center gap-2 flex-wrap">
+              {userDisplayName(user)}
+              {isSeller && isTrustedSeller(user) && (
+                <span className="chip !cursor-default !py-0.5 !px-2 text-[11px] flex items-center gap-1">
+                  <BadgeCheck size={12} className="text-yellow" />
+                  فروشنده مورد اعتماد
+                </span>
+              )}
             </h1>
             <div className="text-xs muted mt-1">
+              {user.username ? (
+                <span dir="ltr">@{user.username}</span>
+              ) : null}
+              {user.username ? " • " : ""}
               موبایل: <span dir="ltr">{toFa(user.phone)}</span> • نقش:{" "}
               {ROLE_LABELS[user.role] || user.role}
             </div>
@@ -481,24 +524,68 @@ function ProfilePage() {
 
       {/* ---------- ویرایش مشخصات ---------- */}
       <div className="card rounded-3xl p-6">
-        <h2 className="font-black mb-3">ویرایش مشخصات</h2>
-        <div className="flex gap-2 max-w-md">
-          <input
-            className="input"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && saveUsername()}
-            placeholder="نام کاربری"
-          />
-          <button
-            type="button"
-            onClick={saveUsername}
-            disabled={savingName}
-            className="btn-yellow shrink-0"
-          >
-            {savingName ? "در حال ذخیره…" : "ذخیره"}
-          </button>
-        </div>
+        <h2 className="font-black mb-1">ویرایش مشخصات</h2>
+        <p className="text-xs muted mb-4">
+          نام و نام خانوادگی در پروفایل، نظرات و صفحه‌ی فروشگاه شما نمایش داده می‌شود.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            saveProfile();
+          }}
+          className="grid sm:grid-cols-2 gap-3 max-w-2xl"
+        >
+          <label className="text-xs muted">
+            نام
+            <input
+              className="input mt-1"
+              value={profile.firstname}
+              onChange={(e) =>
+                setProfile({ ...profile, firstname: e.target.value })
+              }
+              placeholder="مثلاً سارا"
+            />
+          </label>
+          <label className="text-xs muted">
+            نام خانوادگی
+            <input
+              className="input mt-1"
+              value={profile.lastname}
+              onChange={(e) =>
+                setProfile({ ...profile, lastname: e.target.value })
+              }
+              placeholder="مثلاً محمدی"
+            />
+          </label>
+          <label className="text-xs muted">
+            نام کاربری
+            <input
+              className="input mt-1"
+              dir="ltr"
+              value={profile.username}
+              onChange={(e) =>
+                setProfile({ ...profile, username: e.target.value })
+              }
+              placeholder="username"
+              required
+            />
+          </label>
+          <label className="text-xs muted">
+            ایمیل
+            <input
+              className="input mt-1"
+              dir="ltr"
+              value={profile.email}
+              onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+              placeholder="name@example.com"
+            />
+          </label>
+          <div className="sm:col-span-2">
+            <button type="submit" disabled={savingName} className="btn-yellow">
+              {savingName ? "در حال ذخیره…" : "ذخیره مشخصات"}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* ---------- نشانی‌ها ---------- */}

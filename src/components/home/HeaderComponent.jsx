@@ -18,6 +18,7 @@ import { hasDiscount, productImages } from '../../utils/helpers/format';
 
 const NAVY = 'linear-gradient(135deg,#0a1736 0%,#162e66 55%,#0f2150 100%)';
 
+/* ───────── هیرو: تب‌ها + باکس جستجو ───────── */
 function HeroSearch() {
   const tab = 'relative pb-2 whitespace-nowrap';
 

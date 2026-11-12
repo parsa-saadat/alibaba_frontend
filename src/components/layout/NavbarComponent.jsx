@@ -16,6 +16,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useShop } from "../../contexts/ShopContext";
+import { userDisplayName } from "../../utils/helpers/user";
 import {
   fetchCategories,
   buildCategoryTree,
@@ -280,7 +281,7 @@ function NavbarComponent() {
               >
                 <User size={16} className="shrink-0" />
                 <span className="hidden sm:inline max-w-[90px] truncate">
-                  {user.username || "حساب"}
+                  {userDisplayName(user, "حساب")}
                 </span>
                 <ChevronDown
                   size={13}
@@ -298,7 +299,7 @@ function NavbarComponent() {
                   <div className="card rounded-2xl p-2 shadow-2xl space-y-1">
                     <div className="sm:hidden px-3 py-2 border-b border-theme mb-1">
                       <span className="block text-xs font-black truncate">
-                        {user.username || "حساب کاربری"}
+                        {userDisplayName(user, "حساب کاربری")}
                       </span>
                       <span className="block text-[10px] muted">
                         مدیریت حساب
@@ -526,7 +527,7 @@ function NavbarComponent() {
                     <span className="flex items-center gap-2 text-xs font-bold text-white min-w-0">
                       <User size={14} className="text-brand-yellow shrink-0" />
                       <span className="truncate">
-                        {user.username || "حساب کاربری"}
+                        {userDisplayName(user, "حساب کاربری")}
                       </span>
                     </span>
                     <button

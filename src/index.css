@@ -895,6 +895,37 @@ html[data-theme="light"] .skeleton::after {
 
 /* ============ توضیحات محصول (نمایش عمومی) ============ */
 
+/* عنوان متحرک (وقتی متن از عرض ظرف بزرگ‌تر است) */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 0;
+}
+.marquee > span {
+  display: inline-block;
+  padding-inline-end: 1.5rem;
+  will-change: transform;
+}
+.marquee.is-overflow > span {
+  animation: marquee-slide var(--marquee-duration, 8s) ease-in-out infinite alternate;
+}
+.marquee.is-overflow:hover > span {
+  animation-play-state: paused;
+}
+@keyframes marquee-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--marquee-shift, 0));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee.is-overflow > span {
+    animation: none;
+  }
+}
+
 /* نتایج جستجوی هیرو (دو ستونی در دسکتاپ) */
 .search-results.is-grid {
   display: grid;
@@ -910,4 +941,12 @@ html[data-theme="light"] .skeleton::after {
   .search-results.is-grid .search-result:nth-child(2n) {
     border-inline-end: 0;
   }
+}
+
+/* لینک‌های زرد با هاور (کلاس کمکی) */
+.hover-yellow {
+  transition: color 0.18s ease;
+}
+.hover-yellow:hover {
+  color: var(--accent-text);
 }

@@ -20,6 +20,8 @@ function RegisterPage() {
   const [code, setCode] = useState('');
   const [devCode, setDevCode] = useState('');
   const [username, setUsername] = useState('');
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
   const [pending, setPending] = useState(null);
 
   const sendCode = (e) => {
@@ -56,11 +58,20 @@ function RegisterPage() {
     axios
       .put(
         `${API}/user/${pending.user._id}`,
-        { username },
+        {
+          username: username.trim(),
+          firstname: firstname.trim(),
+          lastname: lastname.trim(),
+        },
         { headers: { Authorization: pending.token } },
       )
       .then(() => {
-        login(pending.token, { ...pending.user, username });
+        login(pending.token, {
+          ...pending.user,
+          username: username.trim(),
+          firstname: firstname.trim(),
+          lastname: lastname.trim(),
+        });
         toast.success('ثبت‌نام کامل شد');
         navigate('/');
       })
@@ -140,15 +151,33 @@ function RegisterPage() {
         {step === 3 && (
           <form onSubmit={finish} className="space-y-4">
             <span className="text-sm font-bold flex items-center gap-1">
-              <User size={15} /> نام کاربری
+              <User size={15} /> مشخصات شما
             </span>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                className="input"
+                placeholder="نام"
+                value={firstname}
+                onChange={(e) => setFirstname(e.target.value)}
+              />
+              <input
+                className="input"
+                placeholder="نام خانوادگی"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
+              />
+            </div>
             <input
               className="input"
-              placeholder="مثلاً ali_rezai"
+              dir="ltr"
+              placeholder="نام کاربری — مثلاً ali_rezai"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
+            <p className="text-[11px] muted leading-5">
+              نام و نام خانوادگی اختیاری است و بعداً از پنل کاربری قابل تغییر است.
+            </p>
             <button type="submit" className="btn-yellow w-full">
               تکمیل ثبت‌نام
             </button>

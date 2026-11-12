@@ -16,6 +16,7 @@ import {
   Ban,
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
+import { userFullName } from '../../utils/helpers/user';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import StoreEditorModalComponent from '../../components/panel/StoreEditorModalComponent';
@@ -259,7 +260,7 @@ function StoresPage() {
                   <div className="flex items-center gap-2 text-xs muted min-w-0">
                     <User size={13} className="shrink-0" />
                     <span className="truncate">
-                      {owner ? `${owner.username} (${toFa(owner.phone)})` : 'مالک نامشخص'}
+                      {owner ? `${userFullName(owner) || owner.username} (${toFa(owner.phone)})` : 'مالک نامشخص'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs muted min-w-0">

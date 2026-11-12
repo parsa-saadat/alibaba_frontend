@@ -13,6 +13,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
+import { userFullName } from '../../utils/helpers/user';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
@@ -176,7 +177,7 @@ function CounterPage() {
                   className="card2 rounded-xl p-3 flex items-center justify-between gap-3 flex-wrap"
                 >
                   <div className="min-w-0">
-                    <div className="font-bold text-sm">{s.username}</div>
+                    <div className="font-bold text-sm">{userFullName(s) || s.username}</div>
                     <div className="text-xs muted" dir="ltr">
                       {toFa(s.phone)} • ملی: {toFa(s.national_ID || '—')}
                     </div>
@@ -235,7 +236,7 @@ function CounterPage() {
                       <div className="font-bold text-sm truncate">{p.name}</div>
                       <div className="text-[11px] muted truncate">
                         فروشگاه: {store?.name || p.store_name || '—'} • سازنده:{' '}
-                        {seller?.username || '—'}
+                        {userFullName(seller) || seller?.username || '—'}
                       </div>
                     </div>
                     <Link

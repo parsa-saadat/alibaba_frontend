@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StorageImageComponent from '../common/StorageImageComponent';
+import MarqueeText from '../common/MarqueeText';
 import {
   formatPrice,
   finalPrice,
@@ -55,6 +56,11 @@ function MiniProductComponent({ product }) {
         )}
       </div>
       <div className="px-2.5 pt-2 pb-3">
+        {/* عنوان: اگر طولانی باشد آرام حرکت می‌کند */}
+        <MarqueeText
+          text={product.name}
+          className="text-[13px] font-bold leading-5 mb-1"
+        />
         <div className="text-lg font-extrabold leading-6 truncate">
           {formatPrice(finalPrice(product))}
         </div>

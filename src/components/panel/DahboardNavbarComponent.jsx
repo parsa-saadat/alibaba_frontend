@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   CreditCard,
   ShieldCheck,
+  Images,
   ExternalLink,
   LogOut,
   Menu,
@@ -19,6 +20,7 @@ import {
   PanelRightOpen,
 } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
+import { userDisplayName } from '../../utils/helpers/user';
 
 const ADMIN_ITEMS = [
   { path: '/dashboard', label: 'پیشخوان', icon: LayoutDashboard, end: true },
@@ -29,6 +31,7 @@ const ADMIN_ITEMS = [
   { path: '/dashboard/categories', label: 'دسته‌بندی‌ها', icon: FolderTree },
   { path: '/dashboard/orders', label: 'سفارش‌ها', icon: ShoppingBag },
   { path: '/dashboard/plans', label: 'پلن‌ها', icon: CreditCard },
+  { path: '/dashboard/media', label: 'رسانه‌ها', icon: Images },
 ];
 
 function DashboardNavbarComponent() {
@@ -174,7 +177,7 @@ function DashboardNavbarComponent() {
           </button>
           <span className="font-black text-sm">پنل مدیریت علی‌بازار</span>
         </div>
-        <span className="text-xs text-brand-yellow font-bold">{user?.username}</span>
+        <span className="text-xs text-brand-yellow font-bold">{userDisplayName(user, user?.username)}</span>
       </div>
 
       <aside

@@ -14,6 +14,7 @@ import {
   Phone,
   Search,
   Share2,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Store as StoreIcon,
@@ -26,6 +27,7 @@ import ImageLightboxComponent from '../../components/common/ImageLightboxCompone
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { statusFa, toFa, formatDate, finalPrice, hasDiscount } from '../../utils/helpers/format';
 import { getBody, getList } from '../../utils/helpers/response';
+import { isTrustedSeller, userFullName } from '../../utils/helpers/user';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -60,7 +62,7 @@ function StatTile({ icon: Icon, value, label }) {
 
 function ContactChip({ icon: Icon, label, value, href }) {
   const body = (
-    <div className="card2 flex items-center gap-2.5 rounded-2xl p-3 min-w-0 transition hover:border-yellow">
+    <div className="card2 flex items-center gap-2.5 rounded-2xl p-3 min-w-0 transition hover:border-[var(--primary-color)]">
       <Icon size={16} className="shrink-0 text-yellow" />
       <div className="min-w-0">
         <div className="text-[11px] muted">{label}</div>
@@ -96,6 +98,7 @@ function StorePage() {
   const productsRef = useRef(null);
 
   const [store, setStore] = useState(null);
+  const [owner, setOwner] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -130,6 +133,17 @@ function StorePage() {
         if (!s) throw new Error('فروشگاه پیدا نشد.');
         setStore(s);
         setProducts(getList(prodRes));
+
+        /* نام و نشان «مورد اعتماد» فروشنده — از روت عمومی /user/:id */
+        const ownerId = s.user?._id || s.user;
+        if (ownerId) {
+          axios
+            .get(`${API}/user/${ownerId}`, { timeout: 15000 })
+            .then((res) => setOwner(getBody(res)))
+            .catch(() => setOwner(null));
+        } else {
+          setOwner(null);
+        }
       })
       .catch((err) => {
         if (!axios.isCancel(err)) {
@@ -162,6 +176,10 @@ function StorePage() {
     const timer = setTimeout(() => setToast(''), 2200);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  /* نام نمایشی و وضعیت اعتماد فروشنده (دارنده‌ی فروشگاه) */
+  const sellerName = useMemo(() => userFullName(owner) || owner?.username || '', [owner]);
+  const sellerTrusted = useMemo(() => isTrustedSeller(owner) || isTrustedSeller(store), [owner, store]);
 
   const toggleFollow = () => {
     const next = !following;
@@ -305,7 +323,7 @@ function StorePage() {
               type="button"
               onClick={toggleFollow}
               className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                following ? 'bg-yellow text-[#0a1736]' : 'card2 border border-theme'
+                following ? 'bg-[var(--primary-color)] text-[#0a1736]' : 'card2 border border-theme'
               }`}
             >
               <Heart size={13} fill={following ? 'currentColor' : 'none'} />
@@ -357,13 +375,22 @@ function StorePage() {
                 />
               </div>
               <div className="min-w-0 pb-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="truncate text-xl font-black sm:text-3xl">{store.name}</h1>
                   {isActive && <BadgeCheck size={20} className="shrink-0 text-yellow" />}
+                  {sellerTrusted && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold"
+                      style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+                    >
+                      <ShieldCheck size={12} />
+                      فروشنده مورد اعتماد
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 flex items-center gap-1.5 text-xs muted">
                   <StoreIcon size={12} />
-                  فروشگاه رسمی در علی‌بازار
+                  {sellerName ? `فروشنده: ${sellerName}` : 'فروشگاه رسمی در علی‌بازار'}
                 </p>
               </div>
             </div>
@@ -373,7 +400,7 @@ function StorePage() {
                 type="button"
                 onClick={toggleFollow}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 ${
-                  following ? 'bg-yellow text-[#0a1736]' : 'btn-ghost'
+                  following ? 'bg-[var(--primary-color)] text-[#0a1736]' : 'btn-ghost'
                 }`}
               >
                 <Heart size={16} fill={following ? 'currentColor' : 'none'} />
@@ -429,7 +456,7 @@ function StorePage() {
             style={{ background: 'rgba(255,214,10,0.25)' }}
           />
           <div className="relative flex min-w-0 items-start gap-4">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-yellow text-[#0a1736]">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--primary-color)] text-[#0a1736]">
               <Sparkles size={22} />
             </span>
             <div className="min-w-0">
@@ -457,7 +484,7 @@ function StorePage() {
           <div className="flex items-center gap-2">
             <Package size={19} className="text-yellow" />
             <h2 className="text-base font-black">محصولات فروشگاه</h2>
-            <span className="rounded-full bg-yellow/15 px-2.5 py-0.5 text-xs font-bold text-yellow" style={{ background: 'rgba(255,214,10,0.12)' }}>
+            <span className="rounded-full px-2.5 py-0.5 text-xs font-bold text-yellow" style={{ background: 'rgba(255,214,10,0.12)' }}>
               {toFa(filteredProducts.length)}
             </span>
           </div>

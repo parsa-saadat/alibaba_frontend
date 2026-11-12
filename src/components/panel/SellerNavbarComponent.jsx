@@ -18,6 +18,7 @@ import {
   PanelRightOpen,
 } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
+import { userDisplayName } from '../../utils/helpers/user';
 
 const SELLER_ITEMS = [
   { path: '/seller', label: 'پیشخوان', icon: LayoutDashboard, end: true },
@@ -54,7 +55,7 @@ function SellerNavbarComponent() {
               <div className="min-w-0">
                 <div className="font-black text-sm truncate">پنل فروشنده</div>
                 <div className="text-[11px] text-[#9aa8cc] truncate">
-                  {user?.username || 'فروشنده علی‌بازار'}
+                  {userDisplayName(user, 'فروشنده علی‌بازار')}
                 </div>
               </div>
             )}
@@ -175,7 +176,7 @@ function SellerNavbarComponent() {
           </button>
           <span className="font-black text-sm">پنل فروشندگان علی‌بازار</span>
         </div>
-        <span className="text-xs text-brand-yellow font-bold">{user?.username}</span>
+        <span className="text-xs text-brand-yellow font-bold">{userDisplayName(user, user?.username)}</span>
       </div>
 
       <aside

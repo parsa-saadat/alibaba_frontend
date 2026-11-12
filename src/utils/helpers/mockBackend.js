@@ -62,10 +62,12 @@ const DEMO_SELLERS = [
     username: 'tehran_tech',
     phone: '09121112233',
     seller_type: 'institutional_seller',
-    national_ID: '0012345678',
+    national_ID: '0012345679',
     birth_date: '1372/04/15',
     seller_approved_status: true,
     seller_active_status: 'ACTIVE',
+    seller_trust: true,
+    identity_locked: true,
     identity_image_id: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=600&q=80',
     identity_verification_image_id: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
     address: {
@@ -74,7 +76,7 @@ const DEMO_SELLERS = [
       full_address: 'خیابان ولیعصر، تقاطع طالقانی، مجتمع تجاری نور، طبقه ۴، واحد ۴۱۲',
     },
     settlement_account: {
-      card_number: '6037997512345678',
+      card_number: '6037997512345670',
       sheba_number: 'IR820540102680020817909002',
       firstname_lastname: 'امیرحسین رضایی',
     },
@@ -85,10 +87,12 @@ const DEMO_SELLERS = [
     username: 'pars_appliance',
     phone: '09123334455',
     seller_type: 'Individual_seller',
-    national_ID: '0078945612',
+    national_ID: '0078945615',
     birth_date: '1375/09/22',
     seller_approved_status: false,
     seller_active_status: 'INACTIVE',
+    seller_trust: false,
+    identity_locked: false,
     identity_image_id: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80',
     identity_verification_image_id: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
     address: {
@@ -97,7 +101,7 @@ const DEMO_SELLERS = [
       full_address: 'چهارباغ عباسی، مجتمع تجاری پارسیان، طبقه ۲',
     },
     settlement_account: {
-      card_number: '6219861012345678',
+      card_number: '6219861012345673',
       sheba_number: 'IR550560081180001234567001',
       firstname_lastname: 'سارا محمدی',
     },
@@ -678,7 +682,11 @@ export function setupMockBackendFallback() {
           users.push(user);
           writeState('users', users);
         }
-        return ok({ token: `demo-jwt-token-${user._id}`, user });
+        /* فیلدهای فروشندگی در دمو در آرایه‌ی sellers است؛ برای کار کردن پنل فروشنده
+           همان‌جا هم مرج می‌شود (در بک‌اند واقعی همه روی سند کاربر هستند) */
+        const sellerRecord = sellers.find((s) => s._id === user._id);
+        const mergedUser = sellerRecord ? { ...user, ...sellerRecord } : user;
+        return ok({ token: `demo-jwt-token-${user._id}`, user: mergedUser });
       }
 
       // 2. Categories
@@ -888,41 +896,207 @@ export function setupMockBackendFallback() {
       }
 
       // 7. Users & Sellers
+      /* کاربر درخواست‌دهنده را از توکن (یا کاربر ذخیره‌شده) پیدا می‌کنیم */
+      const requesterUser = (() => {
+        const auth = config.headers?.Authorization || config.headers?.authorization;
+        if (typeof auth === 'string') {
+          const match = auth.match(/demo-jwt-token-(.+)$/);
+          if (match) return users.find((u) => u._id === match[1]) || null;
+        }
+        /* بدون توکن = کاربر ناشناس (مثل optionalAuthenticateToken در بک‌اند) */
+        return null;
+      })();
+      const isAdminRequester = requesterUser?.role === 'admin';
+      /* داده‌ی فروشنده در دمو در آرایه‌ی جدا نگه داشته می‌شود؛ در بک‌اند واقعی روی خود کاربر است */
+      const withSellerFields = (user) => {
+        const sellerRecord = sellers.find((s) => s._id === user?._id);
+        return sellerRecord ? { ...user, ...sellerRecord } : user;
+      };
+      const IDENTITY_FIELDS = [
+        'seller_type',
+        'national_ID',
+        'birth_date',
+        'identity_image_id',
+        'identity_verification_image_id',
+        'address',
+      ];
+
       if (path === '/user' && method === 'get') {
-        return ok({ data: users, total: users.length, totalPages: 1 });
+        return ok({ data: users.map(withSellerFields), total: users.length, totalPages: 1 });
       }
       if (path.startsWith('/user/') && method === 'get') {
         const id = path.split('/')[2];
-        return ok(users.find((u) => u._id === id) || users[0]);
+        const found = users.find((u) => u._id === id);
+        if (!found) return fail(404, 'User not found');
+        const full = withSellerFields(found);
+
+        /* روت عمومی است: خود کاربر یا ادمین همه‌چیز را می‌بیند، بقیه فقط پروفایل عمومی */
+        const isSelfOrAdmin =
+          requesterUser && (requesterUser._id === full._id || isAdminRequester);
+        if (isSelfOrAdmin) return ok(full);
+
+        return ok({
+          _id: full._id,
+          username: full.username,
+          firstname: full.firstname,
+          lastname: full.lastname,
+          is_seller: full.is_seller,
+          seller_trust: full.seller_trust,
+          seller_active_status: full.seller_active_status,
+          seller_approved_status: full.seller_approved_status,
+        });
       }
       if (path.startsWith('/user/') && method === 'put') {
         const id = path.split('/')[2];
-        const idx = users.findIndex((u) => u._id === id);
-        if (idx >= 0) {
-          users[idx] = { ...users[idx], ...body };
-          writeState('users', users);
+        /* مثل کنترلر اصلاح‌شده‌ی بک‌اند: :userId مبنا است؛ خود کاربر یا ادمین */
+        const targetId = id;
+        if (!requesterUser) return fail(401, 'Access Denied: No Token Provided');
+        if (requesterUser._id !== targetId && !isAdminRequester)
+          return fail(403, 'Access Denied');
+        const idx = users.findIndex((u) => u._id === targetId);
+        if (idx < 0) return fail(404, 'User not found');
+
+        const { username, firstname, lastname, email } = body;
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+          return fail(400, 'Invalid email');
+        if (username && users.some((u) => u.username === username && u._id !== targetId))
+          return fail(400, 'Username already exists');
+        if (email && users.some((u) => u.email === email && u._id !== targetId))
+          return fail(400, 'Email already exists');
+
+        users[idx] = {
+          ...users[idx],
+          username: username ?? users[idx].username,
+          firstname: firstname ?? users[idx].firstname,
+          lastname: lastname ?? users[idx].lastname,
+          email: email ?? users[idx].email,
+        };
+        writeState('users', users);
+
+        const sellerIdx = sellers.findIndex((s) => s._id === targetId);
+        if (sellerIdx >= 0 && username) {
+          sellers[sellerIdx] = { ...sellers[sellerIdx], username };
+          writeState('sellers', sellers);
         }
-        return ok(users[idx] || body);
+        return ok(true);
       }
       if (path.startsWith('/user/') && method === 'delete') {
         const id = path.split('/')[2];
+        if (!requesterUser) return fail(401, 'Access Denied: No Token Provided');
+        if (requesterUser._id !== id && !isAdminRequester) return fail(403, 'Access Denied');
+
+        const target = users.find((u) => u._id === id);
+        if (!target) return fail(404, 'User not found');
+
         writeState('users', users.filter((u) => u._id !== id));
-        return ok(true);
+        writeState('sellers', sellers.filter((s) => s._id !== id));
+        writeState('addresses', addresses.filter((a) => (a.user?._id || a.user)?.toString() !== id));
+        writeState('cart', cart.filter((c) => (c.user_id || c.user)?.toString() !== id));
+        return ok(target);
       }
       if (path === '/sellers' && method === 'get') {
-        return ok({ data: sellers, total: sellers.length });
+        if (!isAdminRequester) return fail(403, 'Access Denied');
+        /* نام و نام خانوادگی از سند کاربر خوانده می‌شود (در بک‌اند واقعی هر دو یکی هستند) */
+        const rows = sellers.map((s) => ({
+          ...(users.find((u) => u._id === s._id) || {}),
+          ...s,
+        }));
+        return ok({ data: rows, total: rows.length });
+      }
+      if (path.startsWith('/seller/') && path.endsWith('/trust') && method === 'put') {
+        if (!isAdminRequester) return fail(403, 'Access Denied');
+        const id = path.split('/')[2];
+        const trust = body.trust === undefined ? true : body.trust;
+        if (typeof trust !== 'boolean') return fail(400, 'trust must be a boolean');
+
+        const idx = sellers.findIndex((s) => s._id === id);
+        if (idx < 0) return fail(404, 'User not found');
+        if (trust === true && sellers[idx].seller_approved_status !== true)
+          return fail(400, 'Seller must be approved before trusting');
+        if (sellers[idx].seller_trust === trust) return ok(true);
+
+        sellers[idx] = { ...sellers[idx], seller_trust: trust };
+        writeState('sellers', sellers);
+
+        const userIdx = users.findIndex((u) => u._id === id);
+        if (userIdx >= 0) {
+          users[userIdx] = { ...users[userIdx], seller_trust: trust };
+          writeState('users', users);
+        }
+        return ok(true);
       }
       if (path.startsWith('/seller/') && method === 'get') {
+        if (!isAdminRequester) return fail(403, 'Access Denied');
         const id = path.split('/')[2];
         return ok(sellers.find((s) => s._id === id) || sellers[0]);
       }
       if ((path === '/seller' && method === 'post') || (path.startsWith('/seller/') && method === 'put')) {
         const id = path.split('/')[2] || 'user-admin-1';
         const idx = sellers.findIndex((s) => s._id === id);
+
+        /* آپدیت: قواعد جدید بک‌اند (قفل هویت بعد از تأیید + وضعیت فقط برای ادمین) */
+        if (method === 'put' && idx >= 0) {
+          const record = sellers[idx];
+          const identityLocked =
+            record.identity_locked === true || record.seller_approved_status === true;
+
+          if (!isAdminRequester && identityLocked && IDENTITY_FIELDS.some((f) => body[f] !== undefined))
+            return fail(
+              403,
+              'اطلاعات هویتی بعد از تأیید فروشنده قابل ویرایش نیست؛ فقط حساب تسویه قابل تغییر است.',
+            );
+
+          const allowed = { ...body };
+          if (!isAdminRequester) {
+            delete allowed.seller_active_status;
+            delete allowed.seller_approved_status;
+            delete allowed.seller_trust;
+            delete allowed.identity_locked;
+          } else {
+            /* ادمین: وضعیت‌ها + اعتماد در همان درخواست قابل تغییر است */
+            if (body.seller_active_status !== undefined &&
+                !['ACTIVE', 'INACTIVE'].includes(body.seller_active_status))
+              return fail(400, 'Invalid seller_active_status');
+
+            if (body.seller_approved_status !== undefined &&
+                typeof body.seller_approved_status !== 'boolean')
+              return fail(400, 'Invalid seller_approved_status');
+
+            if (body.seller_trust !== undefined) {
+              if (typeof body.seller_trust !== 'boolean')
+                return fail(400, 'trust must be a boolean');
+              const stillApproved =
+                body.seller_approved_status !== undefined
+                  ? body.seller_approved_status
+                  : record.seller_approved_status;
+              if (body.seller_trust === true && stillApproved !== true)
+                return fail(400, 'Seller must be approved before trusting');
+            }
+
+            if (body.seller_approved_status !== undefined) {
+              allowed.identity_locked = body.seller_approved_status === true;
+              if (body.seller_approved_status !== true && body.seller_trust === undefined)
+                allowed.seller_trust = false;
+            }
+          }
+
+          sellers[idx] = { ...record, ...allowed };
+          writeState('sellers', sellers);
+          return ok(true);
+        }
+
         if (idx >= 0) {
           sellers[idx] = { ...sellers[idx], ...body };
         } else {
-          sellers.push({ _id: id, username: 'فروشنده جدید', seller_approved_status: false, seller_active_status: 'ACTIVE', ...body });
+          sellers.push({
+            _id: id,
+            username: 'فروشنده جدید',
+            seller_approved_status: false,
+            seller_active_status: 'ACTIVE',
+            seller_trust: false,
+            identity_locked: false,
+            ...body,
+          });
         }
         writeState('sellers', sellers);
         return ok(sellers[idx] || body);
@@ -1034,13 +1208,126 @@ export function setupMockBackendFallback() {
         return ok(true);
       }
 
-      // 10. Storage upload / fetch
+      // 10. Storage (کتابخانه‌ی رسانه)
+      /* فهرست عکس‌های موجود در دمو از داده‌های خود دمو ساخته می‌شود
+         تا در پنل ادمین همه‌ی تصاویر پروژه با شناسه دیده شوند */
+      const buildDemoMedia = () => {
+        const rows = [];
+        const seen = new Set();
+
+        const push = (url, extra = {}) => {
+          if (!url || typeof url !== 'string' || seen.has(url)) return;
+          seen.add(url);
+          rows.push({
+            _id: url,
+            name: extra.name || decodeURIComponent(url.split('/').pop().split('?')[0]).slice(0, 40) || 'تصویر',
+            contentType: 'image/jpeg',
+            size: extra.size || 48000 + (url.length * 137) % 900000,
+            url,
+            create_at: extra.create_at || new Date(Date.now() - rows.length * 3600_000).toISOString(),
+            used_by: extra.used_by ? [extra.used_by] : [],
+          });
+        };
+
+        products.forEach((p) => {
+          (p.images_id || []).forEach((img, i) => {
+            const url = typeof img === 'string' ? img : img?.url;
+            if (!url) return;
+            push(url, { name: `${p.name.slice(0, 24)}… (${i + 1})`, used_by: `محصول: ${p.name}` });
+          });
+        });
+
+        stores.forEach((st) => {
+          push(st.profile_image_id, { name: `لوگوی ${st.name}`, used_by: `فروشگاه: ${st.name}` });
+          push(st.banner_image_id, { name: `بنر ${st.name}`, used_by: `فروشگاه: ${st.name}` });
+        });
+
+        sellers.forEach((se) => {
+          push(se.identity_image_id, { name: `کارت ملی ${se.username}`, used_by: `فروشنده: ${se.username}` });
+          push(se.identity_verification_image_id, {
+            name: `سلفی احراز ${se.username}`,
+            used_by: `فروشنده: ${se.username}`,
+          });
+        });
+
+        return rows;
+      };
+
+      const media = readState('media', buildDemoMedia());
+      const writeMedia = (rows) => writeState('media', rows);
+
+      if (path === '/storage' && method === 'get') {
+        if (!isAdminRequester) return fail(403, 'Access Denied');
+
+        const page = Math.max(Number(params.get('page')) || 1, 1);
+        const limit = Math.min(Math.max(Number(params.get('limit')) || 24, 1), 100);
+        const type = params.get('contentType') ? String(params.get('contentType')) : '';
+        const q = params.get('search') ? String(params.get('search')).toLowerCase() : '';
+
+        let rows = media;
+        if (type) rows = rows.filter((f) => String(f.contentType).startsWith(type));
+        if (q)
+          rows = rows.filter(
+            (f) =>
+              String(f.name).toLowerCase().includes(q) ||
+              String(f._id).toLowerCase().includes(q),
+          );
+
+        const total = rows.length;
+        const totalPages = Math.ceil(total / limit) || 1;
+        const data = rows.slice((page - 1) * limit, page * limit);
+
+        return ok({ data, total, totalPages });
+      }
+
+      if (path.startsWith('/storage/') && method === 'get') {
+        const id = decodeURIComponent(path.replace('/storage/', ''));
+        const file = media.find((f) => f._id === id);
+        if (!file) return fail(404, 'File not found');
+        return ok(file);
+      }
+
+      if (path.startsWith('/storage/') && method === 'delete') {
+        if (!isAdminRequester) return fail(403, 'Access Denied');
+        const id = decodeURIComponent(path.replace('/storage/', ''));
+        if (!media.some((f) => f._id === id)) return fail(404, 'File not found');
+        writeMedia(media.filter((f) => f._id !== id));
+        return ok(true);
+      }
+
       if (path === '/storage' && method === 'post') {
-        return ok([
-          {
-            _id: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-          },
-        ]);
+        /* آپلود دمو: فایل‌ها به data URL تبدیل و در حافظه‌ی محلی نگه داشته می‌شوند */
+        const files = typeof FormData !== 'undefined' && body instanceof FormData
+          ? [...body.getAll('files')].filter((f) => f && typeof f === 'object')
+          : [];
+
+        const readAsDataUrl = (file) =>
+          new Promise((resolve) => {
+            if (typeof FileReader === 'undefined') return resolve('');
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => resolve('');
+            reader.readAsDataURL(file);
+          });
+
+        const created = [];
+        for (const file of files) {
+          const dataUrl = await readAsDataUrl(file);
+          if (!dataUrl) continue;
+          const record = {
+            _id: `demo-file-${Date.now()}-${created.length}`,
+            name: file.name || 'فایل بدون نام',
+            contentType: file.type || 'image/jpeg',
+            size: file.size || 0,
+            url: dataUrl,
+            create_at: new Date().toISOString(),
+            used_by: [],
+          };
+          created.push(record);
+        }
+
+        if (created.length) writeMedia([...created, ...media]);
+        return ok(created);
       }
 
       return ok({});

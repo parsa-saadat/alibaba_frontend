@@ -33,6 +33,7 @@ import EditProductPage from './pages/dashboard/EditProductPage';
 import CategoriesPage from './pages/dashboard/CategoriesPage';
 import AdminOrdersPage from './pages/dashboard/OrdersPage';
 import PlansPage from './pages/dashboard/PlansPage';
+import MediaPage from './pages/dashboard/MediaPage';
 import PreAdminPage from './pages/authAdmin/PreAdminPage';
 import VerifyAdminPage from './pages/authAdmin/VerifyAdminPage';
 
@@ -122,6 +123,7 @@ const MainApp = () => {
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="plans" element={<PlansPage />} />
+          <Route path="media" element={<MediaPage />} />
         </Route>
 
         <Route path="/admin" element={<DashboardLayout />}>
@@ -135,6 +137,7 @@ const MainApp = () => {
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="plans" element={<PlansPage />} />
+          <Route path="media" element={<MediaPage />} />
         </Route>
 
         {/* Seller Dashboard Routes */}

@@ -21,7 +21,7 @@ function FeaturedStoresComponent({ stores = [] }) {
               <StorageImageComponent
                 file={s.profile_image_id}
                 alt={s.name}
-                className="w-14 h-14 bg-black rounded-xl object-cover shrink-0"
+                className="w-14 h-14 rounded-xl object-cover shrink-0"
               />
               <div className="min-w-0">
                 <div className="font-black truncate">{s.name}</div>
