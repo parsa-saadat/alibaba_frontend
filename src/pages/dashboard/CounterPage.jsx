@@ -13,9 +13,9 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import StorageImageComponent from '../../components/main/StorageImageComponent';
-import ImageLightboxComponent from '../../components/main/ImageLightboxComponent';
-import { Loading } from '../../components/ScroolToTopComponent';
+import StorageImageComponent from '../../components/common/StorageImageComponent';
+import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import {
   formatPrice,
   toFa,

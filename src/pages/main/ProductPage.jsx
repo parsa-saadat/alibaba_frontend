@@ -4,7 +4,6 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -22,11 +21,8 @@ import {
 } from 'lucide-react';
 
 import { useShop } from '../../contexts/ShopContext';
-import {
-  authHeaders,
-  readList,
-  writeList,
-} from '../../utils/helpers/storage';
+import useCartQuantity from '../../hooks/useCartQuantity';
+import { readList, writeList } from '../../utils/helpers/storage';
 import { getBody, getList, getId } from '../../utils/helpers/response';
 import {
   formatPrice,
@@ -39,11 +35,12 @@ import {
   statusFa,
 } from '../../utils/helpers/format';
 
-import ProductGridComponent from '../../components/main/ProductGridComponent';
-import StorageImageComponent from '../../components/main/StorageImageComponent';
-import ImageLightboxComponent from '../../components/main/ImageLightboxComponent';
-import MarkdownContentComponent from '../../components/main/MarkdownContentComponent';
-import { Loading } from '../../components/ScroolToTopComponent';
+import ProductGridComponent from '../../components/product/ProductGridComponent';
+import CartQtyControl from '../../components/cart/CartQtyControlComponent';
+import StorageImageComponent from '../../components/common/StorageImageComponent';
+import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
+import MarkdownContentComponent from '../../components/common/MarkdownContentComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 
 const API =
   import.meta.env.VITE_APP_API_URL ||
@@ -51,7 +48,6 @@ const API =
   'http://localhost:3000';
 
 const accent = { color: 'var(--primary-color)' };
-const CART_SYNC_DELAY = 1000;
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -61,40 +57,6 @@ function getStock(product) {
   if (!product || product.stock == null || product.stock === '') return null;
   const stock = Number(product.stock);
   return Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : null;
-}
-
-function getItemQuantity(item) {
-  if (!item) return 0;
-  const raw = item.quantity ?? item.qty ?? item.count;
-  if (raw == null || raw === '') return 1;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 1;
-}
-
-function findInCart(cart, productId) {
-  if (!cart || !productId) return null;
-  const items = Array.isArray(cart)
-    ? cart
-    : cart.items || cart.products || cart.cart || [];
-  if (!Array.isArray(items)) return null;
-
-  return (
-    items.find((item) => {
-      if (!item) return false;
-      const candidates = [
-        item.product_id,
-        item.productId,
-        item.product?._id,
-        item.product?.id,
-        item.product,
-        item._id,
-        item.id,
-      ];
-      return candidates.some(
-        (c) => c != null && String(getId(c)) === String(productId),
-      );
-    }) || null
-  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -301,97 +263,6 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* کنترل یکپارچه سبد خرید (− 0 +)                                      */
-/* ------------------------------------------------------------------ */
-
-function CartQtyControl({
-  qty,
-  busy,
-  max,
-  soldOut,
-  onIncrement,
-  onDecrement,
-}) {
-  const atMax = max !== null && qty >= max;
-  const cannotIncrement = soldOut || atMax;
-  const cannotDecrement = qty <= 0;
-
-  return (
-    <div className="space-y-2.5">
-      <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="flex items-center gap-1.5 font-medium">
-          {busy ? (
-            <>
-              <Loader2 size={14} className="animate-spin muted" />
-              <span className="muted">در حال همگام‌سازی…</span>
-            </>
-          ) : qty > 0 ? (
-            <>
-              <CheckCircle2
-                size={14}
-                className="text-emerald-600 dark:text-emerald-400"
-              />
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                موجود در سبد خرید شما
-              </span>
-            </>
-          ) : soldOut ? (
-            <span className="font-bold text-rose-500">این محصول ناموجود است</span>
-          ) : (
-            <span className="muted">تعداد در سبد خرید</span>
-          )}
-        </span>
-
-        {max !== null && !soldOut && (
-          <span className="text-[11px] muted">حداکثر: {toFa(max)} عدد</span>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-theme bg-[var(--card2)]/60 p-1.5">
-        <button
-          type="button"
-          onClick={onDecrement}
-          disabled={cannotDecrement}
-          aria-label={qty === 1 ? 'حذف از سبد خرید' : 'کاهش تعداد'}
-          className={`flex h-11 w-11 items-center justify-center rounded-lg border border-theme bg-[var(--card)] transition disabled:cursor-not-allowed disabled:opacity-35 ${
-            qty === 1
-              ? 'hover:border-rose-500/40 hover:text-rose-500'
-              : 'hover:bg-[var(--card2)]'
-          }`}
-        >
-          {qty === 1 ? <Trash2 size={17} /> : <Minus size={17} />}
-        </button>
-
-        <div className="min-w-0 flex-1 text-center">
-          <span className="text-xl font-black tabular-nums">{toFa(qty)}</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={onIncrement}
-          disabled={cannotIncrement}
-          aria-label={qty === 0 ? 'افزودن به سبد خرید' : 'افزایش تعداد'}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
-          style={{ background: 'var(--primary-color)' }}
-        >
-          <Plus size={18} />
-        </button>
-      </div>
-
-      {qty > 0 && (
-        <Link
-          to="/cart"
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-500/20 dark:text-emerald-400"
-        >
-          <ShoppingCart size={14} />
-          مشاهده سبد خرید
-        </Link>
-      )}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* نوار پایین — فقط موبایل و تبلت                                      */
 /* ------------------------------------------------------------------ */
 
@@ -490,15 +361,7 @@ function ProductPage() {
   const { id, productId } = useParams();
   const activeProductId = id || productId;
 
-  const {
-    user,
-    cart,
-    toggleFavorite,
-    isFavorite,
-    toggleCompare,
-    compare,
-    refreshCart,
-  } = useShop();
+  const { toggleFavorite, isFavorite, toggleCompare, compare } = useShop();
 
   const [product, setProduct] = useState(null);
   const [store, setStore] = useState(null);
@@ -511,70 +374,6 @@ function ProductPage() {
   const [retry, setRetry] = useState(0);
 
   const [zoomFile, setZoomFile] = useState(null);
-
-  // --- وضعیت کنترل سبد خرید ---
-  const [cartQty, setCartQty] = useState(0);
-  const [syncBusy, setSyncBusy] = useState(false);
-
-  const uiQtyRef = useRef(0);
-  const serverQtyRef = useRef(0);
-  const inFlightRef = useRef(false);
-  const debounceTimerRef = useRef(null);
-  const sessionIdRef = useRef(0);
-  const isMountedRef = useRef(true);
-  const deferredFlushRef = useRef(null);
-
-  const activeProductIdRef = useRef(activeProductId);
-  const userIdRef = useRef(user?._id);
-  const refreshCartRef = useRef(refreshCart);
-
-  activeProductIdRef.current = activeProductId;
-  userIdRef.current = user?._id;
-  refreshCartRef.current = refreshCart;
-
-  const dispatchBackgroundSync = (userId, prodId, fromQty, toQty) => {
-    if (!userId || !prodId || fromQty === toQty) return;
-
-    const refreshSafe = () => {
-      try {
-        refreshCartRef.current?.()?.catch?.(() => {});
-      } catch {
-        /* نادیده */
-      }
-    };
-
-    if (fromQty === 0 && toQty > 0) {
-      axios
-        .post(
-          `${API}/user/${userId}/cart`,
-          { product_id: prodId, quantity: toQty },
-          authHeaders(),
-        )
-        .then(refreshSafe)
-        .catch(() => {});
-    } else if (fromQty > 0 && toQty <= 0) {
-      axios
-        .delete(`${API}/user/${userId}/cart/${prodId}`, authHeaders())
-        .then(refreshSafe)
-        .catch(() => {});
-    } else if (fromQty > 0 && toQty > 0) {
-      axios
-        .put(
-          `${API}/user/${userId}/cart/${prodId}`,
-          { quantity: toQty },
-          authHeaders(),
-        )
-        .then(refreshSafe)
-        .catch(() => {});
-    }
-  };
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
   /* ---------- بارگذاری اطلاعات محصول ---------- */
   useEffect(() => {
@@ -684,248 +483,17 @@ function ProductPage() {
     return () => controller.abort();
   }, [activeProductId, retry]);
 
-  /* ---------- ریست و ارسال تغییرات معوق هنگام تغییر محصول / خروج ---------- */
-  useEffect(() => {
-    const currentProductId = activeProductId;
-    const currentUserId = user?._id;
-    const currentSession = sessionIdRef.current + 1;
-    sessionIdRef.current = currentSession;
+  /* ---------- سبد خرید (منبع واحد: Context + بک‌اند) ---------- */
+  const stock = getStock(product);
+  const soldOut = !!product && (product.stock_status === 'OUT_OF_STOCK' || stock === 0);
 
-    const initialQty = getItemQuantity(findInCart(cart, currentProductId));
-    uiQtyRef.current = initialQty;
-    serverQtyRef.current = initialQty;
-    inFlightRef.current = false;
-    deferredFlushRef.current = null;
-    setCartQty(initialQty);
-    setSyncBusy(false);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-
-      const pendingTarget = uiQtyRef.current;
-      const confirmedServer = serverQtyRef.current;
-
-      if (!currentUserId || !currentProductId || pendingTarget === confirmedServer) {
-        return;
-      }
-
-      if (inFlightRef.current) {
-        deferredFlushRef.current = {
-          session: currentSession,
-          productId: currentProductId,
-          userId: currentUserId,
-          targetQty: pendingTarget,
-        };
-        return;
-      }
-
-      dispatchBackgroundSync(
-        currentUserId,
-        currentProductId,
-        confirmedServer,
-        pendingTarget,
-      );
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeProductId, user?._id]);
-
-  /* ---------- همگام‌سازی خودکار با تغییرات Context ---------- */
-  useEffect(() => {
-    if (inFlightRef.current || debounceTimerRef.current) return;
-    if (uiQtyRef.current !== serverQtyRef.current) return;
-
-    const contextQty = getItemQuantity(findInCart(cart, activeProductId));
-    if (contextQty !== serverQtyRef.current) {
-      serverQtyRef.current = contextQty;
-      uiQtyRef.current = contextQty;
-      setCartQty(contextQty);
-    }
-  }, [cart, activeProductId]);
-
-  /* ---------- موتور همگام‌سازی ترتیبی با سرور ---------- */
-
-  const flushSync = async () => {
-    if (inFlightRef.current) return;
-
-    const targetUserId = userIdRef.current;
-    const targetProductId = activeProductIdRef.current;
-    const targetQty = uiQtyRef.current;
-    const confirmedServerQty = serverQtyRef.current;
-
-    if (!targetUserId || !targetProductId) return;
-    if (targetQty === confirmedServerQty) return;
-
-    const reqSession = sessionIdRef.current;
-    inFlightRef.current = true;
-    setSyncBusy(true);
-
-    let mode = 'PUT';
-    if (confirmedServerQty === 0 && targetQty > 0) {
-      mode = 'POST';
-    } else if (confirmedServerQty > 0 && targetQty <= 0) {
-      mode = 'DELETE';
-    }
-
-    let succeeded = false;
-    let confirmedQtyAfterRequest = confirmedServerQty;
-
-    try {
-      if (mode === 'POST') {
-        const response = await axios.post(
-          `${API}/user/${targetUserId}/cart`,
-          { product_id: targetProductId, quantity: targetQty },
-          authHeaders(),
-        );
-        if (response.data?.success === false) {
-          throw new Error(
-            response.data?.message || 'افزودن به سبد خرید ناموفق بود.',
-          );
-        }
-        succeeded = true;
-        confirmedQtyAfterRequest = targetQty;
-
-        if (reqSession === sessionIdRef.current && isMountedRef.current) {
-          serverQtyRef.current = targetQty;
-        }
-      } else if (mode === 'DELETE') {
-        const response = await axios.delete(
-          `${API}/user/${targetUserId}/cart/${targetProductId}`,
-          authHeaders(),
-        );
-        if (response.data?.success === false) {
-          throw new Error(
-            response.data?.message || 'حذف محصول از سبد خرید ناموفق بود.',
-          );
-        }
-        succeeded = true;
-        confirmedQtyAfterRequest = 0;
-
-        if (reqSession === sessionIdRef.current && isMountedRef.current) {
-          serverQtyRef.current = 0;
-        }
-      } else {
-        const response = await axios.put(
-          `${API}/user/${targetUserId}/cart/${targetProductId}`,
-          { quantity: targetQty },
-          authHeaders(),
-        );
-        if (response.data?.success === false) {
-          throw new Error(
-            response.data?.message || 'به‌روزرسانی سبد خرید ناموفق بود.',
-          );
-        }
-        succeeded = true;
-        confirmedQtyAfterRequest = targetQty;
-
-        if (reqSession === sessionIdRef.current && isMountedRef.current) {
-          serverQtyRef.current = targetQty;
-        }
-      }
-
-      try {
-        await refreshCartRef.current?.();
-      } catch {
-        /* همگام‌سازی Context در پس‌زمینه */
-      }
-    } catch {
-      // 🔧 بدون toast — فقط rollback سایلنت
-      if (reqSession === sessionIdRef.current && isMountedRef.current) {
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
-          debounceTimerRef.current = null;
-        }
-        const revertedQty = serverQtyRef.current;
-        uiQtyRef.current = revertedQty;
-        setCartQty(revertedQty);
-      }
-    } finally {
-      if (reqSession === sessionIdRef.current && isMountedRef.current) {
-        inFlightRef.current = false;
-        setSyncBusy(false);
-
-        if (!debounceTimerRef.current && uiQtyRef.current !== serverQtyRef.current) {
-          flushSync();
-        }
-      } else {
-        const deferred = deferredFlushRef.current;
-        if (
-          succeeded &&
-          deferred &&
-          deferred.session === reqSession &&
-          deferred.productId === targetProductId
-        ) {
-          deferredFlushRef.current = null;
-          dispatchBackgroundSync(
-            deferred.userId,
-            deferred.productId,
-            confirmedQtyAfterRequest,
-            deferred.targetQty,
-          );
-        }
-      }
-    }
-  };
-
-  const schedulePutSync = () => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(() => {
-      debounceTimerRef.current = null;
-      flushSync();
-    }, CART_SYNC_DELAY);
-  };
-
-  const incrementCart = () => {
-    // 🔧 بدون toast — اگر لاگین نیست، فقط کار نمی‌کند
-    if (!user?._id) return;
-
-    const stockLimit = getStock(product);
-    const isSoldOut =
-      product?.stock_status === 'OUT_OF_STOCK' || stockLimit === 0;
-    if (isSoldOut) return;
-
-    const current = uiQtyRef.current;
-    if (stockLimit !== null && current >= stockLimit) return;
-
-    const nextQty = current + 1;
-    uiQtyRef.current = nextQty;
-    setCartQty(nextQty);
-
-    if (serverQtyRef.current === 0 && !inFlightRef.current) {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-      flushSync();
-    } else {
-      schedulePutSync();
-    }
-  };
-
-  const decrementCart = () => {
-    if (!user?._id) return;
-
-    const current = uiQtyRef.current;
-    if (current <= 0) return;
-
-    const nextQty = Math.max(0, current - 1);
-    uiQtyRef.current = nextQty;
-    setCartQty(nextQty);
-
-    if (nextQty === 0) {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-      flushSync();
-    } else {
-      schedulePutSync();
-    }
-  };
+  const {
+    qty: cartQty,
+    busy: syncBusy,
+    increment: incrementCart,
+    decrement: decrementCart,
+    loggedIn,
+  } = useCartQuantity(activeProductId, { stock, soldOut });
 
   /* ---------- حالت‌های بارگذاری / خطا ---------- */
 
@@ -974,9 +542,6 @@ function ProductPage() {
   const images = productImages(product) || [];
   const storeId = getId(product.store_id);
   const categoryId = getId(product.category_id);
-
-  const stock = getStock(product);
-  const soldOut = product.stock_status === 'OUT_OF_STOCK' || stock === 0;
 
   const discounted = hasDiscount(product);
   const favorite = isFavorite(activeProductId);
@@ -1322,42 +887,9 @@ function ProductPage() {
           )}
         </section>
 
-        {/* ستون کنار: قیمت + سبد + مشخصات فنی (چسبان در دسکتاپ) */}
+        {/* ستون کنار: مشخصات فنی (چسبان در دسکتاپ) — جعبه قیمت و سبد
+            فقط یک‌بار در بالای صفحه رندر می‌شد، نسخه تکراری حذف شد */}
         <div className="hidden min-w-0 space-y-4 lg:col-span-4 lg:sticky lg:top-36 lg:block lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:pe-1">
-          {/* جعبه قیمت + افزودن به سبد خرید */}
-          <aside className="card space-y-3 rounded-2xl p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-xs muted">قیمت محصول</div>
-                <div className="mt-1 text-2xl font-black" style={accent}>
-                  {formatPrice(finalPrice(product))}
-                </div>
-              </div>
-
-              {discounted && (
-                <div className="flex flex-col items-end gap-1 text-xs">
-                  <span className="line-through muted">
-                    {formatPrice(product.price?.amount)}
-                  </span>
-                  <span className="rounded-full bg-rose-500/10 px-2.5 py-1 font-bold text-rose-600 dark:text-rose-400">
-                    {toFa(product.discount?.percentage)}٪ تخفیف
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-theme pt-3">
-              <CartQtyControl
-                qty={cartQty}
-                busy={syncBusy}
-                max={stock}
-                soldOut={soldOut}
-                onIncrement={incrementCart}
-                onDecrement={decrementCart}
-              />
-            </div>
-          </aside>
-
           {/* مشخصات فنی */}
           <section className="card rounded-2xl p-5">
             <h2 className="flex items-center gap-2 border-b border-theme pb-4 text-lg font-black">
@@ -1446,7 +978,7 @@ function ProductPage() {
         stock={stock}
         soldOut={soldOut}
         discounted={discounted}
-        loggedIn={!!user?._id}
+        loggedIn={loggedIn}
         onIncrement={incrementCart}
         onDecrement={decrementCart}
       />

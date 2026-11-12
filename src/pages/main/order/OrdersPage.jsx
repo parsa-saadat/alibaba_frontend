@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { Package, ChevronDown, ExternalLink } from 'lucide-react';
 import { useShop } from '../../../contexts/ShopContext';
 import { authHeaders } from '../../../utils/helpers/storage';
-import { Loading } from '../../../components/ScroolToTopComponent';
+import { Loading } from '../../../components/common/ScroolToTopComponent';
 import {
   formatPrice,
   toFa,

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Search, ChevronDown, User2, MapPin, Check, X } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import { Loading } from '../../components/ScroolToTopComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import {
   formatPrice,
   toFa,

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import ProductGridComponent from '../../components/main/ProductGridComponent';
+import ProductGridComponent from '../../components/product/ProductGridComponent';
 import { useShop } from '../../contexts/ShopContext';
 import { toFa } from '../../utils/helpers/format';
 

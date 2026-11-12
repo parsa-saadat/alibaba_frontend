@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Pencil, Trash2, Search, Phone, Mail, X } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import { Loading } from '../../components/ScroolToTopComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import { toFa } from '../../utils/helpers/format';
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
 

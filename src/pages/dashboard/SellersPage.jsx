@@ -3,9 +3,9 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Check, X, Search } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import StorageImageComponent from '../../components/main/StorageImageComponent';
-import ImageLightboxComponent from '../../components/main/ImageLightboxComponent';
-import { Loading } from '../../components/ScroolToTopComponent';
+import StorageImageComponent from '../../components/common/StorageImageComponent';
+import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import { toFa, statusFa } from '../../utils/helpers/format';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';

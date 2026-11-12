@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, X, ChevronDown } from 'lucide-react';
-import ProductGridComponent from '../../components/main/ProductGridComponent';
+import ProductGridComponent from '../../components/product/ProductGridComponent';
 import { fetchCategories, buildCategoryTree } from '../../utils/helpers/categories';
 import { getBody, getList } from '../../utils/helpers/response';
 import { finalPrice, toFa } from '../../utils/helpers/format';

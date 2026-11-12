@@ -4,9 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Plus, Search } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import DashboardProductComponent from '../../components/dashboard/ProductComponent';
-import ImageLightboxComponent from '../../components/main/ImageLightboxComponent';
-import { Loading } from '../../components/ScroolToTopComponent';
+import DashboardProductComponent from '../../components/panel/ProductComponent';
+import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import { getId } from '../../utils/helpers/response';
 import { flattenCategories } from '../../utils/helpers/categories';
 

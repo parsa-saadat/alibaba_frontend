@@ -17,8 +17,8 @@ import {
 import { useShop } from "../../contexts/ShopContext";
 import { authHeaders, getToken } from "../../utils/helpers/storage";
 import { toFa } from "../../utils/helpers/format";
-import StorageImageComponent from "../../components/main/StorageImageComponent";
-import ImageLightboxComponent from "../../components/main/ImageLightboxComponent";
+import StorageImageComponent from "../../components/common/StorageImageComponent";
+import ImageLightboxComponent from "../../components/common/ImageLightboxComponent";
 import { nationalIDValidator } from "../../utils/validators/national_id.validator";
 import { cardNumberValidator } from "../../utils/validators/card_number.validator";
 import { shebaNumberValidator } from "../../utils/validators/sheba_number.validator";

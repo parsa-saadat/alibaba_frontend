@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import { Package, ArrowRight, MapPin } from 'lucide-react';
 import { authHeaders } from '../../../utils/helpers/storage';
-import { Loading } from '../../../components/ScroolToTopComponent';
+import { Loading } from '../../../components/common/ScroolToTopComponent';
 import {
   formatPrice,
   toFa,

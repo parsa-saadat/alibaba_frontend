@@ -47,15 +47,15 @@ import SellerPlansPage from './pages/seller/PlansPage';
 import SellerSettingPage from './pages/seller/SettingPage';
 
 // Layouts
-import MainLayout from './components/layouts/MainLayout';
-import DashboardLayout from './components/layouts/DashboardLayout';
-import SellerLayout from './components/layouts/SellerLayout';
-import AuthLayout from './components/layouts/AuthAdminLayout';
+import MainLayout from './components/layout/MainLayout';
+import DashboardLayout from './components/layout/DashboardLayout';
+import SellerLayout from './components/layout/SellerLayout';
+import AuthLayout from './components/layout/AuthAdminLayout';
 
 // Context & Shared
 import { ShopProvider } from './contexts/ShopContext';
 import NotFoundPage from './pages/NotFoundPage';
-import ScrollToTopComponent, { RouteProgress } from './components/ScroolToTopComponent';
+import ScrollToTopComponent, { RouteProgress } from './components/common/ScroolToTopComponent';
 
 const App = () => {
   return (

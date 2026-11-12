@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { MapPin, Plus, CreditCard } from 'lucide-react';
 import { useShop } from '../../../contexts/ShopContext';
 import { authHeaders } from '../../../utils/helpers/storage';
-import StorageImageComponent from '../../../components/main/StorageImageComponent';
+import StorageImageComponent from '../../../components/common/StorageImageComponent';
 import {
   formatPrice,
   finalPrice,

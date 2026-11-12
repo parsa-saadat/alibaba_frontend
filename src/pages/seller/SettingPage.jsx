@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useShop } from '../../contexts/ShopContext';
 import { authHeaders } from '../../utils/helpers/storage';
-import { Loading } from '../../components/ScroolToTopComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import { nationalIDValidator } from '../../utils/validators/national_id.validator';
 import { cardNumberValidator } from '../../utils/validators/card_number.validator';
 import { shebaNumberValidator } from '../../utils/validators/sheba_number.validator';

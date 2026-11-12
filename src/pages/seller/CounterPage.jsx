@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import { Package, Store, ShoppingBag, CreditCard, RefreshCw } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
 import { authHeaders } from '../../utils/helpers/storage';
-import StorageImageComponent from '../../components/main/StorageImageComponent';
-import { Loading } from '../../components/ScroolToTopComponent';
+import StorageImageComponent from '../../components/common/StorageImageComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import {
   formatPrice,
   toFa,

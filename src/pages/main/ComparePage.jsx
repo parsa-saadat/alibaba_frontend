@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GitCompareArrows, Trash2, ShoppingCart, X } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
-import { authHeaders } from '../../utils/helpers/storage';
-import StorageImageComponent from '../../components/main/StorageImageComponent';
+import { cartErrorMessage } from '../../utils/helpers/cart';
+import StorageImageComponent from '../../components/common/StorageImageComponent';
 import {
   formatPrice,
   finalPrice,
@@ -31,7 +31,7 @@ const ROWS = [
 ];
 
 function ComparePage() {
-  const { compare, toggleCompare, clearCompare, user, refreshCart } = useShop();
+  const { compare, toggleCompare, clearCompare, user, addToCart } = useShop();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,15 +54,18 @@ function ComparePage() {
       .finally(() => setLoading(false));
   }, [compare]);
 
-  const addToCart = (id) => {
+  /* افزودن به سبد: addToCart اول وضعیت محصول را از بک‌اند می‌پرسد */
+  const handleAddToCart = (id) => {
     if (!user) return toast.error('ابتدا وارد شوید');
-    axios
-      .post(`${API}/user/${user._id}/cart`, { product_id: id, quantity: 1 }, authHeaders())
-      .then(() => {
-        toast.success('به سبد خرید اضافه شد');
-        refreshCart();
+    addToCart(id, 1)
+      .then((result) => {
+        toast.success(
+          result.status === 'updated'
+            ? 'تعداد این محصول در سبد خرید افزایش یافت'
+            : 'به سبد خرید اضافه شد',
+        );
       })
-      .catch(() => toast.error('خطا در افزودن به سبد'));
+      .catch((error) => toast.error(cartErrorMessage(error, 'خطا در افزودن به سبد')));
   };
 
   return (
@@ -120,7 +123,7 @@ function ComparePage() {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => addToCart(p._id)}
+                        onClick={() => handleAddToCart(p._id)}
                         className="btn-yellow !py-1.5 !px-3 text-xs mt-2 inline-flex items-center gap-1"
                       >
                         <ShoppingCart size={13} /> افزودن به سبد

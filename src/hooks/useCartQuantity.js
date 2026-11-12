@@ -1,140 +1,98 @@
-import { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useShop } from '../contexts/ShopContext';
-import { authHeaders } from '../utils/helpers/storage';
-import { getId } from '../utils/helpers/response';
+import { cartErrorMessage, getCartQuantity } from '../utils/helpers/cart';
 
-const API =
-  import.meta.env.VITE_APP_API_URL ||
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+/*
+ * مدیریت تعداد یک محصول در سبد خرید.
+ * منبع حقیقت Context است که خودش آینه‌ی بک‌اند است؛ این hook فقط
+ * خوش‌بینانه UI را جلو می‌برد و تغییرات را با debounce ثبت می‌کند.
+ */
 
-const CART_SYNC_DELAY = 1000;
-
-/* ---------- helperهای سبد (همان ProductPage) ---------- */
-
-export function getItemQuantity(item) {
-  if (!item) return 0;
-  const raw = item.quantity ?? item.qty ?? item.count;
-  if (raw == null || raw === '') return 1;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 1;
-}
-
-export function findInCart(cart, productId) {
-  if (!cart || !productId) return null;
-  const items = Array.isArray(cart) ? cart : cart.items || cart.products || cart.cart || [];
-  if (!Array.isArray(items)) return null;
-
-  return (
-    items.find((item) => {
-      if (!item) return false;
-      const candidates = [
-        item.product_id,
-        item.productId,
-        item.product?._id,
-        item.product?.id,
-        item.product,
-        item._id,
-        item.id,
-      ];
-      return candidates.some((c) => c != null && String(getId(c)) === String(productId));
-    }) || null
-  );
-}
-
-async function sendCartChange(userId, productId, from, to) {
-  let res;
-  if (from === 0 && to > 0) {
-    res = await axios.post(
-      `${API}/user/${userId}/cart`,
-      { product_id: productId, quantity: to },
-      authHeaders(),
-    );
-  } else if (from > 0 && to <= 0) {
-    res = await axios.delete(`${API}/user/${userId}/cart/${productId}`, authHeaders());
-  } else {
-    res = await axios.put(
-      `${API}/user/${userId}/cart/${productId}`,
-      { quantity: to },
-      authHeaders(),
-    );
-  }
-  if (res.data?.success === false) {
-    throw new Error(res.data?.message || 'خطا در به‌روزرسانی سبد خرید');
-  }
-}
-
-/* ---------- hook اصلی ---------- */
+const CART_SYNC_DELAY = 800;
 
 export default function useCartQuantity(productId, { stock = null, soldOut = false } = {}) {
-  const { user, cart, refreshCart } = useShop();
+  const {
+    cart,
+    user,
+    addToCart,
+    setCartItemQuantity,
+    removeCartItem,
+    getCartQuantity: readCartQuantity,
+  } = useShop();
 
-  const [qty, setQty] = useState(() => getItemQuantity(findInCart(cart, productId)));
+  const id = productId ? String(productId) : '';
+  const loggedIn = !!user?._id;
+
+  const [qty, setQty] = useState(() => (cart ? getCartQuantity(cart, id) : 0));
   const [busy, setBusy] = useState(false);
 
-  const uiQtyRef = useRef(qty); // آنچه کاربر می‌بیند
-  const serverQtyRef = useRef(qty); // آنچه سرور تأیید کرده
-  const inFlightRef = useRef(false);
+  const qtyRef = useRef(qty); // آنچه کاربر می‌بیند
+  const pendingRef = useRef(null); // هدفی که هنوز روی سرور ثبت نشده
   const timerRef = useRef(null);
   const mountedRef = useRef(true);
-  const flushRef = useRef(null);
-  const userIdRef = useRef(user?._id);
-  const refreshCartRef = useRef(refreshCart);
+  const commitRef = useRef(null);
+  const idRef = useRef(id);
 
-  userIdRef.current = user?._id;
-  refreshCartRef.current = refreshCart;
+  qtyRef.current = qty;
+  idRef.current = id;
 
-  /* ارسال ترتیبی به سرور */
-  const flush = async () => {
-    if (inFlightRef.current) return;
+  /* ---------- همگام‌سازی با Context ---------- */
+  useEffect(() => {
+    if (pendingRef.current !== null) return;
+    const contextQty = getCartQuantity(cart, id);
+    qtyRef.current = contextQty;
+    setQty(contextQty);
+  }, [cart, id]);
 
-    const userId = userIdRef.current;
-    const target = uiQtyRef.current;
-    const confirmed = serverQtyRef.current;
+  /* ---------- ثبت تغییر روی سرور ---------- */
+  const commit = useCallback(
+    async (target) => {
+      const productIdValue = idRef.current;
+      if (!productIdValue) return;
 
-    if (!userId || !productId || target === confirmed) return;
-
-    inFlightRef.current = true;
-    if (mountedRef.current) setBusy(true);
-
-    try {
-      await sendCartChange(userId, productId, confirmed, target);
-      serverQtyRef.current = target;
+      if (mountedRef.current) setBusy(true);
       try {
-        await refreshCartRef.current?.();
-      } catch {
-        /* همگام‌سازی Context در پس‌زمینه */
+        if (target <= 0) {
+          await removeCartItem(productIdValue);
+        } else {
+          const current = readCartQuantity(productIdValue);
+          if (current <= 0) {
+            /* محصول هنوز در سبد نیست؛ addToCart خودش اول از بک‌اند می‌پرسد */
+            await addToCart(productIdValue, target);
+            /* اگر درخواست‌ها با هم ادغام شده باشند، تعداد نهایی را ست می‌کنیم */
+            const now = readCartQuantity(productIdValue);
+            if (now > 0 && now !== target) await setCartItemQuantity(productIdValue, target);
+          } else if (current !== target) {
+            await setCartItemQuantity(productIdValue, target);
+          }
+        }
+        pendingRef.current = null;
+      } catch (error) {
+        pendingRef.current = null;
+        const fallback = readCartQuantity(productIdValue);
+        qtyRef.current = fallback;
+        if (mountedRef.current) {
+          setQty(fallback);
+          toast.error(cartErrorMessage(error, 'خطا در به‌روزرسانی سبد خرید'));
+        }
+      } finally {
+        if (mountedRef.current) setBusy(false);
       }
-    } catch {
-      // بدون toast: برگشت سایلنت به مقدار تأییدشده
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      uiQtyRef.current = serverQtyRef.current;
-      if (mountedRef.current) setQty(serverQtyRef.current);
-    } finally {
-      inFlightRef.current = false;
-      if (mountedRef.current) setBusy(false);
+    },
+    [addToCart, readCartQuantity, removeCartItem, setCartItemQuantity],
+  );
+  commitRef.current = commit;
 
-      // تغییراتی که وسط درخواست انجام شده
-      if (!timerRef.current && uiQtyRef.current !== serverQtyRef.current) {
-        flushRef.current?.();
-      }
-    }
-  };
-  flushRef.current = flush;
-
-  const schedule = () => {
+  const schedule = useCallback((target) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
-      flushRef.current?.();
+      commitRef.current?.(target);
     }, CART_SYNC_DELAY);
-  };
+  }, []);
 
-  /* هنگام خروج: تغییرات معوق در پس‌زمینه ارسال می‌شود */
+  /* ---------- ارسال تغییرات معوق هنگام خروج از صفحه ---------- */
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -142,70 +100,67 @@ export default function useCartQuantity(productId, { stock = null, soldOut = fal
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
+        const target = pendingRef.current;
+        if (target !== null) commitRef.current?.(target);
       }
-      flushRef.current?.();
     };
   }, []);
 
-  /* همگام‌سازی با تغییرات Context (مثلاً بعد از لود سبد یا تغییر از جای دیگر) */
-  useEffect(() => {
-    if (inFlightRef.current || timerRef.current) return;
-    if (uiQtyRef.current !== serverQtyRef.current) return;
-
-    const ctxQty = getItemQuantity(findInCart(cart, productId));
-    if (ctxQty !== serverQtyRef.current) {
-      serverQtyRef.current = ctxQty;
-      uiQtyRef.current = ctxQty;
-      setQty(ctxQty);
-    }
-  }, [cart, productId]);
-
+  /* ---------- اکشن‌ها ---------- */
   const increment = () => {
-    if (!userIdRef.current || soldOut) return;
-    const current = uiQtyRef.current;
-    if (stock !== null && current >= stock) return;
+    if (!loggedIn) {
+      toast.error('برای افزودن به سبد خرید ابتدا وارد شوید');
+      return;
+    }
+    if (soldOut) return;
+    if (stock !== null && qtyRef.current >= stock) return;
 
-    const next = current + 1;
-    uiQtyRef.current = next;
+    const next = qtyRef.current + 1;
+    qtyRef.current = next;
+    pendingRef.current = next;
     setQty(next);
 
-    if (serverQtyRef.current === 0 && !inFlightRef.current) {
+    /* اولین افزودن باید فوری باشد تا کاربر منتظر debounce نماند */
+    if (next === 1) {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
-      flush();
+      commitRef.current?.(next);
     } else {
-      schedule();
+      schedule(next);
     }
   };
 
   const decrement = () => {
-    if (!userIdRef.current) return;
-    const current = uiQtyRef.current;
-    if (current <= 0) return;
+    if (!loggedIn) return;
+    if (qtyRef.current <= 0) return;
 
-    const next = current - 1;
-    uiQtyRef.current = next;
+    const next = qtyRef.current - 1;
+    qtyRef.current = next;
+    pendingRef.current = next;
     setQty(next);
 
-    if (next === 0) {
+    if (next <= 0) {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
-      flush();
+      commitRef.current?.(0);
     } else {
-      schedule();
+      schedule(next);
     }
   };
+
+  const atMax = stock !== null && qty >= stock;
 
   return {
     qty,
     busy,
     increment,
     decrement,
-    loggedIn: !!user?._id,
-    atMax: stock !== null && qty >= stock,
+    loggedIn,
+    atMax,
+    inCart: qty > 0,
   };
 }

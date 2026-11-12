@@ -626,12 +626,26 @@ export function setupMockBackendFallback() {
         }
       }
 
-      const ok = (resBody, message = 'موفق') => ({
-        status: 200,
-        data: { success: true, message, body: resBody },
+      const ok = (resBody, message = 'موفق', status = 200) => ({
+        status,
+        data: { success: true, status, message, body: resBody },
         config,
         headers: {},
       });
+
+      /* خطای شبیه‌سازی‌شده مثل axios واقعی reject می‌شود */
+      const fail = (status, message) => {
+        const error = new Error(message);
+        error.config = config;
+        error.response = {
+          status,
+          statusText: String(status),
+          data: { success: false, status, message, body: null },
+          config,
+          headers: {},
+        };
+        throw error;
+      };
 
       const categories = readState('categories', DEMO_CATEGORIES);
       const products = readState('products', DEMO_PRODUCTS);
@@ -791,31 +805,59 @@ export function setupMockBackendFallback() {
         return ok(true);
       }
 
-      // 5. Cart
+      // 5. Cart — دقیقاً مثل بک‌اند واقعی (POST روی محصول موجود خطای already in cart می‌دهد)
       if (/^\/user\/[^/]+\/cart$/.test(path)) {
         if (method === 'get') {
-          return ok({ data: cart, total: cart.length });
+          const page = Number(params.get('page') || 1);
+          const limit = Number(params.get('limit') || 10);
+          const start = (page - 1) * limit;
+          return ok({
+            data: cart.slice(start, start + limit),
+            total: cart.length,
+            totalPages: Math.max(1, Math.ceil(cart.length / limit)),
+          });
         }
         if (method === 'post') {
+          if (!body.product_id) return fail(400, 'Required fields missing');
+          const quantity = Number(body.quantity || 1);
+          if (quantity < 1) return fail(400, 'Quantity must be greater than 0');
+
           const existing = cart.find((c) => c.product_id === body.product_id);
-          if (existing) existing.quantity += Number(body.quantity || 1);
-          else cart.push({ _id: `cart-${Date.now()}`, product_id: body.product_id, quantity: Number(body.quantity || 1) });
+          if (existing) return fail(400, 'Product already exists in cart');
+
+          const created = {
+            _id: `cart-${Date.now()}`,
+            user_id: 'user-admin-1',
+            product_id: body.product_id,
+            quantity,
+          };
+          cart.push(created);
           writeState('cart', cart);
-          return ok(cart);
+          return ok(created, 'Cart created successfully', 201);
         }
       }
       if (/^\/user\/[^/]+\/cart\/[^/]+$/.test(path)) {
         const prodId = path.split('/')[4];
+        if (method === 'get') {
+          const item = cart.find((c) => c.product_id === prodId);
+          if (!item) return fail(404, 'Cart not found');
+          return ok(item);
+        }
         if (method === 'put') {
           const item = cart.find((c) => c.product_id === prodId);
-          if (item) item.quantity = Number(body.quantity || 1);
+          if (!item) return fail(404, 'Cart not found');
+          const quantity = Number(body.quantity || 0);
+          if (quantity < 1) return fail(400, 'Quantity must be greater than 0');
+          item.quantity = quantity;
           writeState('cart', cart);
-          return ok(cart);
+          return ok(item, 'Cart updated successfully');
         }
         if (method === 'delete') {
+          const item = cart.find((c) => c.product_id === prodId);
+          if (!item) return fail(404, 'Cart not found');
           const next = cart.filter((c) => c.product_id !== prodId);
           writeState('cart', next);
-          return ok(next);
+          return ok(true, 'Cart deleted successfully');
         }
       }
 

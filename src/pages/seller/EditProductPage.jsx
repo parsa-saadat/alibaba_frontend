@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { authHeaders } from '../../utils/helpers/storage';
-import ProductEditorComponent from '../../components/dashboard/ProductEditorComponent';
-import { Loading } from '../../components/ScroolToTopComponent';
+import ProductEditorComponent from '../../components/panel/ProductEditorComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import { flattenCategories } from '../../utils/helpers/categories';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';

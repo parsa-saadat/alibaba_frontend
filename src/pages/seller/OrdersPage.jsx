@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Check, X } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import { Loading } from '../../components/ScroolToTopComponent';
+import { Loading } from '../../components/common/ScroolToTopComponent';
 import { formatPrice, toFa, statusFa } from '../../utils/helpers/format';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';

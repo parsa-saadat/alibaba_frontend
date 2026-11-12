@@ -894,3 +894,20 @@ html[data-theme="light"] .skeleton::after {
 /* product style markdown */
 
 /* ============ توضیحات محصول (نمایش عمومی) ============ */
+
+/* نتایج جستجوی هیرو (دو ستونی در دسکتاپ) */
+.search-results.is-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .search-results.is-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .search-results.is-grid .search-result {
+    border-inline-end: 1px solid var(--border);
+  }
+  .search-results.is-grid .search-result:nth-child(2n) {
+    border-inline-end: 0;
+  }
+}
