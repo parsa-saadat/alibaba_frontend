@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import StorageImageComponent from '../common/StorageImageComponent';
 import MarqueeText from '../common/MarqueeText';
+import TrustBadge from './TrustBadge';
 import {
   formatPrice,
   finalPrice,
@@ -24,7 +25,6 @@ export function MiniProductSkeleton() {
 
 function MiniProductComponent({ product }) {
   const discount = hasDiscount(product);
-  const sold = Number(product.sold_count) || 0;
   const soldOut = product.stock_status === 'OUT_OF_STOCK' || product.stock === 0;
 
   let sub = null;
@@ -32,8 +32,6 @@ function MiniProductComponent({ product }) {
     sub = (
       <span className="text-[#999] line-through">{formatPrice(product.price?.amount)}</span>
     );
-  } else if (sold > 0) {
-    sub = <span className="text-[#555]">{toFa(sold)} فروش</span>;
   } else if (!soldOut) {
     sub = <span className="text-[#1f8f3a]">موجود در انبار</span>;
   }
@@ -65,6 +63,10 @@ function MiniProductComponent({ product }) {
           {formatPrice(finalPrice(product))}
         </div>
         <div className="text-[13px] mt-0.5 h-5 truncate">{sub}</div>
+        {/* نشان اعتماد فروشنده — کارت‌های کوچک پیشنهاد ویژه هم مثل بقیه */}
+        <div className="mt-1 flex min-h-[16px] items-center gap-1">
+          <TrustBadge product={product} size={11} />
+        </div>
       </div>
     </Link>
   );

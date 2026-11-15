@@ -1,28 +1,30 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { formatJalaliYear } from '../../utils/helpers/format';
 import {
   ArrowLeft,
   ArrowUp,
   BadgeCheck,
+  Camera,
   ChevronDown,
-  Coffee,
-  Cpu,
-  CreditCard,
+  Crosshair,
   Globe,
-  Headphones,
+  CreditCard,
   Headset,
-  Home,
-  Laptop,
   Mail,
   MapPin,
+  Package,
   Phone,
+  Ruler,
+  Satellite,
   Send,
   ShieldCheck,
-  Smartphone,
   Sparkles,
   Store,
+  Tablet,
   Truck,
 } from 'lucide-react';
+import BrandLogoComponent from '../common/BrandLogoComponent';
 import { fetchCategories } from '../../utils/helpers/categories';
 import { getId } from '../../utils/helpers/response';
 
@@ -30,15 +32,15 @@ import { getId } from '../../utils/helpers/response';
 /* داده‌های ثابت                                                       */
 /* ------------------------------------------------------------------ */
 
-const CATEGORY_ICONS = [Smartphone, Laptop, Headphones, Coffee, Home, Cpu];
+const CATEGORY_ICONS = [Satellite, Crosshair, Camera, Tablet, Ruler, Package];
 
 const FALLBACK_CATEGORIES = [
-  'گوشی موبایل و تبلت',
-  'لپ‌تاپ و لوازم جانبی',
-  'هدفون و تجهیزات صوتی',
-  'لوازم خانگی و آشپزخانه',
-  'قهوه‌ساز و نوشیدنی‌ساز',
-  'خانه هوشمند',
+  'جی‌پی‌اس ایستگاهی (RTK)',
+  'دوربین نقشه‌برداری',
+  'توتال استیشن',
+  'کنترولر و دیتالاگر',
+  'متر و اسکنر لیزری',
+  'لوازم جانبی نقشه‌برداری',
 ];
 
 const LINK_COLUMNS = [
@@ -46,39 +48,38 @@ const LINK_COLUMNS = [
     title: 'خرید و سفارش',
     items: [
       { label: 'همه محصولات', to: '/products' },
-      { label: 'تخفیف‌های امروز', to: '/products?sort=discount' },
-      { label: 'فروشگاه‌ها', to: '/products' },
+      { label: 'تخفیف‌های فعال', to: '/products?discount=true' },
       { label: 'سبد خرید', to: '/cart' },
       { label: 'لیست علاقه‌مندی', to: '/favorites' },
       { label: 'مقایسه محصولات', to: '/compare' },
+      { label: 'پیگیری سفارش‌ها', to: '/orders' },
     ],
   },
   {
-    title: 'فروش در علی‌بازار',
+    title: 'فروش در ژئو کالا',
     items: [
       { label: 'شروع فروش', to: '/seller' },
-      { label: 'پنل فروشندگان', to: '/seller' },
-      { label: 'تعرفه و کمیسیون', to: '/seller' },
-      { label: 'قوانین فروشندگان', to: '/about' },
-      { label: 'بسته‌بندی و ارسال', to: '/about' },
+      { label: 'پنل فروشنده', to: '/seller' },
+      { label: 'پلن‌ها و تعرفه', to: '/seller/plans' },
+      { label: 'قوانین فروشندگان', to: '/terms/sellers' },
     ],
   },
   {
     title: 'راهنما و پشتیبانی',
     items: [
       { label: 'تماس با ما', to: '/contact' },
-      { label: 'درباره علی‌بازار', to: '/about' },
+      { label: 'درباره ژئو کالا', to: '/about' },
       { label: 'سوالات متداول', to: '/contact#faq' },
-      { label: 'پیگیری سفارش‌ها', to: '/orders' },
-      { label: 'شرایط بازگشت کالا', to: '/about' },
-      { label: 'حریم خصوصی', to: '/about' },
+      { label: 'قوانین مشتریان', to: '/terms/customers' },
+      { label: 'قوانین خریداران', to: '/terms/buyers' },
+      { label: 'حریم خصوصی', to: '/privacy' },
     ],
   },
 ];
 
 const STATS = [
-  { value: '+۱۰۰ هزار', label: 'خریدار عمده' },
-  { value: '+۵ هزار', label: 'فروشنده فعال' },
+  { value: '۱۳۸۳', label: 'سال آغاز فعالیت' },
+  { value: '۲', label: 'شعبه فعال' },
   { value: '۲۴/۷', label: 'پشتیبانی' },
 ];
 
@@ -90,35 +91,10 @@ const TRUST_ITEMS = [
 ];
 
 const CONTACTS = [
-  { icon: Phone, text: '۰۲۱-۹۱۰۰۹۱۰۰', href: 'tel:+982191009100' },
-  { icon: Mail, text: 'support@alibazar.ir', href: 'mailto:support@alibazar.ir' },
-  { icon: MapPin, text: 'تهران، خیابان ولیعصر، برج تجارت الکترونیک' },
-];
-
-/* ------------------------------------------------------------------ */
-/* آیکون‌های برند                                                      */
-/* ------------------------------------------------------------------ */
-
-const InstagramIcon = (props) => (
-  <svg viewBox="0 0 24 24" width={17} height={17} fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
-    <rect x="3" y="3" width="18" height="18" rx="5" />
-    <circle cx="12" cy="12" r="4" />
-    <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-  </svg>
-);
-
-const YoutubeIcon = (props) => (
-  <svg viewBox="0 0 24 24" width={17} height={17} fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
-    <rect x="2" y="5" width="20" height="14" rx="4" />
-    <path d="M10.2 9.3 15 12l-4.8 2.7z" fill="currentColor" stroke="none" />
-  </svg>
-);
-
-const SOCIALS = [
-  { label: 'اینستاگرام', href: 'https://instagram.com', icon: InstagramIcon },
-  { label: 'تلگرام', href: 'https://t.me', icon: (props) => <Send size={17} {...props} /> },
-  { label: 'یوتیوب', href: 'https://youtube.com', icon: YoutubeIcon },
-  { label: 'وبلاگ', href: '/about', icon: (props) => <Globe size={17} {...props} />, internal: true },
+  { icon: Phone, text: '۰۹۱۲۹۳۲۷۵۱۵ — شعبه تهران', href: 'tel:+989129327515' },
+  { icon: Phone, text: '۰۹۱۰۲۴۰۱۰۰۷ — شعبه مازندران', href: 'tel:+989102401007' },
+  { icon: Mail, text: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
+  { icon: MapPin, text: 'تهران · مازندران، هچیرود' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -177,59 +153,6 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
   );
 }
 
-// فرم خبرنامه (فعلاً UI است؛ به API خودت وصلش کن)
-function Newsletter() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState(null);
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const value = email.trim();
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setStatus({ type: 'error', text: 'لطفاً یک ایمیل معتبر وارد کنید.' });
-      return;
-    }
-
-    // TODO: ارسال value به API خبرنامه
-    setStatus({ type: 'success', text: 'عضویت شما ثبت شد. ممنون!' });
-    setEmail('');
-  };
-
-  return (
-    <div>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row">
-        <div className="relative flex-1">
-          <Mail size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 opacity-60" />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ایمیل خود را وارد کنید"
-            className="w-full rounded-xl bg-white py-2.5 pe-3 ps-9 text-sm text-[#0a1736] outline-none ring-2 ring-transparent transition focus:ring-[var(--navy)]"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-xl px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-          style={{ background: 'var(--navy)' }}
-        >
-          عضویت
-        </button>
-      </form>
-      {status && (
-        <p className={`mt-2 text-xs font-medium ${status.type === 'error' ? 'text-red-800' : 'text-emerald-900'}`}>
-          {status.text}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* فوتر اصلی                                                          */
-/* ------------------------------------------------------------------ */
-
 function FooterComponent() {
   const [categories, setCategories] = useState([]);
 
@@ -259,13 +182,7 @@ function FooterComponent() {
     }));
   }, [categories]);
 
-  const year = useMemo(() => {
-    try {
-      return new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
-    } catch {
-      return '۱۴۰۵';
-    }
-  }, []);
+  const year = useMemo(() => formatJalaliYear(), []);
 
   return (
     <footer
@@ -287,22 +204,12 @@ function FooterComponent() {
       <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6">
         {/* کارت دعوت: خبرنامه و فروشندگان */}
         <div
-          className="grid gap-6 rounded-3xl p-5 sm:p-6 lg:grid-cols-2 lg:items-center lg:gap-10 lg:p-8"
+          className="flex flex-col gap-6 rounded-3xl p-5 sm:p-6 lg:p-8"
           style={{
             background: 'linear-gradient(135deg, var(--primary-color) 0%, #ffb800 100%)',
             color: 'var(--navy)',
           }}
         >
-          <div>
-            <h3 className="text-lg font-black sm:text-xl">عضویت در خبرنامه‌ی علی‌بازار</h3>
-            <p className="mt-1 text-xs opacity-80 sm:text-sm">
-              هر هفته تخفیف‌ها و پیشنهادهای ویژه‌ی عمده را زودتر از دیگران دریافت کنید.
-            </p>
-            <div className="mt-4">
-              <Newsletter />
-            </div>
-          </div>
-
           <div className="flex flex-col items-start gap-3 rounded-2xl bg-white/25 p-4 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span
@@ -313,7 +220,7 @@ function FooterComponent() {
               </span>
               <div>
                 <b className="block text-sm">کسب‌وکار دارید؟</b>
-                <span className="block text-xs opacity-80">به بیش از ۱۰۰ هزار خریدار عمده دسترسی پیدا کنید</span>
+                <span className="block text-xs opacity-80">تجهیزات نقشه‌برداری خود را در ژئو کالا بفروشید</span>
               </div>
             </div>
             <Link
@@ -355,22 +262,16 @@ function FooterComponent() {
         <div className="grid gap-x-8 gap-y-2 py-12 md:grid-cols-2 lg:grid-cols-12">
           {/* برند */}
           <div className="md:col-span-2 lg:col-span-4">
-            <Link to="/" className="inline-flex items-center gap-3">
-              <span
-                className="grid h-12 w-12 place-items-center rounded-2xl text-2xl font-black"
-                style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
-              >
-                ع
-              </span>
-              <span>
-                <b className="block text-lg leading-tight text-white">علی‌بازار</b>
-                <span className="text-[11px] text-[#8fa0c9]">بازار داخلی ایران • بدون واردات و صادرات</span>
+            <Link to="/" className="inline-flex flex-col items-start gap-2">
+              <BrandLogoComponent variant="full" size="md" tone="white" />
+              <span className="text-[11px] text-[#8fa0c9]">
+                بازارگاه تخصصی تجهیزات نقشه‌برداری
               </span>
             </Link>
 
             <p className="mt-4 max-w-sm text-xs leading-6 text-[#8fa0c9]">
-              یک بازار آنلاین B2B که تولیدکنندگان و عمده‌فروشان ایرانی را به خریداران سراسر کشور وصل می‌کند؛ با تضمین
-              اصالت کالا، قیمت رقابتی و پشتیبانی واقعی.
+              ژئو کالا بازارگاه تخصصی تجهیزات نقشه‌برداری است؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و
+              کنترولر، با مشاوره‌ی فنی و ضمانت اصالت کالا. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا.
             </p>
 
             {/* آمار */}
@@ -385,23 +286,6 @@ function FooterComponent() {
               ))}
             </div>
 
-            {/* شبکه‌های اجتماعی */}
-            <div className="mt-6 flex items-center gap-2">
-              {SOCIALS.map((s) => {
-                const Icon = s.icon;
-                const className =
-                  'grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-[#dfe6fb] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--primary-color)] hover:bg-[var(--primary-color)] hover:text-[var(--navy)]';
-                return s.internal ? (
-                  <Link key={s.label} to={s.href} aria-label={s.label} className={className}>
-                    <Icon />
-                  </Link>
-                ) : (
-                  <a key={s.label} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label} className={className}>
-                    <Icon />
-                  </a>
-                );
-              })}
-            </div>
           </div>
 
           {/* دسته‌بندی‌ها */}
@@ -455,12 +339,20 @@ function FooterComponent() {
       <div className="relative border-t border-white/[0.08] bg-black/20">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
           <p className="text-center text-[11px] text-[#8fa0c9] lg:text-right">
-            © {year} علی‌بازار — تمامی حقوق محفوظ است.
+            © {year} ژئو کالا — تمامی حقوق محفوظ است. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا
           </p>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#8fa0c9]">
-            <Link to="/about" className="transition-colors hover:text-white">قوانین و مقررات</Link>
-            <Link to="/about" className="transition-colors hover:text-white">حریم خصوصی</Link>
+            <Link to="/terms/customers" className="transition-colors hover:text-white">
+              قوانین مشتریان
+            </Link>
+            <Link to="/terms/buyers" className="transition-colors hover:text-white">
+              قوانین خریداران
+            </Link>
+            <Link to="/terms/sellers" className="transition-colors hover:text-white">
+              قوانین فروشندگان
+            </Link>
+            <Link to="/privacy" className="transition-colors hover:text-white">حریم خصوصی</Link>
             <Link to="/contact" className="transition-colors hover:text-white">تماس با ما</Link>
             <button
               type="button"

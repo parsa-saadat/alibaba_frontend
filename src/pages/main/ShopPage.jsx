@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Layers,
+  PackageSearch,
   Percent,
   RotateCcw,
   Search,
@@ -18,20 +19,27 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import ProductGridComponent from '../../components/product/ProductGridComponent';
+import ProductComponent, { ProductSkeleton } from '../../components/product/ProductComponent';
 import { fetchCategories, buildCategoryTree } from '../../utils/helpers/categories';
 import { getBody, getList } from '../../utils/helpers/response';
-import { toFa } from '../../utils/helpers/format';
+import { toFa,
+  productionYearForApi,
+} from '../../utils/helpers/format';
 
 /* ------------------------------------------------------------------ */
 /* ثابت‌ها                                                              */
 /* ------------------------------------------------------------------ */
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const PAGE_SIZE = 20;
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
+/* ۲۴ = مضرب ۲، ۳ و ۴ → در هر بریک‌پوینت ردیف آخر بدون جای خالی پر می‌شود */
+const PAGE_SIZE = 24;
+
+/* قیمت‌ها در سایت به «تومان» نمایش داده می‌شوند و همان واحد به بک‌اند فرستاده می‌شود.
+   وقتی دسته‌ی ماکسیمم روی انتهای نوار باشد، «بدون سقف» در نظر گرفته می‌شود؛
+   پس این سقف هیچ کالای گران‌تری را از نتایج حذف نمی‌کند. */
 const PRICE_MIN = 0;
-const PRICE_MAX = 1_000_000_000; // ۱ میلیارد ریال
+const PRICE_MAX = 200_000_000;
 const PRICE_STEP = 1_000_000;
 
 const YEAR_MIN = 1340;
@@ -49,6 +57,7 @@ const FILTER_KEYS = [
   'min_production',
   'max_production',
   'desc',
+  'tags',
 ];
 
 const SORTS = [
@@ -65,29 +74,63 @@ const STOCK_OPTIONS = [
   { value: 'OUT_OF_STOCK', label: 'ناموجود' },
 ];
 
-// استایل‌های تم (فقط متغیرهای پروژه)
-const ACCENT = { background: 'var(--primary-color)', color: 'var(--navy)' };
+/*
+ * شبکه‌ی محصولات — حداکثر ۴ ستون، همان الگوی بقیه‌ی صفحات سایت
+ * (ProductGridComponent). عرض کارت‌ها در همه‌ی بریک‌پوینت‌ها سالم می‌ماند:
+ *   ۳۹۰px → ۲ ستون (~۱۷۷px) · ۷۶۸px → ۳ ستون (~۲۳۷px)
+ *   ۱۰۲۴px (با سایدبار ۲۷۲px) → ۳ ستون (~۲۲۷px) · ۱۲۸۰px+ → ۴ ستون (~۲۳۰px)
+ */
+/* سه ستون در دسکتاپ — هم‌اندازه با گرید صفحه‌ی فروشگاه (درخواست کاربر) */
+/* موبایل دو ستونه است تا کارت‌ها غول‌آسا و خالی نشوند؛ تبلت سه‌ستونه */
+const GRID_CLASS = 'grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3';
+
+/* ------------------------------------------------------------------ */
+/* رنگ‌های تم — همه از متغیرهای پروژه (بدون رنگ ثابت)                    */
+/* ------------------------------------------------------------------ */
+
+/* پس‌زمینه‌ی ملایم اصلی + متن خوانا در هر دو تم
+   (در تم روشن: پس‌زمینه‌ی کرم + متن سرمه‌ای؛ در تم تاریک: همان + متن زرد) */
 const ACCENT_SOFT = {
-  background: 'color-mix(in srgb, var(--primary-color) 14%, transparent)',
-  color: 'var(--primary-color)',
+  background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)',
+  color: 'var(--accent-text)',
 };
-const TRACK_BG = { background: 'color-mix(in srgb, currentColor 14%, transparent)' };
+/* دکمه/چیپ انتخاب‌شده */
+const ACCENT = {
+  background: 'var(--primary-color)',
+  color: 'var(--navy)',
+};
+/* ریلی که انتخاب‌شده نیست (اسلایدر و سوییچ) */
+const TRACK_BG = {
+  background: 'var(--card2)',
+  border: '1px solid var(--border)',
+};
 
 /* ------------------------------------------------------------------ */
 /* هِلپرها                                                             */
 /* ------------------------------------------------------------------ */
 
-const toLatinDigits = (str = '') =>
-  str
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-
-const digitsOnly = (value) => toLatinDigits(value).replace(/\D/g, '');
-
-const faGrouped = (value) => (value !== '' && value != null ? new Intl.NumberFormat('fa-IR').format(Number(value)) : '');
+const faGrouped = (value) =>
+  value !== '' && value != null ? new Intl.NumberFormat('fa-IR').format(Number(value)) : '';
 
 const faPlain = (value) =>
-  value !== '' && value != null ? new Intl.NumberFormat('fa-IR', { useGrouping: false }).format(Number(value)) : '';
+  value !== '' && value != null
+    ? new Intl.NumberFormat('fa-IR', { useGrouping: false }).format(Number(value))
+    : '';
+
+/* عدد فشرده برای جا شدن در سایدبار ۲۷۲ پیکسلی: «۱٬۲۵۰٬۰۰۰٬۰۰۰» → «۱٫۳ میلیارد» */
+const faCompact = (value) => {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return '۰';
+
+  try {
+    return new Intl.NumberFormat('fa-IR', {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(number);
+  } catch {
+    return faGrouped(number);
+  }
+};
 
 function getPageItems(current, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -128,22 +171,29 @@ function buildActiveChips(filters, categoryName) {
   if (filters.category_id)
     chips.push({ key: 'category', label: categoryName || 'دسته‌بندی', patch: { category_id: '' } });
   if (filters.brand) chips.push({ key: 'brand', label: `برند: ${filters.brand}`, patch: { brand: '' } });
+
   if (filters.min_price || filters.max_price) {
+    const from = filters.min_price ? faCompact(filters.min_price) : '';
+    const to = filters.max_price ? faCompact(filters.max_price) : '';
+    const range = from && to ? `${from} تا ${to}` : from ? `از ${from}` : `تا ${to}`;
     chips.push({
       key: 'price',
-      label: `قیمت: ${faGrouped(filters.min_price) || '۰'} تا ${faGrouped(filters.max_price) || 'بی‌نهایت'}`,
+      label: `قیمت ${range} تومان`,
       patch: { min_price: '', max_price: '' },
     });
   }
+
   if (filters.min_production || filters.max_production) {
-    const from = faPlain(filters.min_production);
-    const to = faPlain(filters.max_production);
+    const from = filters.min_production ? faPlain(filters.min_production) : '';
+    const to = filters.max_production ? faPlain(filters.max_production) : '';
+    const range = from && to ? `${from} تا ${to}` : from ? `از ${from}` : `تا ${to}`;
     chips.push({
       key: 'production',
-      label: `سال تولید: ${from}${from && to ? ' تا ' : ''}${to}`,
+      label: `سال تولید ${range}`,
       patch: { min_production: '', max_production: '' },
     });
   }
+
   if (filters.stock_status) {
     chips.push({
       key: 'stock',
@@ -151,8 +201,14 @@ function buildActiveChips(filters, categoryName) {
       patch: { stock_status: '' },
     });
   }
-  if (filters.discount === 'true') chips.push({ key: 'discount', label: 'تخفیف‌دار', patch: { discount: '' } });
-  if (filters.warranty === 'true') chips.push({ key: 'warranty', label: 'گارانتی‌دار', patch: { warranty: '' } });
+
+  if (filters.tags)
+    chips.push({ key: 'tags', label: `برچسب: ${filters.tags}`, patch: { tags: '' } });
+
+  if (filters.discount === 'true')
+    chips.push({ key: 'discount', label: 'تخفیف‌دار', patch: { discount: '' } });
+  if (filters.warranty === 'true')
+    chips.push({ key: 'warranty', label: 'گارانتی‌دار', patch: { warranty: '' } });
 
   return chips;
 }
@@ -202,15 +258,16 @@ const RANGE_CSS = `
 .ab-range{position:absolute;inset:0;width:100%;height:100%;margin:0;appearance:none;-webkit-appearance:none;background:transparent;pointer-events:none}
 .ab-range::-webkit-slider-runnable-track{background:transparent;height:100%}
 .ab-range::-moz-range-track{background:transparent}
-.ab-range::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:20px;height:20px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:grab}
-.ab-range::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:grab}
-.ab-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--primary-color);outline-offset:2px}
+.ab-range::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:22px;height:22px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 1px 6px rgba(10,23,54,.35);cursor:grab}
+.ab-range::-moz-range-thumb{pointer-events:auto;width:16px;height:16px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 1px 6px rgba(10,23,54,.35);cursor:grab}
+.ab-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent-text);outline-offset:2px}
+.ab-range:active::-webkit-slider-thumb{cursor:grabbing}
 `;
 
-function RangeSlider({ min, max, step, from, to, onCommit, format }) {
-  const clamp = (v, fallback) => {
-    if (v === '' || v == null || Number.isNaN(Number(v))) return fallback;
-    return Math.min(max, Math.max(min, Number(v)));
+function RangeSlider({ min, max, step, from, to, onCommit, format, unit = '' }) {
+  const clamp = (value, fallback) => {
+    if (value === '' || value == null || Number.isNaN(Number(value))) return fallback;
+    return Math.min(max, Math.max(min, Number(value)));
   };
 
   const committedLo = clamp(from, min);
@@ -222,7 +279,7 @@ function RangeSlider({ min, max, step, from, to, onCommit, format }) {
   }, [committedLo, committedHi]);
 
   const [lo, hi] = range;
-  const pct = (v) => ((v - min) / (max - min)) * 100;
+  const pct = (value) => ((value - min) / (max - min)) * 100;
 
   // فقط بعد از رها کردن نوار درخواست ارسال می‌شود
   const commit = () => {
@@ -231,10 +288,10 @@ function RangeSlider({ min, max, step, from, to, onCommit, format }) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <style>{RANGE_CSS}</style>
 
-      <div dir="ltr" className="relative h-5">
+      <div dir="ltr" className="relative h-6">
         <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full" style={TRACK_BG} />
         <div
           className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full"
@@ -272,13 +329,21 @@ function RangeSlider({ min, max, step, from, to, onCommit, format }) {
         />
       </div>
 
-      <div className="flex items-center justify-between gap-2 text-[11px]">
-        <span className="rounded-lg px-2 py-1 font-bold" style={ACCENT_SOFT}>
-          {format(lo, false)}
+      <div className="flex items-center gap-1.5 text-[10px] font-bold">
+        <span
+          className="max-w-[47%] truncate rounded-lg px-2 py-1"
+          style={ACCENT_SOFT}
+          title={format(lo, false)}
+        >
+          {format(lo, false)} {unit}
         </span>
-        <span className="muted">تا</span>
-        <span className="rounded-lg px-2 py-1 font-bold" style={ACCENT_SOFT}>
-          {format(hi, hi >= max)}
+        <span className="shrink-0 muted">تا</span>
+        <span
+          className="max-w-[47%] truncate rounded-lg px-2 py-1"
+          style={ACCENT_SOFT}
+          title={format(hi, hi >= max)}
+        >
+          {format(hi, hi >= max)} {hi < max ? unit : ''}
         </span>
       </div>
     </div>
@@ -292,20 +357,27 @@ function RangeSlider({ min, max, step, from, to, onCommit, format }) {
 function Section({ icon: Icon, title, badge = 0, defaultOpen = true, children }) {
   const [open, setOpen] = useState(defaultOpen);
 
+  /* اگر فیلتری از بیرون فعال شد (چیپ/بازنشانی) بخش مربوطه خودش باز شود */
+  const hadBadge = useRef(badge > 0);
+  useEffect(() => {
+    if (badge > 0 && !hadBadge.current) setOpen(true);
+    hadBadge.current = badge > 0;
+  }, [badge]);
+
   return (
     <section className="card2 overflow-hidden rounded-2xl border border-theme">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2.5 px-3.5 py-3 text-start"
+        className="flex w-full items-center gap-2 px-3 py-2.5 text-start transition hover:opacity-90"
       >
-        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg  var(--primary-color)" style={ACCENT_SOFT}>
-          <Icon size={14} />
+        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg" style={ACCENT_SOFT}>
+          <Icon size={13} />
         </span>
-        <span className="flex-1 text-sm font-black">{title}</span>
+        <span className="flex-1 truncate text-[13px] font-black">{title}</span>
         {badge > 0 && (
-          <span className="rounded-full px-2 py-0.5 text-[10px] font-black" style={ACCENT}>
+          <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black" style={ACCENT}>
             {toFa(badge)}
           </span>
         )}
@@ -315,9 +387,13 @@ function Section({ icon: Icon, title, badge = 0, defaultOpen = true, children })
         />
       </button>
 
-      <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
         <div className="min-h-0 overflow-hidden">
-          <div className="space-y-3 px-3.5 pb-4">{children}</div>
+          <div className="space-y-2 px-3 pb-3">{children}</div>
         </div>
       </div>
     </section>
@@ -331,11 +407,15 @@ function Switch({ icon: Icon, label, checked, onChange }) {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 transition hover:opacity-80"
+      className="flex w-full items-center justify-between gap-3 rounded-xl px-2.5 py-2 transition hover:opacity-90"
     >
-      <span className="flex items-center gap-2 text-xs font-bold">
-        <Icon size={14} className={checked ? '' : 'muted'} style={checked ? { color: 'var(--primary-color)' } : undefined} />
-        {label}
+      <span className="flex min-w-0 items-center gap-2 text-xs font-bold">
+        <Icon
+          size={14}
+          className="shrink-0"
+          style={{ color: checked ? 'var(--accent-text)' : 'var(--muted)' }}
+        />
+        <span className="truncate">{label}</span>
       </span>
       <span
         className="relative h-5 w-9 shrink-0 rounded-full transition-colors duration-300"
@@ -368,7 +448,9 @@ function Segmented({ options, value, onChange }) {
             role="radio"
             aria-checked={active}
             onClick={() => onChange(opt.value)}
-            className={`rounded-lg py-2 text-xs font-bold transition-all duration-200 ${active ? 'shadow-md' : 'hover:opacity-80'}`}
+            className={`rounded-lg py-2 text-[11px] font-bold transition-all duration-200 ${
+              active ? 'shadow-md' : 'muted hover:opacity-80'
+            }`}
             style={active ? ACCENT : undefined}
           >
             {opt.label}
@@ -392,7 +474,10 @@ function CategoryNode({ node, selectedId, expanded, onSelect, onToggle }) {
           type="button"
           aria-pressed={isSelected}
           onClick={() => onSelect(isSelected ? '' : node._id)}
-          className="flex-1 truncate rounded-lg px-2.5 py-1.5 text-start text-xs transition hover:opacity-80"
+          title={node.name}
+          className={`flex-1 truncate rounded-lg px-2.5 py-1.5 text-start text-xs transition ${
+            isSelected ? 'font-black' : 'hover:opacity-80'
+          }`}
           style={isSelected ? ACCENT : undefined}
         >
           {node.name}
@@ -402,9 +487,12 @@ function CategoryNode({ node, selectedId, expanded, onSelect, onToggle }) {
             type="button"
             onClick={() => onToggle(node._id)}
             aria-label={isOpen ? 'بستن زیرمجموعه' : 'باز کردن زیرمجموعه'}
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg muted"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg muted transition hover:opacity-80"
           >
-            <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              size={14}
+              className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            />
           </button>
         )}
       </div>
@@ -427,11 +515,18 @@ function CategoryNode({ node, selectedId, expanded, onSelect, onToggle }) {
   );
 }
 
+/* تعداد دسته‌هایی که بدون «نمایش بیشتر» نشان داده می‌شوند — تا هیچ‌وقت
+   ناحیه‌ی فیلترها اسکرول داخلی پیدا نکند */
+const CATEGORY_PREVIEW = 8;
+
 function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
   const [query, setQuery] = useState('');
+  const [showAll, setShowAll] = useState(false);
   const q = query.trim();
   const flat = useMemo(() => flattenNodes(tree), [tree]);
   const matches = q ? flat.filter((node) => node.name?.includes(q)) : null;
+  const roots = showAll || q ? tree : tree.slice(0, CATEGORY_PREVIEW);
+  const hiddenCount = Math.max(0, tree.length - roots.length);
 
   return (
     <div className="space-y-2">
@@ -445,12 +540,14 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
         />
       </div>
 
-      <div className="max-h-64 space-y-0.5 overflow-y-auto pe-1">
+      <div className="space-y-0.5">
         <button
           type="button"
           aria-pressed={!selectedId}
           onClick={() => onSelect('')}
-          className="w-full rounded-lg px-2.5 py-1.5 text-start text-xs transition hover:opacity-80"
+          className={`w-full rounded-lg px-2.5 py-1.5 text-start text-xs transition ${
+            !selectedId ? 'font-black' : 'hover:opacity-80'
+          }`}
           style={!selectedId ? ACCENT : undefined}
         >
           همه دسته‌ها
@@ -464,7 +561,10 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
                 type="button"
                 aria-pressed={selectedId === node._id}
                 onClick={() => onSelect(selectedId === node._id ? '' : node._id)}
-                className="w-full rounded-lg px-2.5 py-1.5 text-start text-xs transition hover:opacity-80"
+                title={node.name}
+                className={`w-full truncate rounded-lg px-2.5 py-1.5 text-start text-xs transition ${
+                  selectedId === node._id ? 'font-black' : 'hover:opacity-80'
+                }`}
                 style={selectedId === node._id ? ACCENT : undefined}
               >
                 {node.name}
@@ -474,7 +574,7 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
             <p className="px-2 py-3 text-center text-xs muted">دسته‌ای پیدا نشد</p>
           )
         ) : (
-          tree.map((root) => (
+          roots.map((root) => (
             <CategoryNode
               key={root._id}
               node={root}
@@ -485,30 +585,78 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
             />
           ))
         )}
+
+        {!matches && (showAll ? (
+          tree.length > CATEGORY_PREVIEW && (
+            <button
+              type="button"
+              onClick={() => setShowAll(false)}
+              className="mt-1 w-full rounded-lg px-2 py-1.5 text-[11px] font-bold muted transition hover:opacity-80"
+            >
+              نمایش کمتر
+            </button>
+          )
+        ) : hiddenCount > 0 ? (
+          <button
+            type="button"
+            onClick={() => setShowAll(true)}
+            className="mt-1 w-full rounded-lg px-2 py-1.5 text-[11px] font-bold transition hover:opacity-80"
+            style={{ color: 'var(--accent-text)' }}
+          >
+            نمایش {toFa(hiddenCount)} دسته‌ی دیگر
+          </button>
+        ) : null)}
       </div>
     </div>
   );
 }
 
-function FiltersPanel({ filters, setFilter, categoryTree, brands, expanded, onToggleCat }) {
+function FiltersPanel({
+  filters,
+  setFilter,
+  categoryTree,
+  brands,
+  expanded,
+  onToggleCat,
+  sort = '',
+  onSort,
+  scope = 'desktop',
+}) {
+  /* پنل دو بار رندر می‌شود (سایدبار دسکتاپ + شیت موبایل) → id یکتا لازم است */
+  const brandListId = `brand-options-${scope}`;
   const priceCount = (filters.min_price ? 1 : 0) + (filters.max_price ? 1 : 0);
   const yearCount = (filters.min_production ? 1 : 0) + (filters.max_production ? 1 : 0);
   const statusCount =
-    (filters.stock_status ? 1 : 0) + (filters.discount === 'true' ? 1 : 0) + (filters.warranty === 'true' ? 1 : 0);
+    (filters.stock_status ? 1 : 0) +
+    (filters.discount === 'true' ? 1 : 0) +
+    (filters.warranty === 'true' ? 1 : 0);
 
-  const formatPrice = (v, isMax) => (isMax ? 'بدون سقف' : `${faGrouped(v)} ریال`);
-  const formatYear = (v, isMax) => (isMax ? `${faPlain(v)} و بعد` : faPlain(v));
+  const formatPrice = (value, isMax) => (isMax ? 'بدون سقف' : faCompact(value));
+  const formatYear = (value, isMax) => (isMax ? `${faPlain(value)}+` : faPlain(value));
+
+  const sortOptions = SORTS.map((o) => ({ value: o.value, label: o.label }));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
+      {/* مرتب‌سازی — از هدر بخش محصولات به داخل خود فیلترها منتقل شد */}
+      <Section icon={ArrowUpDown} title="مرتب‌سازی" badge={sort ? 1 : 0} defaultOpen>
+        <SelectField
+          value={sort}
+          onChange={(v) => onSort?.(v)}
+          options={sortOptions}
+          label="مرتب‌سازی محصولات"
+          icon={ArrowUpDown}
+        />
+      </Section>
+
       <Section icon={Search} title="جستجو در نام" badge={filters.name ? 1 : 0}>
         <div className="relative">
-          <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 muted " />
+          <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 muted" />
           <DraftField
             value={filters.name}
             onCommit={(v) => setFilter({ name: v })}
             placeholder="نام محصول…"
-            className="input !ps-9"
+            className="input !py-2 !ps-9 text-xs"
           />
         </div>
       </Section>
@@ -525,13 +673,13 @@ function FiltersPanel({ filters, setFilter, categoryTree, brands, expanded, onTo
 
       <Section icon={Award} title="برند" badge={filters.brand ? 1 : 0} defaultOpen={Boolean(filters.brand)}>
         <DraftField
-          list="brand-options"
+          list={brandListId}
           value={filters.brand}
           onCommit={(v) => setFilter({ brand: v })}
           placeholder="نام برند…"
-          className="input"
+          className="input !py-2 text-xs"
         />
-        <datalist id="brand-options">
+        <datalist id={brandListId}>
           {brands.map((brand) => (
             <option key={brand} value={brand} />
           ))}
@@ -546,7 +694,7 @@ function FiltersPanel({ filters, setFilter, categoryTree, brands, expanded, onTo
                   type="button"
                   aria-pressed={active}
                   onClick={() => setFilter({ brand: active ? '' : brand })}
-                  className="rounded-full border border-theme px-2.5 py-1 text-[11px] font-bold transition hover:opacity-80"
+                  className="max-w-full truncate rounded-full border border-theme px-2.5 py-1 text-[11px] font-bold transition hover:opacity-80"
                   style={active ? ACCENT : undefined}
                 >
                   {brand}
@@ -565,11 +713,17 @@ function FiltersPanel({ filters, setFilter, categoryTree, brands, expanded, onTo
           from={filters.min_price}
           to={filters.max_price}
           format={formatPrice}
+          unit="تومان"
           onCommit={(lo, hi) => setFilter({ min_price: lo, max_price: hi })}
         />
       </Section>
 
-      <Section icon={CalendarDays} title="سال تولید" badge={yearCount} defaultOpen={yearCount > 0}>
+      <Section
+        icon={CalendarDays}
+        title="سال تولید"
+        badge={yearCount}
+        defaultOpen={yearCount > 0}
+      >
         <RangeSlider
           min={YEAR_MIN}
           max={YEAR_MAX}
@@ -604,18 +758,50 @@ function FiltersPanel({ filters, setFilter, categoryTree, brands, expanded, onTo
   );
 }
 
+/*
+ * سایدبار فیلترها تا وقتی همه‌ی بخش‌ها بسته‌اند کوتاه است و می‌تواند چسبان بماند.
+ * اگر کاربر همه را باز کند و بلندتر از صفحه شود، حالت چسبان برداشته می‌شود تا
+ * ناحیه‌ی فیلترها هیچ‌وقت اسکرول داخلی (نوار اسکرول جدا) نداشته باشد و کل صفحه
+ * به‌جای آن اسکرول شود.
+ */
+function useFitsViewport(ref, reserved = 120) {
+  const [fits, setFits] = useState(true);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+
+    const check = () => setFits(el.scrollHeight <= window.innerHeight - reserved);
+    check();
+
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(check) : null;
+    ro?.observe(el);
+    window.addEventListener('resize', check);
+    window.addEventListener('orientationchange', check);
+    const id = window.setInterval(check, 600); // بعد از باز/بسته شدن بخش‌ها هم دوباره بسنجد
+
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', check);
+      window.removeEventListener('orientationchange', check);
+      window.clearInterval(id);
+    };
+  }, [ref, reserved]);
+
+  return fits;
+}
+
 function SelectField({ value, onChange, options, label, icon: Icon }) {
   return (
     <div className="relative">
       {Icon && (
-        <Icon size={14} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 muted" />
+        <Icon size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 muted" />
       )}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label={label}
-        className="input cursor-pointer appearance-none !py-2 text-xs"
-        style={{ paddingInlineStart: Icon ? '2.25rem' : undefined, paddingInlineEnd: '2.5rem' }}
+        className="input cursor-pointer appearance-none !py-2 !ps-9 !pe-8 text-xs"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -623,7 +809,7 @@ function SelectField({ value, onChange, options, label, icon: Icon }) {
           </option>
         ))}
       </select>
-      <ChevronDown size={14} className="pointer-events-none absolute end-3.5 top-1/2 -translate-y-1/2 muted" />
+      <ChevronDown size={14} className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 muted" />
     </div>
   );
 }
@@ -656,8 +842,8 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
   return (
     <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="فیلترها">
       <style>{`
-        @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shop-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes shop-fade-in { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
 
       <button
@@ -665,18 +851,18 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
         aria-label="بستن فیلترها"
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        style={{ animation: 'fade-in 0.2s ease-out' }}
+        style={{ animation: 'shop-fade-in 0.2s ease-out' }}
       />
 
       <div
-        className="absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col rounded-t-[28px] border-t border-theme shadow-2xl"
-        style={{ background: 'var(--card)', animation: 'sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1)' }}
+        className="absolute inset-x-0 bottom-0 flex max-h-[86vh] flex-col rounded-t-[28px] border-t border-theme shadow-2xl"
+        style={{ background: 'var(--card)', animation: 'shop-sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1)' }}
       >
         <div className="mx-auto mt-2.5 h-1.5 w-12 rounded-full" style={TRACK_BG} />
 
-        <div className="flex items-center justify-between gap-3 px-5 py-3">
-          <div className="flex items-center gap-2 font-black">
-            <SlidersHorizontal size={16} style={{ color: 'var(--primary-color)' }} />
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+          <div className="flex items-center gap-2 text-sm font-black">
+            <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />
             فیلترها
           </div>
           <div className="flex items-center gap-1">
@@ -685,7 +871,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
                 type="button"
                 onClick={onReset}
                 className="rounded-lg px-2.5 py-1.5 text-xs font-bold"
-                style={{ color: 'var(--primary-color)' }}
+                style={{ color: 'var(--accent-text)' }}
               >
                 پاک کردن
               </button>
@@ -695,7 +881,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
               type="button"
               onClick={onClose}
               aria-label="بستن"
-              className="grid h-9 w-9 place-items-center rounded-xl"
+              className="grid h-9 w-9 place-items-center rounded-xl transition hover:opacity-80"
             >
               <X size={18} />
             </button>
@@ -704,8 +890,8 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">{children}</div>
 
-        <div className="border-t border-theme p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <button type="button" onClick={onClose} className="btn-yellow w-full">
+        <div className="border-t border-theme p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <button type="button" onClick={onClose} className="btn-yellow w-full !py-2.5">
             مشاهده {toFa(total)} کالا
           </button>
         </div>
@@ -719,7 +905,7 @@ function Pagination({ page, totalPages, onChange }) {
   const items = getPageItems(page, totalPages);
 
   return (
-    <nav aria-label="صفحه‌بندی" className="mt-8 flex flex-wrap items-center justify-center gap-2">
+    <nav aria-label="صفحه‌بندی" className="mt-8 flex flex-wrap items-center justify-center gap-1.5">
       <button
         type="button"
         onClick={() => onChange(page - 1)}
@@ -737,7 +923,7 @@ function Pagination({ page, totalPages, onChange }) {
             type="button"
             onClick={() => onChange(item)}
             aria-current={item === page ? 'page' : undefined}
-            className="grid h-9 min-w-9 place-items-center rounded-xl px-2.5 text-xs font-bold transition hover:opacity-80"
+            className="grid h-9 min-w-9 place-items-center rounded-xl px-2 text-xs font-bold transition hover:opacity-80"
             style={item === page ? ACCENT : undefined}
           >
             {toFa(item)}
@@ -763,11 +949,60 @@ function Pagination({ page, totalPages, onChange }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* شبکه‌ی محصولات (با اسکلتون و حالت خالی)                              */
+/* ------------------------------------------------------------------ */
+
+function ProductsGrid({ products, loading, onClear }) {
+  const showSkeletons = loading && products.length === 0;
+
+  if (showSkeletons) {
+    return (
+      <div className={GRID_CLASS} aria-busy="true" aria-label="در حال بارگذاری محصولات">
+        {Array.from({ length: 12 }, (_, index) => (
+          <ProductSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!products.length) {
+    return (
+      <div className="card rounded-3xl p-10 text-center">
+        <PackageSearch size={34} className="mx-auto mb-3 muted" />
+        <div className="font-black">محصولی با این فیلترها پیدا نشد</div>
+        <p className="mt-1 text-xs muted">فیلترها را کمتر کن یا عبارت دیگری جستجو کن.</p>
+        {onClear && (
+          <button type="button" onClick={onClear} className="btn-ghost mt-4 !py-2 text-xs">
+            پاک کردن فیلترها
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${GRID_CLASS} transition-opacity duration-150 ${
+        loading ? 'pointer-events-none opacity-40' : ''
+      }`}
+      aria-busy={loading}
+    >
+      {products.map((product) => (
+        <ProductComponent key={product._id || product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* صفحه‌ی محصولات                                                      */
 /* ------------------------------------------------------------------ */
 
 function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  /* سایدبار فیلتر بدون اسکرول داخلی (توضیح در useFitsViewport) */
+  const asideRef = useRef(null);
+  const asideFits = useFitsViewport(asideRef, 112);
   const search = searchParams.toString();
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const sort = searchParams.get('sort') || '';
@@ -819,6 +1054,15 @@ function ShopPage() {
     params.set('page', String(page));
     params.set('limit', String(PAGE_SIZE));
 
+    /* سال تولید در فیلتر شمسی است، ولی بک‌اند سال میلادی را مقایسه می‌کند */
+    ['min_production', 'max_production'].forEach((key) => {
+      const value = params.get(key);
+      if (!value) return;
+      const gregorian = productionYearForApi(value);
+      if (gregorian) params.set(key, gregorian);
+      else params.delete(key);
+    });
+
     setLoading(true);
     setError('');
 
@@ -827,9 +1071,14 @@ function ShopPage() {
       .then((response) => {
         if (response.data?.success === false) throw new Error(response.data.message);
         const body = getBody(response);
+        const count = Number(body?.total ?? body?.count ?? 0) || 0;
+        const pages =
+          Number(body?.totalPages) ||
+          (count ? Math.ceil(count / PAGE_SIZE) : 1);
+
         setProducts(getList(response));
-        setTotal(Number(body?.total) || 0);
-        setTotalPages(Math.max(1, Number(body?.totalPages) || 1));
+        setTotal(count);
+        setTotalPages(Math.max(1, pages));
       })
       .catch(() => {
         if (!controller.signal.aborted) {
@@ -871,18 +1120,21 @@ function ShopPage() {
     brands,
     expanded: expandedCatIds,
     onToggleCat: toggleCat,
+    sort,
+    onSort: (value) => updateParams({ sort: value }),
   };
 
-  const sortOptions = SORTS.map((s) => ({ value: s.value, label: s.label }));
-
   return (
-    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6">
+    <div
+      className="mx-auto max-w-7xl space-y-4 px-3 py-5 sm:space-y-5 sm:px-4 sm:py-6"
+      style={{ color: 'var(--text)' }}
+    >
       {/* هدر */}
-      <header className="card relative overflow-hidden rounded-3xl p-5 sm:p-6">
+      <header className="card relative overflow-hidden rounded-3xl p-4 sm:p-5 md:p-6">
         <div
           aria-hidden
           className="pointer-events-none absolute -end-20 -top-20 h-56 w-56 rounded-full blur-3xl"
-          style={{ background: 'color-mix(in srgb, var(--primary-color) 14%, transparent)' }}
+          style={{ background: 'color-mix(in srgb, var(--primary-color) 12%, transparent)' }}
         />
         <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
@@ -897,31 +1149,22 @@ function ShopPage() {
               {activeCategory && (
                 <>
                   <ChevronLeft size={12} />
-                  <span className="truncate">{activeCategory.name}</span>
+                  <span className="max-w-[40vw] truncate">{activeCategory.name}</span>
                 </>
               )}
             </nav>
-            <h1 className="mt-2 text-xl font-black sm:text-2xl">{title}</h1>
+            <h1 className="mt-2 truncate text-lg font-black sm:text-xl md:text-2xl">{title}</h1>
             <p className="mt-1 text-xs muted" aria-live="polite">
               {loading ? 'در حال دریافت کالاها…' : `${toFa(total)} کالا یافت شد`}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="w-44">
-              <SelectField
-                value={sort}
-                onChange={(v) => updateParams({ sort: v })}
-                options={sortOptions}
-                label="مرتب‌سازی محصولات"
-                icon={ArrowUpDown}
-              />
-            </div>
-
+          {/* مرتب‌سازی داخل پنل فیلترهاست؛ اینجا فقط دکمه‌ی فیلتر برای موبایل می‌ماند */}
+          <div className="flex w-full items-center gap-2 md:w-auto">
             <button
               type="button"
               onClick={() => setFiltersOpen(true)}
-              className="btn-ghost inline-flex items-center gap-2 !py-2 text-xs lg:hidden"
+              className="btn-ghost inline-flex w-full shrink-0 items-center justify-center gap-2 !py-2 text-xs md:w-auto lg:hidden"
             >
               <SlidersHorizontal size={15} />
               فیلترها
@@ -937,39 +1180,42 @@ function ShopPage() {
 
       {/* چیپ‌های فعال */}
       {chips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {chips.map((chip) => (
             <button
               key={chip.key}
               type="button"
               onClick={() => updateParams(chip.patch)}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition hover:opacity-80"
+              className="inline-flex max-w-full items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold transition hover:opacity-80"
               style={ACCENT_SOFT}
             >
-              {chip.label}
-              <X size={12} />
+              <span className="truncate">{chip.label}</span>
+              <X size={12} className="shrink-0" />
             </button>
           ))}
           <button
             type="button"
             onClick={resetFilters}
-            className="text-xs font-bold underline-offset-4 hover:underline"
-            style={{ color: 'var(--primary-color)' }}
+            className="text-[11px] font-bold underline-offset-4 hover:underline"
+            style={{ color: 'var(--accent-text)' }}
           >
             پاک کردن همه
           </button>
         </div>
       )}
 
-      <div className="grid items-start gap-5 lg:grid-cols-[280px_1fr]">
-        {/* سایدبار دسکتاپ: بدون اسکرول داخلی تا با باز بودن همه بخش‌ها تو در تو نشود */}
-        <aside className="card sticky top-28 hidden rounded-3xl p-4 lg:block">
-          <div className="mb-3 flex items-center justify-between px-1">
-            <div className="flex items-center gap-2 text-sm font-black">
-              <SlidersHorizontal size={16} style={{ color: 'var(--primary-color)' }} />
+      <div className="grid items-start gap-4 lg:grid-cols-[272px_minmax(0,1fr)] xl:gap-5 2xl:grid-cols-[288px_minmax(0,1fr)]">
+        {/* سایدبار دسکتاپ — بدون اسکرول داخلی؛ اگر بلندتر از صفحه شد، چسبان نمی‌ماند */}
+        <aside
+          ref={asideRef}
+          className={`card hidden rounded-3xl p-3 lg:block ${asideFits ? 'sticky top-24' : ''}`}
+        >
+          <div className="mb-2.5 flex items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2 text-[13px] font-black">
+              <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />
               فیلترها
               {chips.length > 0 && (
-                <span className="rounded-full  px-2 py-0.5 text-[10px] font-black" style={ACCENT}>
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-black" style={ACCENT}>
                   {toFa(chips.length)}
                 </span>
               )}
@@ -978,14 +1224,14 @@ function ShopPage() {
               <button
                 type="button"
                 onClick={resetFilters}
-                className="inline-flex items-center gap-1 text-xs muted transition hover:opacity-70"
+                className="inline-flex shrink-0 items-center gap-1 text-[11px] muted transition hover:opacity-70"
               >
                 <RotateCcw size={12} />
                 پاک کردن
               </button>
             )}
           </div>
-          <FiltersPanel {...panelProps} />
+          <FiltersPanel {...panelProps} scope="desktop" />
         </aside>
 
         <div className="min-w-0">
@@ -997,12 +1243,7 @@ function ShopPage() {
               </button>
             </div>
           ) : (
-            <ProductGridComponent
-              products={products}
-              loading={loading}
-              columns={3}
-              emptyTitle="محصولی با این فیلترها پیدا نشد"
-            />
+            <ProductsGrid products={products} loading={loading} onClear={resetFilters} />
           )}
 
           <Pagination page={page} totalPages={totalPages} onChange={goToPage} />
@@ -1016,7 +1257,7 @@ function ShopPage() {
         activeCount={chips.length}
         onReset={resetFilters}
       >
-        <FiltersPanel {...panelProps} />
+        <FiltersPanel {...panelProps} scope="mobile" />
       </FiltersSheet>
     </div>
   );

@@ -2,15 +2,16 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Plus, Search } from 'lucide-react';
+import { Package, Plus, Search } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import DashboardProductComponent from '../../components/panel/ProductComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { getId } from '../../utils/helpers/response';
 import { flattenCategories } from '../../utils/helpers/categories';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 function ProductsPage() {
   const navigate = useNavigate();
@@ -85,6 +86,13 @@ function ProductsPage() {
 
   return (
     <div className="space-y-4">
+      <PanelPageHeader
+        icon={Package}
+        title="محصولات من"
+        subtitle="ثبت، ویرایش و مدیریت کالاهای فروشگاه"
+        onRefresh={() => load()}
+      />
+
       <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
         <div className="relative w-full sm:w-72">
           <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />

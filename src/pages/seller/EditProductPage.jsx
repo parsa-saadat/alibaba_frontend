@@ -6,7 +6,7 @@ import ProductEditorComponent from '../../components/panel/ProductEditorComponen
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { flattenCategories } from '../../utils/helpers/categories';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 function EditProductPage() {
   const { productId } = useParams();
@@ -34,6 +34,29 @@ function EditProductPage() {
     return (
       <div className="py-16">
         <Loading label="در حال دریافت مشخصات محصول…" />
+      </div>
+    );
+  }
+
+  /* اگر محصول پیدا نشد یا دریافت اطلاعات ناموفق بود، به‌جای فرم خالی پیام روشن بدهیم */
+  if (!product) {
+    return (
+      <div className="mx-auto max-w-lg py-16">
+        <div className="card rounded-3xl p-8 text-center">
+          <b className="block text-sm font-black">این محصول پیدا نشد</b>
+          <p className="mt-2 text-xs leading-6 muted">
+            ممکن است حذف شده باشد یا ارتباط با سرور برقرار نشده باشد. یک‌بار دیگر تلاش کنید یا به
+            فهرست محصولات برگردید.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <button type="button" onClick={() => window.location.reload()} className="btn-yellow !py-2 text-xs">
+              تلاش دوباره
+            </button>
+            <a href="/seller/products" onClick={(e) => { e.preventDefault(); navigate('/seller/products'); }} className="btn-ghost !py-2 text-xs">
+              فهرست محصولات
+            </a>
+          </div>
+        </div>
       </div>
     );
   }

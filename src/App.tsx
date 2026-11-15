@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -7,6 +7,8 @@ import HomePage from './pages/main/HomePage';
 import ShopPage from './pages/main/ShopPage';
 import AboutPage from './pages/main/AboutPage';
 import ContactPage from './pages/main/ContactPage';
+import TermsPage from './pages/main/TermsPage';
+import PrivacyPage from './pages/main/PrivacyPage';
 import CartPage from './pages/main/CartPage';
 import FavoritesPage from './pages/main/FavoritesPage';
 import ComparePage from './pages/main/ComparePage';
@@ -57,6 +59,7 @@ import AuthLayout from './components/layout/AuthAdminLayout';
 import { ShopProvider } from './contexts/ShopContext';
 import NotFoundPage from './pages/NotFoundPage';
 import ScrollToTopComponent, { RouteProgress } from './components/common/ScroolToTopComponent';
+import ErrorBoundaryComponent from './components/common/ErrorBoundaryComponent';
 
 const App = () => {
   return (
@@ -67,6 +70,9 @@ const App = () => {
 };
 
 const MainApp = () => {
+  /* مسیر جاری، برای ری‌ست کردن مرز خطا بعد از هر جابه‌جایی */
+  const location = useLocation();
+
   return (
     <>
       <ToastContainer
@@ -84,7 +90,8 @@ const MainApp = () => {
       />
       <ScrollToTopComponent />
       <RouteProgress />
-      <Routes>
+      <ErrorBoundaryComponent resetKey={location.pathname}>
+        <Routes>
         {/* Main Layout Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -92,6 +99,9 @@ const MainApp = () => {
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/terms/:audience" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/compare" element={<ComparePage />} />
@@ -159,7 +169,8 @@ const MainApp = () => {
         </Route>
 
         <Route path="*" element={<NotFoundPage />} /> {/* 404 Page */}
-      </Routes>
+        </Routes>
+      </ErrorBoundaryComponent>
     </>
   );
 };

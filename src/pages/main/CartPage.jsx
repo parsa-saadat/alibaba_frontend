@@ -2,7 +2,17 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { ShoppingCart } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  CreditCard,
+  LoaderCircle,
+  PackageCheck,
+  ShoppingCart,
+  Sparkles,
+  Truck,
+} from 'lucide-react';
+
 import { useShop } from '../../contexts/ShopContext';
 import CartLineItemComponent from '../../components/cart/CartLineItemComponent';
 import CartSummaryComponent, {
@@ -15,24 +25,58 @@ import {
   getCartRows,
   productIdOfCartRow,
 } from '../../utils/helpers/cart';
-import { finalPrice, toFa } from '../../utils/helpers/format';
+import { finalPrice, formatPrice, hasDiscount, toFa } from '../../utils/helpers/format';
 
 const SYNC_DELAY_MS = 900;
 
-/*
- * صفحه سبد خرید.
- * ردیف‌های سبد از Context می‌آیند (که خودش با بک‌اند هم‌گام است) و
- * جزئیات محصولات فقط برای نمایش از بک‌اند خوانده می‌شود.
- */
+/* مراحل خرید — فعلاً فقط مرحله‌ی اول در این صفحه است */
+const STEPS = [
+  { label: 'سبد خرید', icon: ShoppingCart, active: true },
+  { label: 'اطلاعات ارسال', icon: Truck },
+  { label: 'پرداخت', icon: CreditCard },
+];
+
+function StepsStrip() {
+  return (
+    <ol className="card mb-4 flex items-center justify-between gap-1 rounded-2xl px-2 py-2.5 sm:px-4">
+      {STEPS.map((step, index) => {
+        const Icon = step.icon;
+        return (
+          <li key={step.label} className="flex flex-1 items-center gap-2">
+            <span
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-black"
+              style={{
+                background: step.active ? 'var(--primary-color)' : 'var(--card2)',
+                color: step.active ? 'var(--navy)' : 'var(--muted)',
+                border: step.active ? 'none' : '1px solid var(--border)',
+              }}
+            >
+              <Icon size={13} />
+            </span>
+            <span
+              className="truncate text-[11px] font-bold"
+              style={{ color: step.active ? 'var(--text)' : 'var(--muted)' }}
+            >
+              {step.label}
+            </span>
+            {index < STEPS.length - 1 && (
+              <span
+                aria-hidden="true"
+                className="mx-1 hidden h-px flex-1 sm:block"
+                style={{ background: 'var(--border)' }}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/* صفحه‌ی سبد خرید: ردیف‌ها از Context (هم‌گام با بک‌اند) و جزئیات از API محصول */
 function CartPage() {
   const navigate = useNavigate();
-  const {
-    user,
-    cart,
-    cartReady,
-    setCartItemQuantity,
-    removeCartItem,
-  } = useShop();
+  const { user, cart, cartReady, setCartItemQuantity, removeCartItem } = useShop();
 
   const [products, setProducts] = useState({}); // productId → محصول
   const [qtys, setQtys] = useState({}); // تغییرات در انتظار ثبت
@@ -64,7 +108,7 @@ function CartPage() {
     Promise.all(
       missing.map((id) =>
         axios
-          .get(`${API}/product/${id}`)
+          .get(`${API}/product/${id}`, { timeout: 15000 })
           .then((res) => [id, res.data?.body ?? null])
           .catch(() => [id, null]),
       ),
@@ -152,7 +196,10 @@ function CartPage() {
 
   useEffect(() => {
     if (syncState !== 'saved') return undefined;
-    const timer = setTimeout(() => setSyncState((state) => (state === 'saved' ? 'idle' : state)), 1600);
+    const timer = setTimeout(
+      () => setSyncState((state) => (state === 'saved' ? 'idle' : state)),
+      1600,
+    );
     return () => clearTimeout(timer);
   }, [syncState]);
 
@@ -212,67 +259,168 @@ function CartPage() {
   /* ---------- حالت‌ها ---------- */
   if (!user) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center card rounded-3xl p-12 mt-6">
-        <ShoppingCart size={40} className="mx-auto mb-3 muted" />
-        <p className="muted mb-4">برای مشاهده سبد خرید وارد شوید</p>
-        <Link to="/auth/pre" className="btn-yellow">
-          ورود
-        </Link>
+      <div className="mx-auto max-w-lg px-3 py-16 sm:px-4">
+        <div className="card rounded-3xl p-10 text-center">
+          <span
+            className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+            style={{ background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)' }}
+          >
+            <ShoppingCart size={28} style={{ color: 'var(--accent-text)' }} />
+          </span>
+          <h1 className="mt-4 text-base font-black">برای دیدن سبد خرید وارد شوید</h1>
+          <p className="mt-2 text-xs leading-6 muted">
+            سبد خرید به حساب شما گره خورده است تا از هر دستگاهی در دسترس باشد.
+          </p>
+          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
+            ورود به حساب
+            <ArrowLeft size={15} />
+          </Link>
+        </div>
       </div>
     );
   }
 
   if (!cartReady || (detailsLoading && items.length === 0)) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20">
+      <div className="mx-auto max-w-5xl px-3 py-20">
         <Loading label="در حال بارگذاری سبد خرید…" />
       </div>
     );
   }
+
+  const discountTotal = items.reduce((sum, item) => {
+    if (!hasDiscount(item.product)) return sum;
+    const original = Number(item.product.price?.amount) || 0;
+    return sum + Math.max(0, original - finalPrice(item.product)) * item.quantity;
+  }, 0);
 
   const subtotal = items.reduce(
     (sum, item) => sum + finalPrice(item.product) * item.quantity,
     0,
   );
   const visibleItems = items.filter((item) => !removing[item.productId]);
+  const pieceCount = visibleItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <h1 className="font-black text-2xl">سبد خرید ({toFa(visibleItems.length)})</h1>
-        <CartSyncBadge state={syncState} />
-      </div>
+    <div className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-6">
+      <StepsStrip />
 
       {visibleItems.length === 0 ? (
-        <div className="card rounded-3xl p-12 text-center">
-          <ShoppingCart size={40} className="mx-auto mb-3 muted" />
-          <div className="font-black">سبد خرید خالی است</div>
-          <Link to="/products" className="btn-yellow inline-block mt-4">
-            شروع خرید
-          </Link>
+        <div className="card rounded-3xl p-8 text-center sm:p-12">
+          <span
+            className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+            style={{ background: 'color-mix(in srgb, var(--primary-color) 14%, transparent)' }}
+          >
+            <ShoppingCart size={28} style={{ color: 'var(--accent-text)' }} />
+          </span>
+          <h1 className="mt-4 text-base font-black">سبد خرید شما خالی است</h1>
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
+            کالاهای مورد علاقه‌تان را به سبد اضافه کنید تا همین‌جا جمع‌بندی شوند.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <Link to="/products" className="btn-yellow inline-flex items-center gap-2">
+              <Sparkles size={16} />
+              شروع خرید
+            </Link>
+            <Link to="/favorites" className="btn-ghost inline-flex items-center gap-2">
+              علاقه‌مندی‌ها
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="grid lg:grid-cols-[1fr_320px] gap-5 items-start">
-          <div className="space-y-3">
-            {visibleItems.map(({ productId, product, quantity }) => (
-              <CartLineItemComponent
-                key={productId}
-                product={product}
-                quantity={quantity}
-                busy={syncState === 'saving' && !!pendingRef.current[productId]}
-                onChangeQuantity={(next) => changeQuantity(productId, next)}
-                onRemove={() => remove(productId)}
-              />
-            ))}
+        <>
+          {/* ───── هدر ───── */}
+          <header className="card mb-3 flex flex-col gap-2 !rounded-2xl p-3.5 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+            <div className="flex items-center gap-2.5">
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+                style={{ background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)' }}
+              >
+                <ShoppingCart size={17} style={{ color: 'var(--accent-text)' }} />
+              </span>
+              <div className="min-w-0">
+                <h1 className="flex items-center gap-2 text-base font-black sm:text-lg">
+                  سبد خرید
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[11px] font-black"
+                    style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
+                  >
+                    {toFa(visibleItems.length)} کالا · {toFa(pieceCount)} عدد
+                  </span>
+                </h1>
+                <p className="mt-0.5 text-[11px] muted">
+                  تعداد را تغییر دهید؛ تغییرات خودکار در حساب‌تان ذخیره می‌شود.
+                </p>
+              </div>
+            </div>
+
+            <CartSyncBadge state={syncState} />
+          </header>
+
+          <div className="grid items-start gap-4 lg:grid-cols-[1fr_320px]">
+            <div className="space-y-2.5">
+              {visibleItems.map(({ productId, product, quantity }) => (
+                <CartLineItemComponent
+                  key={productId}
+                  product={product}
+                  quantity={quantity}
+                  busy={syncState === 'saving' && !!pendingRef.current[productId]}
+                  onChangeQuantity={(next) => changeQuantity(productId, next)}
+                  onRemove={() => remove(productId)}
+                />
+              ))}
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-theme px-3 py-2.5 text-[11px] muted">
+                <span className="inline-flex items-center gap-1.5">
+                  <Check size={13} style={{ color: '#17994f' }} />
+                  قیمت‌ها نهایی و شامل تخفیف هستند
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <PackageCheck size={13} style={{ color: '#17994f' }} />
+                  موجودی در لحظه‌ی ثبت سفارش کنترل می‌شود
+                </span>
+              </div>
+            </div>
+
+            <CartSummaryComponent
+              subtotal={subtotal}
+              itemCount={visibleItems.length}
+              discount={discountTotal}
+              busy={syncState === 'saving'}
+              onCheckout={goToCheckout}
+            />
           </div>
 
-          <CartSummaryComponent
-            subtotal={subtotal}
-            itemCount={visibleItems.length}
-            busy={syncState === 'saving'}
-            onCheckout={goToCheckout}
-          />
-        </div>
+          {/* نوار پایین موبایل */}
+          <div
+            className="fixed inset-x-0 bottom-0 z-40 border-t px-3 pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2.5 lg:hidden"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+              <div className="leading-tight">
+                <div className="text-[10px] muted">مبلغ قابل پرداخت</div>
+                <div className="text-base font-black" style={{ color: 'var(--accent-text)' }}>
+                  {formatPrice(subtotal)}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={goToCheckout}
+                disabled={syncState === 'saving'}
+                className="btn-yellow inline-flex h-11 items-center gap-2 !py-0 disabled:opacity-50"
+              >
+                {syncState === 'saving' ? (
+                  <LoaderCircle size={16} className="animate-spin" />
+                ) : (
+                  <ArrowLeft size={16} />
+                )}
+                ادامه‌ی خرید
+              </button>
+            </div>
+          </div>
+          {/* فاصله برای نوار ثابت موبایل */}
+          <div className="h-16 lg:hidden" aria-hidden="true" />
+        </>
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import OfferProductsComponent from '../../components/home/OfferProductsComponent
 import NewProductsComponent from '../../components/home/NewProductsComponent';
 import FeaturedStoresComponent from '../../components/home/FeaturedStoresComponent';
 import InfiniteProductsComponent from '../../components/home/InfiniteProductsComponent';
+import RecentlyViewedComponent from '../../components/product/RecentlyViewedComponent';
 import OurPolicyComponent from '../../components/home/OurPolicyComponnet';
 import FloatingToolbarComponent from '../../components/layout/FloatingToolbarComponent';
 import { API } from '../../config/api';
@@ -64,6 +65,8 @@ const HomePage = () => {
       <div className="max-w-[1440px] mx-auto px-4 mt-5 space-y-4">
         <OfferProductsComponent products={products} loading={loading} />
         <NewProductsComponent products={products} loading={loading} />
+        {/* اخیراً مشاهده‌شده‌ها — برای کاربری که قبلاً محصولی باز کرده است */}
+        <RecentlyViewedComponent limit={8} />
       </div>
 
       <FeaturedStoresComponent stores={stores} />

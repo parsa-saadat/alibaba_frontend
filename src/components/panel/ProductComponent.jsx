@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
+import TrustBadge from '../product/TrustBadge';
+import { TRUST, trustState, storeIdOfProduct, sellerIdOfProduct } from '../../services/sellerApi';
 import {
   formatPrice,
   finalPrice,
@@ -21,6 +23,13 @@ function DashboardProductComponent({
 }) {
   const disc = hasDiscount(product);
 
+  /*
+   * نشان «مورد اعتماد» در پنل (فروشنده/مدیر) — همان قاعده‌ی کارت‌های فروشگاه:
+   * اگر store یا seller همین‌جا در دست باشند استفاده می‌شوند، وگرنه از بک‌اند
+   * خوانده می‌شود.
+   */
+  const knownTrust = trustState(store, seller);
+
   return (
     <div className="card rounded-2xl p-4 flex flex-col gap-3">
       <div className="flex gap-3 items-start">
@@ -28,6 +37,7 @@ function DashboardProductComponent({
           <StorageImageComponent
             file={productImages(product)[0]}
             alt={product.name}
+            compact
             className="w-full h-full object-cover"
             onZoom={onZoom}
           />
@@ -52,6 +62,13 @@ function DashboardProductComponent({
             <b className="truncate block mt-0.5">
               {store?.name || product.store_name || '—'}
             </b>
+            <span className="block mt-1">
+              <TrustBadge
+                trust={knownTrust === TRUST.UNKNOWN ? null : knownTrust}
+                storeId={storeIdOfProduct(product)}
+                sellerId={sellerIdOfProduct(product)}
+              />
+            </span>
           </div>
         </div>
       )}

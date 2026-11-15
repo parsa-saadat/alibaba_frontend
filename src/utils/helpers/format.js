@@ -1,6 +1,16 @@
 import { getId, isDirectImage } from './response.js';
+import {
+  JALALI_MONTHS,
+  faDigits,
+  jalaliOfDate,
+  jalaliYearOfGregorian,
+  toGregorian,
+} from './jalali.js';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+
+/* برای استفاده‌ی مستقیم در فرم‌ها */
+export { faDigits };
 const UNITS = { CM: 'سانتی‌متر', M: 'متر', G: 'گرم', KG: 'کیلوگرم' };
 
 export const toFa = (value) => String(value ?? '').replace(/\d/g, (digit) => FA_DIGITS[+digit]);
@@ -70,16 +80,68 @@ export const productImages = (product) => {
 
 export const productImage = (product) => productImages(product).find(isDirectImage) || '';
 
+/*
+ * تاریخ‌های سایت همه شمسی و با یک قالب یکسان نمایش داده می‌شوند:
+ *   formatDate       → ۱۴۰۵/۰۸/۲۲
+ *   formatDateTime   → ۱۴۰۵/۰۸/۲۲ — ۱۴:۳۰
+ *   formatDateLong   → شنبه ۲۲ آبان ۱۴۰۵
+ * منبع تبدیل، utils/helpers/jalali.js است (همان که تقویم فرم محصول از آن استفاده می‌کند).
+ */
+const WEEKDAY_FA = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+
+const validDate = (date) => {
+  const value = date instanceof Date ? date : new Date(date);
+  return Number.isNaN(value.getTime()) ? null : value;
+};
+
 export const formatDate = (date) => {
-  const value = new Date(date);
-  return date && !Number.isNaN(value.getTime())
-    ? toFa(value.toLocaleDateString('fa-IR'))
-    : 'ثبت نشده';
+  if (!date) return 'ثبت نشده';
+  const value = validDate(date);
+  if (!value) return 'ثبت نشده';
+  const j = jalaliOfDate(value);
+  return `${faDigits(j.jy)}/${faDigits(String(j.jm).padStart(2, '0'))}/${faDigits(String(j.jd).padStart(2, '0'))}`;
 };
 
 export const formatDateTime = (date) => {
-  const value = new Date(date);
-  return date && !Number.isNaN(value.getTime()) ? toFa(value.toLocaleString('fa-IR')) : 'ثبت نشده';
+  if (!date) return 'ثبت نشده';
+  const value = validDate(date);
+  if (!value) return 'ثبت نشده';
+  const hour = faDigits(String(value.getHours()).padStart(2, '0'));
+  const minute = faDigits(String(value.getMinutes()).padStart(2, '0'));
+  return `${formatDate(value)} — ${hour}:${minute}`;
+};
+
+export const formatDateLong = (date) => {
+  if (!date) return 'ثبت نشده';
+  const value = validDate(date);
+  if (!value) return 'ثبت نشده';
+  const j = jalaliOfDate(value);
+  return `${WEEKDAY_FA[value.getDay()]} ${faDigits(j.jd)} ${JALALI_MONTHS[j.jm - 1]} ${faDigits(j.jy)}`;
+};
+
+/* فقط روز یا فقط سال شمسی (برای نمودارها و فیلترها) */
+export const formatDayOfMonth = (date) => {
+  const value = validDate(date);
+  return value ? faDigits(jalaliOfDate(value).jd) : '';
+};
+
+export const formatJalaliYear = (date = new Date()) => {
+  const value = validDate(date) || new Date();
+  return faDigits(jalaliOfDate(value).jy);
+};
+
+/* سال تولید محصول در بک‌اند میلادی ذخیره می‌شود؛ نمایش شمسی است */
+export const formatProductionYear = (year) => {
+  const value = Number(year);
+  if (!Number.isFinite(value) || value <= 0) return 'ثبت نشده';
+  return faDigits(jalaliYearOfGregorian(value));
+};
+
+/* سال شمسی → سال میلادی (برای پارامترهای فیلتر بک‌اند) */
+export const productionYearForApi = (jalaliYear) => {
+  const value = Number(String(jalaliYear).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+  if (!Number.isFinite(value) || value <= 0) return '';
+  return String(toGregorian(value, 1, 1).gy);
 };
 
 export const STATUS_FA = {
@@ -100,7 +162,7 @@ export const STATUS_FA = {
   INACTIVE: 'غیرفعال',
   ENABLE: 'فعال',
   DISABLE: 'غیرفعال',
-  ROOT_DISABLE: 'غیرفعال ریشه‌ای',
+  ROOT_DISABLE: 'مسدود توسط مدیریت',
   IN_STOCK: 'موجود',
   OUT_OF_STOCK: 'ناموجود',
   PUBLIC: 'عمومی',

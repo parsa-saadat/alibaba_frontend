@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import BrandLogoComponent from "../common/BrandLogoComponent";
 import {
   ShoppingCart,
   Heart,
@@ -23,6 +24,7 @@ import {
 } from "../../utils/helpers/categories";
 import MegaMenuComponent from "./MegaMenuComponent";
 import SearchBoxComponent from "./SearchBoxComponent";
+import useScrollFade from "../../hooks/useScrollFade";
 
 function NavbarComponent() {
   const navigate = useNavigate();
@@ -41,6 +43,33 @@ function NavbarComponent() {
   const [openBranchIds, setOpenBranchIds] = useState({});
 
   const accountMenuRef = useRef(null);
+  const headerRef = useRef(null);
+  /* محو‌شدگی دو سرِ نوار دسته‌بندی‌ها فقط وقتی سرریز دارد */
+  const [navRowRef, navRowOverflows] = useScrollFade();
+  /*
+   * ارتفاع واقعی هدر در متغیر `--header-h` ذخیره می‌شود؛ اجزای چسبان
+   * (سرستون جدول مقایسه، نوار ابزار ویرایشگر، نوار اقدام محصول) از آن استفاده می‌کنند
+   * تا زیر هدر پنهان نشوند.
+   */
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const apply = () => {
+      const height = Math.round(el.getBoundingClientRect().height);
+      if (height > 0) {
+        document.documentElement.style.setProperty("--header-h", `${height}px`);
+      }
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(el);
+    window.addEventListener("orientationchange", apply);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("orientationchange", apply);
+    };
+  }, []);
+
 
   useEffect(() => {
     const controller = new AbortController();
@@ -185,11 +214,15 @@ function NavbarComponent() {
   };
 
   return (
-    <header className="site-header sticky top-0 z-50">
+    <header ref={headerRef} className="site-header sticky top-0 z-50">
       {/* نوار اصلی هدر */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex flex-wrap md:flex-nowrap items-center justify-between gap-x-2 gap-y-2.5 md:gap-3">
-        {/* لوگو و دکمه منوی موبایل */}
-        <div className="order-1 flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0">
+      {/*
+        موبایل: سه‌ستونه — دکمه منو (شروع) / لوگو (وسط) / اکشن‌ها (انتها) و جستجو در ردیف دوم.
+        دسکتاپ: ردیف فلکس با لوگوی کامل در ابتدا.
+      */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-2.5 md:flex md:flex-nowrap md:items-center md:justify-between md:gap-3">
+        {/* دکمه منوی موبایل + لوگوی کامل در دسکتاپ */}
+        <div className="order-1 col-start-1 flex items-center gap-2 min-w-0 shrink-0 justify-self-start">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -202,33 +235,42 @@ function NavbarComponent() {
 
           <Link
             to="/"
-            className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0"
+            className="hidden sm:flex items-center shrink-0"
+            aria-label="ژئو کالا — صفحه اصلی"
           >
-            <span className="brand-logo w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl grid place-items-center font-black text-lg sm:text-xl shadow-md shrink-0">
-              ع
-            </span>
-            <div className="min-w-0">
-              <b className="text-base sm:text-lg tracking-tight block leading-5 whitespace-nowrap">
-                علی‌بازار
-              </b>
-              <span className="hidden sm:block text-[11px] muted whitespace-nowrap">
-                بازار داخلی ایران
-              </span>
-            </div>
+            <BrandLogoComponent variant="full" size="sm" tone="white" className="md:hidden" />
+            <BrandLogoComponent
+              variant="full"
+              size="md"
+              tone="white"
+              className="hidden md:block"
+            />
           </Link>
         </div>
 
+        {/*
+          گوشی (زیر ۶۴۰px): لوگو وسط هدر
+          تبلت (۶۴۰ تا ۷۶۷px): لوگو کنار دکمه‌ی منو در سمت راست (وسط نباشد تا زیر آیکون‌ها نیفتد)
+        */}
+        <Link
+          to="/"
+          className="order-2 sm:hidden flex items-center justify-center min-w-0 px-1"
+          aria-label="ژئو کالا — صفحه اصلی"
+        >
+          <BrandLogoComponent variant="full" size="sm" tone="white" />
+        </Link>
+
         {/* باکس جستجو — ردیف دوم تمام‌عرض در موبایل، وسط هدر در دسکتاپ */}
-        <div className="order-3 w-full md:order-2 md:w-auto md:flex-1 md:max-w-xl search-shell">
+        <div className="order-4 col-span-3 w-full md:order-2 md:col-span-1 md:w-auto md:flex-1 md:max-w-xl search-shell">
           <SearchBoxComponent />
         </div>
 
         {/* اکشن‌های هدر */}
-        <div className="order-2 md:order-3 flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="order-3 col-start-3 md:order-3 md:col-auto flex items-center gap-1.5 sm:gap-2 shrink-0 justify-self-end">
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden sm:inline-flex btn-ghost !p-2 sm:!p-2.5"
+            className="hidden md:inline-flex btn-ghost !p-2 sm:!p-2.5"
             title="تغییر تم"
             aria-label="تغییر تم روشن و تاریک"
           >
@@ -237,7 +279,7 @@ function NavbarComponent() {
 
           <Link
             to="/compare"
-            className="hidden sm:inline-flex btn-ghost !p-2 sm:!p-2.5 relative"
+            className="hidden md:inline-flex btn-ghost !p-2 sm:!p-2.5 relative"
             title="مقایسه"
             aria-label="مقایسه محصولات"
           >
@@ -280,12 +322,12 @@ function NavbarComponent() {
                 className="btn-yellow !py-2 !px-2.5 sm:!px-3 text-xs sm:text-sm inline-flex items-center gap-1.5"
               >
                 <User size={16} className="shrink-0" />
-                <span className="hidden sm:inline max-w-[90px] truncate">
+                <span className="hidden md:inline max-w-[90px] truncate">
                   {userDisplayName(user, "حساب")}
                 </span>
                 <ChevronDown
                   size={13}
-                  className={`hidden sm:inline transition-transform ${
+                  className={`hidden md:inline transition-transform ${
                     accountOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -380,7 +422,10 @@ function NavbarComponent() {
             />
 
             <nav
-              className="flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap"
+              ref={navRowRef}
+              className={`flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap ${
+                navRowOverflows ? "scroll-fade-x" : ""
+              }`}
               aria-label="لینک‌های اصلی"
             >
               <NavLink to="/" end className="header-nav-link shrink-0">
@@ -437,15 +482,7 @@ function NavbarComponent() {
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="brand-logo w-9 h-9 rounded-xl grid place-items-center font-black shrink-0">
-                  ع
-                </span>
-                <div className="min-w-0">
-                  <b className="text-sm block truncate">علی‌بازار</b>
-                  <span className="text-[10px] text-gray-300 block truncate">
-                    منوی دسترسی سریع
-                  </span>
-                </div>
+                <BrandLogoComponent variant="full" size="sm" tone="white" />
               </div>
               <button
                 type="button"

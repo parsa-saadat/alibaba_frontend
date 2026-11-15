@@ -3,33 +3,30 @@ import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertOctagon,
-  ArrowLeft,
-  BadgeCheck,
   CalendarDays,
   CheckCircle2,
-  Heart,
   Mail,
   MapPin,
   Package,
   Phone,
   Search,
   Share2,
-  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Store as StoreIcon,
-  TrendingUp,
   X,
 } from 'lucide-react';
 import ProductGridComponent from '../../components/product/ProductGridComponent';
+import { ActiveBadge, TrustBadge } from '../../components/store/StoreInfoComponent';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
-import { statusFa, toFa, formatDate, finalPrice, hasDiscount } from '../../utils/helpers/format';
-import { getBody, getList } from '../../utils/helpers/response';
-import { isTrustedSeller, userFullName } from '../../utils/helpers/user';
+import { toFa, formatDate, finalPrice, hasDiscount } from '../../utils/helpers/format';
+import { getBody, getList, getId } from '../../utils/helpers/response';
+import { fetchStore, fetchPublicUser, trustState, activeState, sellerIdOfStore, TRUST } from '../../services/sellerApi';
+import { sellerDisplayName } from '../../utils/helpers/user';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const SORTS = [
   { value: 'newest', label: 'جدیدترین' },
@@ -42,23 +39,6 @@ const SORTS = [
 /* ------------------------------------------------------------------ */
 /* کامپوننت‌های کمکی                                                   */
 /* ------------------------------------------------------------------ */
-
-function StatTile({ icon: Icon, value, label }) {
-  return (
-    <div className="card2 flex items-center gap-3 rounded-2xl p-3 min-w-0">
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-yellow"
-        style={{ background: 'rgba(255,214,10,0.12)' }}
-      >
-        <Icon size={17} />
-      </span>
-      <div className="min-w-0">
-        <div className="font-black text-base leading-tight">{value}</div>
-        <div className="truncate text-[11px] muted">{label}</div>
-      </div>
-    </div>
-  );
-}
 
 function ContactChip({ icon: Icon, label, value, href }) {
   const body = (
@@ -110,7 +90,6 @@ function StorePage() {
   const [onlyInStock, setOnlyInStock] = useState(false);
 
   const [zoomFile, setZoomFile] = useState(null);
-  const [following, setFollowing] = useState(false);
   const [toast, setToast] = useState('');
   const [scrolled, setScrolled] = useState(false);
 
@@ -121,7 +100,7 @@ function StorePage() {
     setError('');
 
     Promise.all([
-      axios.get(`${API}/store/${id}`, { signal: controller.signal, timeout: 15000 }),
+      fetchStore(id),
       axios.get(`${API}/product`, {
         params: { store_id: id, limit: 100, page: 1 },
         signal: controller.signal,
@@ -129,17 +108,28 @@ function StorePage() {
       }),
     ])
       .then(([storeRes, prodRes]) => {
-        const s = getBody(storeRes);
+        const s = getBody(storeRes) || storeRes;
         if (!s) throw new Error('فروشگاه پیدا نشد.');
         setStore(s);
-        setProducts(getList(prodRes));
+
+        /*
+         * فقط محصولات همین فروشگاه.
+         * پارامتر `store_id` را بعضی نسخه‌های بک‌اند در فیلتر محصولات نمی‌خوانند
+         * (روت `/product` فقط seller_id را فیلتر می‌کند) و نتیجه این بود که
+         * صفحه‌ی فروشگاه محصولات همه‌ی فروشگاه‌ها را نشان می‌داد. اینجا خودمان
+         * بر اساس `store_id` هر محصول فیلتر می‌کنیم؛ اگر پاسخ هیچ‌کدام از
+         * محصولات فیلد store_id نداشته باشد، فیلتر اعمال نمی‌شود تا صفحه خالی نشود.
+         */
+        const all = getList(prodRes);
+        const hasStoreField = all.some((item) => Boolean(getId(item.store_id)));
+        const own = all.filter((item) => String(getId(item.store_id)) === String(id));
+        setProducts(hasStoreField ? own : all);
 
         /* نام و نشان «مورد اعتماد» فروشنده — از روت عمومی /user/:id */
         const ownerId = s.user?._id || s.user;
         if (ownerId) {
-          axios
-            .get(`${API}/user/${ownerId}`, { timeout: 15000 })
-            .then((res) => setOwner(getBody(res)))
+          fetchPublicUser(ownerId)
+            .then((value) => setOwner(value))
             .catch(() => setOwner(null));
         } else {
           setOwner(null);
@@ -157,11 +147,6 @@ function StorePage() {
     return () => controller.abort();
   }, [id, retry]);
 
-  // وضعیت «دنبال کردن» (فعلاً در localStorage؛ بعداً به API وصل شود)
-  useEffect(() => {
-    setFollowing(localStorage.getItem(`follow-store-${id}`) === '1');
-  }, [id]);
-
   // نمایش نوار ثابت بالا بعد از اسکرول
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 320);
@@ -178,16 +163,11 @@ function StorePage() {
   }, [toast]);
 
   /* نام نمایشی و وضعیت اعتماد فروشنده (دارنده‌ی فروشگاه) */
-  const sellerName = useMemo(() => userFullName(owner) || owner?.username || '', [owner]);
-  const sellerTrusted = useMemo(() => isTrustedSeller(owner) || isTrustedSeller(store), [owner, store]);
-
-  const toggleFollow = () => {
-    const next = !following;
-    setFollowing(next);
-    localStorage.setItem(`follow-store-${id}`, next ? '1' : '0');
-    setToast(next ? 'فروشگاه به لیست دنبال‌شده‌ها اضافه شد' : 'دنبال کردن لغو شد');
-    // TODO: ارسال وضعیت به API
-  };
+  const sellerName = useMemo(() => sellerDisplayName(owner), [owner]);
+  /* همان قاعده‌ی سخت‌گیرانه‌ی services/sellerApi: تأییدشده فقط با seller_trust === true و تأیید ادمین */
+  const storeTrust = useMemo(() => trustState(store, owner), [owner, store]);
+  const sellerTrusted = storeTrust === TRUST.TRUSTED;
+  const sellerIdForCards = useMemo(() => sellerIdOfStore(store, owner), [owner, store]);
 
   const shareStore = async () => {
     const url = window.location.href;
@@ -206,20 +186,6 @@ function StorePage() {
   const scrollToProducts = () => {
     productsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-
-  // بیشترین تخفیف فروشگاه
-  const featured = useMemo(() => {
-    const discounted = products.filter(hasDiscount);
-    if (!discounted.length) return null;
-    return discounted.reduce((best, p) =>
-      (p.discount?.percentage ?? 0) > (best.discount?.percentage ?? 0) ? p : best,
-    );
-  }, [products]);
-
-  const totalSold = useMemo(
-    () => products.reduce((sum, p) => sum + (p.sold_count ?? 0), 0),
-    [products],
-  );
 
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -298,9 +264,9 @@ function StorePage() {
     );
   }
 
-  const isActive = store.status === 'ENABLE';
+  /* فعال/غیرفعال از وضعیت فروشنده (روت عمومی کاربر) و در نبود آن از وضعیت فروشگاه */
+  const isActive = activeState(store, owner) ?? false;
   const contact = store.contact_info || {};
-  const discountCount = products.filter(hasDiscount).length;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
@@ -314,21 +280,16 @@ function StorePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-navy">
-              <StorageImageComponent file={store.profile_image_id} alt={store.name} className="h-full w-full object-cover" />
+              <StorageImageComponent
+                file={store.profile_image_id}
+                alt={store.name}
+                compact
+                className="h-full w-full object-cover"
+              />
             </div>
             <span className="truncate text-sm font-black">{store.name}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleFollow}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
-                following ? 'bg-[var(--primary-color)] text-[#0a1736]' : 'card2 border border-theme'
-              }`}
-            >
-              <Heart size={13} fill={following ? 'currentColor' : 'none'} />
-              {following ? 'دنبال می‌کنید' : 'دنبال کردن'}
-            </button>
             <button type="button" onClick={scrollToProducts} className="btn-ghost hidden !py-1.5 text-xs sm:inline-flex">
               محصولات
             </button>
@@ -348,16 +309,16 @@ function StorePage() {
           />
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to top, var(--card) 0%, transparent 70%)' }}
+            /* پایان محو با آلفای صفر از همان رنگ کارت (نه transparent سیاه) */
+            style={{ background: 'linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 0%, transparent) 70%)' }}
           />
           <div className="absolute start-4 top-4">
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black shadow-lg ${
-                isActive ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-[#0a1736]'
-              }`}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black text-white shadow-lg"
+              style={{ background: isActive ? '#17994f' : '#c2740a' }}
             >
               {isActive ? <CheckCircle2 size={14} /> : <AlertOctagon size={14} />}
-              {statusFa(store.status)}
+              {isActive ? 'فعال' : 'غیرفعال'}
             </span>
           </div>
         </div>
@@ -375,37 +336,28 @@ function StorePage() {
                 />
               </div>
               <div className="min-w-0 pb-1">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-wrap items-center gap-2">
                   <h1 className="truncate text-xl font-black sm:text-3xl">{store.name}</h1>
-                  {isActive && <BadgeCheck size={20} className="shrink-0 text-yellow" />}
-                  {sellerTrusted && (
-                    <span
-                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold"
-                      style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
-                    >
-                      <ShieldCheck size={12} />
-                      فروشنده مورد اعتماد
+                  <TrustBadge trusted={sellerTrusted} showUntrusted />
+                  <ActiveBadge active={isActive} />
+                </div>
+
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs muted">
+                  <span className="inline-flex items-center gap-1.5">
+                    <StoreIcon size={12} className="shrink-0" />
+                    {sellerName ? `فروشنده: ${sellerName}` : 'فروشگاه رسمی در ژئو کالا'}
+                  </span>
+                  {store.create_at && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays size={12} className="shrink-0" />
+                      عضویت از {formatDate(store.create_at)}
                     </span>
                   )}
                 </div>
-                <p className="mt-1 flex items-center gap-1.5 text-xs muted">
-                  <StoreIcon size={12} />
-                  {sellerName ? `فروشنده: ${sellerName}` : 'فروشگاه رسمی در علی‌بازار'}
-                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleFollow}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 ${
-                  following ? 'bg-[var(--primary-color)] text-[#0a1736]' : 'btn-ghost'
-                }`}
-              >
-                <Heart size={16} fill={following ? 'currentColor' : 'none'} />
-                {following ? 'دنبال می‌کنید' : 'دنبال کردن'}
-              </button>
               <button type="button" onClick={shareStore} className="btn-ghost inline-flex items-center gap-2 !px-3.5 text-sm">
                 <Share2 size={16} />
                 <span className="hidden sm:inline">اشتراک‌گذاری</span>
@@ -417,16 +369,17 @@ function StorePage() {
             <p className="mt-5 max-w-3xl text-sm leading-7 muted">{store.description}</p>
           )}
 
-          {/* آمار */}
-          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatTile icon={Package} value={toFa(products.length)} label="کالای فعال" />
-            <StatTile icon={Sparkles} value={toFa(discountCount)} label="کالای تخفیف‌دار" />
-            <StatTile icon={TrendingUp} value={toFa(totalSold)} label="فروش کل" />
-            <StatTile
-              icon={CalendarDays}
-              value={store.create_at ? formatDate(store.create_at) : '—'}
-              label="عضویت از"
-            />
+          {/* وضعیت اعتماد فروشنده — همیشه صریح می‌گوید تأییدشده هست یا نه */}
+          <div className="card2 mt-5 rounded-2xl p-3.5 sm:p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <TrustBadge trusted={sellerTrusted} showUntrusted />
+              <span className="text-xs font-bold">وضعیت اعتماد فروشنده</span>
+            </div>
+            <p className="mt-2 text-xs leading-6 muted">
+              {sellerTrusted
+                ? 'هویت و سابقه‌ی این فروشنده توسط ژئو کالا بررسی و تأیید شده است؛ خرید از این فروشگاه نشان اعتماد دارد.'
+                : 'این فروشنده هنوز نشان اعتماد ژئو کالا را دریافت نکرده است. پیش از خرید، اطلاعات تماس و شرایط فروش را با او هماهنگ کنید.'}
+            </p>
           </div>
 
           {/* اطلاعات تماس */}
@@ -443,40 +396,6 @@ function StorePage() {
           )}
         </div>
       </section>
-
-      {/* ایده‌ی جدید: پیشنهاد ویژه‌ی فروشگاه */}
-      {featured && (
-        <section
-          className="relative grid gap-4 overflow-hidden rounded-3xl p-5 text-white sm:p-6 md:grid-cols-[1fr_auto] md:items-center"
-          style={{ background: 'linear-gradient(120deg, var(--navy) 0%, #1b3a80 100%)' }}
-        >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -end-16 -top-16 h-48 w-48 rounded-full blur-3xl"
-            style={{ background: 'rgba(255,214,10,0.25)' }}
-          />
-          <div className="relative flex min-w-0 items-start gap-4">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--primary-color)] text-[#0a1736]">
-              <Sparkles size={22} />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold text-yellow">پیشنهاد ویژه‌ی این فروشگاه</p>
-              <h2 className="mt-1 truncate text-base font-black sm:text-lg">{featured.name}</h2>
-              <p className="mt-1 text-xs text-white/75">
-                {toFa(featured.discount?.percentage ?? 0)}٪ تخفیف • قیمت نهایی {toFa(finalPrice(featured))}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={scrollToProducts}
-            className="relative inline-flex w-max items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#0a1736] transition hover:-translate-y-0.5"
-          >
-            مشاهده‌ی پیشنهادها
-            <ArrowLeft size={16} />
-          </button>
-        </section>
-      )}
 
       {/* محصولات */}
       <section ref={productsRef} id="store-products" className="scroll-mt-20 space-y-4">
@@ -547,8 +466,14 @@ function StorePage() {
         <ProductGridComponent
           products={filteredProducts}
           loading={loading}
-          columns={4}
+          columns={3}
           emptyTitle="محصولی مطابق فیلتر در این فروشگاه یافت نشد"
+          /* همه‌ی کالاهای این صفحه از همین فروشگاه‌اند؛ پس وضعیت تأیید فروشنده
+             مستقیم به کارت‌ها داده می‌شود تا هر کارت دنبال فروشنده نگردد */
+          trust={storeTrust}
+          showUntrusted
+          storeId={getId(store) || id}
+          sellerId={sellerIdForCards}
         />
       </section>
 

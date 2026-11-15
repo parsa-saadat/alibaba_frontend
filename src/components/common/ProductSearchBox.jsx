@@ -167,8 +167,11 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       aria-expanded={open}
       aria-controls={listId}
       aria-autocomplete="list"
-      aria-label="جستجو در محصولات علی‌بازار"
-      placeholder={placeholder || (hero ? 'دنبال چه محصولی می‌گردید؟' : 'جستجو در محصولات، برند یا دسته‌بندی…')}
+      aria-label="جستجو در تجهیزات ژئو کالا"
+      placeholder={
+        placeholder ||
+        (hero ? 'جستجوی جی‌پی‌اس، توتال استیشن، دوربین نقشه‌برداری…' : 'جستجو در تجهیزات، برند یا دسته‌بندی…')
+      }
       className={
         hero
           ? 'min-w-0 flex-1 bg-transparent text-sm sm:text-base outline-none placeholder:opacity-60'
@@ -183,11 +186,11 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       className={
         hero
           ? 'btn-yellow !rounded-full flex shrink-0 items-center gap-2 px-5 sm:px-8'
-          : 'btn-yellow !py-2.5 !px-4 text-sm shrink-0'
+          : 'btn-yellow !py-2.5 !px-4 text-sm shrink-0 inline-flex items-center justify-center gap-1.5 whitespace-nowrap'
       }
     >
-      <Search size={hero ? 15 : 15} className={hero ? 'hidden sm:block' : undefined} />
-      جستجو
+      <Search size={15} className="shrink-0" />
+      <span>جستجو</span>
     </button>
   );
 

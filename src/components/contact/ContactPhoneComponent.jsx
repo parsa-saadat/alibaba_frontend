@@ -1,40 +1,43 @@
 import React from 'react';
 import { toast } from 'react-toastify';
-import { Clock3, Copy, Headset, Mail, MapPin, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Clock3, Copy, Handshake, Headset, Mail, PackageSearch } from 'lucide-react';
 
 // راه‌های ارتباطی — هر کارت یک کانال ارتباطی است
 const CHANNELS = [
   {
-    icon: Phone,
-    title: 'تلفن پشتیبانی',
-    value: '۰۲۱-۹۱۰۰۹۱۰۰',
-    copy: '02191009100',
-    href: 'tel:+982191009100',
-    hint: 'شنبه تا پنجشنبه، ۸ صبح تا ۸ شب',
-    action: 'تماس تلفنی',
+    icon: Headset,
+    title: 'مشاوره‌ی فنی خرید',
+    value: 'انتخاب دستگاه و استعلام قیمت',
+    hint: 'راهنمایی برای انتخاب مدل مناسب پروژه',
+    action: 'درخواست مشاوره',
+    anchor: '#contact-form',
+  },
+  {
+    icon: PackageSearch,
+    title: 'پیگیری سفارش',
+    value: 'با کد سفارش، در بخش سفارش‌های من',
+    hint: 'وضعیت پردازش و ارسال، لحظه‌ای',
+    action: 'پیگیری سفارش',
+    to: '/orders',
   },
   {
     icon: Mail,
     title: 'ایمیل',
-    value: 'support@alibazar.ir',
-    copy: 'support@alibazar.ir',
-    href: 'mailto:support@alibazar.ir',
+    value: 'info@geokala.ir',
+    copy: 'info@geokala.ir',
+    href: 'mailto:info@geokala.ir',
     hint: 'پاسخ‌دهی حداکثر تا ۲۴ ساعت کاری',
     action: 'ارسال ایمیل',
   },
   {
-    icon: Headset,
-    title: 'چت آنلاین',
-    value: 'گفتگو با کارشناس',
-    hint: '۲۴ ساعته، ۷ روز هفته',
-    action: 'شروع گفتگو',
-  },
-  {
-    icon: MapPin,
-    title: 'دفتر مرکزی',
-    value: 'تهران، ولیعصر، برج تجارت الکترونیک',
-    hint: 'شنبه تا چهارشنبه، ۹ تا ۱۷ — با تعیین وقت',
-    action: 'مشاهده نشانی',
+    icon: Handshake,
+    title: 'همکاری و نمایندگی',
+    value: 'partner@geokala.ir',
+    copy: 'partner@geokala.ir',
+    href: 'mailto:partner@geokala.ir',
+    hint: 'فروشندگان، نمایندگان و تأمین‌کنندگان',
+    action: 'ارسال درخواست',
   },
 ];
 
@@ -97,16 +100,14 @@ function ContactPhoneComponent() {
               <a href={channel.href} className="inline-block mt-3 text-xs font-bold text-yellow">
                 {channel.action}
               </a>
-            ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  toast.info('برای گفتگو با کارشناس، فرم پایین صفحه را پر کنید.')
-                }
-                className="mt-3 text-xs font-bold text-yellow"
-              >
+            ) : channel.to ? (
+              <Link to={channel.to} className="mt-3 inline-block text-xs font-bold text-yellow">
                 {channel.action}
-              </button>
+              </Link>
+            ) : (
+              <a href={channel.anchor} className="mt-3 inline-block text-xs font-bold text-yellow">
+                {channel.action}
+              </a>
             )}
           </div>
         );

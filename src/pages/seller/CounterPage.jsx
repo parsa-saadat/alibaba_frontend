@@ -1,58 +1,243 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Package, Store, ShoppingBag, CreditCard, RefreshCw } from 'lucide-react';
-import { useShop } from '../../contexts/ShopContext';
-import { authHeaders } from '../../utils/helpers/storage';
-import StorageImageComponent from '../../components/common/StorageImageComponent';
-import { Loading } from '../../components/common/ScroolToTopComponent';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BadgeCheck,
+  Check,
+  CircleDollarSign,
+  Clock3,
+  CreditCard,
+  ExternalLink,
+  Package,
+  Plus,
+  RefreshCw,
+  Settings,
+  ShoppingBag,
+  Sparkles,
+  Store,
+  TrendingUp,
+} from "lucide-react";
+import { useShop } from "../../contexts/ShopContext";
+import { authHeaders } from "../../utils/helpers/storage";
+import { userDisplayName } from "../../utils/helpers/user";
+import StorageImageComponent from "../../components/common/StorageImageComponent";
+import { Loading } from "../../components/common/ScroolToTopComponent";
 import {
   formatPrice,
   toFa,
   statusFa,
   productImages,
-} from '../../utils/helpers/format';
+  formatDate,
+  formatDateLong,
+  formatDayOfMonth,
+} from "../../utils/helpers/format";
+import { getId } from "../../utils/helpers/response";
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API =
+  import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || "/api";
+
+const greeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "صبح بخیر";
+  if (hour < 18) return "بعدازظهر بخیر";
+  return "شب بخیر";
+};
+
+const dayKey = (date) => {
+  const value = new Date(date);
+  return Number.isNaN(value.getTime()) ? "" : value.toISOString().slice(0, 10);
+};
+
+const netOf = (sub) =>
+  (Number(sub.amount ?? sub.subtotal ?? 0) || 0) -
+  (Number(sub.discount_applied ?? 0) || 0);
+
+const compactMoney = (amount) => {
+  const value = Number(amount) || 0;
+  if (value >= 1_000_000_000)
+    return `${toFa((value / 1_000_000_000).toFixed(1))} میلیارد تومان`;
+  if (value >= 1_000_000)
+    return `${toFa((value / 1_000_000).toFixed(1))} میلیون تومان`;
+  return formatPrice(value);
+};
+
+const STATUS_TONE = {
+  awaiting_approval: { color: "#c2740a", bg: "rgba(194,116,10,0.14)" },
+  preparing: { color: "#2563eb", bg: "rgba(37,99,235,0.14)" },
+  ready_to_ship: { color: "#7c3aed", bg: "rgba(124,58,237,0.14)" },
+  shipped: { color: "#0f766e", bg: "rgba(15,118,110,0.14)" },
+  delivered: { color: "#17994f", bg: "rgba(23,153,79,0.14)" },
+  cancelled: { color: "#e53935", bg: "rgba(229,57,53,0.14)" },
+};
+const toneOf = (status) =>
+  STATUS_TONE[status] || { color: "var(--muted)", bg: "var(--card2)" };
+
+function KpiTile({ label, value, hint, icon: Icon, tint, to }) {
+  const body = (
+    <div className="card rounded-2xl p-4 flex items-start justify-between gap-3 h-full transition-transform hover:-translate-y-0.5">
+      <div className="min-w-0">
+        <div className="text-[11px] font-bold muted truncate">{label}</div>
+        <div
+          className="mt-2 font-black leading-tight"
+          style={{
+            color: tint || "var(--text)",
+            fontSize: String(value).length > 9 ? "0.88rem" : "1.05rem",
+          }}
+        >
+          {value}
+        </div>
+        {hint && <div className="mt-1 text-[10px] muted truncate">{hint}</div>}
+      </div>
+      <span
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+        style={{
+          background: "var(--card2)",
+          color: tint || "var(--primary-color)",
+        }}
+      >
+        <Icon size={17} />
+      </span>
+    </div>
+  );
+  return to ? <Link to={to}>{body}</Link> : body;
+}
+
+function Panel({ title, hint, icon: Icon, action, children, className = "" }) {
+  return (
+    <section className={`card rounded-2xl flex flex-col ${className}`}>
+      <header className="flex items-center justify-between gap-2 border-b border-theme px-4 py-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
+            style={{ background: "var(--card2)" }}
+          >
+            <Icon size={15} style={{ color: "var(--primary-color)" }} />
+          </span>
+          <div className="min-w-0">
+            <b className="block text-sm truncate">{title}</b>
+            {hint && <span className="text-[10px] muted">{hint}</span>}
+          </div>
+        </div>
+        {action}
+      </header>
+      <div className="p-3 sm:p-4 flex-1">{children}</div>
+    </section>
+  );
+}
+
+const EmptyRow = ({ text }) => (
+  <div className="grid place-items-center py-8 text-center text-xs muted">
+    {text}
+  </div>
+);
 
 function CounterPage() {
   const { user } = useShop();
-  const [products, setProducts] = useState([]);
-  const [stores, setStores] = useState([]);
-  const [subOrders, setSubOrders] = useState([]);
+  const [data, setData] = useState({ products: [], stores: [], subOrders: [] });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [busyId, setBusyId] = useState("");
 
-  const load = useCallback(async () => {
-    if (!user) return setLoading(false);
-    setLoading(true);
-    const get = (u) =>
-      axios
-        .get(`${API}${u}`, authHeaders())
-        .then((r) => r.data.body?.data || r.data.body || [])
-        .catch(() => []);
-    const [p, s, o] = await Promise.all([
-      get('/perm/products?limit=100'),
-      get('/perm/stores?limit=50'),
-      get('/order/sub/all?limit=100'),
-    ]);
-    setProducts(p);
-    setStores(s);
-    setSubOrders(o);
-    setLoading(false);
-  }, [user]);
+  const load = useCallback(
+    async (silent = false) => {
+      if (!user) return setLoading(false);
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+      const get = (url) =>
+        axios
+          .get(`${API}${url}`, authHeaders())
+          .then((r) => r.data.body?.data || r.data.body || [])
+          .catch(() => []);
+      const [products, stores, subOrders] = await Promise.all([
+        get("/perm/products?limit=100"),
+        get("/perm/stores?limit=50"),
+        get("/order/sub/all?limit=100"),
+      ]);
+      setData({
+        products: Array.isArray(products) ? products : [],
+        stores: Array.isArray(stores) ? stores : [],
+        subOrders: Array.isArray(subOrders) ? subOrders : [],
+      });
+      setLoading(false);
+      setRefreshing(false);
+    },
+    [user],
+  );
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const totalSales = useMemo(
+  const { products, stores, subOrders } = data;
+
+  const totals = useMemo(() => {
+    const sales = subOrders.reduce((sum, sub) => sum + netOf(sub), 0);
+    const waiting = subOrders.filter(
+      (sub) => sub.status === "awaiting_approval",
+    ).length;
+    const inProgress = subOrders.filter((sub) =>
+      ["preparing", "ready_to_ship"].includes(sub.status),
+    ).length;
+    const delivered = subOrders.filter((sub) =>
+      ["delivered", "finalized"].includes(sub.status),
+    ).length;
+    const lowStock = products.filter(
+      (product) => Number(product.stock ?? 0) <= 3,
+    ).length;
+    const items = subOrders.reduce(
+      (sum, sub) =>
+        sum +
+        (sub.items || []).reduce((s, it) => s + (Number(it.quantity) || 1), 0),
+      0,
+    );
+    return { sales, waiting, inProgress, delivered, lowStock, items };
+  }, [subOrders, products]);
+
+  const actionQueue = useMemo(
     () =>
-      subOrders.reduce(
-        (sum, sub) => sum + ((sub.amount ?? sub.subtotal ?? 0) - (sub.discount_applied ?? 0)),
-        0,
-      ),
+      subOrders
+        .filter((sub) =>
+          ["awaiting_approval", "preparing", "ready_to_ship"].includes(
+            sub.status,
+          ),
+        )
+        .slice(0, 5),
     [subOrders],
   );
+
+  const chart = useMemo(() => {
+    const days = Array.from({ length: 7 }).map((_, index) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - index));
+      return { key: dayKey(date), label: formatDayOfMonth(date), value: 0 };
+    });
+    const map = Object.fromEntries(days.map((day) => [day.key, day]));
+    subOrders.forEach((sub) => {
+      const key = dayKey(sub.created_at || sub.create_at);
+      if (map[key]) map[key].value += netOf(sub);
+    });
+    return { days, max: Math.max(...days.map((day) => day.value), 1) };
+  }, [subOrders]);
+
+  const approve = (id) => {
+    setBusyId(id);
+    axios
+      .put(`${API}/order/sub/${id}/approve`, {}, authHeaders())
+      .then(() => load(true))
+      .catch(() => {})
+      .finally(() => setBusyId(""));
+  };
+
+  const nextStatus = (id, status) => {
+    setBusyId(id);
+    axios
+      .put(`${API}/order/sub/${id}/status`, { status }, authHeaders())
+      .then(() => load(true))
+      .catch(() => {})
+      .finally(() => setBusyId(""));
+  };
 
   if (loading) {
     return (
@@ -62,98 +247,432 @@ function CounterPage() {
     );
   }
 
+  const quickLinks = [
+    {
+      to: "/seller/products",
+      label: "محصولات من",
+      icon: Package,
+      hint: `${toFa(products.length)} کالا`,
+    },
+    {
+      to: "/seller/products/create",
+      label: "محصول جدید",
+      icon: Plus,
+      hint: "افزودن کالا",
+    },
+    {
+      to: "/seller/orders",
+      label: "سفارش‌ها",
+      icon: ShoppingBag,
+      hint: `${toFa(totals.waiting)} در انتظار`,
+    },
+    {
+      to: "/seller/stores",
+      label: "فروشگاه‌ها",
+      icon: Store,
+      hint: `${toFa(stores.length)} فروشگاه`,
+    },
+    {
+      to: "/seller/plans",
+      label: "پلن و اشتراک",
+      icon: CreditCard,
+      hint: "ارتقای پلن",
+    },
+    {
+      to: "/seller/settings",
+      label: "تنظیمات فروشنده",
+      icon: Settings,
+      hint: "اطلاعات هویتی",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="font-black text-lg">پیشخوان فروشنده</h1>
-          <p className="text-xs muted">مدیریت فروشگاه‌ها، محصولات و سفارش‌های ثبت‌شده</p>
-        </div>
-        <button
-          type="button"
-          onClick={load}
-          className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
-        >
-          <RefreshCw size={14} /> بروزرسانی
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'کل فروش', value: formatPrice(totalSales), icon: CreditCard },
-          { label: 'سفارش‌ها', value: toFa(subOrders.length), icon: ShoppingBag },
-          { label: 'محصولات من', value: toFa(products.length), icon: Package },
-          { label: 'فروشگاه‌ها', value: toFa(stores.length), icon: Store },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="card rounded-2xl p-5 flex items-start justify-between gap-3"
-          >
-            <div>
-              <div className="text-xs muted font-bold">{stat.label}</div>
-              <div className="font-black text-xl mt-2 text-yellow">{stat.value}</div>
-            </div>
-            <span className="w-10 h-10 rounded-xl bg-navy text-brand-yellow grid place-items-center shrink-0">
-              <stat.icon size={18} />
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-5">
-        <div className="card rounded-2xl p-5 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-black">محصولات اخیر ({toFa(products.length)})</h2>
-            <Link to="/seller/products" className="text-xs font-bold text-yellow">
-              مدیریت محصولات
-            </Link>
-          </div>
-          {products.slice(0, 4).map((p) => (
-            <div key={p._id} className="card2 rounded-xl p-3 flex items-center gap-3">
-              <StorageImageComponent
-                file={productImages(p)[0]}
-                alt={p.name}
-                className="w-11 h-11 rounded-lg object-cover shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm truncate">{p.name}</div>
-                <div className="text-xs muted">موجودی: {toFa(p.stock ?? 0)}</div>
-              </div>
-              <Link
-                to={`/seller/products/${p._id}`}
-                className="btn-ghost !py-1.5 !px-2.5 text-xs shrink-0"
-              >
-                ویرایش
-              </Link>
-            </div>
-          ))}
-        </div>
-
-        <div className="card rounded-2xl p-5 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-black">سفارش‌های اخیر ({toFa(subOrders.length)})</h2>
-            <Link to="/seller/orders" className="text-xs font-bold text-yellow">
-              مدیریت سفارش‌ها
-            </Link>
-          </div>
-          {subOrders.slice(0, 4).map((sub) => (
-            <div
-              key={sub._id}
-              className="card2 rounded-xl p-3 flex items-center justify-between gap-3"
+    <div className="space-y-5">
+      {/* ───── هدر ───── */}
+      <section
+        className="card rounded-3xl overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(120deg, rgba(255,214,10,0.20), rgba(255,214,10,0.04) 45%, rgba(37,99,235,0.10))",
+        }}
+      >
+        <div className="p-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black"
+              style={{
+                background: "rgba(10,23,54,0.35)",
+                color: "var(--primary-color)",
+              }}
             >
-              <div>
-                <b className="text-sm" dir="ltr">
-                  #{sub.order_number || String(sub._id).slice(-8)}
-                </b>
-                <div className="text-xs muted">{statusFa(sub.status)}</div>
-              </div>
-              <div className="font-black text-yellow">
-                {formatPrice((sub.amount ?? sub.subtotal ?? 0) - (sub.discount_applied ?? 0))}
-              </div>
+              <Sparkles size={12} /> پیشخوان فروشنده
+            </span>
+            <h1 className="mt-2 text-lg sm:text-xl font-black">
+              {greeting()}، {userDisplayName(user, "فروشنده ژئو کالا")}
+            </h1>
+            <p className="mt-1 text-xs muted">
+              {formatDateLong(new Date())}
+              {" • "}
+              {totals.waiting > 0
+                ? `${toFa(totals.waiting)} سفارش منتظر تأیید شماست`
+                : "همه‌ی سفارش‌ها بررسی شده‌اند"}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              to="/seller/products/create"
+              className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
+            >
+              <Plus size={14} /> محصول جدید
+            </Link>
+            <Link
+              to="/seller/orders"
+              className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5"
+            >
+              <ShoppingBag size={14} /> سفارش‌ها
+            </Link>
+            <button
+              type="button"
+              onClick={() => load(true)}
+              disabled={refreshing}
+              className="btn-ghost !py-2 !px-2.5 text-xs flex items-center gap-1.5 disabled:opacity-60"
+              title="به‌روزرسانی"
+            >
+              <RefreshCw
+                size={14}
+                className={refreshing ? "animate-spin" : ""}
+              />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ───── کارت‌های کلیدی ───── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+        <KpiTile
+          label="فروش خالص"
+          value={compactMoney(totals.sales / 10)}
+          hint={`${toFa(totals.items)} قلم فروخته‌شده`}
+          icon={CircleDollarSign}
+          tint="#17994f"
+        />
+        <KpiTile
+          label="سفارش‌ها"
+          value={toFa(subOrders.length)}
+          hint={`${toFa(totals.delivered)} تحویل‌شده`}
+          icon={ShoppingBag}
+          to="/seller/orders"
+        />
+        <KpiTile
+          label="در انتظار تأیید"
+          value={toFa(totals.waiting)}
+          hint="نیازمند اقدام"
+          icon={Clock3}
+          tint="#c2740a"
+          to="/seller/orders"
+        />
+        <KpiTile
+          label="در حال پردازش"
+          value={toFa(totals.inProgress)}
+          hint="آماده‌سازی/ارسال"
+          icon={TrendingUp}
+          tint="#2563eb"
+          to="/seller/orders"
+        />
+        <KpiTile
+          label="محصولات"
+          value={toFa(products.length)}
+          hint={`${toFa(totals.lowStock)} کم‌موجود`}
+          icon={Package}
+          tint={totals.lowStock ? "#e53935" : undefined}
+          to="/seller/products"
+        />
+        <KpiTile
+          label="فروشگاه‌ها"
+          value={toFa(stores.length)}
+          hint="زیرمجموعه‌ی شما"
+          icon={Store}
+          tint="#7c3aed"
+          to="/seller/stores"
+        />
+      </div>
+
+      {/* ───── نمودار + صف اقدام ───── */}
+      <div className="grid gap-4 lg:grid-cols-5">
+        <Panel
+          title="روند فروش ۷ روز اخیر"
+          hint="مبلغ خالص سفارش‌ها"
+          icon={TrendingUp}
+          className="lg:col-span-3"
+        >
+          <div className="flex items-end justify-between gap-2 h-40">
+            {chart.days.map((day) => {
+              const height = Math.max(
+                6,
+                Math.round((day.value / chart.max) * 100),
+              );
+              return (
+                <div
+                  key={day.key}
+                  className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end"
+                >
+                  <span className="text-[9px] muted" dir="ltr">
+                    {day.value > 0
+                      ? toFa(Math.round(day.value / 1000000)) + "م"
+                      : "—"}
+                  </span>
+                  <div
+                    className="w-full rounded-t-lg transition-all"
+                    style={{
+                      height: `${height}%`,
+                      background:
+                        day.value > 0
+                          ? "linear-gradient(180deg, var(--primary-color), rgba(255,214,10,0.35))"
+                          : "var(--card2)",
+                    }}
+                    title={`${day.label}: ${formatPrice(day.value)}`}
+                  />
+                  <span className="text-[10px] muted">{day.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+
+        <Panel
+          title="نیازمند اقدام شما"
+          hint={`${toFa(totals.waiting + totals.inProgress)} سفارش`}
+          icon={Clock3}
+          className="lg:col-span-2"
+          action={
+            <Link
+              to="/seller/orders"
+              className="text-[11px] font-bold"
+              style={{ color: "var(--primary-color)" }}
+            >
+              همه
+            </Link>
+          }
+        >
+          {actionQueue.length === 0 ? (
+            <EmptyRow text="سفارشی در انتظار اقدام نیست." />
+          ) : (
+            <div className="space-y-2">
+              {actionQueue.map((sub) => {
+                const tone = toneOf(sub.status);
+                const busy = busyId === sub._id;
+                return (
+                  <div
+                    key={sub._id}
+                    className="card2 rounded-xl p-2.5 flex items-center gap-2"
+                  >
+                    <span
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-lg"
+                      style={{ background: tone.bg, color: tone.color }}
+                    >
+                      <ShoppingBag size={15} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <b className="block truncate text-xs" dir="ltr">
+                        #{sub.order_number || String(sub._id).slice(-8)}
+                      </b>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] muted">
+                        <span
+                          className="shrink-0 whitespace-nowrap rounded-full px-1.5 py-0.5 font-black"
+                          style={{ background: tone.bg, color: tone.color }}
+                        >
+                          {statusFa(sub.status)}
+                        </span>
+                        <span className="truncate">
+                          {formatPrice(netOf(sub))}
+                        </span>
+                      </div>
+                    </div>
+                    {sub.status === "awaiting_approval" && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => approve(sub._id)}
+                        className="btn-yellow !py-1.5 !px-2 text-[11px] flex items-center gap-1 shrink-0 whitespace-nowrap disabled:opacity-60"
+                      >
+                        <Check size={12} /> تأیید
+                      </button>
+                    )}
+                    {sub.status === "preparing" && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => nextStatus(sub._id, "ready_to_ship")}
+                        className="btn-yellow !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
+                      >
+                        آماده ارسال
+                      </button>
+                    )}
+                    {sub.status === "ready_to_ship" && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => nextStatus(sub._id, "shipped")}
+                        className="btn-yellow !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
+                      >
+                        ثبت ارسال
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          )}
+        </Panel>
+      </div>
+
+      {/* ───── محصولات و فروشگاه‌ها ───── */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel
+          title="محصولات اخیر"
+          hint={`${toFa(products.length)} کالا`}
+          icon={Package}
+          action={
+            <Link
+              to="/seller/products"
+              className="text-[11px] font-bold"
+              style={{ color: "var(--primary-color)" }}
+            >
+              مدیریت
+            </Link>
+          }
+        >
+          {products.length === 0 ? (
+            <EmptyRow text="هنوز محصولی ثبت نکرده‌اید." />
+          ) : (
+            <div className="space-y-2">
+              {products.slice(0, 5).map((product) => {
+                const stock = Number(product.stock ?? 0);
+                return (
+                  <Link
+                    key={product._id}
+                    to={`/seller/products/${product._id}`}
+                    className="card2 rounded-xl p-2 flex items-center gap-2.5 hover:opacity-90"
+                  >
+                    <StorageImageComponent
+                      file={productImages(product)[0]}
+                      alt={product.name}
+                      className="h-10 w-10 shrink-0 rounded-lg object-cover"
+                      compact
+                    />
+                    <div className="min-w-0 flex-1">
+                      <b className="block truncate text-xs">{product.name}</b>
+                      <span className="text-[10px] muted truncate block">
+                        موجودی: {toFa(stock)}
+                        {stock <= 3 && (
+                          <span
+                            className="ms-1 inline-flex items-center gap-0.5"
+                            style={{ color: "#e53935" }}
+                          >
+                            <AlertTriangle size={10} /> کم‌موجود
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <ArrowLeft size={13} className="shrink-0 muted" />
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </Panel>
+
+        <Panel
+          title="فروشگاه‌های من"
+          hint={`${toFa(stores.length)} فروشگاه`}
+          icon={Store}
+          action={
+            <Link
+              to="/seller/stores"
+              className="text-[11px] font-bold"
+              style={{ color: "var(--primary-color)" }}
+            >
+              مدیریت
+            </Link>
+          }
+        >
+          {stores.length === 0 ? (
+            <EmptyRow text="هنوز فروشگاهی نساخته‌اید." />
+          ) : (
+            <div className="space-y-2">
+              {stores.slice(0, 4).map((store) => {
+                const id = getId(store);
+                const active = store.status === "ENABLE";
+                return (
+                  <div
+                    key={id}
+                    className="card2 rounded-xl p-2.5 flex items-center gap-2.5"
+                  >
+                    <span
+                      className="h-10 w-10 shrink-0 overflow-hidden rounded-lg"
+                      style={{ background: "var(--card)" }}
+                    >
+                      <StorageImageComponent
+                        file={store.profile_image_id}
+                        alt={store.name}
+                        className="h-full w-full object-cover"
+                        compact
+                      />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <b className="block truncate text-xs">{store.name}</b>
+                      <span className="text-[10px] muted flex items-center gap-1">
+                        <BadgeCheck
+                          size={10}
+                          style={{ color: active ? "#17994f" : "var(--muted)" }}
+                        />
+                        {statusFa(store.status)}
+                      </span>
+                    </div>
+                    <Link
+                      to={`/store/${id}`}
+                      className="btn-ghost !p-1.5"
+                      title="مشاهده صفحه فروشگاه"
+                    >
+                      <ExternalLink size={13} />
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Panel>
+      </div>
+
+      {/* ───── دسترسی سریع ───── */}
+      <Panel title="دسترسی سریع" hint="بخش‌های پنل فروشنده" icon={ExternalLink}>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+          {quickLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="card2 rounded-xl p-3 flex items-center gap-2.5 transition-transform hover:-translate-y-0.5"
+            >
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg"
+                style={{ background: "var(--card)" }}
+              >
+                <link.icon
+                  size={15}
+                  style={{ color: "var(--primary-color)" }}
+                />
+              </span>
+              <div className="min-w-0">
+                <b className="block truncate text-xs">{link.label}</b>
+                <span className="text-[10px] muted truncate block">
+                  {link.hint}
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

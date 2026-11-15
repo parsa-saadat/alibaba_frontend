@@ -1,111 +1,98 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import ProductComponent, { ProductSkeleton } from '../product/ProductComponent';
 import SectionTitle from '../common/SectionTitle';
 import { API } from '../../config/api';
 import { getList } from '../../utils/helpers/response';
 
-const LIMIT = 24;
-
-/* سایزبندی گرید: تعداد ستون‌ها بر اساس عرض واقعی ظرف حساب می‌شود
-   (حداقل عرض هر کارت ۱۶۸px) تا در موبایل دو ستون و در دسکتاپ هفت ستون شود */
+/* حداکثر ۴ ردیف نمایش؛ لودینگ دقیقاً ۴ کارت نشان می‌دهد */
+const MAX_ROWS = 4;
+const SKELETON_COUNT = 4;
+const FETCH_LIMIT = 40;
+const GAP = 12;
 const MIN_CARD_WIDTH = 168;
-const GRID_STYLE = {
-  gridTemplateColumns: `repeat(auto-fit, minmax(min(${MIN_CARD_WIDTH}px, 100%), 1fr))`,
-};
 
 function InfiniteProductsComponent() {
   const [items, setItems] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [firstLoad, setFirstLoad] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [cols, setCols] = useState(4);
+  const wrapRef = useRef(null);
 
-  const loaderRef = useRef(null);
-  const fetchingRef = useRef(false);
-  const seenRef = useRef(new Set());
-  const startedRef = useRef(false);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return undefined;
+    const measure = () => {
+      const width = el.clientWidth || 0;
+      const next = Math.max(2, Math.floor((width + GAP) / (MIN_CARD_WIDTH + GAP)));
+      setCols((prev) => (prev === next ? prev : next));
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
-  const loadMore = useCallback(async () => {
-    if (fetchingRef.current || !hasMore) return;
-    fetchingRef.current = true;
+  const load = useCallback(async () => {
     setLoading(true);
     setError(false);
-
     try {
-      const res = await axios.get(`${API}/product`, { params: { page, limit: LIMIT } });
-      const data = getList(res);
-
-      const fresh = data.filter((p) => !seenRef.current.has(p._id));
-      fresh.forEach((p) => seenRef.current.add(p._id));
-
-      setItems((prev) => [...prev, ...fresh]);
-      setPage((p) => p + 1);
-      if (data.length < LIMIT || fresh.length === 0) setHasMore(false);
+      const res = await axios.get(`${API}/product`, { params: { page: 1, limit: FETCH_LIMIT } });
+      setItems(getList(res) || []);
     } catch {
       setError(true);
+      setItems([]);
     } finally {
-      fetchingRef.current = false;
       setLoading(false);
-      setFirstLoad(false);
     }
-  }, [page, hasMore]);
-
-  /* بارگذاری صفحه‌ی اول به‌محض ورود (قبلاً فقط با اسکرول اتفاق می‌افتاد
-     و کاربر تا رسیدن به انتهای صفحه فقط اسکلتون می‌دید) */
-  useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
-    loadMore();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const el = loaderRef.current;
-    if (!el || !hasMore) return undefined;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !error) loadMore();
-      },
-      { rootMargin: '700px' },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [loadMore, error, hasMore]);
+    load();
+  }, [load]);
+
+  const visible = useMemo(() => items.slice(0, cols * MAX_ROWS), [items, cols]);
+  const gridStyle = {
+    gridTemplateColumns: `repeat(auto-fit, minmax(min(${MIN_CARD_WIDTH}px, 100%), 1fr))`,
+  };
 
   return (
     <section className="pb-4">
       <div className="max-w-[1440px] mx-auto px-4">
         <SectionTitle>پیشنهاد برای شما</SectionTitle>
 
-        <div className="grid gap-3" style={GRID_STYLE}>
-          {items.map((p) => (
-            <ProductComponent key={p._id} product={p} />
-          ))}
-          {(firstLoad || loading) &&
-            Array.from({ length: firstLoad ? 12 : 6 }, (_, i) => (
-              <ProductSkeleton key={`sk-${i}`} />
-            ))}
+        <div ref={wrapRef}>
+          <div className="grid gap-3" style={gridStyle}>
+            {loading
+              ? Array.from({ length: SKELETON_COUNT }, (_, i) => <ProductSkeleton key={`sk-${i}`} />)
+              : visible.map((p) => <ProductComponent key={p._id} product={p} />)}
+          </div>
         </div>
 
-        <div ref={loaderRef} className="h-10" />
-
-        {!firstLoad && !loading && items.length === 0 && !error && (
+        {!loading && !error && visible.length === 0 && (
           <p className="text-center text-sm muted py-10">محصولی یافت نشد</p>
         )}
 
         {error && (
           <div className="text-center py-4">
             <p className="text-sm muted mb-2">خطا در دریافت محصولات</p>
-            <button type="button" onClick={loadMore} className="btn-yellow">
+            <button type="button" onClick={load} className="btn-yellow">
               تلاش مجدد
             </button>
           </div>
         )}
 
-        {!hasMore && items.length > 0 && (
-          <p className="text-center text-sm muted py-4">همه محصولات نمایش داده شد</p>
+        {!loading && !error && visible.length > 0 && (
+          <div className="text-center pt-4">
+            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-yellow hover:underline">
+              مشاهده‌ی همه‌ی محصولات
+            </Link>
+          </div>
         )}
       </div>
     </section>

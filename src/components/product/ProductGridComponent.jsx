@@ -13,6 +13,11 @@ function ProductGridComponent({
   /* اگر مقدار داشته باشد، تعداد ستون‌ها بر اساس عرض واقعی ظرف حساب می‌شود
      تا کارت‌ها در نمایشگرهای کوچک‌تر فشرده نشوند */
   minColumn = null,
+  /* وضعیت تأیید فروشنده که صفحه‌ی والد از قبل می‌داند (صفحه‌ی فروشگاه) */
+  trust = null,
+  showUntrusted = true,
+  storeId = '',
+  sellerId = '',
 }) {
   const fixedGridClass =
     columns === 3
@@ -66,7 +71,14 @@ function ProductGridComponent({
         inert={loading ? true : undefined}
       >
         {products.map((product) => (
-          <ProductComponent key={getId(product)} product={product} />
+          <ProductComponent
+            key={getId(product)}
+            product={product}
+            trust={trust}
+            showUntrusted={showUntrusted}
+            storeId={storeId}
+            sellerId={sellerId}
+          />
         ))}
       </div>
       {loading && (

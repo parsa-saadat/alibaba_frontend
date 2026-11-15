@@ -10,11 +10,13 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
+import TrustBadge from '../product/TrustBadge';
 import ThemeToggleComponent from '../common/ThemeToggleComponent';
 import MarqueeText from '../common/MarqueeText';
 import ProductSearchBox from '../common/ProductSearchBox';
 import { useShop } from '../../contexts/ShopContext';
 import { hasDiscount, productImages } from '../../utils/helpers/format';
+import useScrollFade from '../../hooks/useScrollFade';
 
 const NAVY = 'linear-gradient(135deg,#0a1736 0%,#162e66 55%,#0f2150 100%)';
 
@@ -195,6 +197,10 @@ function CategoryShowcase({ category, products, loading }) {
                 text={p.name}
                 className="mt-2 text-xs sm:text-sm font-semibold group-hover:text-yellow"
               />
+              {/* نشان اعتماد فروشنده — روی کارت‌های دسته‌بندی صفحه‌ی اصلی */}
+              <span className="mt-1 flex min-h-[16px] items-center gap-1">
+                <TrustBadge product={p} size={11} />
+              </span>
             </Link>
           ))}
         </div>
@@ -243,6 +249,7 @@ function LatestProducts({ products, loading }) {
                 <StorageImageComponent
                   file={productImages(p)[0]}
                   alt={p.name}
+                  compact
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -257,6 +264,10 @@ function LatestProducts({ products, loading }) {
                     دارای تخفیف ویژه
                   </span>
                 )}
+                {/* نشان اعتماد فروشنده — فهرست «آخرین محصولات» */}
+                <span className="mt-1 flex min-h-[16px] items-center gap-1">
+                  <TrustBadge product={p} size={11} />
+                </span>
               </div>
 
               <ChevronLeft size={16} className="muted shrink-0 group-hover:text-yellow" />
@@ -270,6 +281,8 @@ function LatestProducts({ products, loading }) {
 
 /* ───────── اصلی ───────── */
 function HeaderComponent({ products = [], categories = [], loading = false }) {
+  /* محو‌شدگی ردیف چیپ‌های موبایل فقط وقتی سرریز دارد */
+  const [mobileRowRef, mobileRowOverflows] = useScrollFade();
   const [hoveredCatId, setHoveredCatId] = useState(null);
 
   // دسته‌بندی فعال: دسته‌ای که موس روی آن است، یا به صورت پیش‌فرض اولین دسته‌ای که محصول دارد
@@ -291,7 +304,12 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
 
       <div className="max-w-[1440px] mx-auto px-4 mt-5">
         {/* چیپ دسته‌بندی برای موبایل */}
-        <div className="lg:hidden flex gap-2 overflow-x-auto pb-3 no-scrollbar">
+        <div
+          ref={mobileRowRef}
+          className={`lg:hidden flex gap-2 overflow-x-auto pb-3 no-scrollbar ${
+            mobileRowOverflows ? 'scroll-fade-x' : ''
+          }`}
+        >
           {loading
             ? [0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-8 w-24 shrink-0" />)
             : categories.map((c) => (

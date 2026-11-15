@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import JalaliDateTimePicker from '../../components/common/JalaliDateTimePicker';
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { useShop } from "../../contexts/ShopContext";
 import { authHeaders, getToken } from "../../utils/helpers/storage";
+import AddressFormModalComponent from '../../components/address/AddressFormModalComponent';
 import { toFa } from "../../utils/helpers/format";
 import {
   userDisplayName,
@@ -33,7 +35,7 @@ import { shebaNumberValidator } from "../../utils/validators/sheba_number.valida
 const API =
   import.meta.env.VITE_APP_API_URL ||
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3000";
+  "/api";
 const MAX_IMAGE_MB = 5;
 
 const EMPTY_ADDR = {
@@ -597,120 +599,12 @@ function ProfilePage() {
           </h2>
           <button
             type="button"
-            onClick={toggleAddrForm}
+            onClick={() => setShowAddr(true)}
             className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1"
           >
-            {showAddr ? (
-              <>
-                <X size={14} /> لغو
-              </>
-            ) : (
-              <>
-                <Plus size={14} /> نشانی جدید
-              </>
-            )}
+            <Plus size={14} /> نشانی جدید
           </button>
         </div>
-
-        {showAddr && (
-          <div
-            className="grid sm:grid-cols-2 gap-3 mb-4 p-4 rounded-2xl"
-            style={{ background: "var(--card2)" }}
-          >
-            <Field
-              label="نام و نام خانوادگی گیرنده"
-              error={addrErrors.full_name}
-              className="sm:col-span-2"
-            >
-              <input
-                className={addrCls("full_name")}
-                value={addr.full_name}
-                onChange={(e) => setAddrField("full_name", e.target.value)}
-              />
-            </Field>
-            <Field label="استان" error={addrErrors.province}>
-              <input
-                className={addrCls("province")}
-                value={addr.province}
-                onChange={(e) => setAddrField("province", e.target.value)}
-              />
-            </Field>
-            <Field label="شهر" error={addrErrors.city}>
-              <input
-                className={addrCls("city")}
-                value={addr.city}
-                onChange={(e) => setAddrField("city", e.target.value)}
-              />
-            </Field>
-            <Field label="محله" error={addrErrors.neighborhood}>
-              <input
-                className={addrCls("neighborhood")}
-                value={addr.neighborhood}
-                onChange={(e) => setAddrField("neighborhood", e.target.value)}
-              />
-            </Field>
-            <Field label="کد پستی (۱۰ رقم)" error={addrErrors.postal_code}>
-              <input
-                className={addrCls("postal_code")}
-                dir="ltr"
-                inputMode="numeric"
-                maxLength={10}
-                value={addr.postal_code}
-                onChange={(e) =>
-                  setAddrField("postal_code", onlyDigits(e.target.value))
-                }
-              />
-            </Field>
-            <Field
-              label="نشانی کامل"
-              error={addrErrors.full_address}
-              className="sm:col-span-2"
-            >
-              <input
-                className={addrCls("full_address")}
-                value={addr.full_address}
-                onChange={(e) => setAddrField("full_address", e.target.value)}
-              />
-            </Field>
-            <Field label="پلاک" error={addrErrors.building_number}>
-              <input
-                className={addrCls("building_number")}
-                inputMode="numeric"
-                value={addr.building_number}
-                onChange={(e) =>
-                  setAddrField("building_number", onlyDigits(e.target.value))
-                }
-              />
-            </Field>
-            <Field label="واحد" error={addrErrors.unit}>
-              <input
-                className={addrCls("unit")}
-                inputMode="numeric"
-                value={addr.unit}
-                onChange={(e) =>
-                  setAddrField("unit", onlyDigits(e.target.value))
-                }
-              />
-            </Field>
-            <div className="sm:col-span-2 flex gap-2">
-              <button
-                type="button"
-                onClick={addAddress}
-                disabled={savingAddr}
-                className="btn-yellow flex-1"
-              >
-                {savingAddr ? "در حال ثبت…" : "ثبت نشانی"}
-              </button>
-              <button
-                type="button"
-                onClick={toggleAddrForm}
-                className="btn-ghost"
-              >
-                لغو
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className="space-y-2">
           {addrLoading && addresses.length === 0 && (
@@ -718,7 +612,7 @@ function ProfilePage() {
               در حال دریافت نشانی‌ها…
             </div>
           )}
-          {!addrLoading && addresses.length === 0 && !showAddr && (
+          {!addrLoading && addresses.length === 0 && (
             <div className="rounded-2xl border border-dashed border-theme p-6 text-center text-xs muted">
               هنوز نشانی‌ای ثبت نکرده‌اید. با دکمه «نشانی جدید» اولین نشانی را
               اضافه کنید.
@@ -772,7 +666,7 @@ function ProfilePage() {
         <div className="card rounded-3xl p-6">
           <h2 className="font-black text-lg flex items-center gap-2 mb-4">
             <Store size={20} className="text-yellow" /> درخواست فروشندگی در
-            علی‌بازار
+            ژئو کالا
           </h2>
 
           <div className="grid sm:grid-cols-2 gap-3">
@@ -798,13 +692,13 @@ function ProfilePage() {
                 }
               />
             </Field>
-            <Field label="تاریخ تولد" error={err("birth_date")}>
-              <input
-                className={inputCls("birth_date")}
-                type="date"
-                max={new Date().toISOString().slice(0, 10)}
+            <Field label="تاریخ تولد (شمسی)" error={err("birth_date")}>
+              <JalaliDateTimePicker
                 value={seller.birth_date}
-                onChange={(e) => setSellerField("birth_date", e.target.value)}
+                onChange={(next) => setSellerField("birth_date", next)}
+                placeholder="مثلاً ۱۳۷۲/۰۴/۱۵"
+                withTime={false}
+                valueFormat="jalali"
               />
             </Field>
             <Field
@@ -913,6 +807,15 @@ function ProfilePage() {
         file={zoomFile?.file}
         alt={zoomFile?.alt}
         onClose={() => setZoomFile(null)}
+      />
+
+      {/* پاپ‌آپ ثبت نشانی (جای فرم درون‌صفحه‌ای) */}
+      <AddressFormModalComponent
+        open={showAddr}
+        onClose={() => setShowAddr(false)}
+        userId={user?._id}
+        makeDefault={addresses.length === 0}
+        onSaved={() => loadAddresses()}
       />
     </div>
   );

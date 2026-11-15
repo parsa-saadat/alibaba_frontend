@@ -1,28 +1,86 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Pencil, Trash2, Search, Phone, Mail, X } from 'lucide-react';
+import {
+  BadgeCheck,
+  CalendarDays,
+  Check,
+  Mail,
+  Pencil,
+  Phone,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Store,
+  Trash2,
+  UserRound,
+  Users,
+  X,
+} from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
-import { toFa } from '../../utils/helpers/format';
+import { toFa, formatDate } from '../../utils/helpers/format';
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
+
+const fullNameOf = (user) =>
+  `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username || 'کاربر';
+
+const initialOf = (user) => (fullNameOf(user)[0] || 'ک').toUpperCase();
+
+/* رنگ نوار بالای کارت بر اساس نقش */
+const roleMeta = (user) => {
+  const role = String(user.role || 'user').toLowerCase();
+  if (role === 'admin' || role === 'root') return { label: 'مدیر', color: '#ffd60a', bg: 'rgba(255,214,10,0.14)' };
+  if (user.is_seller || role === 'seller')
+    return { label: 'فروشنده', color: '#2563eb', bg: 'rgba(37,99,235,0.14)' };
+  return { label: 'کاربر', color: '#17994f', bg: 'rgba(23,153,79,0.14)' };
+};
+
+const FILTERS = [
+  { key: 'ALL', label: 'همه' },
+  { key: 'admin', label: 'مدیران' },
+  { key: 'seller', label: 'فروشندگان' },
+  { key: 'user', label: 'کاربران' },
+];
+
+function StatTile({ label, value, hint, icon: Icon, tint }) {
+  return (
+    <div className="card rounded-2xl p-4 flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <div className="text-[11px] font-bold muted truncate">{label}</div>
+        <div className="mt-2 text-lg font-black" style={{ color: tint || 'var(--text)' }}>
+          {value}
+        </div>
+        {hint && <div className="mt-1 text-[10px] muted truncate">{hint}</div>}
+      </div>
+      <span
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+        style={{ background: 'var(--card2)', color: tint || 'var(--primary-color)' }}
+      >
+        <Icon size={17} />
+      </span>
+    </div>
+  );
+}
 
 function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
   const [editingUser, setEditingUser] = useState(null);
-  const [userForm, setUserForm] = useState({
-    username: '',
-    firstname: '',
-    lastname: '',
-    email: '',
-  });
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [userForm, setUserForm] = useState({ username: '', firstname: '', lastname: '', email: '' });
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (silent) setRefreshing(true);
+    else setLoading(true);
     try {
       const res = await axios.get(`${API}/user?limit=100`, authHeaders());
       setUsers(res.data.body?.data || res.data.body || []);
@@ -30,6 +88,7 @@ function UsersPage() {
       setUsers([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -37,19 +96,30 @@ function UsersPage() {
     load();
   }, [load]);
 
+  const stats = useMemo(() => {
+    const admins = users.filter((u) => ['admin', 'root'].includes(String(u.role).toLowerCase())).length;
+    const sellers = users.filter((u) => u.is_seller || String(u.role).toLowerCase() === 'seller').length;
+    const trusted = users.filter((u) => u.seller_trust === true).length;
+    return { admins, sellers, trusted };
+  }, [users]);
+
   const q = search.trim().toLowerCase();
   const filteredUsers = useMemo(
     () =>
-      q
-        ? users.filter(
-            (u) =>
-              u.username?.toLowerCase().includes(q) ||
-              u.phone?.includes(q) ||
-              u.email?.toLowerCase().includes(q) ||
-              `${u.firstname || ''} ${u.lastname || ''}`.toLowerCase().includes(q),
-          )
-        : users,
-    [users, q],
+      users.filter((u) => {
+        const role = String(u.role || 'user').toLowerCase();
+        if (roleFilter === 'admin' && !['admin', 'root'].includes(role)) return false;
+        if (roleFilter === 'seller' && !(u.is_seller || role === 'seller')) return false;
+        if (roleFilter === 'user' && (u.is_seller || role === 'seller' || ['admin', 'root'].includes(role)))
+          return false;
+        if (!q) return true;
+        return [u.username, u.phone, u.email, u.firstname, u.lastname]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
+      }),
+    [users, q, roleFilter],
   );
 
   const openEditUser = (u) => {
@@ -68,30 +138,36 @@ function UsersPage() {
     if (userForm.email.trim() && !validateEmailSyntax(userForm.email.trim())) {
       return toast.error('ایمیل معتبر نیست');
     }
+
     const payload = { username: userForm.username.trim() };
     if (userForm.firstname.trim()) payload.firstname = userForm.firstname.trim();
     if (userForm.lastname.trim()) payload.lastname = userForm.lastname.trim();
     if (userForm.email.trim()) payload.email = userForm.email.trim();
 
+    setSaving(true);
     axios
       .put(`${API}/user/${editingUser._id}`, payload, authHeaders())
       .then(() => {
         setEditingUser(null);
         toast.success('اطلاعات کاربر به‌روزرسانی شد');
-        load();
+        return load(true);
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'خطا در ویرایش کاربر'));
+      .catch((err) => toast.error(err.response?.data?.message || 'خطا در ویرایش کاربر'))
+      .finally(() => setSaving(false));
   };
 
-  const deleteUser = (id) => {
-    if (!confirm('این کاربر حذف شود؟')) return;
+  const deleteUser = () => {
+    if (!deleteTarget) return;
+    setSaving(true);
     axios
-      .delete(`${API}/user/${id}`, authHeaders())
+      .delete(`${API}/user/${deleteTarget._id}`, authHeaders())
       .then(() => {
+        setDeleteTarget(null);
         toast.success('کاربر حذف شد');
-        load();
+        return load(true);
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'خطا در حذف'));
+      .catch((err) => toast.error(err.response?.data?.message || 'خطا در حذف'))
+      .finally(() => setSaving(false));
   };
 
   if (loading) {
@@ -103,79 +179,216 @@ function UsersPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="font-black">کاربران ({toFa(filteredUsers.length)})</h2>
-        <div className="relative w-full sm:w-72">
+    <div className="space-y-5">
+      {/* ───── سرصفحه (کامپوننت مشترک پنل) ───── */}
+      <PanelPageHeader
+        icon={Users}
+        title="کاربران ژئو کالا"
+        subtitle={`مدیریت اعضا، فروشندگان و مدیران • ${toFa(users.length)} حساب`}
+        onRefresh={() => load(true)}
+        refreshing={refreshing}
+        actions={
+          <Link to="/dashboard/sellers" className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5">
+            <Store size={14} /> پنل فروشندگان
+          </Link>
+        }
+      />
+
+      {/* ───── آمار ───── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile label="کل کاربران" value={toFa(users.length)} hint="همه‌ی نقش‌ها" icon={Users} />
+        <StatTile label="فروشندگان" value={toFa(stats.sellers)} hint="دارای پنل فروشنده" icon={Store} tint="#2563eb" />
+        <StatTile label="مدیران" value={toFa(stats.admins)} hint="دسترسی کامل" icon={ShieldCheck} tint="#c2740a" />
+        <StatTile label="مورد اعتماد" value={toFa(stats.trusted)} hint="فروشنده‌ی تأییدشده" icon={BadgeCheck} tint="#17994f" />
+      </div>
+
+      {/* ───── جستجو و فیلتر ───── */}
+      <section className="card rounded-2xl p-3 sm:p-4 space-y-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          {FILTERS.map((filter) => {
+            const active = roleFilter === filter.key;
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => setRoleFilter(filter.key)}
+                className="chip"
+                style={
+                  active
+                    ? { background: 'var(--primary-color)', color: '#0a1736', borderColor: 'transparent' }
+                    : undefined
+                }
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+          <span className="ms-auto text-[11px] muted">
+            {toFa(filteredUsers.length)} نتیجه
+          </span>
+        </div>
+
+        <div className="relative">
           <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="جستجو با نام، نام کاربری، ایمیل یا موبایل…"
-            className="input !py-2 !pr-9 text-xs"
+            className="input !py-2.5 !pr-9 text-xs w-full"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="btn-ghost !p-1 absolute left-2 top-1/2 -translate-y-1/2"
+              aria-label="پاک کردن جستجو"
+            >
+              <X size={13} />
+            </button>
+          )}
         </div>
-      </div>
+      </section>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredUsers.map((u) => (
-          <div key={u._id} className="card rounded-2xl p-4 flex flex-col gap-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-10 h-10 rounded-xl bg-navy text-brand-yellow grid place-items-center font-black shrink-0">
-                  {(u.firstname || u.username || 'ک')[0]}
-                </span>
-                <div className="min-w-0">
-                  <div className="font-black text-sm truncate">
-                    {u.firstname || u.lastname
-                      ? `${u.firstname || ''} ${u.lastname || ''}`.trim()
-                      : u.username}
+      {/* ───── کارت کاربران ───── */}
+      {filteredUsers.length === 0 ? (
+        <section className="card rounded-3xl p-10 text-center space-y-3">
+          <span
+            className="mx-auto grid h-14 w-14 place-items-center rounded-2xl"
+            style={{ background: 'var(--card2)', color: 'var(--muted)' }}
+          >
+            <UserRound size={24} />
+          </span>
+          <b className="block text-sm">کاربری پیدا نشد</b>
+          <p className="text-xs muted">
+            {users.length === 0 ? 'لیست کاربران خالی است.' : 'فیلتر یا عبارت جستجو را تغییر دهید.'}
+          </p>
+          {(search || roleFilter !== 'ALL') && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                setRoleFilter('ALL');
+              }}
+              className="btn-ghost !py-2 !px-3 text-xs"
+            >
+              پاک کردن فیلترها
+            </button>
+          )}
+        </section>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filteredUsers.map((u) => {
+            const meta = roleMeta(u);
+            const trusted = u.seller_trust === true;
+            const seller = u.is_seller || String(u.role).toLowerCase() === 'seller';
+
+            return (
+              <article key={u._id} className="card rounded-2xl overflow-hidden flex flex-col">
+                <div className="h-1.5 w-full" style={{ background: meta.color, opacity: 0.85 }} />
+
+                <div className="p-4 flex flex-col gap-3 flex-1">
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-base font-black"
+                      style={{ background: meta.bg, color: meta.color }}
+                    >
+                      {initialOf(u)}
+                    </span>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <b className="truncate text-sm">{fullNameOf(u)}</b>
+                        {trusted && <BadgeCheck size={14} style={{ color: '#17994f' }} />}
+                      </div>
+                      <div className="mt-0.5 text-[11px] muted truncate" dir="ltr">
+                        @{u.username || '—'}
+                      </div>
+                    </div>
+
+                    <span
+                      className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black"
+                      style={{ background: meta.bg, color: meta.color }}
+                    >
+                      {meta.label}
+                    </span>
                   </div>
-                  <div className="text-xs muted truncate" dir="ltr">
-                    @{u.username}
+
+                  <div className="space-y-1 text-[11px] muted">
+                    <div className="flex items-center gap-1.5">
+                      <Phone size={11} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
+                      <span dir="ltr">{toFa(u.phone || '—')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Mail size={11} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
+                      <span dir="ltr" className="truncate">
+                        {u.email || 'ایمیل ثبت نشده'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <CalendarDays size={11} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
+                      <span>عضویت: {formatDate(u.created_at || u.create_at)}</span>
+                    </div>
                   </div>
+
+                  {seller && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        style={{
+                          background: u.seller_approved_status ? 'rgba(23,153,79,0.14)' : 'rgba(194,116,10,0.14)',
+                          color: u.seller_approved_status ? '#17994f' : '#c2740a',
+                        }}
+                      >
+                        {u.seller_approved_status ? 'تأییدشده' : 'در انتظار تأیید'}
+                      </span>
+                      <span
+                        className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        style={{
+                          background: u.seller_active_status === 'ACTIVE' ? 'rgba(37,99,235,0.14)' : 'rgba(130,140,170,0.16)',
+                          color: u.seller_active_status === 'ACTIVE' ? '#2563eb' : 'var(--muted)',
+                        }}
+                      >
+                        {u.seller_active_status === 'ACTIVE' ? 'فعال' : 'غیرفعال'}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </div>
-              <span className="chip !cursor-default !py-0.5 !px-2 text-[11px] shrink-0">
-                {u.role}
-                {u.is_seller ? ' • فروشنده' : ''}
-              </span>
-            </div>
 
-            <div className="space-y-1 text-xs muted">
-              <div className="flex items-center gap-1.5">
-                <Phone size={12} className="text-yellow" />
-                <span dir="ltr">{toFa(u.phone || '—')}</span>
-              </div>
-              <div className="flex items-center gap-1.5 truncate">
-                <Mail size={12} className="text-yellow shrink-0" />
-                <span dir="ltr" className="truncate">
-                  {u.email || 'ایمیل ثبت نشده'}
-                </span>
-              </div>
-            </div>
+                <div className="mt-auto flex items-center gap-1.5 border-t border-theme p-3">
+                  <button
+                    type="button"
+                    onClick={() => openEditUser(u)}
+                    className="btn-ghost !py-1.5 text-xs flex-1 flex items-center justify-center gap-1"
+                  >
+                    <Pencil size={13} /> ویرایش
+                  </button>
+                  {seller && (
+                    <Link
+                      to="/dashboard/sellers"
+                      className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1"
+                      title="مدیریت در بخش فروشندگان"
+                    >
+                      <Store size={13} />
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(u)}
+                    className="btn-ghost !p-2"
+                    style={{ color: '#e53935' }}
+                    title="حذف کاربر"
+                    aria-label="حذف کاربر"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
-            <div className="flex items-center gap-2 pt-2 mt-auto border-t border-theme">
-              <button
-                type="button"
-                onClick={() => openEditUser(u)}
-                className="btn-ghost !py-1.5 text-xs flex-1 flex items-center justify-center gap-1"
-              >
-                <Pencil size={13} /> ویرایش کاربر
-              </button>
-              <button
-                type="button"
-                onClick={() => deleteUser(u._id)}
-                className="btn-ghost !p-2 text-red-400"
-                title="حذف کاربر"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
+      {/* ───── مودال ویرایش ───── */}
       {editingUser && (
         <div
           className="fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
@@ -184,67 +397,135 @@ function UsersPage() {
           <form
             onSubmit={saveUser}
             onClick={(e) => e.stopPropagation()}
-            className="card rounded-3xl p-6 w-full max-w-md space-y-3"
+            className="card rounded-3xl w-full max-w-lg overflow-hidden"
           >
-            <div className="flex items-center justify-between border-b border-theme pb-3">
-              <h3 className="font-black">ویرایش کاربر: {editingUser.username}</h3>
+            <div className="flex items-center gap-3 border-b border-theme p-4">
+              <span
+                className="grid h-11 w-11 place-items-center rounded-2xl text-base font-black"
+                style={{ background: roleMeta(editingUser).bg, color: roleMeta(editingUser).color }}
+              >
+                {initialOf(editingUser)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-black truncate">ویرایش {fullNameOf(editingUser)}</h3>
+                <span className="text-[11px] muted" dir="ltr">
+                  @{editingUser.username}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
                 className="btn-ghost !p-1.5"
+                aria-label="بستن"
               >
                 <X size={16} />
               </button>
             </div>
-            <label className="block text-xs muted">
-              نام کاربری
-              <input
-                className="input mt-1"
-                value={userForm.username}
-                onChange={(e) => setUserForm({ ...userForm, username: e.target.value })}
-                required
-              />
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="text-xs muted">
-                نام
+
+            <div className="p-4 space-y-3">
+              <label className="block text-[11px] font-bold muted">
+                نام کاربری
                 <input
-                  className="input mt-1"
-                  value={userForm.firstname}
-                  onChange={(e) => setUserForm({ ...userForm, firstname: e.target.value })}
+                  className="input mt-1.5 !text-xs"
+                  dir="ltr"
+                  value={userForm.username}
+                  onChange={(e) => setUserForm({ ...userForm, username: e.target.value })}
+                  required
                 />
               </label>
-              <label className="text-xs muted">
-                نام خانوادگی
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-[11px] font-bold muted">
+                  نام
+                  <input
+                    className="input mt-1.5 !text-xs"
+                    value={userForm.firstname}
+                    onChange={(e) => setUserForm({ ...userForm, firstname: e.target.value })}
+                  />
+                </label>
+                <label className="text-[11px] font-bold muted">
+                  نام خانوادگی
+                  <input
+                    className="input mt-1.5 !text-xs"
+                    value={userForm.lastname}
+                    onChange={(e) => setUserForm({ ...userForm, lastname: e.target.value })}
+                  />
+                </label>
+              </div>
+              <label className="block text-[11px] font-bold muted">
+                ایمیل
                 <input
-                  className="input mt-1"
-                  value={userForm.lastname}
-                  onChange={(e) => setUserForm({ ...userForm, lastname: e.target.value })}
+                  className="input mt-1.5 !text-xs"
+                  dir="ltr"
+                  value={userForm.email}
+                  onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
                 />
               </label>
+
+              <div className="card2 rounded-xl p-2.5 text-[11px] muted flex items-center gap-1.5">
+                <Phone size={12} />
+                شماره موبایل و نقش کاربر فقط از سمت سرور قابل تغییر است.
+              </div>
             </div>
-            <label className="block text-xs muted">
-              ایمیل
-              <input
-                className="input mt-1"
-                dir="ltr"
-                value={userForm.email}
-                onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-              />
-            </label>
-            <div className="flex justify-end gap-2 pt-2">
+
+            <div className="flex items-center justify-between gap-2 border-t border-theme p-3">
               <button
                 type="button"
-                onClick={() => setEditingUser(null)}
-                className="btn-ghost !py-2 text-xs"
+                onClick={() => {
+                  setEditingUser(null);
+                  setDeleteTarget(editingUser);
+                }}
+                className="btn-ghost !py-2 !px-3 text-xs"
+                style={{ color: '#e53935' }}
               >
-                انصراف
+                حذف کاربر
               </button>
-              <button type="submit" className="btn-yellow !py-2 text-xs">
-                ذخیره تغییرات
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setEditingUser(null)} className="btn-ghost !py-2 !px-4 text-xs">
+                  انصراف
+                </button>
+                <button type="submit" disabled={saving} className="btn-yellow !py-2 !px-4 text-xs flex items-center gap-1.5 disabled:opacity-60">
+                  <Check size={14} /> {saving ? 'در حال ذخیره…' : 'ذخیره تغییرات'}
+                </button>
+              </div>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* ───── مودال حذف ───── */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-[160] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="card rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
+            <span
+              className="mx-auto grid h-14 w-14 place-items-center rounded-2xl"
+              style={{ background: 'rgba(229,57,53,0.14)', color: '#e53935' }}
+            >
+              <Trash2 size={24} />
+            </span>
+            <div className="space-y-1">
+              <b className="block text-sm">حذف کاربر</b>
+              <p className="text-xs muted leading-6">
+                «{fullNameOf(deleteTarget)}» برای همیشه حذف می‌شود. این عملیات قابل بازگشت نیست.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <button type="button" onClick={() => setDeleteTarget(null)} className="btn-ghost !py-2 !px-4 text-xs">
+                انصراف
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={deleteUser}
+                className="btn-yellow !py-2 !px-4 text-xs disabled:opacity-60"
+                style={{ background: '#e53935', color: '#fff' }}
+              >
+                {saving ? 'در حال حذف…' : 'بله، حذف کن'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

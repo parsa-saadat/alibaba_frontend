@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import BrandLogoComponent from '../common/BrandLogoComponent';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -40,34 +41,30 @@ function SellerNavbarComponent() {
     return (
       <div className="flex flex-col h-full bg-[#0a1736] text-white select-none">
         <div
-          className={`p-4 border-b border-white/10 flex items-center ${
-            isCompact ? 'justify-center' : 'justify-between gap-2'
+          className={`border-b border-white/10 flex items-center ${
+            isCompact ? 'justify-center p-3' : 'justify-between gap-2 p-4'
           }`}
         >
           <Link to="/" className="flex items-center gap-2.5 min-w-0">
-            <span
-              className="w-9 h-9 rounded-xl grid place-items-center font-black text-lg shrink-0 shadow"
-              style={{ background: 'var(--primary-color)', color: '#0a1736' }}
-            >
-              ع
-            </span>
+            <BrandLogoComponent size="sm" tone="white" />
             {!isCompact && (
               <div className="min-w-0">
                 <div className="font-black text-sm truncate">پنل فروشنده</div>
                 <div className="text-[11px] text-[#9aa8cc] truncate">
-                  {userDisplayName(user, 'فروشنده علی‌بازار')}
+                  {userDisplayName(user, 'فروشنده ژئو کالا')}
                 </div>
               </div>
             )}
           </Link>
-          {!isMobile && (
+          {!isMobile && !isCompact && (
             <button
               type="button"
-              onClick={() => setCollapsed((v) => !v)}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-[#9aa8cc]"
-              title={collapsed ? 'بزرگ‌نمایی منو' : 'کوچک‌نمایی منو'}
+              onClick={() => setCollapsed(true)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-[#9aa8cc] shrink-0"
+              title="کوچک‌نمایی منو"
+              aria-label="کوچک‌نمایی منو"
             >
-              {collapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}
+              <PanelRightClose size={17} />
             </button>
           )}
           {isMobile && (
@@ -81,6 +78,24 @@ function SellerNavbarComponent() {
             </button>
           )}
         </div>
+
+        {/* دستگیره‌ی باز کردن منو در حالت بسته؛ بیرون از هدر است تا روی لوگو نیفتد */}
+        {!isMobile && isCompact && (
+          <button
+            type="button"
+            onClick={() => setCollapsed(false)}
+            className="mx-auto my-2 grid h-8 w-8 place-items-center rounded-full"
+            style={{
+              background: 'rgba(255,214,10,0.14)',
+              color: 'var(--primary-color)',
+              border: '1px solid rgba(255,214,10,0.35)',
+            }}
+            title="باز کردن منو"
+            aria-label="باز کردن منو"
+          >
+            <PanelRightOpen size={16} />
+          </button>
+        )}
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1" aria-label="ناوبری پنل فروشنده">
           {SELLER_ITEMS.map((item) => {
@@ -174,13 +189,13 @@ function SellerNavbarComponent() {
           >
             <Menu size={19} />
           </button>
-          <span className="font-black text-sm">پنل فروشندگان علی‌بازار</span>
+          <span className="font-black text-sm">پنل فروشندگان ژئو کالا</span>
         </div>
         <span className="text-xs text-brand-yellow font-bold">{userDisplayName(user, user?.username)}</span>
       </div>
 
       <aside
-        className={`hidden lg:block shrink-0 border-l border-white/10 transition-all duration-200 sticky top-0 h-screen ${
+        className={`hidden lg:block shrink-0 border-l border-white/10 transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >

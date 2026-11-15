@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getBody, getId, isDirectImage } from './response.js';
 
-const API = import.meta.env?.VITE_APP_API_URL || import.meta.env?.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env?.VITE_APP_API_URL || import.meta.env?.VITE_API_URL || '/api';
 const cache = new Map();
 
 const bytesToBase64 = (bytes) => {
@@ -43,6 +43,42 @@ export const fileDataUrl = (file) => {
   }
   if (!bytes?.length) return '';
   return `data:${mime};base64,${bytesToBase64(bytes)}`;
+};
+
+/*
+ * تشخیص شناسه‌ی فایل داخل یک آدرس تصویر.
+ * آدرس‌هایی که از آپلود توضیحات می‌آیند به شکل «<API>/storage/<id>» یا «storage:<id>»
+ * ذخیره می‌شوند؛ این تابع آن‌ها را به شناسه برمی‌گرداند تا با resolveStorageImage
+ * به data-url تبدیل شوند (روت عمومی /storage/:id خروجی JSON می‌دهد، نه فایل خام).
+ */
+export const storageIdFromSrc = (src) => {
+  if (!src || typeof src !== 'string') return '';
+  const value = src.trim();
+  if (!value) return '';
+  if (value.startsWith('data:') || value.startsWith('blob:')) return '';
+
+  const prefixed = value.match(/^storage:([A-Za-z0-9_-]+)$/);
+  if (prefixed) return prefixed[1];
+
+  const byPath = value.match(/\/storage\/([A-Za-z0-9_-]+)\/?$/);
+  if (byPath) return byPath[1];
+
+  if (/^[a-f0-9]{24}$/i.test(value)) return value;
+  return '';
+};
+
+/* true یعنی این آدرس یک فایل داخل استوریج است و باید با API رزولو شود */
+export const isStorageSrc = (src) => Boolean(storageIdFromSrc(src));
+
+export const resolveStorageSrc = async (src, force = false) => {
+  const id = storageIdFromSrc(src);
+  if (!id) return src;
+  try {
+    const url = await resolveStorageImage(id, force);
+    return url || src;
+  } catch {
+    return src;
+  }
 };
 
 export const resolveStorageImage = async (file, force = false) => {

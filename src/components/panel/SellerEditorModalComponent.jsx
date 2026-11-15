@@ -17,6 +17,8 @@ import {
   X,
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
+import { clearSellerCache } from '../../services/sellerApi';
+import JalaliDateTimePicker from '../common/JalaliDateTimePicker';
 import { nationalIDValidator } from '../../utils/validators/national_id.validator';
 import { cardNumberValidator } from '../../utils/validators/card_number.validator';
 import { shebaNumberValidator } from '../../utils/validators/sheba_number.validator';
@@ -24,7 +26,7 @@ import { validateEmailSyntax } from '../../utils/validators/email.validator';
 import { toFa } from '../../utils/helpers/format';
 import { userFullName } from '../../utils/helpers/user';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const SELLER_TYPES = [
   ['Individual_seller', 'فروشنده حقیقی'],
@@ -292,7 +294,8 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
       sellerPatch.seller_approved_status = Boolean(form.seller_approved_status);
     if (isDirty('seller_active_status'))
       sellerPatch.seller_active_status = form.seller_active_status;
-    if (isDirty('seller_trust')) sellerPatch.seller_trust = Boolean(form.seller_trust);
+    /* توجه: بک‌اند فیلد seller_trust را در PUT /seller/:id قبول نمی‌کند؛
+       اعتماد فقط با PUT /seller/:id/trust تغییر می‌کند (پایین‌تر جداگانه صدا زده می‌شود). */
 
     return { userPatch, sellerPatch };
   };
@@ -327,6 +330,10 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
     const id = seller._id;
     const jobs = [];
 
+    /* تغییر «نشان اعتماد» مسیر اختصاصی خودش را دارد */
+    const trustDirty = isDirty('seller_trust');
+    const nextTrust = Boolean(form.seller_trust);
+
     const userKeys = Object.keys(userPatch);
     const sellerKeys = Object.keys(sellerPatch);
 
@@ -353,7 +360,29 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
     setSaving(true);
     try {
-      const results = await Promise.allSettled(jobs.map((job) => job.run()));
+      /* اعتماد بعد از تأیید ارسال می‌شود؛ ترتیب مهم است */
+      const results = [];
+      for (const job of jobs) {
+        // eslint-disable-next-line no-await-in-loop
+        results.push(await job.run().then((value) => ({ status: 'fulfilled', value }), (reason) => ({ status: 'rejected', reason })));
+      }
+
+      if (trustDirty) {
+        const trustJob = {
+          label: 'نشان اعتماد فروشنده',
+          keys: ['seller_trust'],
+          run: () =>
+            axios.put(`${API}/seller/${id}/trust`, { trust: nextTrust }, authHeaders()),
+        };
+        jobs.push(trustJob);
+        // eslint-disable-next-line no-await-in-loop
+        results.push(
+          await trustJob.run().then(
+            (value) => ({ status: 'fulfilled', value }),
+            (reason) => ({ status: 'rejected', reason }),
+          ),
+        );
+      }
       const failures = results
         .map((result, index) => ({ result, job: jobs[index] }))
         .filter(({ result }) => result.status === 'rejected')
@@ -373,6 +402,12 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             });
         });
         setInitial((prev) => ({ ...prev, ...applied }));
+        /* کش فروشنده در فروشگاه را خالی کن تا نشان اعتماد فوراً به‌روز شود */
+        try {
+          clearSellerCache();
+        } catch {
+          /* بی‌اهمیت */
+        }
         onSaved?.();
       }
 
@@ -562,13 +597,12 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                 error={errors.birth_date}
                 legacy={isLegacyInvalid('birth_date')}
               >
-                <input
-                  id="in-birth_date"
-                  className="input"
-                  dir="ltr"
-                  placeholder="1372/04/15"
+                <JalaliDateTimePicker
                   value={form.birth_date}
-                  onChange={set('birth_date')}
+                  onChange={(next) => set('birth_date')({ target: { value: next } })}
+                  placeholder="۱۳۷۲/۰۴/۱۵"
+                  withTime={false}
+                  valueFormat="jalali"
                 />
               </Field>
 

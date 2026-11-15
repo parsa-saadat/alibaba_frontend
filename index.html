@@ -3,15 +3,133 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a1736" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta property="og:image" content="/logo.png" />
+    <title>ژئو کالا | بازارگاه تخصصی تجهیزات نقشه‌برداری</title>
+    <meta
+      name="description"
+      content="ژئو کالا، بازارگاه تخصصی تجهیزات نقشه‌برداری؛ جی‌پی‌اس ایستگاهی و RTK، توتال استیشن، دوربین نقشه‌برداری، کنترولر و متر لیزری از برندهای معتبر، با مشاوره فنی و ضمانت اصالت کالا. زیرمجموعه شرکت بازرگانی فناوری سران ماهان آسیا."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ژئو کالا" />
+    <meta property="og:title" content="ژئو کالا | بازارگاه تخصصی تجهیزات نقشه‌برداری" />
+    <meta
+      property="og:description"
+      content="خرید تجهیزات نقشه‌برداری از برندهای معتبر؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و لوازم جانبی."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <title>علی‌بازار | بازار داخلی ایران</title>
+    <style>
+      html,body{margin:0;background:#0a1736}
+      #boot-splash{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 20% 15%,rgba(255,214,10,.14),transparent 55%),linear-gradient(135deg,#0f2150,#0a1736);font-family:Vazirmatn,Tahoma,sans-serif;direction:rtl;color:#eef2ff;z-index:9999}
+      #boot-splash .boot-card{text-align:center;padding:24px;max-width:420px}
+      #boot-splash b{display:block;font-size:20px;font-weight:900;margin-top:18px;letter-spacing:.02em}
+      #boot-splash p{margin:8px 0 0;font-size:12px;color:#9aa8cc;line-height:2}
+      #boot-splash .boot-ring{width:54px;height:54px;margin:0 auto;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:#ffd60a;animation:boot-spin .9s linear infinite}
+      #boot-splash .boot-ring span{display:none}
+      @keyframes boot-spin{to{transform:rotate(360deg)}}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- لودینگ اولیه؛ به‌محض بالا آمدن React خودکار جایگزین می‌شود -->
+      <div id="boot-splash" role="status" aria-live="polite">
+        <div class="boot-card">
+          <div class="boot-ring"><span></span></div>
+          <b>ژئو کالا</b>
+          <p id="boot-splash-text">در حال بارگذاری…</p>
+        </div>
+      </div>
+    </div>
+
+    <!--
+      شبکه‌ی اطمینان: اگر به هر دلیلی (خطای بارگذاری ماژول، مسدود بودن حافظه و…)
+      React بالا نیامد، به‌جای صفحه‌ی سفید یک پیام روشن با دکمه‌ی تلاش دوباره نشان می‌دهیم.
+    -->
+    <script>
+      (function () {
+        var lastError = '';
+        window.addEventListener(
+          'error',
+          function (event) {
+            var target = event && event.target;
+            if (target && (target.src || target.href)) {
+              lastError = 'بارگذاری ' + (target.src || target.href) + ' ناموفق بود';
+            } else if (event && event.message) {
+              lastError = event.message;
+            }
+          },
+          true,
+        );
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event && event.reason;
+          lastError = (reason && (reason.message || String(reason))) || lastError;
+        });
+
+        /*
+         * ترمیم خودکار: اگر مرورگر نسخه‌ی قدیمیِ ماژول‌ها را نگه داشته باشد، خطاهایی
+         * مثل «Invalid hook call» یا «reading 'useState' of null» رخ می‌دهد.
+         * یک‌بار (و فقط یک‌بار برای هر تب) صفحه را با آدرس تازه دوباره بارگذاری می‌کنیم.
+         */
+        var hookErrorPattern = /Invalid hook call|reading 'useState'|does not provide an export named/;
+        function autoRepair(message) {
+          if (!hookErrorPattern.test(String(message || ''))) return;
+          try {
+            if (sessionStorage.getItem('geokala_self_repair') === '1') return;
+            sessionStorage.setItem('geokala_self_repair', '1');
+          } catch (e) {
+            /* اگر sessionStorage نبود، برای جلوگیری از حلقه، کاری نمی‌کنیم */
+            return;
+          }
+          var url = new URL(window.location.href);
+          url.searchParams.set('reload', String(Date.now()));
+          window.location.replace(url.toString());
+        }
+        window.addEventListener('error', function (event) {
+          autoRepair((event && event.message) || (event && event.error && event.error.message));
+        });
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event && event.reason;
+          autoRepair(reason && (reason.message || String(reason)));
+        });
+
+        /* اگر بارگذاری کند بود، فقط یک پیام دلگرم‌کننده نشان بده (نه خطا) */
+        setTimeout(function () {
+          var hint = document.getElementById('boot-splash-text');
+          if (hint) hint.textContent = 'اتصال کمی کند است؛ لطفاً چند لحظه صبر کنید…';
+        }, 7000);
+
+        /* فقط اگر بعد از مدت طولانی هنوز لودینگ اولیه روی صفحه است، خطا نشان بده */
+        setTimeout(function () {
+          var root = document.getElementById('boot-splash');
+          if (!root) return;
+          root.innerHTML =
+            '<div style="max-width:560px;margin:60px auto;padding:28px;border-radius:24px;' +
+            'background:#0f2150;border:1px solid rgba(255,255,255,.12);color:#eef2ff;' +
+            'font-family:Vazirmatn,Tahoma,sans-serif;direction:rtl;text-align:center;line-height:2">' +
+            '<div style="width:44px;height:44px;margin:0 auto 12px;border-radius:14px;' +
+            'background:#ffd60a;color:#0a1736;display:grid;place-items:center;font-weight:900">!</div>' +
+            '<b style="font-size:15px">سایت بالا نیامد</b>' +
+            '<p style="font-size:12px;color:#9aa8cc;margin:8px 0 0">' +
+            'صفحه را دوباره بارگذاری کنید (Ctrl+Shift+R). اگر تکرار شد، متن خطای زیر را بفرستید:' +
+            '</p>' +
+            '<code id="geokala-boot-error" dir="ltr" style="display:block;margin-top:10px;' +
+            'padding:8px;border-radius:10px;background:#162e66;font-size:11px;' +
+            'overflow-wrap:anywhere"></code>' +
+            '<button onclick="location.reload()" style="margin-top:14px;padding:9px 18px;' +
+            'border:0;border-radius:12px;background:#ffd60a;color:#0a1736;font-weight:800;' +
+            'font-family:inherit;cursor:pointer">تلاش دوباره</button></div>';
+          var box = document.getElementById('geokala-boot-error');
+          if (box) box.textContent = lastError || 'خطای نامشخص در بارگذاری اسکریپت‌ها';
+        }, 25000);
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -9,8 +9,9 @@ import {
 } from '../../../utils/validators/phone.validator';
 import { useShop } from '../../../contexts/ShopContext';
 import { toFa } from '../../../utils/helpers/format';
+import AuthShellComponent from '../../../components/auth/AuthShellComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -83,19 +84,16 @@ function RegisterPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <div className="card rounded-3xl p-8">
-        <div className="text-center mb-6">
-          <div
-            className="w-14 h-14 rounded-2xl grid place-items-center font-black text-2xl mx-auto mb-3"
-            style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
-          >
-            ع
-          </div>
-          <h1 className="font-black text-2xl">ثبت‌نام در علی‌بازار</h1>
-          <p className="text-sm muted mt-1">با شماره موبایل ثبت‌نام کنید</p>
-        </div>
-
+    <AuthShellComponent
+      title="ایجاد حساب کاربری"
+      subtitle="با شماره موبایل ثبت‌نام کنید"
+      footer={
+        <>
+          حساب دارید؟{' '}
+          <Link to="/auth/pre" className="font-bold text-yellow">وارد شوید</Link>
+        </>
+      }
+    >
         {step === 1 && (
           <form onSubmit={sendCode} className="space-y-4">
             <span className="text-sm font-bold flex items-center gap-1">
@@ -184,14 +182,7 @@ function RegisterPage() {
           </form>
         )}
 
-        <div className="text-center text-sm muted mt-6">
-          حساب دارید؟{' '}
-          <Link to="/auth/pre" className="font-bold text-yellow">
-            وارد شوید
-          </Link>
-        </div>
-      </div>
-    </div>
+    </AuthShellComponent>
   );
 }
 

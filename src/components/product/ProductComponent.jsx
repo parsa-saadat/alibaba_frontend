@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Heart,
-  GitCompareArrows,
-  BadgeCheck,
-  Check,
-} from 'lucide-react';
+import { Heart, GitCompareArrows, Check } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
 import { getId } from '../../utils/helpers/response';
+import TrustBadge from './TrustBadge';
+import {
+  TRUST,
+  storeIdOfProduct,
+  sellerIdOfProduct,
+  registerTrustProbe,
+} from '../../services/sellerApi';
 import StorageImageComponent from '../common/StorageImageComponent';
 
 import {
@@ -32,7 +34,16 @@ export function ProductSkeleton() {
   );
 }
 
-function ProductComponent({ product }) {
+function ProductComponent({
+  product,
+  /* اگر صفحه‌ی والد وضعیت اعتماد فروشنده را از قبل می‌داند (صفحه‌ی فروشگاه)،
+     همان را می‌دهد تا کارت‌ها درخواست تکراری نفرستند */
+  trust: trustProp = null,
+  /* سازگاری با فراخوانی‌های قبلی؛ برچسب «بدون تأیید» حالا همیشه نمایش داده می‌شود */
+  showUntrusted = true,
+  storeId: storeIdProp = '',
+  sellerId: sellerIdProp = '',
+}) {
   const { toggleFavorite, isFavorite, toggleCompare, compare } = useShop();
 
   const id = getId(product);
@@ -45,12 +56,34 @@ function ProductComponent({ product }) {
   const soldOut = product.stock_status === 'OUT_OF_STOCK' || stock === 0;
 
   const rating = Number(ratingOf(product)) || 0;
-  const sold = Number(product.sold_count) || 0;
+
+  /*
+   * نشان «مورد اعتماد» فقط از بک‌اند واقعی می‌آید (هیچ فیلد آماده‌ای روی محصول نیست):
+   *   product.store_id → GET /store/:id → store.user → GET /user/:id → seller_trust
+   * نتیجه در services/sellerApi کش می‌شود، پس ۲۰ کارت با ۳ فروشگاه چند درخواست بیشتر نمی‌فرستد.
+   * قانون ثابت: تا وقتی seller_trust دقیقاً true نباشد، هیچ نشان سبزی رندر نمی‌شود.
+   */
+  /* «نامشخص» از طرف صفحه‌ی والد یعنی «من نمی‌دانم»، نه «تأییدنشده»؛ در این حالت
+     خود کارت وضعیت را از بک‌اند می‌پرسد (داخل TrustBadge). */
+  const knownTrust = trustProp && trustProp !== TRUST.UNKNOWN ? trustProp : null;
+
+  /* شناسه‌هایی که برای پیدا کردن فروشنده تلاش می‌شود — روی محصول، بعد از پراپ صفحه */
+  const probeStoreId = storeIdOfProduct(product) || storeIdProp || '';
+  const probeSellerId = sellerIdOfProduct(product) || sellerIdProp || '';
+
+  /*
+   * برای عیب‌یابی روی نصب واقعی: در کنسول مرورگر بنویس
+   *     await __trustExplain()
+   * تا برای هر کارت ببینی شناسه‌ها چه بودند و درخواست‌ها چه جوابی دادند.
+   */
+  useEffect(() => {
+    registerTrustProbe({ id, storeId: probeStoreId, sellerId: probeSellerId });
+  }, [id, probeStoreId, probeSellerId]);
 
   const circle =
     'w-8 h-8 rounded-full grid place-items-center border border-theme bg-[var(--card)]/90 backdrop-blur-sm  transition-colors hover:bg-[var(--card)]';
 
-  return (                                                  
+  return (
     <div className="card group relative flex flex-col h-full w-full rounded-xl p-3 ">
       {/* ───── تصویر ───── */}
       <div
@@ -121,7 +154,7 @@ function ProductComponent({ product }) {
 
       {/* ───── قیمت ───── */}
       <div className="mt-3 flex items-baseline gap-2 flex-wrap">
-        <span className="text-xl font-black leading-none text-yellow">
+        <span className="text-lg sm:text-xl font-black leading-none text-yellow">
           {formatPrice(finalPrice(product))}
         </span>
         {discount && (
@@ -129,7 +162,7 @@ function ProductComponent({ product }) {
         )}
       </div>
 
-      {/* ───── موجودی و فروش ───── */}
+      {/* ───── موجودی ───── */}
       <div className="mt-1.5 text-sm">
         {soldOut ? (
           <span className="text-rose-500 font-bold">ناموجود</span>
@@ -138,21 +171,25 @@ function ProductComponent({ product }) {
         ) : (
           <span>موجود</span>
         )}
-        {sold > 0 && <span className="muted ms-2">{toFa(sold)} فروش</span>}
       </div>
 
-      {/* ───── فروشنده ───── */}
-      <div className="mt-1.5 flex items-center gap-1 text-xs muted min-w-0">
-        <BadgeCheck size={16} className="text-yellow shrink-0" />
-        <span className="font-black text-yellow text-sm shrink-0">تأییدشده</span>
-        <span>·</span>
+      {/* ───── فروشگاه ───── */}
+      <div className="flex items-center gap-1 text-xs muted min-w-0">
         {product.store_id && product.store_name ? (
           <Link to={`/store/${product.store_id}`} className="relative z-20 truncate hover:underline">
             {product.store_name}
           </Link>
-        ) : (
-          <span className="truncate">{product.store_name || 'ایران'}</span>
-        )}
+        ) : product.store_name ? (
+          <span className="truncate">{product.store_name}</span>
+        ) : null}
+      </div>
+
+      {/* ───── نشان اعتماد فروشنده ─────
+          زیر خود محصول (آخرین سطر کارت) و همیشه نمایش داده می‌شود؛
+          ظاهر ملایم دور ۱۸: سبز کم‌رنگ برای تأییدشده، خاکستری برای تأییدنشده.
+          وضعیت «نامشخص» هیچ برچسبی نمی‌گیرد. ───── */}
+      <div className="mt-1.5 flex min-h-[18px] items-center gap-1">
+        <TrustBadge trust={knownTrust} storeId={probeStoreId} sellerId={probeSellerId} debug />
       </div>
 
       {/* لینک کل کارت */}

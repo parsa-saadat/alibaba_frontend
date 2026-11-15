@@ -7,26 +7,42 @@ import { Placeholder } from '@tiptap/extension-placeholder';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import { Markdown } from 'tiptap-markdown';
 import {
+  ArrowRight,
+  ArrowUp,
   Bold,
-  Italic,
+  ChevronDown,
+  Code,
+  Code2,
+  Columns3,
+  Edit3,
   Heading2,
+  Heading3,
+  ImagePlus,
+  Italic,
+  Link2,
   List,
   ListOrdered,
-  Quote,
-  Code,
-  Link2,
-  ImagePlus,
-  Video as VideoIcon,
-  MonitorPlay,
-  Table as TableIcon,
-  Rows3,
-  Columns3,
+  Maximize2,
+  Merge,
   Minus,
+  Minimize2,
+  MonitorPlay,
+  Plus,
+  Quote,
+  Redo2,
+  Rows3,
+  Split,
+  Strikethrough,
+  Table as TableIcon,
   Trash2,
-  Edit3,
-  Code2,
+  Undo2,
+  Video as VideoIcon,
   X,
 } from 'lucide-react';
+import useMediaSrc from '../../hooks/useMediaSrc';
+
+const API =
+  import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const MD_PATTERNS = [
   /^#{1,6}\s+.+/m,
@@ -54,11 +70,10 @@ export function isValidBackendMarkdown(text) {
 const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#0a1736' };
 
 /* ------------------------------------------------------------------ */
-/* ابزارهای کمکی رسانه                                                  */
+/* ابزارهای کمکی رسانه                                                 */
 /* ------------------------------------------------------------------ */
 const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
-// تبدیل لینک‌های رایج به آدرس embed (فقط https و هاست‌های مجاز)
 const toEmbedUrl = (input) => {
   let u;
   try {
@@ -90,18 +105,24 @@ const toEmbedUrl = (input) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* NodeView مشترک: تصویر / ویدیو / جاسازی (تمام‌عرض، راست‌چین)           */
+/* NodeView مشترک: تصویر / ویدیو / جاسازی                              */
 /* ------------------------------------------------------------------ */
 function MediaView({ node, selected, deleteNode }) {
   const { src, alt } = node.attrs;
   const type = node.type.name;
+  const media = useMediaSrc(src);
 
   return (
     <NodeViewWrapper className={`md-media ${selected ? 'is-selected' : ''}`}>
       <div className="md-media-box" contentEditable={false}>
-        {type === 'image' && (
-          <img src={src} alt={alt || ''} draggable={false} className="md-media-el" />
-        )}
+        {type === 'image' &&
+          (media.url ? (
+            <img src={media.url} alt={alt || ''} draggable={false} className="md-media-el" />
+          ) : (
+            <div className="md-media-loading">
+              {media.failed ? 'تصویر در دسترس نیست' : 'در حال بارگذاری تصویر…'}
+            </div>
+          ))}
         {type === 'video' && (
           <video src={src} controls playsInline className="md-media-el" />
         )}
@@ -131,7 +152,7 @@ function MediaView({ node, selected, deleteNode }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* سریالایز Markdown برای رسانه‌ها                                      */
+/* سریالایز Markdown برای رسانه‌های بلوکی                               */
 /* ------------------------------------------------------------------ */
 const serializeBlock = (toText) => (state, node) => {
   state.write(toText(node));
@@ -150,12 +171,18 @@ const embedToText = (node) => `<iframe src="${esc(node.attrs.src)}" allowfullscr
 /* ------------------------------------------------------------------ */
 /* Extensions رسانه                                                    */
 /* ------------------------------------------------------------------ */
+/*
+ * تصویر:
+ *  - سریالایز: `![alt](src)` به‌صورت بلوک مستقل (تا در متن حل نشود)
+ *  - پارس: دست markdown-it انجام می‌شود، پس `parse` خالی می‌ماند
+ * این ترکیب رفت‌وبرگشت کامل می‌دهد: آپلود → ذخیره → باز شدن در فرم ویرایش.
+ */
 const MediaImage = Image.extend({
   addNodeView() {
     return ReactNodeViewRenderer(MediaView);
   },
   addStorage() {
-    return { markdown: { serialize: serializeBlock(imageToText) } };
+    return { markdown: { serialize: serializeBlock(imageToText), parse: {} } };
   },
 });
 
@@ -257,7 +284,6 @@ const TableKeys = Extension.create({
   },
 });
 
-// میانبر Ctrl+K برای لینک
 const LinkShortcut = Extension.create({
   name: 'linkShortcut',
   addKeyboardShortcuts() {
@@ -271,9 +297,9 @@ const LinkShortcut = Extension.create({
 });
 
 /* ------------------------------------------------------------------ */
-/* دکمه ابزار                                                          */
+/* دکمه‌های ابزار                                                      */
 /* ------------------------------------------------------------------ */
-function ToolBtn({ title, active, disabled, onClick, children }) {
+function ToolBtn({ title, active, disabled, onClick, children, wide = false }) {
   return (
     <button
       type="button"
@@ -283,7 +309,7 @@ function ToolBtn({ title, active, disabled, onClick, children }) {
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className="btn-ghost !p-2 disabled:opacity-40"
+      className={`btn-ghost !p-2 disabled:opacity-40 ${wide ? '!px-2.5 !py-1.5 text-[11px] gap-1.5' : ''}`}
       style={active ? ACTIVE_STYLE : undefined}
     >
       {children}
@@ -291,9 +317,326 @@ function ToolBtn({ title, active, disabled, onClick, children }) {
   );
 }
 
+const Sep = () => <span className="w-px h-5 mx-1 bg-current opacity-20 shrink-0" />;
+
 function pickMediaFile(list) {
   return [...(list || [])].find(
     (f) => f.type.startsWith('image/') || f.type.startsWith('video/'),
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* سرتیتر سطر/ستون در محل مکان‌نما                                     */
+/* ------------------------------------------------------------------ */
+/*
+ * دستور آماده‌ی تیپ‌تپ (`toggleHeaderColumn`) همیشه ستون اول را سرتیتر می‌کند و
+ * `toggleHeaderRow` هم فقط سطر جاری را می‌شناسد. کاربر انتظار دارد هر جا موس
+ * است همان سطر/ستون سرتیتر شود؛ پس هر دو را دستی و بر اساس موقعیت مکان‌نما
+ * انجام می‌دهیم.
+ */
+function cellAtCursor(editor) {
+  const { $from } = editor.state.selection;
+  for (let depth = $from.depth; depth > 0; depth -= 1) {
+    const cellName = $from.node(depth).type.name;
+    if (cellName !== 'tableCell' && cellName !== 'tableHeader') continue;
+
+    const rowDepth = depth - 1;
+    const tableDepth = depth - 2;
+    if (rowDepth < 1 || tableDepth < 1) return null;
+    if ($from.node(rowDepth).type.name !== 'tableRow') return null;
+    const table = $from.node(tableDepth);
+    if (table.type.name !== 'table') return null;
+
+    return {
+      table,
+      tablePos: $from.before(tableDepth),
+      /* شماره‌ی سطر = اندیسِ فرزندِ جدول، شماره‌ی ستون = اندیسِ فرزندِ سطر */
+      row: $from.index(tableDepth),
+      col: $from.index(rowDepth),
+    };
+  }
+  return null;
+}
+
+/* آیا همه‌ی خانه‌های این سطر/ستون سرتیتر هستند؟ */
+function axisIsHeader(editor, axis) {
+  const info = cellAtCursor(editor);
+  if (!info) return false;
+  let all = true;
+  info.table.forEach((row, _rowOffset, rowIndex) => {
+    row.forEach((cell, _cellOffset, colIndex) => {
+      if (axis === 'row' ? rowIndex !== info.row : colIndex !== info.col) return;
+      if (cell.type.name !== 'tableHeader') all = false;
+    });
+  });
+  return all;
+}
+
+/* سرتیتر کردن (یا برداشتن سرتیتر) همان سطر/ستونی که مکان‌نما در آن است */
+function toggleHeaderAtCursor(editor, axis) {
+  const info = cellAtCursor(editor);
+  if (!info) return;
+  const headerType = editor.schema.nodes.tableHeader;
+  const cellType = editor.schema.nodes.tableCell;
+  if (!headerType || !cellType) return;
+
+  const target = axisIsHeader(editor, axis) ? cellType : headerType;
+  const { state, view } = editor;
+  const tr = state.tr;
+
+  info.table.forEach((row, rowOffset, rowIndex) => {
+    if (axis === 'row' && rowIndex !== info.row) return;
+    const rowPos = info.tablePos + 1 + rowOffset;
+    row.forEach((cell, cellOffset, colIndex) => {
+      if (axis === 'col' && colIndex !== info.col) return;
+      if (cell.type === target) return;
+      tr.setNodeMarkup(rowPos + 1 + cellOffset, target, cell.attrs);
+    });
+  });
+
+  if (tr.docChanged) {
+    view.dispatch(tr);
+    view.focus();
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* پنل ساده‌ی جدول                                                     */
+/* ------------------------------------------------------------------ */
+
+/* دکمه‌ی کوچک پنل جدول */
+function TableAction({ children, title, onClick, disabled, active }) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      aria-pressed={!!active}
+      disabled={disabled}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      className="btn-ghost !py-1 !px-2 text-[11px] flex items-center gap-1 disabled:opacity-40 whitespace-nowrap"
+      style={active ? ACTIVE_STYLE : undefined}
+    >
+      {children}
+    </button>
+  );
+}
+
+function MenuRow({ label, children }) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="w-14 shrink-0 text-[10px] font-black muted">{label}</span>
+      <div className="flex items-center gap-1 flex-wrap">{children}</div>
+    </div>
+  );
+}
+
+function TableMenu({ editor, onClose }) {
+  const [size, setSize] = useState({ rows: 3, cols: 3 });
+  const inTable = editor.isActive('table');
+  const rowIsHeader = inTable && axisIsHeader(editor, 'row');
+  const colIsHeader = inTable && axisIsHeader(editor, 'col');
+
+  const run = (fn) => () => fn(editor.chain().focus()).run();
+
+  return (
+    <div
+      className="p-3 space-y-2.5 border-b border-theme"
+      style={{ background: 'var(--card2)' }}
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      {/* سرصفحه‌ی پنل */}
+      <div className="flex items-center justify-between gap-2">
+        <b className="text-[11px] flex items-center gap-1.5">
+          <TableIcon size={13} className="text-yellow" /> جدول
+        </b>
+        <button type="button" onClick={onClose} className="btn-ghost !p-1" aria-label="بستن">
+          <X size={13} />
+        </button>
+      </div>
+
+      {/* درج جدول جدید */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="w-14 shrink-0 text-[10px] font-black muted">جدول تازه</span>
+        {[
+          ['rows', 'سطر', Rows3],
+          ['cols', 'ستون', Columns3],
+        ].map(([key, label, Icon]) => (
+          <div key={key} className="flex items-center gap-1 card rounded-lg px-1.5 py-0.5">
+            <Icon size={11} className="muted" />
+            <span className="text-[10px] muted">{label}</span>
+            <button
+              type="button"
+              className="btn-ghost !p-0.5"
+              onClick={() => setSize((prev) => ({ ...prev, [key]: Math.max(2, prev[key] - 1) }))}
+              aria-label={`کم کردن ${label}`}
+            >
+              <Minus size={10} />
+            </button>
+            <b className="w-4 text-center text-[11px]">{size[key]}</b>
+            <button
+              type="button"
+              className="btn-ghost !p-0.5"
+              onClick={() => setSize((prev) => ({ ...prev, [key]: Math.min(10, prev[key] + 1) }))}
+              aria-label={`زیاد کردن ${label}`}
+            >
+              <Plus size={10} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: size.rows, cols: size.cols, withHeaderRow: true })
+              .run()
+          }
+          className="btn-yellow !py-1 !px-2.5 text-[11px] flex items-center gap-1"
+        >
+          <TableIcon size={12} /> درج
+        </button>
+      </div>
+
+      {!inTable ? (
+        <p className="text-[11px] muted leading-5">
+          روی یکی از خانه‌های جدول کلیک کنید تا گزینه‌های سرتیتر، افزودن و حذف فعال شوند.
+        </p>
+      ) : (
+        <>
+          <MenuRow label="سطر">
+            <TableAction title="افزودن سطر بالای این سطر" onClick={run((c) => c.addRowBefore())} disabled={!editor.can().addRowBefore()}>
+              <Plus size={11} /> بالا
+            </TableAction>
+            <TableAction title="افزودن سطر پایین این سطر" onClick={run((c) => c.addRowAfter())} disabled={!editor.can().addRowAfter()}>
+              <Plus size={11} /> پایین
+            </TableAction>
+            <TableAction
+              title="همان سطری که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)"
+              active={rowIsHeader}
+              onClick={() => toggleHeaderAtCursor(editor, 'row')}
+              disabled={!inTable}
+            >
+              <Heading2 size={11} /> سرتیتر سطر
+            </TableAction>
+            <TableAction title="حذف سطر جاری" onClick={run((c) => c.deleteRow())} disabled={!editor.can().deleteRow()}>
+              <Minus size={11} /> حذف
+            </TableAction>
+          </MenuRow>
+
+          <MenuRow label="ستون">
+            <TableAction title="افزودن ستون سمت چپ" onClick={run((c) => c.addColumnBefore())} disabled={!editor.can().addColumnBefore()}>
+              <Plus size={11} /> چپ
+            </TableAction>
+            <TableAction title="افزودن ستون سمت راست" onClick={run((c) => c.addColumnAfter())} disabled={!editor.can().addColumnAfter()}>
+              <Plus size={11} /> راست
+            </TableAction>
+            <TableAction
+              title="همان ستونی که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)"
+              active={colIsHeader}
+              onClick={() => toggleHeaderAtCursor(editor, 'col')}
+              disabled={!inTable}
+            >
+              <Columns3 size={11} /> سرتیتر ستون
+            </TableAction>
+            <TableAction title="حذف ستون جاری" onClick={run((c) => c.deleteColumn())} disabled={!editor.can().deleteColumn()}>
+              <Minus size={11} /> حذف
+            </TableAction>
+          </MenuRow>
+
+          <MenuRow label="خانه">
+            <TableAction title="ادغام خانه‌های انتخاب‌شده" onClick={run((c) => c.mergeCells())} disabled={!editor.can().mergeCells()}>
+              <Merge size={11} /> ادغام
+            </TableAction>
+            <TableAction title="جدا کردن خانه‌ی ادغام‌شده" onClick={run((c) => c.splitCell())} disabled={!editor.can().splitCell()}>
+              <Split size={11} /> جدا کردن
+            </TableAction>
+            <TableAction title="حذف کل جدول" onClick={run((c) => c.deleteTable())} disabled={!editor.can().deleteTable()}>
+              <Trash2 size={11} /> حذف جدول
+            </TableAction>
+          </MenuRow>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* پاپ‌آپ ورود لینک (تصویر / ویدیو)                                     */
+/* ------------------------------------------------------------------ */
+function LinkDialog({ state, onSubmit, onClose }) {
+  const [value, setValue] = useState(state.initial || '');
+  const [error, setError] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    const onKey = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const submit = () => {
+    const result = onSubmit(value.trim());
+    if (result) setError(result);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[320] flex items-center justify-center p-4"
+      style={{ background: 'rgba(3,7,20,0.62)', backdropFilter: 'blur(3px)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={state.title}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="card rounded-2xl p-4 w-full max-w-md space-y-3 shadow-2xl">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h3 className="font-black text-sm">{state.title}</h3>
+            <p className="text-[11px] muted leading-5 mt-1">{state.hint}</p>
+          </div>
+          <button type="button" onClick={onClose} className="btn-ghost !p-1.5" aria-label="بستن">
+            <X size={15} />
+          </button>
+        </div>
+
+        <input
+          ref={inputRef}
+          dir="ltr"
+          className="input text-xs"
+          placeholder={state.placeholder}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setError('');
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              submit();
+            }
+          }}
+        />
+
+        {error && <p className="text-[11px] text-red-400 leading-5">{error}</p>}
+
+        <div className="flex items-center gap-2 justify-end pt-1">
+          <button type="button" onClick={onClose} className="btn-ghost !py-1.5 !px-3 text-xs">
+            انصراف
+          </button>
+          <button type="button" onClick={submit} className="btn-yellow !py-1.5 !px-3.5 text-xs">
+            افزودن
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -304,11 +647,22 @@ function MarkdownEditorComponent({
   value = '',
   onChange,
   onUploadImage,
-  onUploadMedia, // اختیاری: برای آپلود ویدیو
+  onUploadMedia,
   placeholder = 'توضیحات کامل محصول...',
 }) {
   const [view, setView] = useState('visual');
   const [uploading, setUploading] = useState(false);
+  const [tableMenu, setTableMenu] = useState(false);
+  const [imageMenu, setImageMenu] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  /* فاصله‌ی حالت تمام‌صفحه از سمت راست، تا نوار کنار پنل زیر آن نرود */
+  const [fsOffset, setFsOffset] = useState(0);
+  /* پاپ‌آپ لینک تصویر/ویدیو: { kind: 'image' | 'video', … } */
+  const [linkDialog, setLinkDialog] = useState(null);
+  /* وقتی نوار ابزار به بالای صفحه می‌چسبد، گوشه‌های گردش برداشته می‌شود */
+  const [toolbarStuck, setToolbarStuck] = useState(false);
+  const toolbarSentinelRef = useRef(null);
+  const toolbarRef = useRef(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const uploadRef = useRef(null);
@@ -316,9 +670,7 @@ function MarkdownEditorComponent({
 
   const extensions = useMemo(
     () => [
-      StarterKit.configure({
-        link: { openOnClick: false, autolink: true },
-      }),
+      StarterKit.configure({ link: { openOnClick: false, autolink: true } }),
       MediaImage,
       VideoNode,
       EmbedNode,
@@ -330,7 +682,7 @@ function MarkdownEditorComponent({
       TableKeys,
       LinkShortcut.configure({ onShortcut: () => openLinkRef.current?.() }),
       Markdown.configure({
-        html: true, // برای ذخیره ویدیو و جاسازی به‌صورت HTML
+        html: true,
         tightLists: true,
         breaks: true,
         transformPastedText: true,
@@ -366,10 +718,12 @@ function MarkdownEditorComponent({
         return false;
       },
     },
-    onUpdate: ({ editor }) => {
-      onChange?.(editor.storage.markdown.getMarkdown());
+    onUpdate: ({ editor: inst }) => {
+      onChange?.(inst.storage.markdown.getMarkdown());
     },
   });
+
+  if (typeof window !== 'undefined' && import.meta.env.DEV) window.__editor = editor;
 
   const handleFile = async (file) => {
     if (!file || !editor) return;
@@ -393,7 +747,80 @@ function MarkdownEditorComponent({
   };
   uploadRef.current = handleFile;
 
-  // همگام‌سازی مقدار بیرونی فقط در حالت visual
+  /* ---------- حالت تمام‌صفحه (مثل وردپرس) ---------- */
+  useEffect(() => {
+    if (!fullscreen) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape') setFullscreen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [fullscreen]);
+
+  /*
+   * در حالت تمام‌صفحه نباید نوار کنار پنل (منوی مدیریت/فروشنده) زیر ویرایشگر
+   * برود؛ پس لبه‌ی راست پنجره‌ی ویرایشگر به اندازه‌ی همان نوار عقب می‌نشیند.
+   * عرض نوار با تغییر اندازه‌ی پنجره یا باز/بسته‌شدن منو دوباره اندازه‌گیری می‌شود.
+   */
+  useEffect(() => {
+    if (!fullscreen) return undefined;
+
+    const measure = () => {
+      let offset = 0;
+      const aside = document.querySelector('aside');
+      const desktop = window.innerWidth >= 1024;
+      if (desktop && aside) {
+        const style = window.getComputedStyle(aside);
+        const rect = aside.getBoundingClientRect();
+        const isDrawer = style.position === 'fixed';
+        if (!isDrawer && rect.width > 0 && rect.height > 0) {
+          offset = Math.max(0, Math.round(window.innerWidth - rect.left));
+        }
+      }
+      setFsOffset(offset);
+    };
+
+    measure();
+    window.addEventListener('resize', measure);
+    const aside = document.querySelector('aside');
+    const observer =
+      aside && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    observer?.observe(aside);
+
+    return () => {
+      window.removeEventListener('resize', measure);
+      observer?.disconnect();
+    };
+  }, [fullscreen]);
+
+  /*
+   * نوار ابزار «توضیحات کامل محصول» چسبان است؛ وقتی به بالای صفحه می‌چسبد، گوشه‌های
+   * گرد بالا دیگر بی‌معنا و بدشکل می‌شوند. یک عنصر نگهبان یک‌پیکسلی بالای نوار می‌گذاریم:
+   * تا وقتی دیده می‌شود نوار در جای خودش است (گرد)، و وقتی از دید خارج شد یعنی چسبیده
+   * (بدون گردی).
+   */
+  useEffect(() => {
+    const sentinel = toolbarSentinelRef.current;
+    if (!sentinel || fullscreen || typeof IntersectionObserver === 'undefined') {
+      setToolbarStuck(false);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setToolbarStuck(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '0px' },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+    /* `editor` هم وابستگی است: تا ادیتور آماده نشود نگهبان در صفحه نیست */
+  }, [fullscreen, view, editor]);
+
+  /* همگام‌سازی مقدار بیرونی فقط در حالت visual */
   useEffect(() => {
     if (!editor || view !== 'visual') return;
     if (editor.storage.markdown.getMarkdown() !== value) {
@@ -428,33 +855,115 @@ function MarkdownEditorComponent({
   };
   openLinkRef.current = setLink;
 
-  /* ---------- جاسازی ویدیو ---------- */
-  const insertEmbed = () => {
-    const input = window.prompt('آدرس ویدیو (YouTube، Vimeo یا Aparat)', 'https://');
-    if (!input) return;
-    const src = toEmbedUrl(input);
-    if (!src) {
-      window.alert('فقط لینک‌های https مربوط به YouTube، Vimeo و Aparat پذیرفته می‌شوند.');
-      return;
+  /* ---------- پاپ‌آپ لینک تصویر ---------- */
+  const openImageDialog = () =>
+    setLinkDialog({
+      kind: 'image',
+      title: 'افزودن تصویر با لینک',
+      hint: 'آدرس کامل تصویر را با http یا https وارد کنید. تصویر همان‌جا در متن درج می‌شود.',
+      placeholder: 'https://example.com/image.jpg',
+      initial: '',
+    });
+
+  /* ---------- پاپ‌آپ لینک ویدیو ---------- */
+  const openVideoDialog = () =>
+    setLinkDialog({
+      kind: 'video',
+      title: 'افزودن ویدیو با لینک',
+      hint: 'لینک ویدیوی YouTube، Vimeo یا آپارات را وارد کنید؛ به پخش‌کننده‌ی قابل جاسازی تبدیل می‌شود.',
+      placeholder: 'https://www.aparat.com/v/…',
+      initial: '',
+    });
+
+  /* ارسال پاپ‌آپ: پیام خطا برمی‌گرداند یا null (یعنی انجام شد) */
+  const submitLink = (raw) => {
+    if (!raw) return 'آدرس را وارد کنید.';
+    if (linkDialog?.kind === 'image') {
+      if (!/^https?:\/\//i.test(raw)) return 'آدرس تصویر باید با http یا https شروع شود.';
+      editor.chain().focus().setImage({ src: raw, alt: 'تصویر' }).run();
+      setLinkDialog(null);
+      return null;
     }
+    const src = toEmbedUrl(raw);
+    if (!src) return 'فقط لینک‌های https مربوط به YouTube، Vimeo و Aparat پذیرفته می‌شوند.';
     editor.chain().focus().setEmbed({ src }).run();
+    setLinkDialog(null);
+    return null;
   };
 
   const inTable = editor.isActive('table');
-  const valid = isValidBackendMarkdown(value);
   const notVisual = view !== 'visual';
 
   return (
-    <div className="rounded-2xl border border-theme overflow-hidden" style={{ background: 'var(--bg2)' }}>
+    <div
+      /* توجّه: `overflow-hidden` اینجا نوار ابزارِ چسبان را بی‌اثر می‌کرد
+         (هر والدِ overflow-hidden یک «جعبه‌ی اسکرول» می‌سازد و sticky به آن می‌چسبد) */
+      className={`border border-theme relative ${fullscreen ? 'rounded-none' : 'rounded-2xl'}`}
+      style={
+        fullscreen
+          ? {
+              position: 'fixed',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              /* نوار کنار پنل دیده و قابل استفاده بماند */
+              right: fsOffset,
+              zIndex: 200,
+              background: 'var(--bg)',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100dvh',
+            }
+          : { background: 'var(--bg2)' }
+      }
+    >
+      {/* نگهبان یک‌پیکسلی برای تشخیص چسبیدن نوار ابزار */}
+      <span ref={toolbarSentinelRef} aria-hidden="true" className="block h-px w-full -mb-px" />
+
+      {/*
+        نوار ابزار + پنل جدول با هم یک بلوک چسبان را می‌سازند؛
+        بالای صفحه می‌چسبند و پنل جدول دقیقاً زیر نوار ابزار می‌آید.
+      */}
+      <div
+        className={
+          fullscreen
+            ? 'shrink-0'
+            : `sticky z-40 backdrop-blur-md ${toolbarStuck ? '' : 'rounded-t-2xl'}`
+        }
+        style={
+          fullscreen
+            ? undefined
+            : {
+                top: 'calc(var(--header-h, 0px) + var(--editor-bar-h, 0px))',
+                background: 'var(--card)',
+              }
+        }
+      >
       {/* نوار ابزار */}
       <div
+        ref={toolbarRef}
         className="flex items-center justify-between gap-2 flex-wrap px-3 py-2 border-b border-theme"
         style={{ background: 'var(--card)' }}
       >
         <div className="flex items-center gap-1 flex-wrap">
-          <ToolBtn title="تیتر" active={editor.isActive('heading', { level: 2 })} disabled={notVisual}
+          <ToolBtn title="واگرد" disabled={notVisual || !editor.can().undo()}
+            onClick={() => editor.chain().focus().undo().run()}>
+            <Undo2 size={15} />
+          </ToolBtn>
+          <ToolBtn title="ازنو" disabled={notVisual || !editor.can().redo()}
+            onClick={() => editor.chain().focus().redo().run()}>
+            <Redo2 size={15} />
+          </ToolBtn>
+
+          <Sep />
+
+          <ToolBtn title="تیتر ۲" active={editor.isActive('heading', { level: 2 })} disabled={notVisual}
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
             <Heading2 size={15} />
+          </ToolBtn>
+          <ToolBtn title="تیتر ۳" active={editor.isActive('heading', { level: 3 })} disabled={notVisual}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
+            <Heading3 size={15} />
           </ToolBtn>
           <ToolBtn title="بولد (Ctrl+B)" active={editor.isActive('bold')} disabled={notVisual}
             onClick={() => editor.chain().focus().toggleBold().run()}>
@@ -463,6 +972,10 @@ function MarkdownEditorComponent({
           <ToolBtn title="ایتالیک (Ctrl+I)" active={editor.isActive('italic')} disabled={notVisual}
             onClick={() => editor.chain().focus().toggleItalic().run()}>
             <Italic size={15} />
+          </ToolBtn>
+          <ToolBtn title="خط‌خورده" active={editor.isActive('strike')} disabled={notVisual}
+            onClick={() => editor.chain().focus().toggleStrike().run()}>
+            <Strikethrough size={15} />
           </ToolBtn>
           <ToolBtn title="لیست نقطه‌ای" active={editor.isActive('bulletList')} disabled={notVisual}
             onClick={() => editor.chain().focus().toggleBulletList().run()}>
@@ -484,14 +997,49 @@ function MarkdownEditorComponent({
             <Link2 size={15} />
           </ToolBtn>
 
-          <span className="w-px h-5 mx-1 bg-current opacity-20" />
+          <Sep />
 
           {onUploadImage && (
-            <>
-              <ToolBtn title="درج تصویر" disabled={uploading || notVisual}
-                onClick={() => imageInputRef.current?.click()}>
-                <ImagePlus size={15} />
+            <div className="relative">
+              <ToolBtn
+                title="افزودن تصویر"
+                disabled={uploading || notVisual}
+                active={imageMenu}
+                onClick={() => setImageMenu((v) => !v)}
+              >
+                <span className="flex items-center gap-0.5">
+                  <ImagePlus size={15} />
+                  <ChevronDown size={11} />
+                </span>
               </ToolBtn>
+              {imageMenu && !notVisual && (
+                <div
+                  className="absolute z-[60] mt-1 w-52 card rounded-xl p-1.5 shadow-2xl space-y-1"
+                  style={{ right: 0 }}
+                  onMouseDown={(e) => e.preventDefault()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageMenu(false);
+                      imageInputRef.current?.click();
+                    }}
+                    className="w-full text-right btn-ghost !py-1.5 !px-2 text-xs flex items-center gap-1.5"
+                  >
+                    <ImagePlus size={13} /> آپلود از دستگاه
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageMenu(false);
+                      openImageDialog();
+                    }}
+                    className="w-full text-right btn-ghost !py-1.5 !px-2 text-xs flex items-center gap-1.5"
+                  >
+                    <Link2 size={13} /> افزودن با لینک
+                  </button>
+                </div>
+              )}
               <input
                 ref={imageInputRef}
                 type="file"
@@ -503,7 +1051,7 @@ function MarkdownEditorComponent({
                   handleFile(file);
                 }}
               />
-            </>
+            </div>
           )}
 
           {onUploadMedia && (
@@ -526,40 +1074,41 @@ function MarkdownEditorComponent({
             </>
           )}
 
-          <ToolBtn title="جاسازی ویدیو (YouTube / Vimeo / Aparat)" disabled={notVisual} onClick={insertEmbed}>
+          <ToolBtn
+            title="افزودن ویدیو با لینک (YouTube / Vimeo / Aparat)"
+            disabled={notVisual}
+            onClick={openVideoDialog}
+          >
             <MonitorPlay size={15} />
           </ToolBtn>
 
-          <ToolBtn title="درج جدول (۳×۳)" disabled={notVisual}
-            onClick={() =>
-              editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
-            }>
-            <TableIcon size={15} />
-          </ToolBtn>
+          <Sep />
 
-          {inTable && view === 'visual' && (
-            <>
-              <span className="w-px h-5 mx-1 bg-current opacity-20" />
-              <ToolBtn title="افزودن ردیف" onClick={() => editor.chain().focus().addRowAfter().run()}>
-                <Rows3 size={15} />
-              </ToolBtn>
-              <ToolBtn title="افزودن ستون" onClick={() => editor.chain().focus().addColumnAfter().run()}>
-                <Columns3 size={15} />
-              </ToolBtn>
-              <ToolBtn title="حذف ردیف" onClick={() => editor.chain().focus().deleteRow().run()}>
-                <Minus size={15} />
-              </ToolBtn>
-              <ToolBtn title="حذف ستون" onClick={() => editor.chain().focus().deleteColumn().run()}>
-                <Columns3 size={15} className="opacity-60" />
-              </ToolBtn>
-              <ToolBtn title="حذف جدول" onClick={() => editor.chain().focus().deleteTable().run()}>
-                <Trash2 size={15} />
-              </ToolBtn>
-            </>
-          )}
+          <ToolBtn
+            title="جدول و تنظیمات آن"
+            active={tableMenu || inTable}
+            disabled={notVisual}
+            onClick={() => setTableMenu((v) => !v)}
+          >
+            <span className="flex items-center gap-0.5">
+              <TableIcon size={15} />
+              <ChevronDown size={11} />
+            </span>
+          </ToolBtn>
         </div>
 
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setFullscreen((v) => !v)}
+            className="chip !py-1 !px-2.5 flex items-center gap-1 text-xs"
+            title={fullscreen ? 'خروج از تمام‌صفحه (Esc)' : 'ویرایش تمام‌صفحه'}
+            aria-pressed={fullscreen}
+            style={fullscreen ? ACTIVE_STYLE : undefined}
+          >
+            {fullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+            <span className="hidden sm:inline">{fullscreen ? 'خروج' : 'تمام‌صفحه'}</span>
+          </button>
           <button
             type="button"
             onClick={() => setView('visual')}
@@ -579,8 +1128,84 @@ function MarkdownEditorComponent({
         </div>
       </div>
 
+      {/*
+        پنل پیشرفته‌ی جدول — دقیقاً زیر نوار ابزار می‌نشیند (هر دو با هم چسبان‌اند)
+        و اگر بلندتر از کادر دید شد، داخل خودش اسکرول می‌شود.
+      */}
+      {tableMenu && view === 'visual' && (
+        <div
+          data-table-panel="1"
+          className="max-h-[calc(100dvh-var(--header-h,0px)-var(--editor-bar-h,0px)-96px)] overflow-y-auto border-b border-theme"
+          style={{ background: 'var(--card2)' }}
+        >
+          <TableMenu editor={editor} onClose={() => setTableMenu(false)} />
+        </div>
+      )}
+      </div>
+
+      {/* نوار میان‌بر جدول، وقتی داخل جدول هستیم */}
+      {inTable && view === 'visual' && (
+        <div
+          className={`flex items-center gap-1 flex-wrap px-3 py-1.5 border-b border-theme text-[11px] ${
+            fullscreen
+              ? 'shrink-0'
+              : 'sticky top-[calc(var(--header-h,0px)+var(--editor-bar-h,0px))] z-30'
+          }`}
+          style={{ background: 'var(--card2)' }}
+        >
+          <span className="font-black muted">جدول:</span>
+          <ToolBtn title="سطر جدید پایین" onClick={() => editor.chain().focus().addRowAfter().run()}>
+            <Rows3 size={13} />
+          </ToolBtn>
+          <ToolBtn title="ستون جدید راست" onClick={() => editor.chain().focus().addColumnAfter().run()}>
+            <Columns3 size={13} />
+          </ToolBtn>
+          <ToolBtn
+            title="سرتیتر سطر (همان سطر مکان‌نما)"
+            active={axisIsHeader(editor, 'row')}
+            onClick={() => toggleHeaderAtCursor(editor, 'row')}
+          >
+            <ArrowUp size={13} />
+          </ToolBtn>
+          <ToolBtn
+            title="سرتیتر ستون (همان ستون مکان‌نما)"
+            active={axisIsHeader(editor, 'col')}
+            onClick={() => toggleHeaderAtCursor(editor, 'col')}
+          >
+            <ArrowRight size={13} />
+          </ToolBtn>
+          <ToolBtn title="ادغام خانه‌ها" disabled={!editor.can().mergeCells()}
+            onClick={() => editor.chain().focus().mergeCells().run()}>
+            <Merge size={13} />
+          </ToolBtn>
+          <ToolBtn title="جدا کردن خانه" disabled={!editor.can().splitCell()}
+            onClick={() => editor.chain().focus().splitCell().run()}>
+            <Split size={13} />
+          </ToolBtn>
+          <ToolBtn title="حذف سطر" onClick={() => editor.chain().focus().deleteRow().run()}>
+            <Minus size={13} />
+          </ToolBtn>
+          <ToolBtn title="حذف جدول" onClick={() => editor.chain().focus().deleteTable().run()}>
+            <Trash2 size={13} />
+          </ToolBtn>
+          <ToolBtn title="تنظیمات بیشتر" onClick={() => setTableMenu(true)}>
+            <span className="flex items-center gap-0.5 text-[11px]">
+              بیشتر <ChevronDown size={11} />
+            </span>
+          </ToolBtn>
+        </div>
+      )}
+
       {/* ناحیه ویرایش بصری */}
-      <div className={view === 'visual' ? '' : 'hidden'}>
+      <div
+        className={
+          view === 'visual'
+            ? fullscreen
+              ? 'flex-1 min-h-0 overflow-y-auto'
+              : 'overflow-hidden rounded-b-2xl'
+            : 'hidden'
+        }
+      >
         <EditorContent editor={editor} />
       </div>
 
@@ -590,22 +1215,26 @@ function MarkdownEditorComponent({
         onChange={(e) => onChange?.(e.target.value)}
         dir="ltr"
         rows={11}
-        className={`${view === 'source' ? 'block' : 'hidden'} w-full p-4 bg-transparent outline-none text-sm leading-7 font-mono resize-y min-h-[240px]`}
+        className={`${view === 'source' ? 'block' : 'hidden'} w-full p-4 bg-transparent outline-none text-sm leading-7 font-mono resize-y min-h-[240px] ${
+          fullscreen ? 'flex-1 min-h-0 resize-none' : ''
+        }`}
       />
 
-      {/* وضعیت */}
-      <div
-        className="px-3 py-2 border-t border-theme flex items-center justify-between gap-2 text-xs"
-        style={{ background: 'var(--card)' }}
-      >
-        <span className={valid ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-          {uploading
-            ? 'در حال آپلود…'
-            : valid
-              ? '✓ ساختار Markdown معتبر است'
-              : 'توضیحات باید حداقل یک عنصر Markdown (مثل تیتر، بولد یا لیست) داشته باشد'}
-        </span>
-      </div>
+      {/* نوار وضعیت فقط هنگام آپلود (بدون پیام‌های اعتبارسنجی و راهنمای میان‌بر) */}
+      {uploading && (
+        <div
+          className={`px-3 py-2 border-t border-theme flex items-center gap-2 text-xs ${
+            fullscreen ? 'shrink-0' : 'rounded-b-2xl'
+          }`}
+          style={{ background: 'var(--card)' }}
+        >
+          <span className="text-amber-400 font-bold">در حال آپلود…</span>
+        </div>
+      )}
+
+      {linkDialog && (
+        <LinkDialog state={linkDialog} onSubmit={submitLink} onClose={() => setLinkDialog(null)} />
+      )}
     </div>
   );
 }

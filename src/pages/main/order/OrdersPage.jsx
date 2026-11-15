@@ -1,33 +1,108 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Package, ChevronDown, ExternalLink } from 'lucide-react';
+import {
+  Banknote,
+  ChevronDown,
+  ClipboardList,
+  CreditCard,
+  ExternalLink,
+  MapPin,
+  Package,
+  PackageCheck,
+  ReceiptText,
+  RotateCcw,
+  Store,
+  Truck,
+} from 'lucide-react';
+
 import { useShop } from '../../../contexts/ShopContext';
 import { authHeaders } from '../../../utils/helpers/storage';
-import { Loading } from '../../../components/common/ScroolToTopComponent';
-import {
-  formatPrice,
-  toFa,
-  formatDateTime,
-  statusFa,
-} from '../../../utils/helpers/format';
+import { formatPrice, toFa, formatDateTime, statusFa } from '../../../utils/helpers/format';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API =
+  import.meta.env.VITE_APP_API_URL ||
+  import.meta.env.VITE_API_URL ||
+  '/api';
+
+/* رنگ وضعیت — سبز (نهایی) / کهربایی (در جریان) / قرمز (لغو) */
+function statusTone(status = '') {
+  if (['paid', 'delivered', 'finalized'].includes(status)) return '#17994f';
+  if (['cancelled', 'rejected', 'failed'].includes(status)) return '#e53935';
+  return '#c2740a';
+}
+
+const FILTERS = [
+  { key: 'all', label: 'همه سفارش‌ها' },
+  { key: 'pending', label: 'در انتظار پرداخت' },
+  { key: 'paid', label: 'پرداخت‌شده' },
+];
+
+function Chip({ tone, children }) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black"
+      style={{ background: `color-mix(in srgb, ${tone} 15%, transparent)`, color: tone }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SkeletonOrder() {
+  return (
+    <div className="card rounded-2xl p-4" aria-hidden="true">
+      <div className="flex items-center justify-between gap-3">
+        <div className="skeleton h-4 w-32" />
+        <div className="skeleton h-5 w-24" />
+      </div>
+      <div className="skeleton mt-3 h-3 w-2/3" />
+      <div className="skeleton mt-2 h-3 w-1/2" />
+    </div>
+  );
+}
+
+function SummaryTile({ icon: Icon, value, label }) {
+  return (
+    <div className="flex min-w-0 items-center gap-2.5 rounded-2xl px-3 py-2.5" style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}>
+      <span
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-xl"
+        style={{ background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)', color: 'var(--accent-text)' }}
+      >
+        <Icon size={15} />
+      </span>
+      <div className="min-w-0">
+        <div className="truncate text-sm font-black leading-tight">{value}</div>
+        <div className="truncate text-[10px] muted">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 function OrdersPage() {
   const { user } = useShop();
   const [orders, setOrders] = useState([]);
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [payBusy, setPayBusy] = useState('');
 
   const load = useCallback(() => {
-    if (!user) return setLoading(false);
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
+    setError('');
     axios
       .get(`${API}/orders?limit=50`, authHeaders())
-      .then((res) => setOrders(res.data.body?.data || res.data.body || []))
-      .catch((err) => console.error('Error fetching orders:', err))
+      .then((res) => {
+        const body = res.data?.body;
+        setOrders(Array.isArray(body) ? body : body?.data || []);
+      })
+      .catch(() => setError('دریافت سفارش‌ها ناموفق بود.'))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -35,146 +110,367 @@ function OrdersPage() {
     load();
   }, [load]);
 
+  const payStatusOf = (order) =>
+    order.payment?.status || order.payment_status || 'pending';
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return orders;
+    return orders.filter((order) => {
+      const status = payStatusOf(order);
+      if (filter === 'paid') return status === 'paid';
+      return status !== 'paid';
+    });
+  }, [orders, filter]);
+
+  const stats = useMemo(() => {
+    const paid = orders.filter((o) => payStatusOf(o) === 'paid');
+    const spent = paid.reduce(
+      (sum, o) => sum + Number(o.final_amount ?? o.total_amount ?? o.amount ?? 0),
+      0,
+    );
+    return { count: orders.length, paid: paid.length, spent };
+  }, [orders]);
+
   const payOrder = (orderId) => {
+    setPayBusy(orderId);
     axios
       .post(`${API}/order/${orderId}/pay/`, {}, authHeaders())
       .then((res) => {
-        const b = res.data.body || {};
+        const body = res.data?.body || {};
         const url =
-          b.pay_url ||
-          b.url ||
-          (b.authority ? `https://sandbox.zarinpal.com/pg/StartPay/${b.authority}` : null);
+          body.pay_url ||
+          body.url ||
+          (body.authority ? `https://sandbox.zarinpal.com/pg/StartPay/${body.authority}` : null);
         if (url && /^https?:/.test(url)) window.location.href = url;
         else toast.info('درخواست پرداخت ارسال شد');
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'خطا در شروع پرداخت'));
+      .catch((err) => toast.error(err.response?.data?.message || 'خطا در شروع پرداخت'))
+      .finally(() => setPayBusy(''));
   };
 
+  /* ---------------- بدون کاربر ---------------- */
   if (!user) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center card rounded-3xl p-12 mt-6">
-        <Package size={36} className="mx-auto muted mb-3" />
-        <p className="muted mb-4">برای مشاهده سفارش‌ها وارد شوید</p>
-        <Link to="/auth/pre" className="btn-yellow">
-          ورود
-        </Link>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 py-20">
-        <Loading label="در حال دریافت سفارش‌ها…" />
+      <div className="mx-auto max-w-lg px-4 py-20">
+        <div className="card rounded-3xl p-10 text-center">
+          <span
+            className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+            style={{ background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)' }}
+          >
+            <ReceiptText size={28} style={{ color: 'var(--accent-text)' }} />
+          </span>
+          <h1 className="mt-4 text-base font-black">برای دیدن سفارش‌ها وارد شوید</h1>
+          <p className="mt-2 text-xs muted">وضعیت سفارش‌ها، مرسوله‌ها و پرداخت‌ها در این بخش نمایش داده می‌شود.</p>
+          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
+            ورود به حساب
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <h1 className="font-black text-2xl mb-5 flex items-center gap-2">
-        <Package size={24} className="text-yellow" /> سفارش‌های من ({toFa(orders.length)})
-      </h1>
-      {orders.length === 0 ? (
-        <div className="card rounded-3xl p-12 text-center">
-          <div className="font-black">سفارشی ثبت نشده است</div>
-          <Link to="/products" className="btn-yellow inline-block mt-4">
-            شروع خرید
-          </Link>
+    <div className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-6">
+      {/* هدر */}
+      <header className="card rounded-3xl p-4 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
+              style={{ background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)' }}
+            >
+              <ReceiptText size={20} style={{ color: 'var(--accent-text)' }} />
+            </span>
+            <div>
+              <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">
+                سفارش‌های من
+                <span
+                  className="rounded-full px-2 py-0.5 text-[11px] font-black"
+                  style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
+                >
+                  {toFa(stats.count)}
+                </span>
+              </h1>
+              <p className="mt-0.5 text-[11px] muted">وضعیت پرداخت، مرسوله‌ها و فاکتور هر سفارش</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={load}
+            className="btn-ghost inline-flex items-center justify-center gap-1.5 !py-2 text-xs"
+          >
+            <RotateCcw size={14} />
+            بروزرسانی
+          </button>
         </div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((order) => {
-            const payStatus = order.payment?.status || order.payment_status || 'pending';
+
+        {stats.count > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <SummaryTile icon={Package} value={toFa(stats.count)} label="کل سفارش‌ها" />
+            <SummaryTile icon={PackageCheck} value={toFa(stats.paid)} label="پرداخت‌شده" />
+            <SummaryTile icon={Banknote} value={formatPrice(stats.spent)} label="مجموع خرید" />
+          </div>
+        )}
+
+        {stats.count > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {FILTERS.map((item) => {
+              const active = filter === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setFilter(item.key)}
+                  aria-pressed={active}
+                  className="rounded-full px-3 py-1.5 text-[11px] font-bold transition"
+                  style={
+                    active
+                      ? { background: 'var(--primary-color)', color: 'var(--navy)' }
+                      : { background: 'var(--card2)', border: '1px solid var(--border)' }
+                  }
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </header>
+
+      {/* لیست */}
+      <div className="mt-4 space-y-3">
+        {loading ? (
+          <>
+            <SkeletonOrder />
+            <SkeletonOrder />
+          </>
+        ) : error ? (
+          <div className="card rounded-3xl p-10 text-center">
+            <p className="text-sm muted">{error}</p>
+            <button type="button" onClick={load} className="btn-yellow mt-4 inline-flex items-center gap-2">
+              <RotateCcw size={15} />
+              تلاش دوباره
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="card rounded-3xl px-6 py-14 text-center">
+            <span
+              className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+              style={{ background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)' }}
+            >
+              <ClipboardList size={28} style={{ color: 'var(--accent-text)' }} />
+            </span>
+            <h2 className="mt-4 text-base font-black">
+              {orders.length === 0 ? 'هنوز سفارشی ثبت نکرده‌اید' : 'سفارشی با این فیلتر نیست'}
+            </h2>
+            <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
+              {orders.length === 0
+                ? 'اولین خریدتان را انجام دهید تا وضعیت سفارش و مرسوله‌ها اینجا نمایش داده شود.'
+                : 'فیلتر را عوض کنید تا سفارش‌های دیگر را ببینید.'}
+            </p>
+            {orders.length === 0 ? (
+              <Link to="/products" className="btn-yellow mt-5 inline-flex items-center gap-2">
+                شروع خرید
+              </Link>
+            ) : (
+              <button type="button" onClick={() => setFilter('all')} className="btn-ghost mt-5">
+                نمایش همه سفارش‌ها
+              </button>
+            )}
+          </div>
+        ) : (
+          filtered.map((order) => {
+            const payStatus = payStatusOf(order);
+            const isPaid = payStatus === 'paid';
             const subs = order.sub_orders || [];
             const isOpen = expanded === order._id;
+            const itemCount = subs.reduce(
+              (sum, sub) => sum + (sub.items?.length || 0),
+              0,
+            );
+            const preview = subs
+              .flatMap((sub) => sub.items || [])
+              .slice(0, 2)
+              .map((item) => item.product_name ?? item.name)
+              .filter(Boolean);
+
             return (
-              <div key={order._id} className="card rounded-2xl p-4">
+              <article key={order._id} className="card overflow-hidden rounded-2xl">
+                {/* ردیف اصلی */}
                 <button
                   type="button"
                   onClick={() => setExpanded(isOpen ? null : order._id)}
-                  className="w-full flex items-center justify-between flex-wrap gap-3 text-right"
+                  aria-expanded={isOpen}
+                  className="flex w-full flex-col gap-3 p-4 text-start transition hover:bg-black/[0.03] sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
-                    <div className="font-black text-sm flex items-center gap-2">
-                      سفارش{' '}
-                      <span dir="ltr">
-                        #{order.order_number || String(order._id).slice(-8)}
-                      </span>
-                      <ChevronDown
-                        size={15}
-                        className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                      />
-                    </div>
-                    <div className="text-xs muted mt-1">
-                      {order.payment?.ref_id && (
-                        <>
-                          کد رهگیری: <span dir="ltr">{order.payment.ref_id}</span> •{' '}
-                        </>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+                      style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
+                    >
+                      <Package size={17} style={{ color: 'var(--accent-text)' }} />
+                    </span>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-black" dir="ltr">
+                          #{order.order_number || String(order._id).slice(-8)}
+                        </span>
+                        <Chip tone={statusTone(payStatus)}>
+                          {isPaid ? 'پرداخت‌شده' : 'در انتظار پرداخت'}
+                        </Chip>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] muted">
+                        <span>{formatDateTime(order.created_at)}</span>
+                        <span>•</span>
+                        <span>{toFa(subs.length)} مرسوله</span>
+                        <span>•</span>
+                        <span>{toFa(itemCount)} قلم کالا</span>
+                        {order.payment?.ref_id && (
+                          <>
+                            <span>•</span>
+                            <span dir="ltr">رهگیری: {order.payment.ref_id}</span>
+                          </>
+                        )}
+                      </div>
+                      {preview.length > 0 && (
+                        <p className="mt-1 line-clamp-1 text-[11px] muted">
+                          {preview.join('، ')}
+                          {itemCount > preview.length ? ' و …' : ''}
+                        </p>
                       )}
-                      {formatDateTime(order.created_at)}
                     </div>
                   </div>
-                  <div className="text-left">
-                    <div className="font-black text-yellow">
-                      {formatPrice(order.final_amount ?? order.total_amount ?? order.amount)}
+
+                  <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end">
+                    <div className="text-end">
+                      <div className="text-base font-black" style={{ color: 'var(--accent-text)' }}>
+                        {formatPrice(order.final_amount ?? order.total_amount ?? order.amount)}
+                      </div>
+                      {Number(order.total_discount) > 0 && (
+                        <div className="mt-0.5 text-[10px] muted">
+                          تخفیف: {formatPrice(order.total_discount)}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-xs muted mt-1">
-                      {payStatus === 'paid' ? 'پرداخت‌شده' : 'در انتظار پرداخت'} •{' '}
-                      {toFa(subs.length)} مرسوله
-                    </div>
+                    <ChevronDown
+                      size={18}
+                      className={`shrink-0 muted transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    />
                   </div>
                 </button>
 
+                {/* جزئیات */}
                 {isOpen && (
-                  <div className="mt-3 space-y-2 border-t border-theme pt-3">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      {payStatus !== 'paid' && (
+                  <div className="border-t border-theme p-4">
+                    {/* اکشن‌ها */}
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      {!isPaid && (
                         <button
                           type="button"
                           onClick={() => payOrder(order._id)}
-                          className="btn-yellow !py-1.5 !px-3 text-xs"
+                          disabled={payBusy === order._id}
+                          className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-xs disabled:opacity-60"
                         >
-                          پرداخت آنلاین سفارش
+                          <CreditCard size={14} />
+                          {payBusy === order._id ? 'در حال انتقال…' : 'پرداخت آنلاین'}
                         </button>
                       )}
                       <Link
                         to={`/order/${order._id}`}
-                        className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1"
+                        className="btn-ghost inline-flex items-center gap-1.5 !py-2 text-xs"
                       >
-                        <ExternalLink size={13} /> مشاهده فاکتور سفارش
+                        <ExternalLink size={14} />
+                        مشاهده فاکتور
                       </Link>
                     </div>
-                    {subs.map((sub) => (
-                      <div key={sub._id} className="card2 rounded-xl p-3 text-sm">
-                        <div className="flex justify-between flex-wrap gap-2">
-                          <b dir="ltr">#{sub.order_number || String(sub._id).slice(-8)}</b>
-                          <span className="chip !cursor-default text-xs">
-                            {statusFa(sub.status)}
-                          </span>
-                        </div>
-                        <div className="muted mt-1.5 text-xs leading-6">
-                          {(sub.items || [])
-                            .map((i) => `${i.product_name ?? i.name ?? ''} ×${toFa(i.quantity)}`)
-                            .join('، ')}
-                        </div>
-                        <div className="font-black mt-1 text-yellow">
-                          {formatPrice(
-                            (sub.amount ?? sub.subtotal ?? 0) - (sub.discount_applied ?? 0),
+
+                    {/* مرسوله‌ها */}
+                    <div className="space-y-2">
+                      {subs.map((sub) => (
+                        <div
+                          key={sub._id}
+                          className="rounded-2xl p-3"
+                          style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold muted">
+                                <Store size={12} />
+                                مرسوله
+                              </span>
+                              <span className="text-xs font-black" dir="ltr">
+                                #{sub.order_number || String(sub._id).slice(-6)}
+                              </span>
+                              <Chip tone={statusTone(sub.status)}>{statusFa(sub.status)}</Chip>
+                            </div>
+                            <span className="text-xs font-black" style={{ color: 'var(--accent-text)' }}>
+                              {formatPrice((sub.amount ?? sub.subtotal ?? 0) - (sub.discount_applied ?? 0))}
+                            </span>
+                          </div>
+
+                          {(sub.items || []).length > 0 && (
+                            <ul className="mt-2 divide-y" style={{ borderColor: 'var(--border)' }}>
+                              {sub.items.map((item, index) => (
+                                <li
+                                  key={`${sub._id}-${index}`}
+                                  className="flex items-center justify-between gap-2 py-1.5 text-[11px]"
+                                  style={{ borderColor: 'var(--border)' }}
+                                >
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {item.product_name ?? item.name ?? 'کالا'}
+                                  </span>
+                                  <span className="shrink-0 muted">×{toFa(item.quantity ?? 1)}</span>
+                                  {item.unit_price != null && (
+                                    <span className="w-24 shrink-0 text-end font-bold">
+                                      {formatPrice(item.unit_price)}
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+                          {sub.shipping_address && (
+                            <p className="mt-2 flex items-start gap-1 border-t pt-2 text-[10px] muted" style={{ borderColor: 'var(--border)' }}>
+                              <MapPin size={11} className="mt-0.5 shrink-0" />
+                              <span className="leading-5">
+                                {[
+                                  sub.shipping_address.province,
+                                  sub.shipping_address.city,
+                                  sub.shipping_address.full_address,
+                                ]
+                                  .filter(Boolean)
+                                  .join('، ')}
+                              </span>
+                            </p>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+
+                    {/* جمع سفارش */}
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-theme px-3 py-2 text-[11px]">
+                      <span className="inline-flex items-center gap-1 muted">
+                        <Truck size={13} />
+                        {Number(order.total_discount) > 0 ? 'با احتساب تخفیف' : 'مبلغ نهایی'}
+                      </span>
+                      <span className="font-black">{formatPrice(order.final_amount ?? order.total_amount ?? order.amount)}</span>
+                    </div>
+
                     {order.customer_notes && (
-                      <div className="text-xs muted">یادداشت: {order.customer_notes}</div>
+                      <p className="mt-2 rounded-xl px-3 py-2 text-[11px] muted" style={{ background: 'var(--card2)' }}>
+                        یادداشت شما: {order.customer_notes}
+                      </p>
                     )}
                   </div>
                 )}
-              </div>
+              </article>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </div>
   );
 }

@@ -7,6 +7,8 @@ import { API } from '../../config/api';
 
 // عدد پشتیبان در صورت در دسترس نبودن بک‌اند
 const FALLBACK = { products: 1200, stores: 85, categories: 12 };
+/* سال تجربه: فعالیت از ۱۳۸۳ تا امروز */
+const EXPERIENCE_YEARS = 22;
 const SATISFACTION = '۹۸٪';
 
 function AboutStatsComponent() {
@@ -38,9 +40,9 @@ function AboutStatsComponent() {
   }, []);
 
   const items = [
-    { icon: Package, value: stats ? toFa(stats.products) : '…', label: 'محصول فعال' },
-    { icon: Store, value: stats ? toFa(stats.stores) : '…', label: 'فروشنده و فروشگاه' },
-    { icon: FolderTree, value: stats ? toFa(stats.categories) : '…', label: 'دسته‌بندی تخصصی' },
+    { icon: Package, value: `${toFa(EXPERIENCE_YEARS)} سال`, label: 'تجربه‌ی سران آسیا' },
+    { icon: Store, value: stats ? toFa(stats.stores) : '…', label: 'فروشنده و برند' },
+    { icon: FolderTree, value: stats ? toFa(stats.categories) : '…', label: 'دسته‌بندی نقشه‌برداری' },
     { icon: Heart, value: SATISFACTION, label: 'رضایت خریداران' },
   ];
 

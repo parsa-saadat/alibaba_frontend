@@ -1,20 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { formatDateLong } from '../../utils/helpers/format';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import {
-  Check,
-  Copy,
-  FileQuestion,
-  Film,
-  Image as ImageIcon,
-  ImageOff,
-  Loader2,
-  Search,
-  ShieldAlert,
-  Trash2,
-  Upload,
-  ZoomIn,
-} from 'lucide-react';
+import { Check, Copy, FileQuestion, Film, Image as ImageIcon, ImageOff, Images, Loader2, Search, ShieldAlert, Trash2, Upload, ZoomIn } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { resolveStorageImage } from '../../utils/helpers/storage-files';
 import { getBody, getId } from '../../utils/helpers/response';
@@ -22,8 +10,9 @@ import { Link } from 'react-router-dom';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { toFa } from '../../utils/helpers/format';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const PAGE_SIZE = 24;
 
@@ -49,15 +38,7 @@ const formatSize = (bytes) => {
 
 const formatDate = (value) => {
   if (!value) return '—';
-  try {
-    return new Date(value).toLocaleDateString('fa-IR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  } catch {
-    return '—';
-  }
+  return formatDateLong(value);
 };
 
 /* تصویر را با کش کمکی storage-files به data URL/آدرس تبدیل می‌کند */
@@ -355,6 +336,13 @@ function MediaPage() {
 
   return (
     <div className="space-y-4">
+      <PanelPageHeader
+        icon={Images}
+        title="کتابخانه‌ی رسانه"
+        subtitle="مدیریت تصاویر و فایل‌های بارگذاری‌شده"
+        onRefresh={() => load()}
+      />
+
       {/* سرصفحه */}
       <div className="card rounded-3xl p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

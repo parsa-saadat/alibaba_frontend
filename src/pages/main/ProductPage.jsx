@@ -9,6 +9,7 @@ import {
   Copy,
   GitCompareArrows,
   Heart,
+  Layers,
   Loader2,
   Minus,
   Package,
@@ -23,6 +24,10 @@ import {
 import { useShop } from '../../contexts/ShopContext';
 import useCartQuantity from '../../hooks/useCartQuantity';
 import { readList, writeList } from '../../utils/helpers/storage';
+import {
+  isTrustedProduct,
+  isTrustedStore,
+} from '../../utils/helpers/user';
 import { getBody, getList, getId } from '../../utils/helpers/response';
 import {
   formatPrice,
@@ -33,19 +38,29 @@ import {
   formatWeight,
   productImages,
   statusFa,
+  formatProductionYear,
 } from '../../utils/helpers/format';
 
-import ProductGridComponent from '../../components/product/ProductGridComponent';
+import ProductScrollerComponent from '../../components/product/ProductScrollerComponent';
+import RecentlyViewedComponent from '../../components/product/RecentlyViewedComponent';
+import { fetchCategories, descendantIds } from '../../utils/helpers/categories';
+import {
+  SellerStoreCard,
+  StoreContactModal,
+  TrustBadge,
+} from '../../components/store/StoreInfoComponent';
 import CartQtyControl from '../../components/cart/CartQtyControlComponent';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import MarkdownContentComponent from '../../components/common/MarkdownContentComponent';
+import ErrorBoundaryComponent from '../../components/common/ErrorBoundaryComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
+import { fetchStore, fetchPublicUser, primeSeller } from '../../services/sellerApi';
 
 const API =
   import.meta.env.VITE_APP_API_URL ||
   import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+  '/api';
 
 const accent = { color: 'var(--primary-color)' };
 
@@ -358,6 +373,7 @@ function MobileBottomBar({
 /* ------------------------------------------------------------------ */
 
 function ProductPage() {
+
   const { id, productId } = useParams();
   const activeProductId = id || productId;
 
@@ -365,6 +381,7 @@ function ProductPage() {
 
   const [product, setProduct] = useState(null);
   const [store, setStore] = useState(null);
+  const [owner, setOwner] = useState(null); // صاحب فروشگاه (برای وضعیت اعتماد و اطلاعات تماس)
   const [category, setCategory] = useState(null);
   const [similar, setSimilar] = useState([]);
 
@@ -374,6 +391,8 @@ function ProductPage() {
   const [retry, setRetry] = useState(0);
 
   const [zoomFile, setZoomFile] = useState(null);
+  const [contactOpen, setContactOpen] = useState(false);
+
 
   /* ---------- بارگذاری اطلاعات محصول ---------- */
   useEffect(() => {
@@ -382,6 +401,8 @@ function ProductPage() {
 
     setProduct(null);
     setStore(null);
+    setOwner(null);
+    setContactOpen(false);
     setCategory(null);
     setSimilar([]);
     setError('');
@@ -425,13 +446,46 @@ function ProductPage() {
         const currentStoreId = getId(current.store_id);
         const currentCategoryId = getId(current.category_id);
 
-        if (currentStoreId) {
-          axios
-            .get(`${API}/store/${currentStoreId}`, { signal, timeout: 15000 })
-            .then((res) => {
-              if (!signal.aborted) setStore(getBody(res));
+        /* شناسه‌ی فروشنده، مستقل از فروشگاه (برای وقتی /store پاسخ نمی‌دهد) */
+        const currentSellerId = getId(current.seller_id);
+
+        /*
+         * صاحب فروشگاه از روت عمومی کاربر خوانده می‌شود:
+         * seller_trust (اعتماد)، seller_active_status (فعال/غیرفعال)،
+         * firstname/lastname (نام و نام خانوادگی فروشنده).
+         */
+        const loadOwner = (ownerId) => {
+          if (!ownerId) return;
+          fetchPublicUser(ownerId)
+            .then((value) => {
+              if (!signal.aborted) setOwner(value);
             })
-            .catch(() => {});
+            .catch(() => {
+              if (!signal.aborted) setOwner(null);
+            });
+        };
+
+        if (currentStoreId) {
+          fetchStore(currentStoreId)
+            .then((value) => {
+              if (signal.aborted) return;
+              const currentStore = value || null;
+              setStore(currentStore);
+
+              /* store.user می‌تواند رشته یا آبجکت پرشده باشد */
+              loadOwner(
+                getId(currentStore?.user) ||
+                  currentStore?.user_id ||
+                  getId(currentStore?.owner) ||
+                  currentSellerId,
+              );
+            })
+            .catch(() => {
+              /* فروشگاه در دسترس نبود → حداقل اطلاعات فروشنده را بگیر */
+              if (!signal.aborted) loadOwner(currentSellerId);
+            });
+        } else {
+          loadOwner(currentSellerId);
         }
 
         if (currentCategoryId) {
@@ -445,22 +499,36 @@ function ProductPage() {
             })
             .catch(() => {});
 
+          /*
+           * «محصولات مرتبط» فقط از همین دسته‌بندی (و زیردسته‌هایش).
+           * بک‌اند پارامتر category_id را فیلتر می‌کند، ولی برای اطمینان خودمان هم
+           * دوباره روی پاسخ فیلتر می‌زنیم؛ قبلاً کارت‌هایی از دسته‌های دیگر هم
+           * می‌آمد. تعداد از ۴ به ۱۲ رسید و نمایش افقی/اسکرولی شد.
+           */
           setSimilarLoading(true);
-          axios
-            .get(`${API}/product`, {
-              params: { category_id: currentCategoryId, limit: 6, page: 1 },
+          Promise.all([
+            axios.get(`${API}/product`, {
+              params: { category_id: currentCategoryId, limit: 24, page: 1 },
               signal,
               timeout: 15000,
-            })
-            .then((res) => {
+            }),
+            fetchCategories(signal).catch(() => []),
+          ])
+            .then(([res, categories]) => {
               if (signal.aborted) return;
-              setSimilar(
-                getList(res)
-                  .filter(
-                    (item) => String(getId(item)) !== String(activeProductId),
-                  )
-                  .slice(0, 4),
-              );
+
+              const allowed = new Set([
+                String(currentCategoryId),
+                ...descendantIds(categories, currentCategoryId),
+              ]);
+
+              const matched = getList(res).filter((item) => {
+                if (String(getId(item)) === String(activeProductId)) return false;
+                const catId = getId(item.category_id);
+                return Boolean(catId) && allowed.has(String(catId));
+              });
+
+              setSimilar(matched.slice(0, 12));
             })
             .catch(() => {})
             .finally(() => {
@@ -543,6 +611,9 @@ function ProductPage() {
   const storeId = getId(product.store_id);
   const categoryId = getId(product.category_id);
 
+  /* فروشنده‌ی تأییدشده: از فروشگاه/صاحب فروشگاه و در نهایت از خود محصول */
+  const sellerTrusted = isTrustedStore(store, owner) || isTrustedProduct(product);
+
   const discounted = hasDiscount(product);
   const favorite = isFavorite(activeProductId);
   const compared = compare?.includes(activeProductId);
@@ -555,7 +626,7 @@ function ProductPage() {
 
   const specs = [
     ['برند', product.brand || 'ثبت نشده'],
-    ['سال تولید', product.production ? toFa(product.production) : 'ثبت نشده'],
+    ['سال تولید', formatProductionYear(product.production)],
     ['وضعیت موجودی', stockLabel],
     ['ابعاد', formatDimensions(product.dimensions) || 'ثبت نشده'],
     ['وزن', formatWeight(product.weight) || 'ثبت نشده'],
@@ -563,7 +634,6 @@ function ProductPage() {
       'گارانتی',
       product.warranty ? 'دارای گارانتی اصالت و سلامت' : 'بدون گارانتی',
     ],
-    ['فروش رفته', `${toFa(product.sold_count ?? 0)} عدد`],
   ];
 
   /* ---------- رندر ---------- */
@@ -571,7 +641,7 @@ function ProductPage() {
   return (
     <main
       dir="rtl"
-      className="mx-auto max-w-7xl px-4 pt-6 pb-24 md:pt-8 md:pb-24 lg:pb-8"
+      className="mx-auto max-w-7xl px-4 pt-6 pb-24 md:pt-8 md:pb-24 lg:pb-12"
     >
       {/* مسیر صفحه */}
       <nav
@@ -720,6 +790,7 @@ function ProductPage() {
                     <span className="truncate font-bold text-[var(--text-color)]">
                       {store.name}
                     </span>
+                    <TrustBadge trusted={sellerTrusted} />
                   </span>
                   <ArrowLeft size={14} className="shrink-0 muted" />
                 </Link>
@@ -773,7 +844,7 @@ function ProductPage() {
                 ['ابعاد', formatDimensions(product.dimensions) || 'ثبت نشده'],
                 [
                   'سال تولید',
-                  product.production ? toFa(product.production) : 'ثبت نشده',
+                  formatProductionYear(product.production),
                 ],
                 ['برند', product.brand || 'ثبت نشده'],
               ].map(([label, value]) => (
@@ -785,17 +856,18 @@ function ProductPage() {
                 </div>
               ))}
             </div>
-
-            <a
-              href="#product-description"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-bold hover:opacity-80"
-              style={accent}
-            >
-              مشاهده توضیحات و مشخصات کامل
-              <ArrowLeft size={14} />
-            </a>
           </section>
         </div>
+      </div>
+
+      {/* فروشگاه فروشنده — با کلیک، پاپ‌آپ اطلاعات تماس باز می‌شود */}
+      <div className="mt-6 lg:mt-8">
+        <SellerStoreCard
+          store={store}
+          owner={owner}
+          product={product}
+          onOpenContact={() => setContactOpen(true)}
+        />
       </div>
 
       {/* توضیحات و مشخصات فنی */}
@@ -865,7 +937,19 @@ function ProductPage() {
                 [&_td]:text-right
               "
             >
-              <MarkdownContentComponent content={product.description} />
+              <ErrorBoundaryComponent
+                resetKey={activeProductId}
+                fallback={
+                  <pre
+                    dir="auto"
+                    className="whitespace-pre-wrap font-sans text-sm leading-7"
+                  >
+                    {String(product.description || '')}
+                  </pre>
+                }
+              >
+                <MarkdownContentComponent content={product.description} />
+              </ErrorBoundaryComponent>
             </div>
           ) : (
             <p className="text-sm muted">
@@ -876,12 +960,14 @@ function ProductPage() {
           {Array.isArray(product.tags) && product.tags.length > 0 && (
             <div className="mt-8 flex flex-wrap gap-2 border-t border-theme pt-5">
               {product.tags.map((tag, index) => (
-                <span
+                <Link
                   key={`${tag}-${index}`}
-                  className="chip !cursor-default text-xs"
+                  to={`/products?tags=${encodeURIComponent(tag)}`}
+                  className="chip text-xs transition hover:-translate-y-0.5"
+                  title={`همه‌ی کالاهای با برچسب «${tag}»`}
                 >
                   #{tag}
-                </span>
+                </Link>
               ))}
             </div>
           )}
@@ -890,6 +976,84 @@ function ProductPage() {
         {/* ستون کنار: مشخصات فنی (چسبان در دسکتاپ) — جعبه قیمت و سبد
             فقط یک‌بار در بالای صفحه رندر می‌شد، نسخه تکراری حذف شد */}
         <div className="hidden min-w-0 space-y-4 lg:col-span-4 lg:sticky lg:top-36 lg:block lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:pe-1">
+          {/*
+            جعبه‌ی اقدام، زیر کارت «مشخصات فنی» و داخل همان ستون چسبان است؛
+            پس با اسکرول کاربر پایین می‌آید و هیچ نواری به پایین صفحه نمی‌چسبد.
+          */}
+          <section className="card rounded-2xl p-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <div className="min-w-0">
+                <span className="block text-[10px] muted">قیمت محصول</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-lg font-black" style={accent}>
+                    {formatPrice(finalPrice(product))}
+                  </span>
+                  {discounted && (
+                    <span className="text-[11px] line-through muted">
+                      {formatPrice(product.price?.amount)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {stock !== null && (
+                <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
+                  style={{ background: 'var(--card2)' }}>
+                  {soldOut ? 'ناموجود' : `${toFa(stock)} عدد`}
+                </span>
+              )}
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {cartQty === 0 ? (
+                <button
+                  type="button"
+                  onClick={incrementCart}
+                  disabled={soldOut || !loggedIn}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{ background: 'var(--primary-color)' }}
+                >
+                  <ShoppingCart size={16} />
+                  {soldOut ? 'ناموجود' : 'افزودن به سبد خرید'}
+                </button>
+              ) : (
+                <div className="flex items-center justify-between gap-1.5 rounded-xl border border-theme bg-[var(--card2)]/60 p-1">
+                  <button
+                    type="button"
+                    onClick={decrementCart}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg border border-theme bg-[var(--card)] transition ${
+                      cartQty === 1 ? 'hover:border-rose-500/40 hover:text-rose-500' : 'hover:bg-[var(--card2)]'
+                    }`}
+                    aria-label={cartQty === 1 ? 'حذف از سبد' : 'کاهش تعداد'}
+                  >
+                    {cartQty === 1 ? <Trash2 size={15} /> : <Minus size={15} />}
+                  </button>
+                  <div className="text-center text-sm font-black tabular-nums">
+                    {syncBusy ? <Loader2 size={14} className="mx-auto animate-spin muted" /> : toFa(cartQty)}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={incrementCart}
+                    disabled={soldOut || (stock !== null && cartQty >= stock) || !loggedIn}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
+                    style={{ background: 'var(--primary-color)' }}
+                    aria-label="افزایش تعداد"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setContactOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-theme px-4 py-2.5 text-sm font-bold transition hover:border-[var(--primary-color)]"
+              >
+                <Store size={16} />
+                ارتباط با فروشنده
+              </button>
+            </div>
+          </section>
+
           {/* مشخصات فنی */}
           <section className="card rounded-2xl p-5">
             <h2 className="flex items-center gap-2 border-b border-theme pb-4 text-lg font-black">
@@ -938,37 +1102,32 @@ function ProductPage() {
         </section>
       </div>
 
-      {/* محصولات مشابه */}
+      {/* محصولات مرتبط — فقط از همین دسته‌بندی، اسکرولی و بیشتر */}
       {(similarLoading || similar.length > 0) && (
         <section className="mt-10">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="flex items-center gap-2 text-lg font-black">
-              <span
-                className="h-5 w-1 rounded-full"
-                style={{ background: 'var(--primary-color)' }}
-              />
-              محصولات مشابه
-            </h2>
-            {categoryId && (
-              <Link
-                to={`/products?category_id=${encodeURIComponent(categoryId)}`}
-                className="inline-flex items-center gap-1 text-xs font-bold"
-                style={accent}
-              >
-                مشاهده همه
-                <ArrowLeft size={15} />
-              </Link>
-            )}
-          </div>
-
-          <ProductGridComponent
+          <ProductScrollerComponent
+            partone="محصولات"
+            parttwo="مرتبط"
+            icon={Layers}
+            subtitle={
+              category?.name
+                ? `از دسته‌ی «${category.name}» — با کشیدن به کنار، محصولات بیشتری ببینید`
+                : 'از همین دسته‌بندی — با کشیدن به کنار، محصولات بیشتری ببینید'
+            }
             products={similar}
             loading={similarLoading}
-            columns={4}
-            skeletonCount={4}
+            moreTo={
+              categoryId ? `/products?category_id=${encodeURIComponent(categoryId)}` : '/products'
+            }
+            emptyText="محصول مرتبطی در این دسته‌بندی نیست"
           />
         </section>
       )}
+
+      {/* اخیراً مشاهده‌شده‌ها */}
+      <section className="mt-6">
+        <RecentlyViewedComponent excludeId={activeProductId} limit={8} />
+      </section>
 
       {/* نوار پایین — فقط موبایل و تبلت */}
       <MobileBottomBar
@@ -981,6 +1140,14 @@ function ProductPage() {
         loggedIn={loggedIn}
         onIncrement={incrementCart}
         onDecrement={decrementCart}
+      />
+
+      <StoreContactModal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        store={store}
+        owner={owner}
+        product={product}
       />
 
       <ImageLightboxComponent

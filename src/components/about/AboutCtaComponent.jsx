@@ -9,17 +9,18 @@ function AboutCtaComponent() {
         className="rounded-3xl p-6 sm:p-9 flex flex-col md:flex-row items-center justify-between gap-6"
         style={{
           background:
-            'radial-gradient(circle at 85% 20%, rgba(255,214,10,0.18), transparent 45%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))',
+            'radial-gradient(circle at 85% 20%, rgba(255,214,10,0.18) 0%, rgba(255,214,10,0) 45%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))',
           border: '1px solid rgba(255,214,10,0.28)',
         }}
       >
         <div className="max-w-xl">
           <h2 className="font-black text-lg sm:text-2xl text-white leading-tight">
-            علی‌بازار برای رشد کسب‌وکار شماست
+            ژئو کالا برای کار شما ساخته شده
           </h2>
           <p className="text-xs sm:text-sm text-white/70 leading-7 mt-2">
-            اگر تولیدکننده یا عمده‌فروش هستی، فروشگاهت را بساز و به خریداران سراسر کشور دسترسی پیدا
-            کن. اگر خریدار هستی، از بین فروشندگان معتبر قیمت بگیر و مطمئن خرید کن.
+            اگر فروشنده‌ی تجهیزات نقشه‌برداری هستی، فروشگاهت را در ژئو کالا بساز و به نقشه‌برداران
+            سراسر کشور دسترسی پیدا کن. اگر خریدار هستی، مدل‌ها را مقایسه کن و با مشورت کارشناس
+           خرید کن.
           </p>
         </div>
 

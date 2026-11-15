@@ -23,8 +23,9 @@ import { Loading } from '../../components/common/ScroolToTopComponent';
 import SellerEditorModalComponent from '../../components/panel/SellerEditorModalComponent';
 import { toFa } from '../../utils/helpers/format';
 import { isTrustedSeller, userFullName, userInitial } from '../../utils/helpers/user';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const FILTERS = [
   ['ALL', 'همه'],
@@ -103,9 +104,12 @@ function SellersPage() {
   const [zoom, setZoom] = useState(null);
   const [editingSeller, setEditingSeller] = useState(null);
   const [busyId, setBusyId] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (isRefresh = false) => {
+    if (isRefresh && typeof isRefresh === 'object') isRefresh = true;
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
     try {
       const res = await axios.get(`${API}/sellers?limit=100`, authHeaders());
       const body = res.data.body;
@@ -115,6 +119,7 @@ function SellersPage() {
       toast.error(e.response?.data?.message || 'دریافت فهرست فروشندگان ناموفق بود');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -193,19 +198,14 @@ function SellersPage() {
 
   return (
     <div className="space-y-4">
-      {/* سرصفحه */}
-      <div className="card rounded-3xl p-4 sm:p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="flex items-center gap-2 text-base font-black sm:text-lg">
-              <UserRound size={18} className="text-yellow" />
-              فروشندگان
-            </h1>
-            <p className="mt-1 text-xs muted">
-              تأیید، فعال/غیرفعال کردن، نشان اعتماد و ویرایش کامل اطلاعات هر فروشنده.
-            </p>
-          </div>
-
+      <PanelPageHeader
+        icon={UserRound}
+        title="فروشندگان"
+        subtitle="تأیید، فعال/غیرفعال کردن، نشان اعتماد و ویرایش کامل اطلاعات هر فروشنده."
+        onRefresh={() => load(true)}
+        refreshing={refreshing}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="relative w-full sm:w-80">
             <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
             <input
@@ -215,22 +215,22 @@ function SellersPage() {
               className="input !py-2 !pr-9 text-xs"
             />
           </div>
-        </div>
 
-        {/* فیلترها */}
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {FILTERS.map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setFilter(value)}
-              className={`chip ${filter === value ? 'on' : ''}`}
-            >
-              {label}
-            </button>
-          ))}
+          {/* فیلترها */}
+          <div className="flex flex-wrap gap-1.5">
+            {FILTERS.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setFilter(value)}
+                className={`chip ${filter === value ? 'on' : ''}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </PanelPageHeader>
 
       {/* فهرست */}
       {filteredSellers.length === 0 ? (

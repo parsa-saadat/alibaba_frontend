@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatDate } from '../../utils/helpers/format';
 import {
   Check,
   Package,
@@ -20,8 +21,9 @@ import {
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { useShop } from '../../contexts/ShopContext';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 const PAY_PREFIX = import.meta.env.VITE_PAYMENT_PREFIX || '';
 
 /* ------------------------------------------------------------------ */
@@ -496,19 +498,12 @@ function PlansPage() {
         />
       )}
 
-      <div className="card rounded-3xl p-6 text-center">
-        <div
-          className="w-12 h-12 rounded-2xl grid place-items-center mx-auto mb-3"
-          style={{ background: 'var(--primary-color)', color: '#0a1736' }}
-        >
-          <Sparkles size={22} />
-        </div>
-        <h1 className="font-black text-xl">پلن‌های فروشندگی</h1>
-        <p className="text-xs muted mt-2 max-w-xl mx-auto leading-6">
-          پلن مناسب کسب‌وکار خود را انتخاب کنید. بعد از پرداخت، محدودیت‌های فروشگاه و محصولات شما
-          بلافاصله بر اساس پلن به‌روزرسانی می‌شود.
-        </p>
-      </div>
+      <PanelPageHeader
+        icon={Sparkles}
+        title="پلن‌های فروشندگی"
+        subtitle="پلن مناسب کسب‌وکار خود را انتخاب کنید؛ بعد از پرداخت، محدودیت‌های فروشگاه و محصولات بلافاصله به‌روزرسانی می‌شود."
+        onRefresh={loadPlans}
+      />
 
       {loading && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

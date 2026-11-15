@@ -3,58 +3,94 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
-  Pencil,
-  Trash2,
-  Search,
+  BadgeCheck,
+  Ban,
+  CheckCircle2,
   ExternalLink,
   Mail,
-  Phone,
-  User,
-  Store,
-  CheckCircle2,
+  MapPin,
+  Package,
   PauseCircle,
-  Ban,
+  Pencil,
+  Phone,
+  Plus,
+  RefreshCw,
+  Search,
+  Store,
+  Trash2,
+  UserRound,
+  X,
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import { userFullName } from '../../utils/helpers/user';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import StoreEditorModalComponent from '../../components/panel/StoreEditorModalComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { toFa, statusFa } from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
+import { userFullName } from '../../utils/helpers/user';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
-const STATUS_STYLE = {
-  ENABLE: { cls: 'bg-emerald-500/15 text-emerald-400', icon: CheckCircle2 },
-  DISABLE: { cls: 'bg-amber-500/15 text-amber-400', icon: PauseCircle },
-  ROOT_DISABLE: { cls: 'bg-red-500/15 text-red-400', icon: Ban },
+const STATUS_META = {
+  ENABLE: { color: '#17994f', bg: 'rgba(23,153,79,0.14)', icon: CheckCircle2 },
+  DISABLE: { color: '#c2740a', bg: 'rgba(194,116,10,0.14)', icon: PauseCircle },
+  ROOT_DISABLE: { color: '#e53935', bg: 'rgba(229,57,53,0.14)', icon: Ban },
 };
+const metaOf = (status) => STATUS_META[status] || STATUS_META.DISABLE;
+
+function StatTile({ label, value, hint, icon: Icon, tint }) {
+  return (
+    <div className="card rounded-2xl p-4 flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <div className="text-[11px] font-bold muted truncate">{label}</div>
+        <div className="mt-2 text-lg font-black" style={{ color: tint || 'var(--text)' }}>
+          {value}
+        </div>
+        {hint && <div className="mt-1 text-[10px] muted truncate">{hint}</div>}
+      </div>
+      <span
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
+        style={{ background: 'var(--card2)', color: tint || 'var(--primary-color)' }}
+      >
+        <Icon size={17} />
+      </span>
+    </div>
+  );
+}
 
 function StoresPage() {
   const [stores, setStores] = useState([]);
   const [users, setUsers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [storeModal, setStoreModal] = useState(undefined);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [zoomFile, setZoomFile] = useState(null);
   const [busyId, setBusyId] = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (silent) setRefreshing(true);
+    else setLoading(true);
     try {
-      const [sRes, uRes] = await Promise.all([
+      const [storesRes, usersRes, productsRes] = await Promise.all([
         axios.get(`${API}/perm/stores?limit=100`, authHeaders()),
-        axios.get(`${API}/user?limit=100`, authHeaders()),
+        axios.get(`${API}/user?limit=100`, authHeaders()).catch(() => null),
+        axios.get(`${API}/perm/products?limit=200`, authHeaders()).catch(() => null),
       ]);
-      setStores(sRes.data.body?.data || sRes.data.body || []);
-      setUsers(uRes.data.body?.data || uRes.data.body || []);
+      setStores(storesRes.data.body?.data || storesRes.data.body || []);
+      setUsers(usersRes?.data?.body?.data || usersRes?.data?.body || []);
+      const list = productsRes?.data?.body?.data || productsRes?.data?.body || [];
+      setProducts(Array.isArray(list) ? list : []);
     } catch {
       setStores([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -64,12 +100,24 @@ function StoresPage() {
 
   const userMap = useMemo(() => Object.fromEntries(users.map((u) => [getId(u), u])), [users]);
 
+  const statsByStore = useMemo(() => {
+    const map = {};
+    products.forEach((product) => {
+      const key = getId(product.store_id);
+      if (!key) return;
+      if (!map[key]) map[key] = { count: 0, stock: 0 };
+      map[key].count += 1;
+      map[key].stock += Number(product.stock ?? 0) || 0;
+    });
+    return map;
+  }, [products]);
+
   const counts = useMemo(
     () => ({
       all: stores.length,
-      ENABLE: stores.filter((s) => s.status === 'ENABLE').length,
-      DISABLE: stores.filter((s) => s.status === 'DISABLE').length,
-      ROOT_DISABLE: stores.filter((s) => s.status === 'ROOT_DISABLE').length,
+      ENABLE: stores.filter((store) => store.status === 'ENABLE').length,
+      DISABLE: stores.filter((store) => store.status === 'DISABLE').length,
+      ROOT_DISABLE: stores.filter((store) => store.status === 'ROOT_DISABLE').length,
     }),
     [stores],
   );
@@ -77,15 +125,21 @@ function StoresPage() {
   const q = search.trim().toLowerCase();
   const filtered = useMemo(
     () =>
-      stores.filter((s) => {
-        if (statusFilter !== 'all' && s.status !== statusFilter) return false;
+      stores.filter((store) => {
+        if (statusFilter !== 'all' && store.status !== statusFilter) return false;
         if (!q) return true;
-        const owner = userMap[getId(s.user)];
-        return (
-          s.name?.toLowerCase().includes(q) ||
-          s.contact_info?.email?.toLowerCase().includes(q) ||
-          owner?.username?.toLowerCase().includes(q)
-        );
+        const owner = userMap[getId(store.user)];
+        return [
+          store.name,
+          store.contact_info?.email,
+          store.contact_info?.phone,
+          owner?.username,
+          userFullName(owner),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
       }),
     [stores, userMap, q, statusFilter],
   );
@@ -93,30 +147,27 @@ function StoresPage() {
   const setStoreStatus = async (store, status) => {
     setBusyId(getId(store));
     try {
-      await axios.put(
-        `${API}/store/${getId(store)}`,
-        { status, contact_info: store.contact_info },
-        authHeaders(),
-      );
+      await axios.put(`${API}/store/${getId(store)}`, { status, contact_info: store.contact_info }, authHeaders());
       toast.success(`وضعیت فروشگاه به «${statusFa(status)}» تغییر کرد`);
-      load();
-    } catch (e) {
-      toast.error(e.response?.data?.message || 'خطا در تغییر وضعیت فروشگاه');
+      load(true);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'خطا در تغییر وضعیت فروشگاه');
     } finally {
       setBusyId('');
     }
   };
 
   const deleteStore = async (store) => {
-    if (!window.confirm(`فروشگاه «${store.name}» حذف شود؟`)) return;
     setBusyId(getId(store));
     try {
       await axios.delete(`${API}/store/${getId(store)}`, authHeaders());
       toast.success('فروشگاه حذف شد');
-      load();
+      setDeleteTarget(null);
+      load(true);
     } catch {
       toast.info('حذف ممکن نبود؛ فروشگاه به‌جای آن مسدود شد');
       await setStoreStatus(store, 'ROOT_DISABLE');
+      setDeleteTarget(null);
     } finally {
       setBusyId('');
     }
@@ -138,202 +189,319 @@ function StoresPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      {/* ---------- هدر ---------- */}
-      <div className="card rounded-2xl p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="font-black flex items-center gap-2">
-            <Store size={18} className="text-yellow" /> مدیریت فروشگاه‌ها
-            <span className="text-xs muted font-normal">({toFa(filtered.length)} مورد)</span>
-          </h2>
-          <div className="relative w-full sm:w-72">
-            <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="جستجوی نام فروشگاه، ایمیل یا مالک…"
-              className="input !py-2 !pr-9 text-xs"
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {tabs.map((t) => (
+    <div className="space-y-5">
+      <PanelPageHeader
+        icon={Store}
+        title="مدیریت فروشگاه‌ها"
+        subtitle={`${toFa(stores.length)} فروشگاه • ${toFa(products.length)} کالا • ${toFa(counts.ENABLE)} فعال`}
+        onRefresh={() => load(true)}
+        refreshing={refreshing}
+        actions={
+          <>
+            <Link to="/dashboard/sellers" className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5">
+              <UserRound size={14} /> فروشندگان
+            </Link>
             <button
-              key={t.id}
               type="button"
-              onClick={() => setStatusFilter(t.id)}
-              className={`chip !py-1 !px-3 text-xs ${statusFilter === t.id ? 'on' : ''}`}
+              onClick={() => setStoreModal(null)}
+              className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
             >
-              {t.label} ({toFa(counts[t.id])})
+              <Plus size={14} /> فروشگاه جدید
             </button>
-          ))}
-        </div>
+          </>
+        }
+      />
+
+      {/* ───── آمار ───── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile label="کل فروشگاه‌ها" value={toFa(counts.all)} hint={`${toFa(products.length)} کالا`} icon={Store} />
+        <StatTile label="فعال" value={toFa(counts.ENABLE)} hint="در دسترس مشتری" icon={CheckCircle2} tint="#17994f" />
+        <StatTile label="غیرفعال" value={toFa(counts.DISABLE)} hint="موقتاً بسته" icon={PauseCircle} tint="#c2740a" />
+        <StatTile label="مسدود" value={toFa(counts.ROOT_DISABLE)} hint="توسط مدیریت" icon={Ban} tint="#e53935" />
       </div>
 
-      {filtered.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-theme p-10 text-center text-sm muted">
-          فروشگاهی پیدا نشد.
+      {/* ───── فیلتر و جستجو ───── */}
+      <section className="card rounded-2xl p-3 sm:p-4 space-y-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          {tabs.map((tab) => {
+            const active = statusFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStatusFilter(tab.id)}
+                className="chip flex items-center gap-1.5"
+                style={active ? { background: 'var(--primary-color)', color: '#0a1736', borderColor: 'transparent' } : undefined}
+              >
+                {tab.label}
+                <span
+                  className="rounded-full px-1.5 text-[10px] font-black"
+                  style={{ background: active ? 'rgba(10,23,54,0.16)' : 'var(--card2)' }}
+                >
+                  {toFa(counts[tab.id] || 0)}
+                </span>
+              </button>
+            );
+          })}
+          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)} نتیجه</span>
+        </div>
+
+        <div className="relative">
+          <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="جستجوی نام فروشگاه، ایمیل یا مالک…"
+            className="input !py-2.5 !pr-9 text-xs w-full"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="btn-ghost !p-1 absolute left-2 top-1/2 -translate-y-1/2"
+              aria-label="پاک کردن جستجو"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* ───── لیست ───── */}
+      {filtered.length === 0 ? (
+        <section className="card rounded-3xl p-10 text-center space-y-3">
+          <span
+            className="mx-auto grid h-14 w-14 place-items-center rounded-2xl"
+            style={{ background: 'var(--card2)', color: 'var(--muted)' }}
+          >
+            <Store size={24} />
+          </span>
+          <b className="block text-sm">فروشگاهی پیدا نشد</b>
+          <p className="text-xs muted">
+            {stores.length === 0 ? 'فروشگاهی ثبت نشده است.' : 'فیلتر یا عبارت جستجو را تغییر دهید.'}
+          </p>
+        </section>
+      ) : (
+        <div className="grid gap-3 xl:grid-cols-2">
+          {filtered.map((store) => {
+            const id = getId(store);
+            const owner = userMap[getId(store.user)];
+            const busy = busyId === id;
+            const meta = metaOf(store.status);
+            const StatusIcon = meta.icon;
+            const rooted = store.status === 'ROOT_DISABLE';
+            const stats = statsByStore[id] || { count: 0, stock: 0 };
+            const zoomable = (file) => (file ? (f, a) => setZoomFile({ file: f, alt: a }) : undefined);
+
+            return (
+              <article key={id} className="card rounded-2xl overflow-hidden flex flex-col">
+                <div
+                  className="relative w-full overflow-hidden"
+                  style={{
+                    height: 84,
+                    background: store.banner_image_id
+                      ? 'var(--card2)'
+                      : 'linear-gradient(135deg, var(--card2), rgba(255,214,10,0.35))',
+                  }}
+                >
+                  {store.banner_image_id && (
+                    <StorageImageComponent
+                      file={store.banner_image_id}
+                      alt={`بنر ${store.name}`}
+                      className="w-full h-full object-cover"
+                      onZoom={zoomable(store.banner_image_id)}
+                    />
+                  )}
+                  <span
+                    className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black backdrop-blur"
+                    style={{ background: meta.bg, color: meta.color }}
+                  >
+                    <StatusIcon size={11} /> {statusFa(store.status)}
+                  </span>
+                </div>
+
+                <div className="p-4 flex flex-col gap-3 flex-1">
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="grid shrink-0 place-items-center overflow-hidden rounded-2xl border border-theme text-lg font-black"
+                      style={{ width: 52, height: 52, background: 'var(--card2)', color: 'var(--primary-color)' }}
+                    >
+                      {store.profile_image_id ? (
+                        <StorageImageComponent
+                          file={store.profile_image_id}
+                          alt={store.name}
+                          className="w-full h-full object-cover"
+                          onZoom={zoomable(store.profile_image_id)}
+                        />
+                      ) : (
+                        (store.name || '?').trim()[0]
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <Link to={`/store/${id}`} className="block truncate text-sm font-black hover:underline">
+                        {store.name || 'بدون نام'}
+                      </Link>
+                      <div className="mt-1 flex items-center gap-1 text-[11px] muted min-w-0">
+                        <UserRound size={11} className="shrink-0" />
+                        <span className="truncate">
+                          {userFullName(owner) || owner?.username || 'مالک نامشخص'}
+                        </span>
+                        {owner?.seller_trust === true && <BadgeCheck size={12} style={{ color: '#17994f' }} />}
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                          style={{ background: 'var(--card2)', color: 'var(--text)' }}
+                        >
+                          <Package size={10} /> {toFa(stats.count)} کالا
+                        </span>
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                          style={{ background: 'var(--card2)', color: 'var(--muted)' }}
+                        >
+                          موجودی: {toFa(stats.stock)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-1.5 border-y border-theme py-2.5 text-[11px] muted sm:grid-cols-2">
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <Mail size={12} className="shrink-0" />
+                      <span dir="ltr" className="truncate">{store.contact_info?.email || '—'}</span>
+                    </span>
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <Phone size={12} className="shrink-0" />
+                      <span dir="ltr" className="truncate">{store.contact_info?.phone || store.contact_info?.fax || '—'}</span>
+                    </span>
+                    {store.contact_info?.address && (
+                      <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
+                        <MapPin size={12} className="shrink-0" />
+                        <span className="truncate">{store.contact_info.address}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-auto flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setStoreModal(store)}
+                      className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
+                    >
+                      <Pencil size={13} /> ویرایش
+                    </button>
+
+                    {!rooted && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setStoreStatus(store, store.status === 'ENABLE' ? 'DISABLE' : 'ENABLE')}
+                        className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
+                      >
+                        {store.status === 'ENABLE' ? <PauseCircle size={13} /> : <CheckCircle2 size={13} />}
+                        {store.status === 'ENABLE' ? 'غیرفعال' : 'فعال'}
+                      </button>
+                    )}
+
+                    {rooted ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setStoreStatus(store, 'ENABLE')}
+                        className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
+                        style={{ color: '#17994f' }}
+                        title="برداشتن مسدودی و فعال‌سازی دوباره‌ی فروشگاه"
+                      >
+                        <CheckCircle2 size={13} /> رفع مسدودی
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => {
+                          if (window.confirm(`فروشگاه «${store.name}» مسدود شود؟ فروشنده دیگر نمی‌تواند آن را ویرایش یا فعال کند.`)) {
+                            setStoreStatus(store, 'ROOT_DISABLE');
+                          }
+                        }}
+                        className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
+                        style={{ color: '#e53935' }}
+                        title="مسدودسازی توسط مدیریت"
+                      >
+                        <Ban size={13} /> مسدودسازی
+                      </button>
+                    )}
+
+                    <Link to={`/store/${id}`} className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1">
+                      <ExternalLink size={13} /> صفحه
+                    </Link>
+
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setDeleteTarget(store)}
+                      className="btn-ghost !p-2 ms-auto disabled:opacity-50"
+                      style={{ color: '#e53935' }}
+                      title="حذف یا مسدودسازی فروشگاه"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
-
-      {/* ---------- لیست ---------- */}
-      <div className="grid xl:grid-cols-2 gap-4">
-        {filtered.map((s) => {
-          const id = getId(s);
-          const owner = userMap[getId(s.user)];
-          const busy = busyId === id;
-          const st = STATUS_STYLE[s.status] || STATUS_STYLE.DISABLE;
-          const StatusIcon = st.icon;
-          const zoomable = (file) => (file ? (f, a) => setZoomFile({ file: f, alt: a }) : undefined);
-
-          return (
-            <div
-              key={id}
-              className="card rounded-2xl overflow-hidden flex flex-col"
-              style={{ opacity: s.status === 'ROOT_DISABLE' ? 0.8 : 1 }}
-            >
-              {/* بنر */}
-              <div
-                className="w-full relative overflow-hidden"
-                style={{
-                  height: 80,
-                  background: s.banner_image_id
-                    ? 'var(--card2)'
-                    : 'linear-gradient(135deg, var(--card2), var(--primary-color) 220%)',
-                }}
-              >
-                {s.banner_image_id && (
-                  <StorageImageComponent
-                    file={s.banner_image_id}
-                    alt={`بنر ${s.name}`}
-                    className="w-full h-full object-cover"
-                    onZoom={zoomable(s.banner_image_id)}
-                  />
-                )}
-              </div>
-
-              <div className="p-4 flex flex-col gap-3 flex-1">
-                <div className="flex items-start gap-3">
-                  {/* لوگو */}
-                  <div
-                    className="rounded-2xl overflow-hidden shrink-0 grid place-items-center font-black text-xl border border-theme"
-                    style={{
-                      width: 52,
-                      height: 52,
-                      background: 'var(--card2)',
-                      color: 'var(--primary-color)',
-                    }}
-                  >
-                    {s.profile_image_id ? (
-                      <StorageImageComponent
-                        file={s.profile_image_id}
-                        alt={s.name}
-                        className="w-full h-full object-cover"
-                        onZoom={zoomable(s.profile_image_id)}
-                      />
-                    ) : (
-                      (s.name || '?').trim()[0]
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <Link
-                        to={`/store/${id}`}
-                        className="font-black text-base hover:underline truncate"
-                      >
-                        {s.name}
-                      </Link>
-                      <span
-                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0 ${st.cls}`}
-                      >
-                        <StatusIcon size={12} /> {statusFa(s.status)}
-                      </span>
-                    </div>
-                    {s.description && (
-                      <p className="text-xs muted leading-6 mt-1 line-clamp-2">{s.description}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 py-3 border-y border-theme">
-                  <div className="flex items-center gap-2 text-xs muted min-w-0">
-                    <User size={13} className="shrink-0" />
-                    <span className="truncate">
-                      {owner ? `${userFullName(owner) || owner.username} (${toFa(owner.phone)})` : 'مالک نامشخص'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs muted min-w-0">
-                    <Mail size={13} className="shrink-0" />
-                    <span dir="ltr" className="truncate">{s.contact_info?.email || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs muted min-w-0">
-                    <Phone size={13} className="shrink-0" />
-                    <span dir="ltr" className="truncate">
-                      {s.contact_info?.phone || s.contact_info?.fax || '—'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 flex-wrap mt-auto">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => setStoreModal(s)}
-                    className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1"
-                  >
-                    <Pencil size={13} /> ویرایش
-                  </button>
-
-                  <select
-                    disabled={busy}
-                    value=""
-                    onChange={(e) => e.target.value && setStoreStatus(s, e.target.value)}
-                    className="input !py-1.5 !px-2 text-xs !w-auto"
-                    aria-label="تغییر وضعیت"
-                  >
-                    <option value="">تغییر وضعیت…</option>
-                    {s.status !== 'ENABLE' && <option value="ENABLE">فعال کردن</option>}
-                    {s.status !== 'DISABLE' && <option value="DISABLE">غیرفعال کردن</option>}
-                    {s.status !== 'ROOT_DISABLE' && (
-                      <option value="ROOT_DISABLE">مسدودسازی ریشه‌ای</option>
-                    )}
-                  </select>
-
-                  <Link to={`/store/${id}`} className="btn-ghost !p-2" title="مشاهده صفحه فروشگاه">
-                    <ExternalLink size={14} />
-                  </Link>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => deleteStore(s)}
-                    className="btn-ghost !p-2 text-red-400 mr-auto"
-                    title="حذف فروشگاه"
-                    aria-label="حذف فروشگاه"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
       {storeModal !== undefined && (
         <StoreEditorModalComponent
           store={storeModal}
           isAdmin
           onClose={() => setStoreModal(undefined)}
-          onSaved={load}
+          onSaved={() => load(true)}
         />
       )}
 
-      <ImageLightboxComponent
-        file={zoomFile?.file}
-        alt={zoomFile?.alt}
-        onClose={() => setZoomFile(null)}
-      />
+      {/* ───── تأیید حذف ───── */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="card rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
+            <span
+              className="mx-auto grid h-14 w-14 place-items-center rounded-2xl"
+              style={{ background: 'rgba(229,57,53,0.14)', color: '#e53935' }}
+            >
+              <Trash2 size={24} />
+            </span>
+            <div className="space-y-1">
+              <b className="block text-sm">حذف فروشگاه</b>
+              <p className="text-xs muted leading-6">
+                «{deleteTarget.name}» حذف شود؟ اگر حذف ممکن نباشد، فروشگاه مسدود می‌شود و کالاهایش از دسترس خارج می‌شوند.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <button type="button" onClick={() => setDeleteTarget(null)} className="btn-ghost !py-2 !px-4 text-xs">
+                انصراف
+              </button>
+              <button
+                type="button"
+                disabled={busyId === getId(deleteTarget)}
+                onClick={() => deleteStore(deleteTarget)}
+                className="btn-yellow !py-2 !px-4 text-xs disabled:opacity-60"
+                style={{ background: '#e53935', color: '#fff' }}
+              >
+                بله، حذف کن
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ImageLightboxComponent file={zoomFile?.file} alt={zoomFile?.alt} onClose={() => setZoomFile(null)} />
     </div>
   );
 }

@@ -41,13 +41,17 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="light"] {
-  --bg: #eef2fa;
+  /*
+   * تم روشن: خاکستری‌ها کاملاً خنثی‌اند (بدون مایل به آبی).
+   * فقط رنگ برند (سرمه‌ای/زرد) رنگی می‌ماند؛ بقیه‌ی سطح‌ها neutral است.
+   */
+  --bg: #f3f3f5;
   --bg2: #ffffff;
   --card: #ffffff;
-  --card2: #e4eaf7;
-  --border: rgba(10, 23, 54, 0.14);
-  --text: #0a1736;
-  --muted: #4b5c86;
+  --card2: #ececee;
+  --border: rgba(17, 18, 20, 0.14);
+  --text: #17181c;
+  --muted: #5c5e66;
   --accent-text: #0a1736;
   --header-bg: #0a1736;
   --header-text: #ffffff;
@@ -62,6 +66,19 @@ body {
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
+}
+
+/*
+ * رنگ پیش‌فرض همه‌ی بوردرها = متغیر تم.
+ * بدون این قاعده، کلاس خالی `border` رنگ متن (سفید/مشکی خالص) می‌گیرد و
+ * گوشه‌ها در تم روشن/تاریک خط تیز و ناهماهنگ می‌سازد.
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border);
+  }
 }
 
 .card {
@@ -149,12 +166,15 @@ body {
   cursor: pointer;
   transition: 0.15s;
 }
+.chip {
+  /* وزن قلم ثابت است؛ وگرنه با هاور متن پهن‌تر می‌شود و بقیه‌ی المان‌ها تکان می‌خورند */
+  font-weight: 700;
+}
 .chip:hover,
 .chip.on {
   border-color: var(--primary-color);
   background: var(--primary-color);
   color: var(--navy);
-  font-weight: 800;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -233,6 +253,20 @@ button:disabled {
 .site-footer .muted {
   color: #9aa8cc;
 }
+/* لوگو: نسخه‌ی سفید برای تم تاریک، نسخه‌ی سرمه‌ای برای تم روشن */
+.brand-on-dark {
+  display: block;
+}
+.brand-on-light {
+  display: none;
+}
+html.light .brand-on-dark {
+  display: none;
+}
+html.light .brand-on-light {
+  display: block;
+}
+
 .brand-logo,
 .header-badge {
   background: var(--primary-color);
@@ -672,7 +706,8 @@ html[data-theme="light"] .skeleton::after {
 
 @media (max-width: 767px) {
   .search-shell {
-    order: 3;
+    /* ردیف دوم زیر لوگو؛ اکشن‌ها (order:3) در ردیف اول می‌مانند */
+    order: 4;
     flex-basis: 100%;
     max-width: none;
   }
@@ -950,3 +985,56 @@ html[data-theme="light"] .skeleton::after {
 .hover-yellow:hover {
   color: var(--accent-text);
 }
+
+/* ------------------------------------------------------------------ */
+/* سایه‌ی نرم دو سرِ اسکرول افقی (محصولات، دسته‌بندی، چیپ‌ها)            */
+/* ------------------------------------------------------------------ */
+/*
+ * کارت‌ها موقع اسکرول نرم محو می‌شوند تا لبه‌ی بریده‌شده حس «بریدگی» ندهد.
+ * از mask استفاده می‌شود تا در هر دو تم و روی هر پس‌زمینه‌ای درست دیده شود.
+ */
+/*
+ * پنل ادمین و فروشنده
+ * -------------------
+ * این ناحیه هدر سایت را ندارد؛ فقط یک نوار بالای پنل (در موبایل) هست.
+ * متغیر `--header-h` داخل همین ناحیه بازنویسی می‌شود تا اجزای چسبانِ پنل
+ * (نوار ویرایش محصول، نوار ابزار ویرایشگر، پنل جدول) دقیقاً زیر همان نوار بچسبند
+ * و مقدار هدر صفحه‌های فروشگاه به پنل «نشت» نکند.
+ */
+.admin-wrapper {
+  --header-h: 0px;
+}
+
+@media (max-width: 1023.98px) {
+  .admin-wrapper {
+    /* ارتفاع نوار بالای پنل در موبایل (اندازه‌گیری‌شده: ۶۰ پیکسل) */
+    --header-h: 60px;
+  }
+}
+
+.scroll-fade-x {
+  --fade-size: 20px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-size),
+    #000 calc(100% - var(--fade-size)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-size),
+    #000 calc(100% - var(--fade-size)),
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+@media (max-width: 640px) {
+  .scroll-fade-x {
+    --fade-size: 18px;
+  }
+}
+

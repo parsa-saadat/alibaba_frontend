@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Plus, Pencil, Trash2, ChevronDown, FolderTree } from 'lucide-react';
+import { ChevronDown, FolderTree, Pencil, Plus, Trash2 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { toFa, statusFa } from '../../utils/helpers/format';
 import { flattenCategories, buildCategoryTree } from '../../utils/helpers/categories';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const EMPTY_CAT = { name: '', slug: '', parent_id: '', status: 'ACTIVE', sort_order: 0 };
 
@@ -51,7 +52,9 @@ function CategoriesPage() {
   const saveCategory = (e) => {
     e.preventDefault();
     if (!catForm.name.trim()) return toast.error('نام دسته الزامی است');
-    const cleanSlug = makeSlug(catForm.slug);
+    /* بک‌اند slug لاتین می‌خواهد؛ اگر نام فارسی باشد slug خالی می‌شود، پس از نام یا یک شناسه‌ی یکتا استفاده می‌کنیم */
+    const cleanSlug = makeSlug(catForm.slug) || makeSlug(catForm.name) || `cat-${Date.now().toString(36)}`;
+    if (cleanSlug.length > 100) return toast.error('slug حداکثر ۱۰۰ کاراکتر است');
     if (!cleanSlug || !SLUG_REGEX.test(cleanSlug)) {
       return toast.error(
         'اسلاگ باید با حروف کوچک انگلیسی، عدد و خط تیره باشد (مثلاً: mobile-audio)',
@@ -181,7 +184,15 @@ function CategoriesPage() {
   }
 
   return (
-    <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
+    <div className="space-y-5">
+      <PanelPageHeader
+        icon={FolderTree}
+        title="دسته‌بندی‌ها"
+        subtitle="ساختار درختی دسته‌بندی محصولات"
+        onRefresh={() => load()}
+      />
+
+      <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
       <form
         onSubmit={saveCategory}
         className="card rounded-2xl p-5 space-y-3 lg:sticky lg:top-20"
@@ -279,6 +290,7 @@ function CategoriesPage() {
         ) : (
           categoryTree.map((root) => renderAdminCatNode(root, 0))
         )}
+      </div>
       </div>
     </div>
   );

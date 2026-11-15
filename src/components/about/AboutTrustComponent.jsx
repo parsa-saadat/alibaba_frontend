@@ -2,12 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, CreditCard, Headset, RotateCcw, ShieldCheck } from 'lucide-react';
 
-// تضمین‌های علی‌بازار
+// تضمین برای فروشنده‌های مورد اعتماد
 const GUARANTEES = [
   { icon: ShieldCheck, title: 'ضمانت اصالت', desc: 'کالای غیراصل برگشت داده می‌شود.' },
-  { icon: RotateCcw, title: 'بازگشت ۷ روزه', desc: 'تا ۷ روز پس از تحویل، بدون دلیل خاص.' },
+  { icon: RotateCcw, title: 'بازگشت ۷ روزه', desc: 'تا ۷ روز پس از تحویل، با پلمب سالم.' },
   { icon: CreditCard, title: 'پرداخت محافظت‌شده', desc: 'مبلغ تا تأیید تحویل نزد ما می‌ماند.' },
-  { icon: Headset, title: 'پشتیبانی ۲۴/۷', desc: 'چت آنلاین همیشه و تلفن در ساعات کاری.' },
+  { icon: Headset, title: 'مشاوره و پشتیبانی فنی', desc: 'کارشناس نقشه‌برداری، قبل و بعد از خرید.' },
 ];
 
 // لینک‌های حقوقی و راهنما
@@ -23,7 +23,7 @@ function AboutTrustComponent() {
     <section className="max-w-[1200px] mx-auto px-4 pb-10 grid gap-4 lg:grid-cols-3">
       {/* تضمین‌ها */}
       <div className="lg:col-span-2 card rounded-3xl p-6 sm:p-7 flex flex-col">
-        <b className="font-black text-sm">تضمین‌های علی‌بازار</b>
+        <b className="font-black text-sm">تضمین برای فروشنده‌های مورد اعتماد</b>
         <p className="text-xs muted mt-1 leading-6">
           این چهار قول، پایه‌ی اعتماد بازارگاه ما هستند و در همه‌ی سفارش‌ها اجرا می‌شوند.
         </p>

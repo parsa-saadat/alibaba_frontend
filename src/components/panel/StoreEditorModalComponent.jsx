@@ -9,7 +9,7 @@ import { getId } from '../../utils/helpers/response';
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
 import { validateIRPhoneSyntax } from '../../utils/validators/phone.validator';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const EMPTY = {
   name: '',
@@ -72,11 +72,15 @@ function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onS
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (store?.status === 'ROOT_DISABLE' && !isAdmin) return toast.error('این فروشگاه توسط مدیریت مسدود شده است');
     if (!form.name.trim()) return toast.error('نام فروشگاه الزامی است');
+    if (form.name.trim().length > 50) return toast.error('نام فروشگاه حداکثر ۵۰ کاراکتر است');
+    if (form.description.trim().length > 255) return toast.error('توضیحات فروشگاه حداکثر ۲۵۵ کاراکتر است');
+    if (!form.phone.trim()) return toast.error('شماره تماس فروشگاه الزامی است');
     if (!validateEmailSyntax(form.email.trim())) {
       return toast.error('ایمیل تماس معتبر وارد کنید');
     }
-    if (form.phone.trim() && !validateIRPhoneSyntax(form.phone.trim())) {
+    if (!validateIRPhoneSyntax(form.phone.trim())) {
       return toast.error('شماره موبایل تماس باید با 09 و ۱۱ رقم باشد');
     }
 
@@ -259,12 +263,24 @@ function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onS
               <select
                 className="input mt-1"
                 value={form.status}
+                disabled={!isAdmin && store.status === 'ROOT_DISABLE'}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
               >
-                <option value="ENABLE">فعال (ENABLE)</option>
-                <option value="DISABLE">غیرفعال (DISABLE)</option>
-                {isAdmin && <option value="ROOT_DISABLE">غیرفعال ریشه‌ای توسط ادمین (ROOT_DISABLE)</option>}
+                <option value="ENABLE">فعال</option>
+                <option value="DISABLE">غیرفعال (موقتاً بسته)</option>
+                {(isAdmin || store.status === 'ROOT_DISABLE') && (
+                  <option value="ROOT_DISABLE" disabled={!isAdmin}>
+                    مسدود توسط مدیریت
+                  </option>
+                )}
               </select>
+              {form.status === 'ROOT_DISABLE' && (
+                <span className="mt-1.5 block text-[11px]" style={{ color: '#e53935' }}>
+                  {isAdmin
+                    ? 'فروشگاه مسدود است؛ فروشنده نمی‌تواند آن را ویرایش یا فعال کند و کالاهایش خرید نمی‌شود.'
+                    : 'این فروشگاه توسط مدیریت مسدود شده است؛ برای رفع مسدودی با پشتیبانی تماس بگیرید.'}
+                </span>
+              )}
             </label>
           )}
         </div>

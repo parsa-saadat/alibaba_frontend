@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TitleComponent from '../common/TitleComponent';
 import ProductComponent, { ProductSkeleton } from './ProductComponent';
+import useScrollFade from '../../hooks/useScrollFade';
 
 /* سایزبندی کارت‌ها — یک منبع واحد برای کارت و اسکلتون
    تا هنگام بارگذاری، عرض کارت‌ها نپرد و صفحه نلرزد.
@@ -22,6 +23,7 @@ function ProductScrollerComponent({
   emptyText = 'محصولی موجود نیست',
 }) {
   const rowRef = useRef(null);
+  const [fadeRef, rowOverflows] = useScrollFade();
 
   // dir = 1 → جلو (در RTL یعنی به سمت چپ)، dir = -1 → عقب
   const scroll = (dir) => {
@@ -47,9 +49,11 @@ function ProductScrollerComponent({
 
         <div className="flex items-center gap-3">
           {extra}
-          <Link to={moreTo} className="text-sm font-bold flex items-center gap-1 text-yellow">
-            مشاهده همه <ChevronLeft size={15} />
-          </Link>
+          {moreTo ? (
+            <Link to={moreTo} className="text-sm font-bold flex items-center gap-1 text-yellow">
+              مشاهده همه <ChevronLeft size={15} />
+            </Link>
+          ) : null}
           <button type="button" onClick={() => scroll(-1)} className={arrow} aria-label="قبلی">
             <ChevronRight size={18} />
           </button>
@@ -63,8 +67,13 @@ function ProductScrollerComponent({
         <div className="py-10 text-center text-sm muted">{emptyText}</div>
       ) : (
         <div
-          ref={rowRef}
-          className="flex items-stretch gap-3 overflow-x-auto snap-x snap-proximity scroll-smooth py-2 no-scrollbar"
+          ref={(node) => {
+            rowRef.current = node;
+            fadeRef.current = node;
+          }}
+          className={`flex items-stretch gap-3 overflow-x-auto snap-x snap-proximity scroll-smooth py-2 no-scrollbar ${
+            rowOverflows ? 'scroll-fade-x' : ''
+          }`}
         >
           {loading
             ? Array.from({ length: 6 }, (_, i) => (

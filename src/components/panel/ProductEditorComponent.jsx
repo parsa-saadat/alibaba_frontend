@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { X, Upload, Plus, ArrowRight, Save } from 'lucide-react';
+import { X, Upload, Plus, ArrowRight, Save, Star, Hash, KeyRound } from 'lucide-react';
 import MarkdownEditorComponent, { isValidBackendMarkdown } from './MarkdownEditorComponent';
+import ErrorBoundaryComponent from '../common/ErrorBoundaryComponent';
 import StorageImageComponent from '../common/StorageImageComponent';
 import ImageLightboxComponent from '../common/ImageLightboxComponent';
+import JalaliDateTimePicker from '../common/JalaliDateTimePicker';
 import { getToken, authHeaders } from '../../utils/helpers/storage';
 import { getId } from '../../utils/helpers/response';
 import {
@@ -13,8 +15,14 @@ import {
   toFa,
   formatPrice,
 } from '../../utils/helpers/format';
+import {
+  faDigits,
+  gregorianYearOfJalali,
+  jalaliYearOfGregorian,
+  parseLocalInputValue,
+} from '../../utils/helpers/jalali';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const DEFAULT_FORM = {
   name: '',
@@ -50,6 +58,20 @@ function toDateInputValue(iso) {
   return d.toISOString().slice(0, 16);
 }
 
+/* سال‌های شمسی برای فیلد «سال تولید»؛ بک‌اند سال میلادی می‌خواهد (۱۹۰۰ تا امسال) */
+const currentJalaliYear = jalaliYearOfGregorian(new Date().getFullYear());
+const JALALI_YEARS = Array.from({ length: 26 }, (_, i) => currentJalaliYear - i);
+
+/* خلاصه‌ی خوانای تاریخ تخفیف برای زیر فیلد شمسی */
+const expiryHint = (value) => {
+  const date = parseLocalInputValue(value);
+  if (!date) return 'بدون تاریخ انقضا (تخفیف همیشه فعال است)';
+  const days = Math.ceil((date.getTime() - Date.now()) / 86400000);
+  if (days < 0) return 'این تاریخ گذشته است؛ تخفیف روی سایت اعمال نمی‌شود';
+  if (days === 0) return 'امروز منقضی می‌شود';
+  return `${faDigits(days)} روز دیگر منقضی می‌شود`;
+};
+
 function ProductEditorComponent({
   product = null,
   stores = [],
@@ -58,18 +80,39 @@ function ProductEditorComponent({
   onCancel,
   onSaved,
 }) {
+  /* ارتفاع نوار بالای فرم برای چسبیدن پنل جدول دقیقاً زیر آن */
+  const barRef = useRef(null);
+
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) return undefined;
+    const apply = () => {
+      const height = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--editor-bar-h', `${height}px`);
+    };
+    apply();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', apply);
+      return () => window.removeEventListener('resize', apply);
+    }
+    const observer = new ResizeObserver(apply);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [zoomFile, setZoomFile] = useState(null);
+  const [imageIdOpen, setImageIdOpen] = useState(false);
+  const [imageIdInput, setImageIdInput] = useState('');
   const fileRef = useRef(null);
 
   useEffect(() => {
     if (!product) {
       setForm({
         ...DEFAULT_FORM,
-        store_id: stores[0] ? getId(stores[0]) : '',
+        store_id: (stores.find((s) => !s.status || s.status === 'ENABLE') ? getId(stores.find((s) => !s.status || s.status === 'ENABLE')) : ''),
         category_id: categories[0] ? getId(categories[0]) : '',
       });
       return;
@@ -131,6 +174,39 @@ function ProductEditorComponent({
       toast.error(err.response?.data?.message || 'خطا در آپلود تصویر');
     }
     e.target.value = '';
+  };
+
+  /* جابه‌جایی تصویر به جایگاه اول = انتخاب به‌عنوان «تصویر اصلی» محصول */
+  const makeMainImage = (index) => {
+    if (index <= 0) return;
+    setForm((prev) => {
+      const next = [...prev.images_id];
+      const [picked] = next.splice(index, 1);
+      return { ...prev, images_id: [picked, ...next] };
+    });
+    toast.success('تصویر اصلی محصول تغییر کرد');
+  };
+
+  /* افزودن تصویر با آیدی فایل در فضای ذخیره‌سازی (فقط مدیر) */
+  const addImageById = () => {
+    const ids = imageIdInput
+      .split(/[\s,،\n]+/)
+      .map((token) => token.trim())
+      .map((token) => token.split('/').filter(Boolean).pop() || '')
+      .filter(Boolean);
+
+    if (!ids.length) return toast.error('آیدی تصویر را وارد کنید');
+    if (!/^[a-zA-Z0-9_-]{6,64}$/.test(ids[0])) {
+      return toast.error('آیدی تصویر معتبر نیست (حداقل ۶ کاراکتر حرف/رقم)');
+    }
+    const fresh = ids.filter((id) => !form.images_id.includes(id));
+    if (!fresh.length) return toast.error('این تصویر از قبل در گالری هست');
+    const room = 20 - form.images_id.length;
+    if (room <= 0) return toast.error('حداکثر ۲۰ تصویر مجاز است');
+
+    setForm((prev) => ({ ...prev, images_id: [...prev.images_id, ...fresh.slice(0, room)] }));
+    setImageIdInput('');
+    toast.success(fresh.length > 1 ? 'تصاویر اضافه شدند' : 'تصویر اضافه شد');
   };
 
   const handleMarkdownUpload = async (file) => {
@@ -207,7 +283,11 @@ function ProductEditorComponent({
       basePayload.store_id = form.store_id;
       basePayload.visibility = form.visibility;
     } else {
-      if (form.stock_status !== product.stock_status) basePayload.stock_status = form.stock_status;
+      /* بک‌اند اجازه نمی‌دهد وضعیت موجودی با تعداد موجودی نخواند؛ وضعیت را از تعداد می‌گیریم */
+      const derivedStock = Number(form.stock) > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK';
+      if (derivedStock !== product.stock_status || Number(form.stock) !== Number(product.stock)) {
+        basePayload.stock_status = derivedStock;
+      }
       if (String(form.visibility).toLowerCase() !== String(product.visibility).toLowerCase()) {
         basePayload.visibility = form.visibility;
       }
@@ -233,7 +313,15 @@ function ProductEditorComponent({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="flex items-center justify-between gap-3 flex-wrap card rounded-2xl p-4">
+      {/*
+        نوار بالای فرم ویرایش: هنگام اسکرول به بالاترین نقطه می‌چسبد و ارتفاعش در
+        متغیر `--editor-bar-h` ذخیره می‌شود تا پنل پیشرفته‌ی جدول دقیقاً زیرش بنشیند.
+      */}
+      <div
+        ref={barRef}
+        className="sticky top-0 z-40 flex items-center justify-between gap-3 flex-wrap card rounded-2xl p-4 backdrop-blur-md top-[var(--header-h,0px)]"
+        style={{ backgroundColor: 'var(--card)' }}
+      >
         <div className="flex items-center gap-3">
           {onCancel && (
             <button type="button" onClick={onCancel} className="btn-ghost !p-2" aria-label="بازگشت">
@@ -296,26 +384,66 @@ function ProductEditorComponent({
 
           <div className="card rounded-2xl p-5 space-y-3">
             <h3 className="font-black text-sm">توضیحات کامل محصول</h3>
-            <MarkdownEditorComponent
-              value={form.description}
-              onChange={(val) => setForm((prev) => ({ ...prev, description: val }))}
-              onUploadImage={handleMarkdownUpload}
-            />
+            {/*
+              اگر ویرایشگر بصری به هر دلیلی خطا بدهد، فرم نباید از کار بیفتد؛
+              یک ناحیه‌ی متن خام Markdown جای آن می‌نشیند.
+            */}
+            <ErrorBoundaryComponent
+              resetKey={product ? getId(product) : 'new-product'}
+              fallback={
+                <div className="space-y-2">
+                  <p className="text-[11px] leading-6" style={{ color: '#e0a800' }}>
+                    ویرایشگر بصری باز نشد؛ متن Markdown را همین‌جا ویرایش کنید.
+                  </p>
+                  <textarea
+                    dir="ltr"
+                    rows={12}
+                    className="input font-mono text-xs leading-6"
+                    value={form.description}
+                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+              }
+            >
+              <MarkdownEditorComponent
+                value={form.description}
+                onChange={(val) => setForm((prev) => ({ ...prev, description: val }))}
+                onUploadImage={handleMarkdownUpload}
+              />
+            </ErrorBoundaryComponent>
           </div>
 
           <div className="card rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <h3 className="font-black text-sm">
-                گالری تصاویر محصول ({toFa(form.images_id.length)} / ۲۰)
-              </h3>
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                className="btn-ghost !py-2 text-xs flex items-center gap-1.5"
-              >
-                <Upload size={14} /> {uploading ? 'در حال آپلود…' : 'آپلود تصویر'}
-              </button>
+              <div>
+                <h3 className="font-black text-sm">
+                  گالری تصاویر محصول ({toFa(form.images_id.length)} / ۲۰)
+                </h3>
+                <p className="mt-1 text-[10px] muted">
+                  اولین تصویر، تصویر اصلی محصول است؛ با دکمه‌ی «اصلی کن» هر تصویر دیگری را جلو
+                  بیندازید.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setImageIdOpen((v) => !v)}
+                    className="btn-ghost !py-2 text-xs flex items-center gap-1.5"
+                    aria-expanded={imageIdOpen}
+                  >
+                    <Hash size={14} /> افزودن با آیدی
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="btn-ghost !py-2 text-xs flex items-center gap-1.5"
+                >
+                  <Upload size={14} /> {uploading ? 'در حال آپلود…' : 'آپلود تصویر'}
+                </button>
+              </div>
               <input
                 ref={fileRef}
                 type="file"
@@ -325,6 +453,40 @@ function ProductEditorComponent({
                 onChange={handleGalleryUpload}
               />
             </div>
+
+            {/* افزودن تصویر با آیدی — فقط مدیر سیستم */}
+            {isAdmin && imageIdOpen && (
+              <div className="card2 rounded-xl p-3 space-y-2">
+                <label className="block text-[11px] muted">
+                  آیدی فایل تصویر در فضای ذخیره‌سازی (چند آیدی را با فاصله یا کاما جدا کنید)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    className="input flex-1 min-w-[200px] font-mono text-xs"
+                    dir="ltr"
+                    placeholder="مثلاً 65f1c0a9b2d3e4f5a6b7c8d9"
+                    value={imageIdInput}
+                    onChange={(e) => setImageIdInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addImageById();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addImageById}
+                    className="btn-yellow !py-2 text-xs flex items-center gap-1.5"
+                  >
+                    <KeyRound size={14} /> افزودن
+                  </button>
+                </div>
+                <p className="text-[10px] muted leading-5">
+                  آدرس کامل تصویر هم پذیرفته می‌شود؛ فقط بخش آخر آدرس به‌عنوان آیدی ذخیره می‌شود.
+                </p>
+              </div>
+            )}
 
             {form.images_id.length === 0 ? (
               <div className="rounded-xl border border-dashed border-theme p-8 text-center text-xs muted">
@@ -356,13 +518,24 @@ function ProductEditorComponent({
                     >
                       <X size={12} />
                     </button>
-                    {idx === 0 && (
+
+                    {idx === 0 ? (
                       <span
-                        className="absolute bottom-1 right-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        className="absolute bottom-1 right-1 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
                         style={{ background: 'var(--primary-color)', color: '#0a1736' }}
                       >
-                        اصلی
+                        <Star size={10} /> اصلی
                       </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => makeMainImage(idx)}
+                        className="absolute bottom-1 right-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-[#0a1736]"
+                        aria-label="انتخاب به‌عنوان تصویر اصلی"
+                        title="انتخاب به‌عنوان تصویر اصلی"
+                      >
+                        <Star size={10} /> اصلی کن
+                      </button>
                     )}
                   </div>
                 ))}
@@ -386,8 +559,9 @@ function ProductEditorComponent({
                 >
                   <option value="">انتخاب فروشگاه</option>
                   {stores.map((s) => (
-                    <option key={getId(s)} value={getId(s)}>
+                    <option key={getId(s)} value={getId(s)} disabled={s.status && s.status !== 'ENABLE'}>
                       {s.name}
+                      {s.status === 'ROOT_DISABLE' ? ' (مسدود)' : s.status === 'DISABLE' ? ' (غیرفعال)' : ''}
                     </option>
                   ))}
                 </select>
@@ -432,15 +606,20 @@ function ProductEditorComponent({
                 />
               </label>
               <label className="text-xs muted">
-                سال تولید
-                <input
+                سال تولید (شمسی)
+                <select
                   className="input mt-1"
-                  type="number"
-                  min={1380}
-                  max={2100}
-                  value={form.production}
-                  onChange={(e) => setForm({ ...form, production: e.target.value })}
-                />
+                  value={jalaliYearOfGregorian(Number(form.production) || new Date().getFullYear())}
+                  onChange={(e) =>
+                    setForm({ ...form, production: gregorianYearOfJalali(Number(e.target.value)) })
+                  }
+                >
+                  {JALALI_YEARS.map((jy) => (
+                    <option key={jy} value={jy}>
+                      {faDigits(jy)}
+                    </option>
+                  ))}
+                </select>
               </label>
             </div>
 
@@ -545,15 +724,17 @@ function ProductEditorComponent({
                     onChange={(e) => setForm({ ...form, discount_percentage: e.target.value })}
                   />
                 </label>
-                <label className="text-xs muted">
-                  انقضای تخفیف
-                  <input
-                    className="input mt-1"
-                    type="datetime-local"
+                <div className="text-xs muted">
+                  انقضای تخفیف (شمسی)
+                  <JalaliDateTimePicker
                     value={form.discount_expiry}
-                    onChange={(e) => setForm({ ...form, discount_expiry: e.target.value })}
+                    onChange={(next) => setForm({ ...form, discount_expiry: next })}
+                    placeholder="مثلاً ۱۴۰۵/۰۹/۰۱"
                   />
-                </label>
+                  <span className="mt-1 block text-[10px] muted leading-5">
+                    {expiryHint(form.discount_expiry)}
+                  </span>
+                </div>
               </div>
             )}
           </div>

@@ -1,6 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Clock3, Headset, MessageSquare, Phone, Sparkles } from 'lucide-react';
+import {
+  ChevronLeft,
+  Clock3,
+  FileText,
+  Headset,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+import PageHeroComponent from '../../components/common/PageHeroComponent';
 import ContactPhoneComponent from '../../components/contact/ContactPhoneComponent';
 import ContactFormComponent from '../../components/contact/ContactFormComponent';
 import ContactOfficeComponent from '../../components/contact/ContactOfficeComponent';
@@ -8,96 +20,189 @@ import ContactDepartmentsComponent from '../../components/contact/ContactDepartm
 import ContactFaqComponent from '../../components/contact/ContactFaqComponent';
 
 const STATS = [
-  { icon: Clock3, title: 'پاسخ‌دهی زیر ۲۴ ساعت', desc: 'به همه پیام‌ها' },
-  { icon: Headset, title: 'پشتیبانی ۲۴/۷', desc: 'چت آنلاین همیشه فعال' },
-  { icon: MessageSquare, title: '۹۸٪ رضایت', desc: 'از تجربه پشتیبانی' },
+  { icon: Clock3, title: 'پاسخ زیر ۲۴ ساعت', desc: 'به همه پیام‌ها' },
+  { icon: Headset, title: 'مشاوره‌ی تخصصی', desc: 'کارشناس نقشه‌برداری' },
+  { icon: MessageSquare, title: 'دو شعبه‌ی فعال', desc: 'تهران و مازندران' },
 ];
 
+const HOURS = [
+  { day: 'شنبه تا چهارشنبه', time: '۹:۰۰ تا ۱۸:۰۰' },
+  { day: 'پنجشنبه', time: '۹:۰۰ تا ۱۴:۰۰' },
+  { day: 'جمعه', time: 'تعطیل — فرم و ایمیل فعال است' },
+];
+
+const DIRECT = [
+  { icon: Phone, label: 'شعبه تهران', value: '۰۹۱۲۹۳۲۷۵۱۵', href: 'tel:+989129327515' },
+  { icon: Phone, label: 'شعبه مازندران (هچیرود)', value: '۰۹۱۰۲۴۰۱۰۰۷', href: 'tel:+989102401007' },
+  { icon: Mail, label: 'پشتیبانی', value: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
+  { icon: Mail, label: 'همکاری و نمایندگی', value: 'partner@geokala.ir', href: 'mailto:partner@geokala.ir' },
+];
+
+/*
+ * صفحه‌ی «تماس با ما» — چیدمان دو ستونی مثل صفحه‌ی «درباره ما»:
+ * بنر → کانال‌های ارتباطی → [فرم تماس | ستون اطلاعات چسبان] → شعبه‌ها → دپارتمان‌ها → پرسش‌ها → فراخوان
+ */
 function ContactPage() {
   return (
     <div className="pb-4">
-      {/* هدر صفحه */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          background:
-            'radial-gradient(circle at 15% 20%, rgba(255,214,10,0.16), transparent 45%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))',
-        }}
-      >
-        <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-16">
-          {/* مسیر */}
-          <nav className="flex items-center gap-1.5 text-[11px] text-white/60">
-            <Link to="/" className="hover:text-white transition-colors">
-              خانه
-            </Link>
-            <ChevronLeft size={12} />
-            <span className="text-white/90">تماس با ما</span>
-          </nav>
-
-          <div className="mt-6 max-w-2xl">
-            <span
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold rounded-full px-3 py-1"
-              style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+      {/* بنر صفحه — همان بنر «درباره ما» */}
+      <PageHeroComponent
+        breadcrumb="تماس با ما"
+        badge="تیم فنی و پشتیبانی ژئو کالا"
+        title="مشاوره‌ی خرید تجهیزات نقشه‌برداری"
+        description="از انتخاب مدل درست جی‌پی‌اس یا توتال استیشن تا پیگیری سفارش و خدمات پس از فروش؛ کارشناسان ما در شعبه‌های تهران و هچیرود پاسخ‌گوی شما هستند."
+        highlights={STATS.map((stat) => ({ icon: stat.icon, label: stat.title }))}
+        actions={
+          <>
+            <a href="tel:+989129327515" className="btn-yellow inline-flex items-center gap-2">
+              <Phone size={16} />
+              تماس با شعبه تهران
+            </a>
+            <a
+              href="#contact-form"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
             >
-              <Sparkles size={12} />
-              تیم پشتیبانی علی‌بازار
-            </span>
-            <h1 className="font-black text-2xl sm:text-4xl text-white mt-3 leading-tight">
-              هر سوالی دارید، ما همین‌جا هستیم
-            </h1>
-            <p className="text-xs sm:text-sm text-white/70 leading-6 mt-3">
-              از خرید و پیگیری سفارش تا شروع فروش در علی‌بازار؛ کارشناسان ما در ۷ روز هفته پاسخ‌گوی
-              شما هستند. سریع‌ترین راه را انتخاب کنید.
-            </p>
+              <MessageSquare size={16} />
+              ارسال پیام
+            </a>
+          </>
+        }
+      />
 
-            <div className="flex flex-wrap items-center gap-3 mt-5">
-              <a href="tel:+982191009100" className="btn-yellow inline-flex items-center gap-2">
-                <Phone size={16} />
-                تماس با پشتیبانی
-              </a>
-              <a
-                href="#contact-form"
-                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
-              >
-                <MessageSquare size={16} />
-                ارسال پیام
-              </a>
-            </div>
-          </div>
-
-          {/* شاخص‌های اعتماد */}
-          <div className="hidden md:flex flex-wrap gap-6 mt-7">
-            {STATS.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.title} className="flex items-center gap-2.5">
-                  <span
-                    className="w-9 h-9 rounded-xl grid place-items-center"
-                    style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--primary-color)' }}
-                  >
-                    <Icon size={17} />
-                  </span>
-                  <span>
-                    <b className="block text-xs text-white">{stat.title}</b>
-                    <span className="text-[10px] text-white/50">{stat.desc}</span>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* راه‌های ارتباطی */}
-      <div className="max-w-[1200px] mx-auto px-4 -mt-10 relative z-10">
+      {/* کانال‌های ارتباطی — روی بنر می‌نشیند */}
+      <div className="max-w-[1200px] mx-auto px-4 -mt-12 relative z-10">
         <ContactPhoneComponent />
       </div>
 
-      {/* فرم + دفتر */}
-      <section id="contact-form" className="max-w-[1200px] mx-auto px-4 py-8 grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <ContactFormComponent />
+      {/* فرم تماس + ستون اطلاعات (بدون فضای خالی دو طرف فرم) */}
+      <section className="max-w-[1200px] mx-auto px-4 py-8">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-bold text-yellow">ارسال پیام</span>
+            <h2 className="mt-1.5 font-black text-lg">فرم تماس و پاسخ کارشناس</h2>
+          </div>
+          <p className="max-w-md text-xs muted leading-6">
+            دقیق‌ترین راه برای پیگیری مکتوب؛ پیام شما با شماره پیگیری در ایمیل ثبت می‌شود.
+          </p>
+        </div>
+
+        <div
+          id="contact-form"
+          className="grid items-start gap-4 scroll-mt-24 lg:grid-cols-[minmax(0,1fr)_360px]"
+        >
+          <div className="min-w-0">
+            <ContactFormComponent />
+          </div>
+
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            {/* تماس مستقیم */}
+            <div className="card rounded-3xl p-5">
+              <h3 className="flex items-center gap-2 text-sm font-black">
+                <Phone size={16} className="text-yellow" />
+                تماس مستقیم
+              </h3>
+              <ul className="mt-3 space-y-2.5">
+                {DIRECT.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.value + item.label}>
+                      <a
+                        href={item.href}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-colors hover:bg-[var(--card2)]"
+                      >
+                        <span
+                          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
+                          style={{ background: 'var(--card2)' }}
+                        >
+                          <Icon size={14} className="text-yellow" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-[10px] muted">{item.label}</span>
+                          <b className="block truncate text-xs tabular-nums" dir="auto">
+                            {item.value}
+                          </b>
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {/* ساعات کاری */}
+            <div className="card rounded-3xl p-5">
+              <h3 className="flex items-center gap-2 text-sm font-black">
+                <Clock3 size={16} className="text-yellow" />
+                ساعات پاسخ‌دهی
+              </h3>
+              <ul className="mt-3 space-y-2 text-xs">
+                {HOURS.map((row) => (
+                  <li key={row.day} className="flex items-center justify-between gap-2">
+                    <span className="muted">{row.day}</span>
+                    <b className="tabular-nums">{row.time}</b>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 rounded-xl px-3 py-2 text-[11px] leading-6" style={{ background: 'var(--card2)' }}>
+                فرم تماس و ایمیل شبانه‌روزی ثبت می‌شود؛ پاسخ‌دهی در ساعات کاری انجام می‌گیرد.
+              </p>
+            </div>
+
+            {/* میان‌بُرها */}
+            <div className="card rounded-3xl p-5">
+              <h3 className="flex items-center gap-2 text-sm font-black">
+                <ShieldCheck size={16} className="text-yellow" />
+                قبل از تماس بخوانید
+              </h3>
+              <div className="mt-3 space-y-2">
+                <Link
+                  to="/terms/customers"
+                  className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText size={14} className="text-yellow" />
+                    قوانین و مقررات مشتریان
+                  </span>
+                  <ChevronLeft size={14} className="muted" />
+                </Link>
+                <Link
+                  to="/terms/buyers"
+                  className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText size={14} className="text-yellow" />
+                    قوانین خریداران
+                  </span>
+                  <ChevronLeft size={14} className="muted" />
+                </Link>
+                <Link
+                  to="/orders"
+                  className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
+                >
+                  <span className="flex items-center gap-2">
+                    <MapPin size={14} className="text-yellow" />
+                    پیگیری سفارش‌های من
+                  </span>
+                  <ChevronLeft size={14} className="muted" />
+                </Link>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      {/* شعبه‌ها */}
+      <section className="max-w-[1200px] mx-auto px-4 pb-8">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-bold text-yellow">شعبه‌های ما</span>
+            <h2 className="mt-1.5 font-black text-lg">حضوری هم می‌توانید سر بزنید</h2>
+          </div>
+          <p className="max-w-md text-xs muted leading-6">
+            هر شعبه شماره‌ی مستقیم و دکمه‌ی مسیریابی دارد؛ پیش از مراجعه تماس بگیرید تا هماهنگی انجام
+            شود.
+          </p>
         </div>
         <ContactOfficeComponent />
       </section>
@@ -106,7 +211,8 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="flex items-end justify-between gap-3 mb-4">
           <div>
-            <h2 className="font-black text-lg">با دپارتمان درست حرف بزنید</h2>
+            <span className="text-[11px] font-bold text-yellow">دپارتمان‌ها</span>
+            <h2 className="mt-1.5 font-black text-lg">با دپارتمان درست حرف بزنید</h2>
             <p className="text-xs muted mt-1">هر درخواست را مستقیم به تیم تخصصی خودش بفرستید</p>
           </div>
           <Link to="/about" className="text-xs font-bold text-yellow inline-flex items-center gap-1">
@@ -129,23 +235,23 @@ function ContactPage() {
           style={{
             background:
               'linear-gradient(135deg, rgba(255,214,10,0.14), rgba(255,214,10,0.02)), var(--card)',
-            border: '1px solid rgba(255,214,10,0.3)',
+            border: '1px solid color-mix(in srgb, var(--primary-color) 32%, transparent)',
           }}
         >
           <div>
             <h2 className="font-black text-lg">هنوز جواب سوالتان را پیدا نکردید؟</h2>
             <p className="text-xs muted mt-1.5 leading-6">
-              کارشناسان ما شنبه تا پنجشنبه از ۸ صبح تا ۸ شب پاسخ‌گو هستند؛ چت آنلاین هم ۲۴ ساعته فعال
-              است.
+              کارشناسان ما شنبه تا پنجشنبه از ۹ صبح تا ۶ عصر پاسخ‌گو هستند؛ فرم همین صفحه هم شبانه‌روزی
+              ثبت می‌شود.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <a href="tel:+982191009100" className="btn-yellow inline-flex items-center gap-2">
+            <a href="tel:+989129327515" className="btn-yellow inline-flex items-center gap-2">
               <Phone size={16} />
-              ۰۲۱-۹۱۰۰۹۱۰۰
+              ۰۹۱۲۹۳۲۷۵۱۵
             </a>
             <a
-              href="mailto:support@alibazar.ir"
+              href="mailto:info@geokala.ir"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold"
               style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
             >

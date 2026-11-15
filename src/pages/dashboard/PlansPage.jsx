@@ -5,22 +5,13 @@ import DatePicker from 'react-multi-date-picker';
 import TimePicker from 'react-multi-date-picker/plugins/time_picker';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
-import {
-  Plus,
-  Trash2,
-  CreditCard,
-  Pencil,
-  Save,
-  X,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  Loader2,
-} from 'lucide-react';
+import { formatDateTime } from '../../utils/helpers/format';
+import { AlertTriangle, CreditCard, Eye, EyeOff, Layers, Loader2, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
+import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
-const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const MIN_TOMAN = 1000;
 
@@ -335,8 +326,16 @@ function PlansPage() {
   const tomanValue = Number(planForm.amount) || 0;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] xl:grid-cols-[450px_minmax(0,1fr)] gap-4 lg:gap-5 items-start">
-      <style>{DP_CSS}</style>
+    <div className="space-y-5">
+      <PanelPageHeader
+        icon={Layers}
+        title="پلن‌های فروشندگی"
+        subtitle="تعرفه‌ها، سقف محصول و دسترسی‌ها"
+        onRefresh={() => load()}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] xl:grid-cols-[450px_minmax(0,1fr)] gap-4 lg:gap-5 items-start">
+        <style>{DP_CSS}</style>
 
       {/* فرم */}
       <form
@@ -622,6 +621,7 @@ function PlansPage() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
       />
+      </div>
     </div>
   );
 }

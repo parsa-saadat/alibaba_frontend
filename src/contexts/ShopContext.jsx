@@ -28,34 +28,44 @@ import {
   removeCartRow,
   upsertCartRow,
 } from '../utils/helpers/cart';
-import { setupMockBackendFallback } from '../utils/helpers/mockBackend';
 import { API } from '../config/api';
 
-setupMockBackendFallback();
-
-const DEFAULT_DEMO_USER = {
-  _id: 'user-admin-1',
-  username: 'parsa_admin',
-  firstname: 'پارسا',
-  lastname: 'سعادت',
-  phone: '09120000001',
-  email: 'parsa@alibazar.ir',
-  role: 'admin',
-  is_seller: true,
+/*
+ * دسترسی امن به حافظه‌ی مرورگر؛ در آی‌فریم sandbox یا حالت ناشناس، خواندن
+ * localStorage استثنا می‌دهد. این‌جا اگر مرورگر اجازه نداد، از حافظه‌ی رم
+ * استفاده می‌کنیم تا اپ سفید نشود. (بدون ایمپورت تازه؛ وابستگی اضافه نمی‌خواهد)
+ */
+const memoryStore = new Map();
+const storeGet = (key) => {
+  try {
+    const value = window.localStorage.getItem(key);
+    return value ?? memoryStore.get(key) ?? null;
+  } catch {
+    return memoryStore.get(key) ?? null;
+  }
+};
+const storeSet = (key, value) => {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    memoryStore.set(key, value);
+  }
 };
 
 const ShopContext = createContext(null);
 
 export const ShopProvider = ({ children }) => {
+  /*
+   * کاربر فقط از نشست واقعی خوانده می‌شود (بدون ورود خودکار با اکانت تست).
+   * اگر از نسخه‌های قبلی یک نشست آزمایشی در مرورگر مانده باشد، پاک می‌شود.
+   */
   const [user, setUser] = useState(() => {
-    const existing = getUser();
-    if (existing) return existing;
-    if (!localStorage.getItem('alibazar_init_auth')) {
-      localStorage.setItem('alibazar_init_auth', '1');
-      setAuth('demo-jwt-token-user-admin-1', DEFAULT_DEMO_USER);
-      return DEFAULT_DEMO_USER;
+    const token = getToken();
+    if (typeof token === 'string' && token.startsWith('demo-jwt-token')) {
+      clearAuth();
+      return null;
     }
-    return null;
+    return getUser();
   });
   /* سبد خرید: منبع واحد حقیقت، همیشه آینه‌ی بک‌اند */
   const [cart, setCart] = useState([]);
@@ -63,7 +73,7 @@ export const ShopProvider = ({ children }) => {
   const [cartReady, setCartReady] = useState(false);
   const [favorites, setFavorites] = useState(readList('favorites'));
   const [compare, setCompare] = useState(readList('compare'));
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [theme, setTheme] = useState(() => storeGet('theme') || 'dark');
 
   const cartRef = useRef([]);
   const userRef = useRef(user);
@@ -82,7 +92,7 @@ export const ShopProvider = ({ children }) => {
     root.classList.toggle('dark', theme === 'dark');
     root.classList.toggle('light', theme === 'light');
     root.style.colorScheme = theme;
-    localStorage.setItem('theme', theme);
+    storeSet('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
@@ -320,7 +330,7 @@ export const ShopProvider = ({ children }) => {
       const res = await axios.get(`${API}/user/${u._id}`, authHeaders());
       if (res.data.success) {
         const merged = { ...u, ...res.data.body };
-        localStorage.setItem('user', JSON.stringify(merged));
+        storeSet('user', JSON.stringify(merged));
         setUser(merged);
       }
     } catch (err) {
@@ -358,6 +368,14 @@ export const ShopProvider = ({ children }) => {
   };
 
   const isFavorite = (id) => favorites.includes(id);
+
+  /* پاک کردن یک‌جای لیست علاقه‌مندی‌ها (یک بار نوشتن، بدون حلقه روی toggleFavorite) */
+  const clearFavorites = () => {
+    if (!favorites.length) return;
+    setFavorites([]);
+    writeList('favorites', []);
+    toast.success('لیست علاقه‌مندی‌ها پاک شد');
+  };
 
   const toggleCompare = (id) => {
     if (compare.includes(id)) {
@@ -404,6 +422,7 @@ export const ShopProvider = ({ children }) => {
       favorites,
       toggleFavorite,
       isFavorite,
+      clearFavorites,
       compare,
       toggleCompare,
       clearCompare,

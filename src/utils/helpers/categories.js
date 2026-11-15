@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getBody, getList, getId } from './response.js';
 
-const API = import.meta.env?.VITE_APP_API_URL || import.meta.env?.VITE_API_URL || 'http://localhost:3000';
+const API = import.meta.env?.VITE_APP_API_URL || import.meta.env?.VITE_API_URL || '/api';
 
 export const flattenCategories = (nodes, parentId = '', seen = new Set()) => {
   if (!Array.isArray(nodes)) return [];
@@ -56,4 +56,30 @@ export const fetchCategories = async (signal) => {
     page += 1;
   } while (page <= totalPages);
   return flattenCategories(categories);
+};
+
+/* شناسه‌ی همه‌ی زیردسته‌های یک دسته (برای «محصولات مرتبط» و فیلترها) */
+export const descendantIds = (flatCategories = [], rootId = '') => {
+  const root = String(rootId || '');
+  if (!root) return [];
+
+  const childrenOf = new Map();
+  for (const cat of Array.isArray(flatCategories) ? flatCategories : []) {
+    const parent = String(getId(cat?.parent_id ?? cat?.parent) || '');
+    if (!parent) continue;
+    if (!childrenOf.has(parent)) childrenOf.set(parent, []);
+    childrenOf.get(parent).push(String(getId(cat)));
+  }
+
+  const out = [];
+  const stack = [...(childrenOf.get(root) || [])];
+  const seen = new Set();
+  while (stack.length) {
+    const id = stack.pop();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+    stack.push(...(childrenOf.get(id) || []));
+  }
+  return out;
 };
