@@ -459,6 +459,7 @@ function StoresPage() {
         <StoreEditorModalComponent
           store={storeModal}
           isAdmin
+          users={users}
           onClose={() => setStoreModal(undefined)}
           onSaved={() => load(true)}
         />

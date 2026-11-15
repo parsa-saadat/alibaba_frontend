@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ */
+/* فونت وزیرمتن — به‌صورت محلی در سورس اپ (بدون CDN)                    */
+/* ------------------------------------------------------------------ */
+/*
+ * فایل متغیر (Variable) است و وزن‌های ۱۰۰ تا ۹۰۰ را پوشش می‌دهد؛ پس فقط یک
+ * فایل لازم است. مسیر از `src/assets/fonts` خوانده می‌شود تا ویت آن را داخل
+ * باندل بگذارد (در بیلد تک‌فایلی هم داخل خروجی می‌نشیند و هیچ درخواست
+ * خارجی‌ای لازم نیست).
+ */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./assets/fonts/Vazirmatn-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 :root {
   --primary-color: #ffd60a;
   --primary-hover: #f5c400;
@@ -20,7 +38,7 @@
   --color-success: #2ba84a;
   --color-warning: #ff9f43;
   --color-danger: #e53935;
-  --toastify-font-family: "Vazirmatn", Tahoma, sans-serif !important;
+  --toastify-font-family: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif !important;
 }
 
 html[data-theme="dark"] {
@@ -62,7 +80,8 @@ html[data-theme="light"] {
 }
 
 body {
-  font-family: "Vazirmatn", Tahoma, sans-serif;
+  font-family: "Vazirmatn", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-synthesis-weight: none;
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;

@@ -31,6 +31,7 @@ import ImageLightboxComponent from "../../components/common/ImageLightboxCompone
 import { nationalIDValidator } from "../../utils/validators/national_id.validator";
 import { cardNumberValidator } from "../../utils/validators/card_number.validator";
 import { shebaNumberValidator } from "../../utils/validators/sheba_number.validator";
+import MyStoresSectionComponent from '../../components/profile/MyStoresSectionComponent';
 
 const API =
   import.meta.env.VITE_APP_API_URL ||
@@ -589,6 +590,9 @@ function ProfilePage() {
           </div>
         </form>
       </div>
+
+      {/* ---------- فروشگاه‌های من و ظرفیت پلن ---------- */}
+      <MyStoresSectionComponent />
 
       {/* ---------- نشانی‌ها ---------- */}
       <div className="card rounded-3xl p-6">

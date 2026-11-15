@@ -26,6 +26,8 @@ import { Loading } from '../../components/common/ScroolToTopComponent';
 import { toFa, statusFa } from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
 import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
+import StoreCapacityComponent from '../../components/panel/StoreCapacityComponent';
+import useStoreCapacity from '../../hooks/useStoreCapacity';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
@@ -66,6 +68,8 @@ function StoresPage() {
   const [storeModal, setStoreModal] = useState(undefined);
   const [zoomFile, setZoomFile] = useState(null);
   const [busyId, setBusyId] = useState('');
+  /* ظرفیت ساخت فروشگاه بر اساس پلن فروشندگی */
+  const capacity = useStoreCapacity();
 
   const load = useCallback(async (silent = false) => {
     if (silent) setRefreshing(true);
@@ -164,9 +168,15 @@ function StoresPage() {
         icon={Store}
         title="فروشگاه‌های من"
         subtitle={`${toFa(stores.length)} فروشگاه • ${toFa(products.length)} کالا در مجموع`}
-        onRefresh={() => load(true)}
+        onRefresh={() => {
+          capacity.refresh();
+          load(true);
+        }}
         refreshing={refreshing}
       />
+
+      {/* ───── ظرفیت پلن و دکمه‌ی ساخت فروشگاه ───── */}
+      <StoreCapacityComponent capacity={capacity} onCreate={() => setStoreModal(null)} />
 
       {/* ───── آمار ───── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -232,13 +242,34 @@ function StoresPage() {
           >
             <Store size={24} />
           </span>
-          <b className="block text-sm">فروشگاهی پیدا نشد</b>
+          <b className="block text-sm">
+            {capacity.reason === 'not-seller' ? 'هنوز فروشنده نیستید' : 'فروشگاهی پیدا نشد'}
+          </b>
           <p className="text-xs muted">
-            {stores.length === 0 ? 'هنوز فروشگاهی نساخته‌اید.' : 'فیلتر یا عبارت جستجو را تغییر دهید.'}
+            {capacity.reason === 'not-seller'
+              ? 'برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید؛ از پنل کاربری درخواست فروشندگی بدهید.'
+              : stores.length === 0
+                ? 'هنوز فروشگاهی نساخته‌اید.'
+                : 'فیلتر یا عبارت جستجو را تغییر دهید.'}
           </p>
-          <button type="button" onClick={() => setStoreModal(null)} className="btn-yellow !py-2 !px-3 text-xs">
-            ساخت فروشگاه جدید
-          </button>
+          {capacity.reason === 'not-seller' ? (
+            <Link to="/profile" className="btn-ghost !py-2 !px-3 text-xs inline-flex items-center gap-1.5">
+              درخواست فروشندگی
+            </Link>
+          ) : capacity.canCreate ? (
+            <button type="button" onClick={() => setStoreModal(null)} className="btn-yellow !py-2 !px-3 text-xs">
+              ساخت فروشگاه جدید
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title={capacity.blockedText}
+              className="btn-ghost !py-2 !px-3 text-xs opacity-60 cursor-not-allowed"
+            >
+              {capacity.blockedText || 'ساخت فروشگاه جدید'}
+            </button>
+          )}
         </section>
       ) : (
         <div className="grid gap-3 xl:grid-cols-2">
@@ -380,7 +411,10 @@ function StoresPage() {
         <StoreEditorModalComponent
           store={storeModal}
           onClose={() => setStoreModal(undefined)}
-          onSaved={() => load(true)}
+          onSaved={() => {
+            capacity.refresh();
+            load(true);
+          }}
         />
       )}
 

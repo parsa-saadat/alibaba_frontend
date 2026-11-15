@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { X, Upload, Store } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
 import ImageLightboxComponent from '../common/ImageLightboxComponent';
-import { getToken, authHeaders } from '../../utils/helpers/storage';
+import { getToken, authHeaders, getUser } from '../../utils/helpers/storage';
 import { getId } from '../../utils/helpers/response';
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
 import { validateIRPhoneSyntax } from '../../utils/validators/phone.validator';
@@ -22,17 +22,43 @@ const EMPTY = {
   address: '',
 };
 
-function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onSaved }) {
+function StoreEditorModalComponent({
+  store = null,
+  isAdmin = false,
+  users = [],
+  defaultOwnerId = '',
+  onClose,
+  onSaved,
+}) {
+  const currentUser = getUser();
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [zoomFile, setZoomFile] = useState(null);
+  /*
+   * انتخاب مالک فروشگاه (فقط ادمین، هنگام ساخت)
+   * 'self'  = فروشگاه برای خود مدیر
+   * 'other' = جستجو و انتخاب هر کاربر دیگر
+   */
+  const [ownerMode, setOwnerMode] = useState(defaultOwnerId ? 'other' : 'self');
+  const [ownerId, setOwnerId] = useState(defaultOwnerId);
+  const [owner, setOwner] = useState(null);
+  const [ownerQuery, setOwnerQuery] = useState('');
+  const [ownerResults, setOwnerResults] = useState([]);
+  const [ownerSearching, setOwnerSearching] = useState(false);
+  const [ownerCapacity, setOwnerCapacity] = useState(null);
+  const [createdStatus, setCreatedStatus] = useState('ENABLE');
   const profileRef = useRef(null);
   const bannerRef = useRef(null);
 
   useEffect(() => {
     if (!store) {
       setForm(EMPTY);
+      setOwnerMode(defaultOwnerId ? 'other' : 'self');
+      setOwnerId(defaultOwnerId || getId(currentUser) || '');
+      setOwner(null);
+      setOwnerQuery('');
+      setCreatedStatus('ENABLE');
       return;
     }
     setForm({
@@ -46,6 +72,78 @@ function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onS
       address: store.contact_info?.address || '',
     });
   }, [store]);
+
+  /*
+   * ظرفیت پلن مالک انتخابی (فقط ادمین): تعداد فروشگاه‌های فعلی و سقف پلن.
+   * ساخت فروشگاه توسط ادمین از محدودیت پلن عبور می‌کند، ولی این اطلاعات
+   * نمایش داده می‌شود تا مدیر بداند کاربر در چه وضعیتی است.
+   */
+  useEffect(() => {
+    if (!isAdmin || store || !ownerId) {
+      setOwnerCapacity(null);
+      return undefined;
+    }
+    const planId = getId(owner?.seller_plan?.plan_id);
+    let cancelled = false;
+
+    Promise.all([
+      axios
+        .get(`${API}/perm/stores`, { ...authHeaders(), params: { user_id: ownerId, limit: 100 } })
+        .catch(() => null),
+      planId ? axios.get(`${API}/plan/${planId}`, authHeaders()).catch(() => null) : Promise.resolve(null),
+    ]).then(([storesRes, planRes]) => {
+      if (cancelled) return;
+      const body = storesRes?.data?.body;
+      const list = body?.data || body || [];
+      const planBody = planRes?.data?.body;
+      const plan = planBody?.plan || planBody?.data || planBody || null;
+      setOwnerCapacity({
+        used: Array.isArray(list) ? list.length : 0,
+        max: Number(plan?.features?.max_shops ?? 0),
+        planName: plan?.name || '',
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin, store, ownerId, owner]);
+
+  /* جستجوی کاربر برای انتخاب مالک فروشگاه (سمت سرور) */
+  useEffect(() => {
+    if (!isAdmin || store || ownerMode !== 'other') return undefined;
+    const q = ownerQuery.trim();
+    const controller = new AbortController();
+    setOwnerSearching(true);
+    const timer = setTimeout(() => {
+      axios
+        .get(`${API}/user`, {
+          ...authHeaders(),
+          params: { limit: 12, desc: 1, ...(q ? { search: q } : {}) },
+          signal: controller.signal,
+        })
+        .catch(() => null)
+        .then((res) => {
+          if (controller.signal.aborted) return;
+          const body = res?.data?.body;
+          setOwnerResults(body?.data || body || []);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setOwnerSearching(false);
+        });
+    }, 260);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [isAdmin, store, ownerMode, ownerQuery]);
+
+  const pickOwner = (u) => {
+    setOwner(u);
+    setOwnerId(getId(u));
+    setOwnerQuery('');
+  };
 
   const uploadSingle = async (e, field) => {
     const file = e.target.files?.[0];
@@ -88,6 +186,10 @@ function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onS
     if (form.phone.trim()) contact_info.phone = form.phone.trim();
     if (form.address.trim()) contact_info.address = form.address.trim();
 
+    if (isAdmin && !store && ownerMode === 'other' && !ownerId) {
+      return toast.error('مالک فروشگاه را انتخاب کنید');
+    }
+
     const payload = {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
@@ -96,6 +198,14 @@ function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onS
     if (form.profile_image_id) payload.profile_image_id = form.profile_image_id;
     if (form.banner_image_id) payload.banner_image_id = form.banner_image_id;
     if (store) payload.status = form.status;
+    /*
+     * ادمین می‌تواند فروشگاه را برای خودش یا هر کاربر دیگری بسازد
+     * (اگر user_id فرستاده نشود، بک‌اند مالک را خود مدیر می‌گذارد).
+     */
+    if (isAdmin && !store) {
+      if (ownerMode === 'other' && ownerId) payload.user_id = ownerId;
+      if (createdStatus) payload.status = createdStatus;
+    }
 
     setSaving(true);
     try {
@@ -134,6 +244,131 @@ function StoreEditorModalComponent({ store = null, isAdmin = false, onClose, onS
             <X size={17} />
           </button>
         </div>
+
+        {/* مالک فروشگاه + وضعیت اولیه — فقط ادمین و فقط هنگام ساخت */}
+        {isAdmin && !store ? (
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setOwnerMode('self');
+                  setOwner(null);
+                  setOwnerId(getId(currentUser));
+                  setOwnerQuery('');
+                }}
+                className={`chip !py-1.5 !px-3 text-[11px] ${ownerMode === 'self' ? 'on' : ''}`}
+              >
+                برای خودم
+              </button>
+              <button
+                type="button"
+                onClick={() => setOwnerMode('other')}
+                className={`chip !py-1.5 !px-3 text-[11px] ${ownerMode === 'other' ? 'on' : ''}`}
+              >
+                برای کاربر دیگر
+              </button>
+            </div>
+
+            {ownerMode === 'other' ? (
+              <div className="space-y-2">
+                <input
+                  className="input !py-2 text-xs"
+                  placeholder="جستجوی نام، نام کاربری یا موبایل مالک…"
+                  value={ownerQuery}
+                  onChange={(e) => setOwnerQuery(e.target.value)}
+                />
+
+                {owner && !ownerQuery ? (
+                  <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'var(--card2)' }}>
+                    <span className="min-w-0 flex-1 text-xs truncate">
+                      <b>{[owner.firstname, owner.lastname].filter(Boolean).join(' ') || owner.username}</b>
+                      <span className="muted" dir="ltr"> • {owner.phone}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOwner(null);
+                        setOwnerId('');
+                      }}
+                      className="btn-ghost !py-1 !px-2 text-[11px]"
+                    >
+                      تغییر
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="max-h-40 overflow-y-auto rounded-xl border border-theme"
+                    style={{ background: 'var(--card2)' }}
+                  >
+                    {ownerSearching ? (
+                      <div className="px-3 py-2 text-[11px] muted">در حال جستجو…</div>
+                    ) : ownerResults.length === 0 ? (
+                      <div className="px-3 py-2 text-[11px] muted">کاربری پیدا نشد.</div>
+                    ) : (
+                      ownerResults.map((u) => (
+                        <button
+                          key={getId(u)}
+                          type="button"
+                          onClick={() => pickOwner(u)}
+                          className="w-full px-3 py-2 text-start text-[11px] hover:bg-white/5 flex items-center justify-between gap-2 border-b border-theme last:border-0"
+                        >
+                          <span className="min-w-0 truncate">
+                            {[u.firstname, u.lastname].filter(Boolean).join(' ') || u.username || 'کاربر'}
+                          </span>
+                          <span className="muted shrink-0" dir="ltr">
+                            {u.phone || u.username}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] muted">
+                فروشگاه به نام خود شما ({currentUser?.username || 'مدیر'}) ساخته می‌شود.
+              </p>
+            )}
+
+            {ownerId && ownerCapacity ? (
+              <p
+                className="rounded-xl px-3 py-2 text-[11px]"
+                style={{
+                  background:
+                    ownerCapacity.max > 0 && ownerCapacity.used >= ownerCapacity.max
+                      ? 'rgba(229,57,53,0.10)'
+                      : 'var(--card2)',
+                }}
+              >
+                {ownerCapacity.max > 0 ? (
+                  <>
+                    پلن{ownerCapacity.planName ? ` «${ownerCapacity.planName}»` : ''}: ظرفیت{' '}
+                    {ownerCapacity.used.toLocaleString('fa-IR')} از{' '}
+                    {ownerCapacity.max.toLocaleString('fa-IR')} فروشگاه
+                    {ownerCapacity.used >= ownerCapacity.max
+                      ? ' — ظرفیت پلن این کاربر پر است؛ ساخت فروشگاه با دسترسی مدیر انجام می‌شود.'
+                      : ''}
+                  </>
+                ) : (
+                  'این کاربر پلن فروشندگی فعالی ندارد؛ ساخت فروشگاه با دسترسی مدیر مجاز است.'
+                )}
+              </p>
+            ) : null}
+
+            <label className="text-xs muted block">
+              وضعیت فروشگاه در ابتدا
+              <select
+                className="input mt-1 !py-2"
+                value={createdStatus}
+                onChange={(e) => setCreatedStatus(e.target.value)}
+              >
+                <option value="ENABLE">فعال</option>
+                <option value="DISABLE">غیرفعال</option>
+              </select>
+            </label>
+          </div>
+        ) : null}
 
         <div className="space-y-3">
           <div className="relative h-32 rounded-2xl overflow-hidden border border-theme bg-navy">
