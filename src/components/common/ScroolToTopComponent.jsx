@@ -29,8 +29,19 @@ const ScrollToTopComponent = () => {
   const location = useLocation();
 
   useEffect(() => {
+    /* لینک با #بخش (مثل /contact#faq): بعد از رندر صفحه به همان بخش برو */
+    const id = decodeURIComponent((location.hash || '').replace('#', ''));
+    if (id) {
+      const timer = window.setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        else window.scrollTo(0, 0);
+      }, 120);
+      return () => window.clearTimeout(timer);
+    }
     window.scrollTo(0, 0);
-  }, [location.pathname, location.search]);
+    return undefined;
+  }, [location.pathname, location.search, location.hash]);
 
   return null;
 };

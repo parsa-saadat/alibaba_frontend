@@ -13,7 +13,9 @@ function AuthShellComponent({ title, subtitle, children, footer }) {
     <div
       className="relative isolate overflow-hidden"
       style={{
-        minHeight: 'calc(100vh - var(--header-h, 96px))',
+        minHeight: '100vh',
+        display: 'grid',
+        alignItems: 'center',
         background:
           'radial-gradient(circle at 15% 10%, rgba(255,214,10,0.16) 0%, rgba(255,214,10,0) 45%), radial-gradient(circle at 90% 90%, rgba(80,120,255,0.18) 0%, rgba(80,120,255,0) 50%), linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-deep) 100%)',
       }}

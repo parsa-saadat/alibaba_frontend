@@ -74,6 +74,7 @@ function LegalPageComponent({
   footerNote,
   tabs = [],
   activeTab = '',
+  crumb = 'قوانین و مقررات',
 }) {
   const [active, setActive] = useState(sections[0]?.id || '');
 
@@ -105,7 +106,7 @@ function LegalPageComponent({
           خانه
         </Link>
         <ChevronLeft size={12} />
-        <span>قوانین و مقررات</span>
+        <span>{crumb}</span>
         <ChevronLeft size={12} />
         <span className="font-bold" style={{ color: 'var(--accent-text)' }}>
           {title}

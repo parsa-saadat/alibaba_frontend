@@ -52,6 +52,28 @@ const storeSet = (key, value) => {
   }
 };
 
+
+/* بررسی دوره‌ای توکن با سرور: هر ۶ ساعت */
+const SESSION_CHECK_MS = 6 * 60 * 60 * 1000;
+const LAST_CHECK_KEY = 'session_checked_at';
+
+/* خواندن بخش payload توکن JWT (بدون اعتبارسنجی؛ فقط برای مقایسه‌ی نقش) */
+const decodeJwt = (token) => {
+  try {
+    const part = String(token || '').split('.')[1];
+    if (!part) return null;
+    const json = decodeURIComponent(
+      atob(part.replace(/-/g, '+').replace(/_/g, '/'))
+        .split('')
+        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join(''),
+    );
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+};
+
 const ShopContext = createContext(null);
 
 export const ShopProvider = ({ children }) => {
@@ -71,6 +93,8 @@ export const ShopProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [cartLoading, setCartLoading] = useState(false);
   const [cartReady, setCartReady] = useState(false);
+  /* تا وقتی نشست ذخیره‌شده با بک‌اند بررسی نشده، اپ صفحه‌ی لودینگ نشان می‌دهد (نه خطا) */
+  const [authReady, setAuthReady] = useState(() => !getToken());
   const [favorites, setFavorites] = useState(readList('favorites'));
   const [compare, setCompare] = useState(readList('compare'));
   const [theme, setTheme] = useState(() => storeGet('theme') || 'dark');
@@ -322,29 +346,109 @@ export const ShopProvider = ({ children }) => {
     [addToCart, applyCart, currentUser, isInCart, refreshCart],
   );
 
+  /*
+   * همگام‌سازی نشست با سرور (GET /auth/session):
+   *  - توکن را در سرور بررسی می‌کند؛ اگر منقضی/نامعتبر یا کاربر حذف شده بود، خروج می‌دهد.
+   *  - توکن و پروفایل تازه (نقش، is_seller، تأیید فروشندگی) را جایگزین می‌کند؛
+   *    پس فروشنده‌ی تازه‌تأییدشده بدون خروج و ورود دوباره کار می‌کند.
+   */
+  const syncSession = useCallback(async () => {
+    if (!getToken()) return false;
+    try {
+      const res = await axios.get(`${API}/auth/session`, { ...authHeaders(), timeout: 12000 });
+      const body = res.data?.body;
+      if (res.data?.success && body?.token && body?.user) {
+        setAuth(body.token, body.user);
+        storeSet(LAST_CHECK_KEY, String(Date.now()));
+        setUser(body.user);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      const code = err?.response?.status;
+      if (code === 401 || code === 403) {
+        clearAuth();
+        setUser(null);
+        cartRef.current = [];
+        setCart([]);
+        toast.info('نشست شما منقضی شده است؛ دوباره وارد شوید');
+      }
+      /* خطای شبکه: نشست دست‌نخورده می‌ماند و بار بعد دوباره امتحان می‌شود */
+      return false;
+    }
+  }, []);
+
   /* ---------- پروفایل ---------- */
   const refreshUser = useCallback(async () => {
     const u = getUser();
-    if (!getToken() || !u?._id) return;
+    if (!getToken() || !u?._id) {
+      setAuthReady(true);
+      return;
+    }
     try {
-      const res = await axios.get(`${API}/user/${u._id}`, authHeaders());
-      if (res.data.success) {
+      const res = await axios.get(`${API}/user/${u._id}`, {
+        ...authHeaders(),
+        timeout: 12000,
+      });
+      if (res.data?.success) {
         const merged = { ...u, ...res.data.body };
         storeSet('user', JSON.stringify(merged));
         setUser(merged);
+        /* اگر نقش/فروشنده بودن داخل توکن با دیتابیس فرق دارد، توکن را تازه کن */
+        const claims = decodeJwt(getToken());
+        if (
+          claims &&
+          (String(claims.role || '') !== String(merged.role || '') ||
+            Boolean(claims.is_seller) !== Boolean(merged.is_seller))
+        ) {
+          syncSession();
+        }
       }
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      /* توکن منقضی یا نامعتبر: نشست پاک می‌شود تا کاربر دوباره وارد شود */
+      const code = err?.response?.status;
+      if (code === 401 || code === 403) {
+        clearAuth();
+        setUser(null);
+        cartRef.current = [];
+        setCart([]);
+      } else {
+        console.error('Error fetching profile:', err);
+      }
+    } finally {
+      setAuthReady(true);
     }
-  }, []);
+  }, [syncSession]);
 
   useEffect(() => {
     refreshCart();
     refreshUser();
   }, [refreshCart, refreshUser]);
 
+  /* چک ۶ ساعته‌ی توکن: با تایمر، و هنگام برگشت به تب اگر ۶ ساعت گذشته باشد */
+  useEffect(() => {
+    const due = () => {
+      const last = Number(storeGet(LAST_CHECK_KEY)) || 0;
+      return Date.now() - last >= SESSION_CHECK_MS;
+    };
+    const check = () => {
+      if (getToken() && due()) syncSession();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') check();
+    };
+    check();
+    const timer = window.setInterval(check, 15 * 60 * 1000);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [syncSession]);
+
   const login = (token, userData) => {
     setAuth(token, userData);
+    storeSet(LAST_CHECK_KEY, String(Date.now()));
     setUser(userData);
     cartRef.current = [];
     setCart([]);
@@ -402,9 +506,11 @@ export const ShopProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       user,
+      authReady,
       login,
       logout,
       refreshUser,
+      syncSession,
       /* سبد */
       cart,
       cartCount,
@@ -433,6 +539,7 @@ export const ShopProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       user,
+      authReady,
       cart,
       cartCount,
       cartLoading,
@@ -440,6 +547,7 @@ export const ShopProvider = ({ children }) => {
       favorites,
       compare,
       theme,
+      syncSession,
       refreshCart,
       fetchCartItem,
       isInCart,

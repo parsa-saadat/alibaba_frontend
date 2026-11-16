@@ -10,6 +10,7 @@ import { Loading } from '../../components/common/ScroolToTopComponent';
 import { getId } from '../../utils/helpers/response';
 import { flattenCategories } from '../../utils/helpers/categories';
 import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
+import useStoreCapacity from '../../hooks/useStoreCapacity';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
@@ -21,6 +22,8 @@ function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [zoomFile, setZoomFile] = useState(null);
+  const capacity = useStoreCapacity();
+  const canAdd = capacity.isAdmin || capacity.planActive;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -103,12 +106,27 @@ function ProductsPage() {
             className="input !py-2 !pr-9 text-xs"
           />
         </div>
-        <Link
-          to="/seller/products/create"
-          className="btn-yellow !py-2.5 text-sm flex items-center gap-1.5"
-        >
-          <Plus size={16} /> محصول جدید
-        </Link>
+        {canAdd ? (
+          <Link
+            to="/seller/products/create"
+            className="btn-yellow !py-2.5 text-sm flex items-center gap-1.5"
+          >
+            <Plus size={16} /> محصول جدید
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled={capacity.loading}
+            onClick={() => {
+              toast.error('برای ساخت محصول باید پلن فعال داشته باشید');
+              navigate('/seller/plans');
+            }}
+            className="btn-yellow !py-2.5 text-sm flex items-center gap-1.5 disabled:opacity-60"
+            title="پلن فعال لازم است"
+          >
+            <Plus size={16} /> محصول جدید
+          </button>
+        )}
       </div>
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">

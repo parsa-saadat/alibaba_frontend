@@ -5,6 +5,8 @@ import { authHeaders } from '../../utils/helpers/storage';
 import ProductEditorComponent from '../../components/panel/ProductEditorComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { flattenCategories } from '../../utils/helpers/categories';
+import useStoreCapacity from '../../hooks/useStoreCapacity';
+import PlanRequiredNotice from '../../components/panel/PlanRequiredNotice';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
@@ -13,6 +15,8 @@ function CreateProductPage() {
   const [stores, setStores] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  /* بدون پلن فعال، ساخت محصول ممنوع است (مدیر مستثناست) */
+  const capacity = useStoreCapacity();
 
   useEffect(() => {
     Promise.all([
@@ -25,6 +29,26 @@ function CreateProductPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  if (capacity.loading) {
+    return (
+      <div className="py-16">
+        <Loading label="در حال بررسی پلن فروشندگی…" />
+      </div>
+    );
+  }
+
+  if (!capacity.isAdmin && !capacity.planActive) {
+    return (
+      <PlanRequiredNotice
+        text={
+          capacity.reason === 'expired'
+            ? 'اعتبار پلن فروشندگی شما تمام شده است؛ برای اضافه کردن محصول، پلن را تمدید کنید.'
+            : undefined
+        }
+      />
+    );
+  }
 
   if (loading) {
     return (

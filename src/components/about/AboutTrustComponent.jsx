@@ -12,9 +12,13 @@ const GUARANTEES = [
 
 // لینک‌های حقوقی و راهنما
 const LINKS = [
-  { label: 'قوانین و مقررات', to: '/about' },
-  { label: 'حریم خصوصی', to: '/about' },
-  { label: 'شرایط بازگشت کالا', to: '/contact#faq' },
+  { label: 'قوانین مشتریان', to: '/terms/customers' },
+  { label: 'قوانین خریداران', to: '/terms/buyers' },
+  { label: 'قوانین فروشندگان', to: '/terms/sellers' },
+  { label: 'حریم خصوصی', to: '/privacy' },
+  { label: 'شرایط بازگشت کالا', to: '/terms/buyers#returns' },
+  { label: 'راهنمای خرید', to: '/guide/buying' },
+  { label: 'راهنمای فروش در ژئو کالا', to: '/guide/selling' },
   { label: 'سوالات متداول', to: '/contact#faq' },
 ];
 

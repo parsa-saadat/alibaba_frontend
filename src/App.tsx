@@ -9,6 +9,7 @@ import AboutPage from './pages/main/AboutPage';
 import ContactPage from './pages/main/ContactPage';
 import TermsPage from './pages/main/TermsPage';
 import PrivacyPage from './pages/main/PrivacyPage';
+import GuidePage from './pages/main/GuidePage';
 import CartPage from './pages/main/CartPage';
 import FavoritesPage from './pages/main/FavoritesPage';
 import ComparePage from './pages/main/ComparePage';
@@ -56,7 +57,7 @@ import SellerLayout from './components/layout/SellerLayout';
 import AuthLayout from './components/layout/AuthAdminLayout';
 
 // Context & Shared
-import { ShopProvider } from './contexts/ShopContext';
+import { ShopProvider, useShop } from './contexts/ShopContext';
 import NotFoundPage from './pages/NotFoundPage';
 import ScrollToTopComponent, { RouteProgress } from './components/common/ScroolToTopComponent';
 import ErrorBoundaryComponent from './components/common/ErrorBoundaryComponent';
@@ -72,6 +73,27 @@ const App = () => {
 const MainApp = () => {
   /* مسیر جاری، برای ری‌ست کردن مرز خطا بعد از هر جابه‌جایی */
   const location = useLocation();
+  const authReady = (useShop() as { authReady?: boolean } | null)?.authReady ?? true;
+
+  /* لودینگ اولیه: تا بررسی نشست کاربر تمام نشده، به‌جای صفحه‌ی خطا/پرش، لودینگ نشان بده */
+  if (!authReady) {
+    return (
+      <div
+        className="min-h-screen grid place-items-center"
+        style={{ background: 'var(--navy-deep, #0a1736)' }}
+      >
+        <div className="text-center space-y-4" role="status" aria-live="polite">
+          <div
+            className="mx-auto h-14 w-14 rounded-full animate-spin"
+            style={{ border: '3px solid rgba(255,255,255,.14)', borderTopColor: '#ffd60a' }}
+          />
+          <p className="text-sm font-bold" style={{ color: '#eef2ff' }}>
+            در حال بارگذاری ژئو کالا…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -102,6 +124,8 @@ const MainApp = () => {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/terms/:audience" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/guide" element={<GuidePage />} />
+          <Route path="/guide/:topic" element={<GuidePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/compare" element={<ComparePage />} />

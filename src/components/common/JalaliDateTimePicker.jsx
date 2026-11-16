@@ -162,6 +162,13 @@ export default function JalaliDateTimePicker({
   const selectedJalali = selectedDate ? jalaliOfDate(selectedDate) : null;
   const todayJalali = jalaliOfDate(today);
 
+  /* فهرست سال‌ها: ۱۱۰ سال گذشته (تاریخ تولد) تا ۱۵ سال آینده (انقضای تخفیف)؛ سال انتخاب‌شده همیشه در فهرست است */
+  const yearOptions = useMemo(() => {
+    const from = Math.min(todayJalali.jy - 110, cursor.jy);
+    const to = Math.max(todayJalali.jy + 15, cursor.jy);
+    return Array.from({ length: to - from + 1 }, (_, i) => to - i);
+  }, [todayJalali.jy, cursor.jy]);
+
   const monthLength = jalaliMonthLength(cursor.jy, cursor.jm);
   const firstGregorian = toGregorian(cursor.jy, cursor.jm, 1);
   const firstWeekday = weekdayColumn(new Date(firstGregorian.gy, firstGregorian.gm - 1, 1).getDay());
@@ -173,6 +180,7 @@ export default function JalaliDateTimePicker({
     const minute = selectedDate ? selectedDate.getMinutes() : 0;
     const g = toGregorian(cursor.jy, cursor.jm, day);
     emit(new Date(g.gy, g.gm - 1, g.gd, hour, withTime ? minute : 0, 0, 0));
+    if (!withTime) setOpen(false);
   };
 
   const setTime = (hour, minute) => {
@@ -318,11 +326,31 @@ export default function JalaliDateTimePicker({
             >
               <ChevronRight size={14} />
             </button>
-            <div className="text-center">
-              <div className="text-xs font-black">
-                {JALALI_MONTHS[cursor.jm - 1]} {faDigits(cursor.jy)}
-              </div>
-              <div className="text-[10px] muted">تقویم شمسی</div>
+            <div className="flex items-center justify-center gap-1">
+              <select
+                className="input !py-1 !px-1.5 text-[11px] font-black !w-auto"
+                value={cursor.jm}
+                onChange={(e) => setCursor((prev) => ({ ...prev, jm: Number(e.target.value) }))}
+                aria-label="ماه"
+              >
+                {JALALI_MONTHS.map((name, i) => (
+                  <option key={name} value={i + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="input !py-1 !px-1.5 text-[11px] font-black !w-auto"
+                value={cursor.jy}
+                onChange={(e) => setCursor((prev) => ({ ...prev, jy: Number(e.target.value) }))}
+                aria-label="سال"
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>
+                    {faDigits(y)}
+                  </option>
+                ))}
+              </select>
             </div>
             <button
               type="button"

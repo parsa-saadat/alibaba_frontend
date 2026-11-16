@@ -1,8 +1,19 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import NavbarComponent from './NavbarComponent';
 import FooterComponent from './FooterComponent';
 
 const MainLayout = () => {
+  const { pathname } = useLocation();
+
+  /* صفحه‌های ورود/ثبت‌نام: بدون هدر و فوتر سنگین سایت، فقط کارت فرم روی پس‌زمینه‌ی برند */
+  if (pathname.startsWith('/auth/')) {
+    return (
+      <main className="min-h-screen">
+        <Outlet />
+      </main>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavbarComponent />

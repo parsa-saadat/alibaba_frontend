@@ -61,6 +61,7 @@ const LINK_COLUMNS = [
       { label: 'شروع فروش', to: '/seller' },
       { label: 'پنل فروشنده', to: '/seller' },
       { label: 'پلن‌ها و تعرفه', to: '/seller/plans' },
+      { label: 'راهنمای فروش', to: '/guide/selling' },
       { label: 'قوانین فروشندگان', to: '/terms/sellers' },
     ],
   },
@@ -69,6 +70,7 @@ const LINK_COLUMNS = [
     items: [
       { label: 'تماس با ما', to: '/contact' },
       { label: 'درباره ژئو کالا', to: '/about' },
+      { label: 'راهنمای خرید', to: '/guide/buying' },
       { label: 'سوالات متداول', to: '/contact#faq' },
       { label: 'قوانین مشتریان', to: '/terms/customers' },
       { label: 'قوانین خریداران', to: '/terms/buyers' },

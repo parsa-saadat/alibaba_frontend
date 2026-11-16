@@ -419,7 +419,40 @@ function ProfilePage() {
     }
   };
 
+  /* اعتبارسنجی فرم درخواست فروشندگی؛ مقدارهای نرمال‌شده را برمی‌گرداند */
+  const validateSellerForm = () => {
+    const errors = {};
+    const nationalId = onlyDigits(seller.national_ID);
+    const card = onlyDigits(seller.card_number);
+    const sheba = normalizeSheba(seller.sheba_number);
+
+    if (!nationalIDValidator(nationalId)) errors.national_ID = "کد ملی باید ۱۰ رقم باشد";
+    if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(String(seller.birth_date || "").trim()))
+      errors.birth_date = "تاریخ تولد را از تقویم انتخاب کنید";
+    if (!seller.firstname_lastname.trim())
+      errors.firstname_lastname = "نام صاحب حساب الزامی است";
+    if (!cardNumberValidator(card)) errors.card_number = "شماره کارت ۱۶ رقمی معتبر نیست";
+    if (!shebaNumberValidator(sheba))
+      errors.sheba_number = "شبا باید با IR شروع شود و ۲۴ رقم داشته باشد";
+    if (!seller.province.trim()) errors.province = "استان الزامی است";
+    if (!seller.city.trim()) errors.city = "شهر الزامی است";
+    if (!seller.full_address.trim()) errors.full_address = "نشانی کامل الزامی است";
+    if (!seller.identity_image_id) errors.identity_image_id = "تصویر کارت ملی را بارگذاری کنید";
+    if (!seller.identity_verification_image_id)
+      errors.identity_verification_image_id = "سلفی احراز هویت را بارگذاری کنید";
+
+    return { errors, nationalId, card, sheba };
+  };
+
   const requestSeller = () => {
+    if (submittingSeller) return;
+    const { errors, nationalId, card, sheba } = validateSellerForm();
+    if (Object.keys(errors).length) {
+      setSellerErrors(errors);
+      toast.error("لطفاً موارد مشخص‌شده را اصلاح کنید");
+      return;
+    }
+    setSellerErrors({});
     setSubmittingSeller(true);
     axios
       .post(

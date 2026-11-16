@@ -28,6 +28,7 @@ import { getId } from '../../utils/helpers/response';
 import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 import StoreCapacityComponent from '../../components/panel/StoreCapacityComponent';
 import useStoreCapacity from '../../hooks/useStoreCapacity';
+import { useShop } from '../../contexts/ShopContext';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
@@ -63,6 +64,8 @@ function StoresPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const { syncSession } = useShop();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [storeModal, setStoreModal] = useState(undefined);
@@ -71,9 +74,10 @@ function StoresPage() {
   /* ظرفیت ساخت فروشگاه بر اساس پلن فروشندگی */
   const capacity = useStoreCapacity();
 
-  const load = useCallback(async (silent = false) => {
+  const load = useCallback(async (silent = false, retried = false) => {
     if (silent) setRefreshing(true);
     else setLoading(true);
+    setLoadError('');
     try {
       const [storesRes, productsRes] = await Promise.all([
         axios.get(`${API}/perm/stores?limit=100`, authHeaders()),
@@ -82,13 +86,18 @@ function StoresPage() {
       setStores(storesRes.data.body?.data || storesRes.data.body || []);
       const list = productsRes?.data?.body?.data || productsRes?.data?.body || [];
       setProducts(Array.isArray(list) ? list : []);
-    } catch {
+    } catch (error) {
+      /* توکن قدیمی (نقش هنوز «کاربر» است) → توکن را از سرور تازه کن و یک‌بار دوباره بخوان */
+      if (!retried && [401, 403].includes(error?.response?.status) && (await syncSession?.())) {
+        return load(silent, true);
+      }
       setStores([]);
+      setLoadError(error?.response?.data?.message || 'دریافت فهرست فروشگاه‌ها ناموفق بود');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [syncSession]);
 
   useEffect(() => {
     load();
@@ -150,6 +159,17 @@ function StoresPage() {
     return (
       <div className="py-16">
         <Loading label="در حال بارگذاری فروشگاه‌ها…" />
+      </div>
+    );
+  }
+
+  if (loadError && stores.length === 0) {
+    return (
+      <div className="card rounded-2xl p-8 text-center space-y-3">
+        <p className="text-sm muted">{loadError}</p>
+        <button type="button" onClick={() => load()} className="btn-yellow !py-2 text-xs">
+          تلاش دوباره
+        </button>
       </div>
     );
   }
