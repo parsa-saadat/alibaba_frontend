@@ -25,8 +25,8 @@ function HeroSearch() {
   const tab = 'relative pb-2 whitespace-nowrap';
 
   return (
-    <section className="px-4 pt-8 pb-10" style={{ background: NAVY }}>
-      <div className="flex items-center justify-center gap-6 sm:gap-12 text-xl sm:text-[28px] font-black">
+    <section className="px-3 pt-5 pb-6 sm:px-4 sm:pt-8 sm:pb-10" style={{ background: NAVY }}>
+      <div className="flex items-center justify-center gap-4 text-base min-[400px]:text-lg sm:gap-12 sm:text-2xl md:text-[28px] font-black">
         <Link to="/products" className={tab} style={{ color: 'var(--primary-color)' }}>
           محصولات
           <span
@@ -43,14 +43,14 @@ function HeroSearch() {
       </div>
 
       <div
-        className="card mt-6 max-w-[960px] mx-auto rounded-[20px] p-3 sm:p-4"
+        className="card mt-4 max-w-[960px] mx-auto rounded-2xl p-2.5 sm:mt-6 sm:rounded-[20px] sm:p-4"
         style={{ border: '2px solid var(--primary-color)' }}
       >
         {/* همان جستجوی زنده‌ی هدر: با تایپ کردن، محصولات پیشنهاد می‌شوند */}
         <ProductSearchBox variant="hero" />
 
         <div
-          className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 pt-3 text-xs sm:text-sm muted"
+          className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-2.5 text-[11px] sm:mt-3 sm:gap-y-2 sm:pt-3 sm:text-sm muted"
           style={{ borderTop: '1px solid var(--border)' }}
         >
           <Link to="/products?discount=true" className="flex items-center gap-1.5 hover:text-yellow">
@@ -282,7 +282,7 @@ function LatestProducts({ products, loading }) {
 /* ───────── اصلی ───────── */
 function HeaderComponent({ products = [], categories = [], loading = false }) {
   /* محو‌شدگی ردیف چیپ‌های موبایل فقط وقتی سرریز دارد */
-  const [mobileRowRef, mobileRowOverflows] = useScrollFade();
+  const [mobileRowRef, , mobileRowFade] = useScrollFade();
   const [hoveredCatId, setHoveredCatId] = useState(null);
 
   // دسته‌بندی فعال: دسته‌ای که موس روی آن است، یا به صورت پیش‌فرض اولین دسته‌ای که محصول دارد
@@ -306,9 +306,8 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
         {/* چیپ دسته‌بندی برای موبایل */}
         <div
           ref={mobileRowRef}
-          className={`lg:hidden flex gap-2 overflow-x-auto pb-3 no-scrollbar ${
-            mobileRowOverflows ? 'scroll-fade-x' : ''
-          }`}
+          style={mobileRowFade}
+          className="scroll-fade-x lg:hidden flex gap-2 overflow-x-auto pb-3 no-scrollbar"
         >
           {loading
             ? [0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-8 w-24 shrink-0" />)

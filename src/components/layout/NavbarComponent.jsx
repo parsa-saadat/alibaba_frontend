@@ -45,7 +45,7 @@ function NavbarComponent() {
   const accountMenuRef = useRef(null);
   const headerRef = useRef(null);
   /* محو‌شدگی دو سرِ نوار دسته‌بندی‌ها فقط وقتی سرریز دارد */
-  const [navRowRef, navRowOverflows] = useScrollFade();
+  const [navRowRef, , navRowFade] = useScrollFade();
   /*
    * ارتفاع واقعی هدر در متغیر `--header-h` ذخیره می‌شود؛ اجزای چسبان
    * (سرستون جدول مقایسه، نوار ابزار ویرایشگر، نوار اقدام محصول) از آن استفاده می‌کنند
@@ -423,9 +423,8 @@ function NavbarComponent() {
 
             <nav
               ref={navRowRef}
-              className={`flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap ${
-                navRowOverflows ? "scroll-fade-x" : ""
-              }`}
+              style={navRowFade}
+              className="scroll-fade-x flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap"
               aria-label="لینک‌های اصلی"
             >
               <NavLink to="/" end className="header-nav-link shrink-0">

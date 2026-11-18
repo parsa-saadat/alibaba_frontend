@@ -1031,29 +1031,39 @@ html[data-theme="light"] .skeleton::after {
   }
 }
 
+/* سایه‌ی محو لبه‌های اسکرول افقی؛ اندازه‌ی هر سمت را useScrollFade با --fade-l / --fade-r
+   تعیین می‌کند (۰ = بدون سایه). تغییر اندازه نرم انیمیت می‌شود. */
+@property --fade-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
 .scroll-fade-x {
-  --fade-size: 20px;
+  --fade-l: 0px;
+  --fade-r: 0px;
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 var(--fade-size),
-    #000 calc(100% - var(--fade-size)),
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 var(--fade-size),
-    #000 calc(100% - var(--fade-size)),
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
     transparent 100%
   );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-}
-
-@media (max-width: 640px) {
-  .scroll-fade-x {
-    --fade-size: 18px;
-  }
+  transition:
+    --fade-l 0.2s ease,
+    --fade-r 0.2s ease;
 }
 

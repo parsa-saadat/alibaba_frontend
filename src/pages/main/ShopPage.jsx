@@ -12,14 +12,17 @@ import {
   Layers,
   PackageSearch,
   Percent,
+  BadgeCheck,
   RotateCcw,
   Search,
+  Store as StoreIcon,
   ShieldCheck,
   SlidersHorizontal,
   Wallet,
   X,
 } from 'lucide-react';
 import ProductComponent, { ProductSkeleton } from '../../components/product/ProductComponent';
+import SupplierCardComponent, { SupplierSkeleton } from '../../components/shop/SupplierCardComponent';
 import { fetchCategories, buildCategoryTree } from '../../utils/helpers/categories';
 import { getBody, getList } from '../../utils/helpers/response';
 import { toFa,
@@ -45,8 +48,22 @@ const PRICE_STEP = 1_000_000;
 const YEAR_MIN = 1340;
 const YEAR_MAX = 1405;
 
+/* تب «تأمین‌کنندگان» (فروشگاه‌هایی که کالا را دارند)، مثل علی‌بابا */
+const SUPPLIER_PAGE_SIZE = 8;
+
+const SUPPLIER_SORTS = [
+  { value: '', label: 'مرتبط‌ترین' },
+  { value: 'products', label: 'بیشترین کالای مطابق' },
+  { value: 'trust', label: 'فروشنده‌ی مورد اعتماد' },
+  { value: 'price_asc', label: 'ارزان‌ترین' },
+  { value: 'price_desc', label: 'گران‌ترین' },
+  { value: 'newest', label: 'جدیدترین فروشگاه' },
+];
+
 const FILTER_KEYS = [
   'name',
+  'verified',
+  'min_products',
   'category_id',
   'brand',
   'min_price',
@@ -204,6 +221,15 @@ function buildActiveChips(filters, categoryName) {
 
   if (filters.tags)
     chips.push({ key: 'tags', label: `برچسب: ${filters.tags}`, patch: { tags: '' } });
+
+  if (filters.verified === 'true')
+    chips.push({ key: 'verified', label: 'فقط مورد اعتماد', patch: { verified: '' } });
+  if (filters.min_products)
+    chips.push({
+      key: 'min_products',
+      label: `حداقل ${faPlain(filters.min_products)} کالا`,
+      patch: { min_products: '' },
+    });
 
   if (filters.discount === 'true')
     chips.push({ key: 'discount', label: 'تخفیف‌دار', patch: { discount: '' } });
@@ -621,6 +647,7 @@ function FiltersPanel({
   sort = '',
   onSort,
   scope = 'desktop',
+  mode = 'products',
 }) {
   /* پنل دو بار رندر می‌شود (سایدبار دسکتاپ + شیت موبایل) → id یکتا لازم است */
   const brandListId = `brand-options-${scope}`;
@@ -634,7 +661,8 @@ function FiltersPanel({
   const formatPrice = (value, isMax) => (isMax ? 'بدون سقف' : faCompact(value));
   const formatYear = (value, isMax) => (isMax ? `${faPlain(value)}+` : faPlain(value));
 
-  const sortOptions = SORTS.map((o) => ({ value: o.value, label: o.label }));
+  const isSuppliers = mode === 'suppliers';
+  const sortOptions = (isSuppliers ? SUPPLIER_SORTS : SORTS).map((o) => ({ value: o.value, label: o.label }));
 
   return (
     <div className="space-y-2">
@@ -644,10 +672,31 @@ function FiltersPanel({
           value={sort}
           onChange={(v) => onSort?.(v)}
           options={sortOptions}
-          label="مرتب‌سازی محصولات"
+          label={isSuppliers ? 'مرتب‌سازی تأمین‌کنندگان' : 'مرتب‌سازی محصولات'}
           icon={ArrowUpDown}
         />
       </Section>
+
+      {isSuppliers && (
+        <Section
+          icon={StoreIcon}
+          title="فروشنده"
+          badge={(filters.verified === 'true' ? 1 : 0) + (filters.min_products ? 1 : 0)}
+        >
+          <Switch
+            icon={BadgeCheck}
+            label="فقط فروشنده‌ی مورد اعتماد"
+            checked={filters.verified === 'true'}
+            onChange={(c) => setFilter({ verified: c ? 'true' : '' })}
+          />
+          <Switch
+            icon={Boxes}
+            label="حداقل ۲ کالای مطابق"
+            checked={filters.min_products === '2'}
+            onChange={(c) => setFilter({ min_products: c ? '2' : '' })}
+          />
+        </Section>
+      )}
 
       <Section icon={Search} title="جستجو در نام" badge={filters.name ? 1 : 0}>
         <div className="relative">
@@ -994,6 +1043,44 @@ function ProductsGrid({ products, loading, onClear }) {
   );
 }
 
+function SuppliersList({ suppliers, loading, onClear }) {
+  if (loading && suppliers.length === 0) {
+    return (
+      <div className="space-y-3" aria-busy="true" aria-label="در حال بارگذاری تأمین‌کنندگان">
+        {[0, 1, 2].map((i) => (
+          <SupplierSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!suppliers.length) {
+    return (
+      <div className="card rounded-3xl p-10 text-center">
+        <PackageSearch size={34} className="mx-auto mb-3 muted" />
+        <div className="font-black">فروشگاهی با این فیلترها پیدا نشد</div>
+        <p className="mt-1 text-xs muted">فیلترها را کمتر کن یا عبارت دیگری جستجو کن.</p>
+        {onClear && (
+          <button type="button" onClick={onClear} className="btn-ghost mt-4 !py-2 text-xs">
+            پاک کردن فیلترها
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`space-y-3 transition-opacity duration-150 ${loading ? 'pointer-events-none opacity-40' : ''}`}
+      aria-busy={loading}
+    >
+      {suppliers.map((store) => (
+        <SupplierCardComponent key={store._id} store={store} />
+      ))}
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* صفحه‌ی محصولات                                                      */
 /* ------------------------------------------------------------------ */
@@ -1007,8 +1094,13 @@ function ShopPage() {
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const sort = searchParams.get('sort') || '';
   const filters = Object.fromEntries(FILTER_KEYS.map((key) => [key, searchParams.get(key) || '']));
+  /* تب فعال: محصولات | تأمین‌کنندگان (فروشگاه‌هایی که کالای جستجوشده را دارند) */
+  const isSuppliers = searchParams.get('tab') === 'suppliers';
 
   const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [supplierBrands, setSupplierBrands] = useState([]);
+  const [supplierTotal, setSupplierTotal] = useState(null);
   const [categories, setCategories] = useState([]);
   const [expandedCatIds, setExpandedCatIds] = useState({});
   const [total, setTotal] = useState(0);
@@ -1036,7 +1128,24 @@ function ShopPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const resetFilters = () => setSearchParams(sort ? { sort } : {});
+  /* تغییر تب: مرتب‌سازی و فیلترهای مخصوص هر تب پاک می‌شوند، بقیه‌ی فیلترها می‌مانند */
+  const switchTab = (next) => {
+    setSearchParams((previous) => {
+      const params = new URLSearchParams(previous);
+      ['page', 'sort', 'verified', 'min_products'].forEach((key) => params.delete(key));
+      if (next === 'suppliers') params.set('tab', 'suppliers');
+      else params.delete('tab');
+      return params;
+    });
+  };
+
+  const resetFilters = () =>
+    setSearchParams((() => {
+      const keep = {};
+      if (sort) keep.sort = sort;
+      if (isSuppliers) keep.tab = 'suppliers';
+      return keep;
+    })());
   const toggleCat = useCallback((id) => setExpandedCatIds((prev) => ({ ...prev, [id]: !prev[id] })), []);
   const closeSheet = useCallback(() => setFiltersOpen(false), []);
 
@@ -1052,7 +1161,7 @@ function ShopPage() {
     const controller = new AbortController();
     const params = new URLSearchParams(search);
     params.set('page', String(page));
-    params.set('limit', String(PAGE_SIZE));
+    params.delete('tab');
 
     /* سال تولید در فیلتر شمسی است، ولی بک‌اند سال میلادی را مقایسه می‌کند */
     ['min_production', 'max_production'].forEach((key) => {
@@ -1062,6 +1171,49 @@ function ShopPage() {
       if (gregorian) params.set(key, gregorian);
       else params.delete(key);
     });
+
+    /* ---------- تب تأمین‌کنندگان: GET /product/stores ---------- */
+    if (isSuppliers) {
+      const query = (params.get('name') || '').trim();
+      params.delete('name');
+      if (query) params.set('q', query);
+      params.set('limit', String(SUPPLIER_PAGE_SIZE));
+      params.set('products_per_store', '8');
+      if (params.get('stock_status') === 'IN_STOCK') {
+        params.delete('stock_status');
+        params.set('in_stock', 'true');
+      }
+
+      setLoading(true);
+      setError('');
+
+      axios
+        .get(`${API}/product/stores?${params}`, { signal: controller.signal, timeout: 15000 })
+        .then((response) => {
+          if (response.data?.success === false) throw new Error(response.data.message);
+          const body = getBody(response);
+          const count = Number(body?.total ?? 0) || 0;
+          setSuppliers(Array.isArray(body?.data) ? body.data : []);
+          setSupplierBrands((body?.facets?.brands || []).map((b) => b.value));
+          setSupplierTotal(count);
+          setTotal(count);
+          setTotalPages(Math.max(1, Number(body?.totalPages) || 1));
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) {
+            setError('دریافت تأمین‌کنندگان ناموفق بود. اتصال به بک‌اند را بررسی کنید.');
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+
+      return () => controller.abort();
+    }
+
+    /* ---------- تب محصولات: GET /product ---------- */
+    ['verified', 'min_products'].forEach((key) => params.delete(key));
+    params.set('limit', String(PAGE_SIZE));
 
     setLoading(true);
     setError('');
@@ -1090,7 +1242,7 @@ function ShopPage() {
       });
 
     return () => controller.abort();
-  }, [search, page, retry]);
+  }, [search, page, retry, isSuppliers]);
 
   const categoryTree = useMemo(() => buildCategoryTree(categories), [categories]);
   const brands = useMemo(() => [...new Set(products.map((p) => p.brand).filter(Boolean))], [products]);
@@ -1111,13 +1263,20 @@ function ShopPage() {
     });
   }, [filters.category_id, categoryTree]);
 
-  const title = activeCategory?.name || (filters.name ? `نتایج «${filters.name}»` : 'همه محصولات');
+  const title = isSuppliers
+    ? filters.name
+      ? `تأمین‌کنندگان «${filters.name}»`
+      : activeCategory
+        ? `تأمین‌کنندگان ${activeCategory.name}`
+        : 'همه‌ی تأمین‌کنندگان'
+    : activeCategory?.name || (filters.name ? `نتایج «${filters.name}»` : 'همه محصولات');
 
   const panelProps = {
     filters,
     setFilter: updateParams,
     categoryTree,
-    brands,
+    brands: isSuppliers ? supplierBrands : brands,
+    mode: isSuppliers ? 'suppliers' : 'products',
     expanded: expandedCatIds,
     onToggleCat: toggleCat,
     sort,
@@ -1155,7 +1314,15 @@ function ShopPage() {
             </nav>
             <h1 className="mt-2 truncate text-lg font-black sm:text-xl md:text-2xl">{title}</h1>
             <p className="mt-1 text-xs muted" aria-live="polite">
-              {loading ? 'در حال دریافت کالاها…' : `${toFa(total)} کالا یافت شد`}
+              {loading
+                ? isSuppliers
+                  ? 'در حال دریافت تأمین‌کنندگان…'
+                  : 'در حال دریافت کالاها…'
+                : isSuppliers
+                  ? filters.name
+                    ? `${toFa(total)} فروشگاه این کالا را دارند`
+                    : `${toFa(total)} فروشگاه یافت شد`
+                  : `${toFa(total)} کالا یافت شد`}
             </p>
           </div>
 
@@ -1177,6 +1344,45 @@ function ShopPage() {
           </div>
         </div>
       </header>
+
+      {/* تب‌ها: محصولات | تأمین‌کنندگان (مثل علی‌بابا) */}
+      <div
+        role="tablist"
+        aria-label="نوع نتایج"
+        className="flex items-center gap-6 px-1"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        {[
+          { key: 'products', label: 'محصولات', icon: Boxes },
+          { key: 'suppliers', label: 'تأمین‌کنندگان', icon: StoreIcon },
+        ].map((item) => {
+          const active = (item.key === 'suppliers') === isSuppliers;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => !active && switchTab(item.key)}
+              className="relative flex shrink-0 items-center gap-1.5 whitespace-nowrap px-1 pb-2.5 pt-1 text-sm transition"
+              style={{
+                fontWeight: active ? 900 : 600,
+                color: active ? 'var(--text)' : 'var(--muted)',
+                boxShadow: active ? 'inset 0 -3px 0 var(--primary-color)' : 'none',
+              }}
+            >
+              <Icon size={15} />
+              {item.label}
+              {item.key === 'suppliers' && isSuppliers && supplierTotal !== null && (
+                <span className="rounded-full px-1.5 text-[10px] font-black" style={ACCENT_SOFT}>
+                  {toFa(supplierTotal)}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
       {/* چیپ‌های فعال */}
       {chips.length > 0 && (
@@ -1243,7 +1449,15 @@ function ShopPage() {
               </button>
             </div>
           ) : (
-            <ProductsGrid products={products} loading={loading} onClear={resetFilters} />
+            isSuppliers ? (
+              <SuppliersList
+                suppliers={suppliers}
+                loading={loading}
+                onClear={resetFilters}
+              />
+            ) : (
+              <ProductsGrid products={products} loading={loading} onClear={resetFilters} />
+            )
           )}
 
           <Pagination page={page} totalPages={totalPages} onChange={goToPage} />

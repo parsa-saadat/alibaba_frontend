@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LoaderCircle } from 'lucide-react';
 
@@ -27,8 +27,12 @@ export function RouteProgress() {
 
 const ScrollToTopComponent = () => {
   const location = useLocation();
+  const previousPath = useRef(location.pathname);
 
   useEffect(() => {
+    const samePage = previousPath.current === location.pathname;
+    previousPath.current = location.pathname;
+
     /* لینک با #بخش (مثل /contact#faq): بعد از رندر صفحه به همان بخش برو */
     const id = decodeURIComponent((location.hash || '').replace('#', ''));
     if (id) {
@@ -39,7 +43,12 @@ const ScrollToTopComponent = () => {
       }, 120);
       return () => window.clearTimeout(timer);
     }
-    window.scrollTo(0, 0);
+    /* صفحه‌ی تازه: بالا بپر. فقط پارامتر جستجو/فیلتر عوض شده: آرام و روان بالا بیا */
+    if (samePage) {
+      if (window.scrollY > 4) window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo(0, 0);
+    }
     return undefined;
   }, [location.pathname, location.search, location.hash]);
 

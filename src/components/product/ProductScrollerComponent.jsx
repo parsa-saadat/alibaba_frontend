@@ -23,7 +23,7 @@ function ProductScrollerComponent({
   emptyText = 'محصولی موجود نیست',
 }) {
   const rowRef = useRef(null);
-  const [fadeRef, rowOverflows] = useScrollFade();
+  const [fadeRef, , fadeStyle] = useScrollFade();
 
   // dir = 1 → جلو (در RTL یعنی به سمت چپ)، dir = -1 → عقب
   const scroll = (dir) => {
@@ -71,9 +71,8 @@ function ProductScrollerComponent({
             rowRef.current = node;
             fadeRef.current = node;
           }}
-          className={`flex items-stretch gap-3 overflow-x-auto snap-x snap-proximity scroll-smooth py-2 no-scrollbar ${
-            rowOverflows ? 'scroll-fade-x' : ''
-          }`}
+          style={fadeStyle}
+          className="scroll-fade-x flex items-stretch gap-3 overflow-x-auto snap-x snap-proximity scroll-smooth py-2 no-scrollbar"
         >
           {loading
             ? Array.from({ length: 6 }, (_, i) => (

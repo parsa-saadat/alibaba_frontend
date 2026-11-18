@@ -170,11 +170,11 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       aria-label="جستجو در تجهیزات ژئو کالا"
       placeholder={
         placeholder ||
-        (hero ? 'جستجوی جی‌پی‌اس، توتال استیشن، دوربین نقشه‌برداری…' : 'جستجو در تجهیزات، برند یا دسته‌بندی…')
+        (hero ? 'جستجوی جی‌پی‌اس، توتال استیشن…' : 'جستجو در تجهیزات، برند یا دسته‌بندی…')
       }
       className={
         hero
-          ? 'min-w-0 flex-1 bg-transparent text-sm sm:text-base outline-none placeholder:opacity-60'
+          ? 'min-w-0 flex-1 truncate bg-transparent py-1.5 text-[13px] outline-none placeholder:opacity-60 sm:py-0 sm:text-base'
           : 'input !pr-10 !pl-9 !py-2.5 text-sm'
       }
     />
@@ -183,14 +183,15 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
   const submitButton = (
     <button
       type="submit"
+      aria-label="جستجو"
       className={
         hero
-          ? 'btn-yellow !rounded-full flex shrink-0 items-center gap-2 px-5 sm:px-8'
+          ? 'btn-yellow !rounded-full flex shrink-0 items-center justify-center gap-1.5 !p-0 h-9 w-9 sm:h-auto sm:w-auto sm:!px-6 sm:!py-2 text-sm'
           : 'btn-yellow !py-2.5 !px-4 text-sm shrink-0 inline-flex items-center justify-center gap-1.5 whitespace-nowrap'
       }
     >
-      <Search size={15} className="shrink-0" />
-      <span>جستجو</span>
+      <Search size={hero ? 16 : 15} className="shrink-0" />
+      <span className={hero ? 'hidden sm:inline' : ''}>جستجو</span>
     </button>
   );
 
@@ -200,10 +201,10 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
         <form
           onSubmit={submitSearch}
           role="search"
-          className="flex items-center gap-2 sm:gap-3 rounded-xl px-3 py-2"
+          className="flex items-center gap-2 sm:gap-3 rounded-xl py-1.5 ps-3 pe-1.5 sm:px-3 sm:py-2"
           style={{ background: 'rgba(255,255,255,.07)', border: '1px solid var(--border)' }}
         >
-          <Search size={19} className="shrink-0 muted" aria-hidden="true" />
+          <Search size={18} className="hidden shrink-0 muted sm:block" aria-hidden="true" />
           {input}
           {clearButton}
           {submitButton}
