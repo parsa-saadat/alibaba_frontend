@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -64,7 +65,7 @@ function InfiniteProductsComponent() {
   return (
     <section className="pb-4">
       <div className="max-w-[1440px] mx-auto px-4">
-        <SectionTitle>پیشنهاد برای شما</SectionTitle>
+        <SectionTitle>{translateText("پیشنهاد برای شما")}</SectionTitle>
 
         <div ref={wrapRef}>
           <div className="grid gap-3" style={gridStyle}>
@@ -75,23 +76,19 @@ function InfiniteProductsComponent() {
         </div>
 
         {!loading && !error && visible.length === 0 && (
-          <p className="text-center text-sm muted py-10">محصولی یافت نشد</p>
+          <p className="text-center text-sm muted py-10">{translateText("محصولی یافت نشد")}</p>
         )}
 
         {error && (
           <div className="text-center py-4">
-            <p className="text-sm muted mb-2">خطا در دریافت محصولات</p>
-            <button type="button" onClick={load} className="btn-yellow">
-              تلاش مجدد
-            </button>
+            <p className="text-sm muted mb-2">{translateText("خطا در دریافت محصولات")}</p>
+            <button type="button" onClick={load} className="btn-yellow">{translateText("تلاش مجدد ")}</button>
           </div>
         )}
 
         {!loading && !error && visible.length > 0 && (
           <div className="text-center pt-4">
-            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-yellow hover:underline">
-              مشاهده‌ی همه‌ی محصولات
-            </Link>
+            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-yellow hover:underline">{translateText("مشاهده‌ی همه‌ی محصولات ")}</Link>
           </div>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import {
   BadgeCheck,
@@ -13,33 +14,33 @@ import {
 const FEATURES = [
   {
     icon: BadgeCheck,
-    title: 'کالای اصل با گارانتی',
-    desc: 'تجهیزات از مسیر واردات رسمی مجموعه تأمین می‌شوند؛ اصالت، سریال و مدارک گارانتی بررسی می‌شود.',
+    title: translateText("کالای اصل با گارانتی"),
+    desc: translateText("تجهیزات از مسیر واردات رسمی مجموعه تأمین می‌شوند؛ اصالت، سریال و مدارک گارانتی بررسی می‌شود."),
   },
   {
     icon: Scale,
-    title: 'مقایسه‌ی مشخصات فنی',
-    desc: 'مدل‌ها را کنار هم می‌گذارید و دقت، تعداد کانال، فرکانس، ایمو و باطری را مقایسه می‌کنید؛ نه فقط قیمت.',
+    title: translateText("مقایسه‌ی مشخصات فنی"),
+    desc: translateText("مدل‌ها را کنار هم می‌گذارید و دقت، تعداد کانال، فرکانس، ایمو و باطری را مقایسه می‌کنید؛ نه فقط قیمت."),
   },
   {
     icon: Headset,
-    title: 'مشاوره‌ی تخصصی پیش از خرید',
-    desc: 'کارشناس نقشه‌برداری کمک می‌کند دستگاه مناسب پروژه‌تان را انتخاب کنید، نه گران‌ترین را.',
+    title: translateText("مشاوره‌ی تخصصی پیش از خرید"),
+    desc: translateText("کارشناس نقشه‌برداری کمک می‌کند دستگاه مناسب پروژه‌تان را انتخاب کنید، نه گران‌ترین را."),
   },
   {
     icon: ShieldCheck,
-    title: 'پشتیبانی و کالیبراسیون',
-    desc: 'آموزش راه‌اندازی، به‌روزرسانی نرم‌افزار و خدمات پس از فروش، زیر نظر همان تیم فنی.',
+    title: translateText("پشتیبانی و کالیبراسیون"),
+    desc: translateText("آموزش راه‌اندازی، به‌روزرسانی نرم‌افزار و خدمات پس از فروش، زیر نظر همان تیم فنی."),
   },
   {
     icon: Truck,
-    title: 'ارسال به سراسر کشور',
-    desc: 'بسته‌بندی مخصوص تجهیزات دقیق و ارسال به سراسر کشور، از شعبه‌ی تهران و مازندران.',
+    title: translateText("ارسال به سراسر کشور"),
+    desc: translateText("بسته‌بندی مخصوص تجهیزات دقیق و ارسال به سراسر کشور، از شعبه‌ی تهران و مازندران."),
   },
   {
     icon: CreditCard,
-    title: 'پرداخت امن',
-    desc: 'پرداخت از طریق درگاه بانکی معتبر انجام می‌شود و اطلاعات کارت شما ذخیره نمی‌شود.',
+    title: translateText("پرداخت امن"),
+    desc: translateText("پرداخت از طریق درگاه بانکی معتبر انجام می‌شود و اطلاعات کارت شما ذخیره نمی‌شود."),
   },
 ];
 
@@ -49,15 +50,10 @@ function WhyChoseUsComponent() {
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow">
-            <ShieldCheck size={13} />
-            چرا ژئو کالا
-          </span>
-          <h2 className="font-black text-xl sm:text-2xl mt-1.5">چیزی که ما را متفاوت می‌کند</h2>
+            <ShieldCheck size={13} />{translateText("چرا ژئو کالا ")}</span>
+          <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText("چیزی که ما را متفاوت می‌کند")}</h2>
         </div>
-        <p className="text-xs muted max-w-md leading-6">
-          ما یک لیست آگهی نیستیم؛ بازارگاه تخصصی یک مجموعه‌ی قدیمی در حوزه‌ی نقشه‌برداری، با دانش فنی
-          و پشتیبانی مسئول.
-        </p>
+        <p className="text-xs muted max-w-md leading-6">{translateText("ما یک لیست آگهی نیستیم؛ بازارگاه تخصصی یک مجموعه‌ی قدیمی در حوزه‌ی نقشه‌برداری، با دانش فنی و پشتیبانی مسئول. ")}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

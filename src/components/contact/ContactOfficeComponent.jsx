@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useState } from 'react';
 import {
   Building2,
@@ -19,27 +20,27 @@ const BRANCHES = [
   {
     id: 'tehran',
     icon: Building2,
-    city: 'شعبه تهران',
-    tag: 'دفتر مرکزی · فروش و مشاوره',
-    person: 'آقای علیزاده',
-    phone: '۰۹۱۲۹۳۲۷۵۱۵',
+    city: translateText("شعبه تهران"),
+    tag: translateText("دفتر مرکزی · فروش و مشاوره"),
+    person: translateText("آقای علیزاده"),
+    phone: translateText("۰۹۱۲۹۳۲۷۵۱۵"),
     tel: '+989129327515',
-    address: 'تهران',
-    note: 'بازدید حضوری با هماهنگی تلفنی قبلی',
-    mapQuery: 'تهران',
+    address: translateText("تهران"),
+    note: translateText("بازدید حضوری با هماهنگی تلفنی قبلی"),
+    mapQuery: translateText("تهران"),
     accent: 'rgba(255,214,10,0.16)',
   },
   {
     id: 'mazandaran',
     icon: Warehouse,
-    city: 'شعبه مازندران',
-    tag: 'انبار و دفتر فروش شرق مازندران',
-    person: 'آقای علیزاده',
-    phone: '۰۹۱۰۲۴۰۱۰۰۷',
+    city: translateText("شعبه مازندران"),
+    tag: translateText("انبار و دفتر فروش شرق مازندران"),
+    person: translateText("آقای علیزاده"),
+    phone: translateText("۰۹۱۰۲۴۰۱۰۰۷"),
     tel: '+989102401007',
-    address: 'مازندران، هچیرود',
-    note: 'تحویل حضوری و هماهنگی ارسال',
-    mapQuery: 'هچیرود، مازندران',
+    address: translateText("مازندران، هچیرود"),
+    note: translateText("تحویل حضوری و هماهنگی ارسال"),
+    mapQuery: translateText("هچیرود، مازندران"),
     accent: 'rgba(23,153,79,0.16)',
   },
 ];
@@ -48,9 +49,9 @@ const mapUrl = (query) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 
 const HOURS = [
-  { day: 'شنبه تا چهارشنبه', time: '۹:۰۰ – ۱۸:۰۰' },
-  { day: 'پنجشنبه', time: '۹:۰۰ – ۱۴:۰۰' },
-  { day: 'جمعه', time: 'تعطیل (فرم سایت فعال)' },
+  { day: translateText("شنبه تا چهارشنبه"), time: translateText("۹:۰۰ – ۱۸:۰۰") },
+  { day: translateText("پنجشنبه"), time: translateText("۹:۰۰ – ۱۴:۰۰") },
+  { day: translateText("جمعه"), time: translateText("تعطیل (فرم سایت فعال)") },
 ];
 
 function BranchCard({ branch }) {
@@ -113,7 +114,7 @@ function BranchCard({ branch }) {
           style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
         >
           <div className="min-w-0">
-            <span className="block text-[10px] muted">تماس مستقیم · {branch.person}</span>
+            <span className="block text-[10px] muted">{translateText("تماس مستقیم · ")}{branch.person}</span>
             <a href={`tel:${branch.tel}`} className="font-black text-sm hover-yellow" dir="ltr">
               {branch.phone}
             </a>
@@ -122,8 +123,8 @@ function BranchCard({ branch }) {
             type="button"
             onClick={copyPhone}
             className="btn-ghost !p-2 shrink-0"
-            aria-label="کپی شماره"
-            title="کپی شماره"
+            aria-label={translateText("کپی شماره")}
+            title={translateText("کپی شماره")}
           >
             {copied ? <Check size={14} style={{ color: '#17994f' }} /> : <Copy size={14} />}
           </button>
@@ -134,18 +135,14 @@ function BranchCard({ branch }) {
             href={`tel:${branch.tel}`}
             className="btn-yellow inline-flex items-center justify-center gap-1.5 !py-2 text-[11px]"
           >
-            <Phone size={13} />
-            تماس
-          </a>
+            <Phone size={13} />{translateText("تماس ")}</a>
           <a
             href={mapUrl(branch.mapQuery)}
             target="_blank"
             rel="noreferrer noopener"
             className="btn-ghost inline-flex items-center justify-center gap-1.5 !py-2 text-[11px]"
           >
-            <Navigation size={13} />
-            مسیریابی
-          </a>
+            <Navigation size={13} />{translateText("مسیریابی ")}</a>
         </div>
       </div>
     </article>
@@ -159,13 +156,11 @@ function ContactOfficeComponent() {
       <div className="card rounded-3xl p-4 sm:p-5 lg:col-span-2">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <b className="text-sm font-black">شعبه‌های ما</b>
-            <span className="ms-2 text-[11px] muted">تهران · مازندران (هچیرود)</span>
+            <b className="text-sm font-black">{translateText("شعبه‌های ما")}</b>
+            <span className="ms-2 text-[11px] muted">{translateText("تهران · مازندران (هچیرود)")}</span>
           </div>
           <span className="inline-flex items-center gap-1 text-[10px] muted">
-            <MapPin size={12} />
-            برای هر شعبه دکمه‌ی مسیریابی فعال است
-          </span>
+            <MapPin size={12} />{translateText("برای هر شعبه دکمه‌ی مسیریابی فعال است ")}</span>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -174,17 +169,13 @@ function ContactOfficeComponent() {
           ))}
         </div>
 
-        <p className="mt-3 text-[11px] leading-6 muted">
-          برای بازدید حضوری یا تحویل دستگاه، قبل از مراجعه تماس بگیرید تا هماهنگی انجام شود.
-        </p>
+        <p className="mt-3 text-[11px] leading-6 muted">{translateText("برای بازدید حضوری یا تحویل دستگاه، قبل از مراجعه تماس بگیرید تا هماهنگی انجام شود. ")}</p>
       </div>
 
       {/* ساعات کاری */}
       <div className="card rounded-3xl p-5">
         <b className="flex items-center gap-2 text-sm font-black">
-          <Clock3 size={15} className="text-yellow" />
-          ساعات پاسخ‌دهی
-        </b>
+          <Clock3 size={15} className="text-yellow" />{translateText("ساعات پاسخ‌دهی ")}</b>
         <div className="mt-2">
           {HOURS.map((row, index) => (
             <div
@@ -199,9 +190,7 @@ function ContactOfficeComponent() {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[11px] leading-5 muted">
-          پاسخ‌دهی به ایمیل‌ها و فرم سایت در روزهای کاری: کمتر از ۲۴ ساعت.
-        </p>
+        <p className="mt-2 text-[11px] leading-5 muted">{translateText("پاسخ‌دهی به ایمیل‌ها و فرم سایت در روزهای کاری: کمتر از ۲۴ ساعت. ")}</p>
       </div>
     </div>
   );

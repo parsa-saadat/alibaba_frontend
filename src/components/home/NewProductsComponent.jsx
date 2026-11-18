@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import ProductScrollerComponent from '../product/ProductScrollerComponent';
@@ -35,10 +36,10 @@ function NewProductsComponent({ products = [], loading = false }) {
 
   return (
     <ProductScrollerComponent
-      partone={user ? 'پیشنهاد ویژه' : 'پرفروش‌ترین'}
-      parttwo={user ? 'برای شما' : 'محصولات'}
+      partone={user ? translateText("پیشنهاد ویژه") : translateText("پرفروش‌ترین")}
+      parttwo={user ? translateText("برای شما") : translateText("محصولات")}
       icon={Sparkles}
-      subtitle={user ? 'بر اساس علاقه‌مندی‌ها، برندهای محبوب و بازدیدهای شما' : undefined}
+      subtitle={user ? translateText("بر اساس علاقه‌مندی‌ها، برندهای محبوب و بازدیدهای شما") : undefined}
       products={personalised}
       loading={loading}
       moreTo="/products"

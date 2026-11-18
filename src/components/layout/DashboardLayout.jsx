@@ -1,3 +1,6 @@
+import LanguageSelector from '../common/locale/LanguageSelectorComponent';
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import { Outlet, Link } from 'react-router-dom';
 import { ShieldAlert, Store } from 'lucide-react';
 import DashboardNavbarComponent from '../panel/DahboardNavbarComponent';
@@ -8,12 +11,13 @@ const DashboardLayout = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen flex flex-col gap-4 items-center justify-center p-6">
+        <LanguageSelector variant="admin" />
         <div className="card rounded-3xl p-8 max-w-md w-full text-center space-y-4">
           <ShieldAlert size={38} className="mx-auto text-yellow" />
-          <h1 className="font-black text-xl">ورود به پنل مدیریت</h1>
+          <h1 className="font-black text-xl">{translateText('ورود به پنل مدیریت')}</h1>
           <Link to="/auth/pre" className="btn-yellow inline-block">
-            ورود به حساب
+            {translateText('ورود به حساب ')}
           </Link>
         </div>
       </div>
@@ -29,24 +33,28 @@ const DashboardLayout = () => {
     const isSeller = user.is_seller === true || String(user.role || '') === 'seller';
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen flex flex-col gap-4 items-center justify-center p-6">
+        <LanguageSelector variant="admin" />
         <div className="card rounded-3xl p-8 max-w-md w-full text-center space-y-4">
           <ShieldAlert size={38} className="mx-auto text-yellow" />
-          <h1 className="font-black text-xl">این بخش مخصوص مدیر است</h1>
+          <h1 className="font-black text-xl">{translateText('این بخش مخصوص مدیر است')}</h1>
           <p className="text-sm muted leading-6">
-            حساب فعلی شما نقش «{user.role || 'کاربر'}» دارد و دسترسی به پنل مدیریت ندارد.
-            با حساب ادمین وارد شوید یا به پنل خودتان بروید.
+            {translateText('حساب فعلی شما نقش «')}
+            {user.role || translateText('کاربر')}
+            {translateText(
+              '» دارد و دسترسی به پنل مدیریت ندارد. با حساب ادمین وارد شوید یا به پنل خودتان بروید. ',
+            )}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Link to="/auth/pre" className="btn-yellow inline-flex items-center gap-1.5">
-              ورود با حساب ادمین
+              {translateText('ورود با حساب ادمین ')}
             </Link>
             <Link
               to={isSeller ? '/seller' : '/'}
               className="btn-ghost inline-flex items-center gap-1.5"
             >
               <Store size={15} />
-              {isSeller ? 'پنل فروشندگی' : 'صفحه‌ی اصلی'}
+              {isSeller ? translateText('پنل فروشندگی') : translateText('صفحه‌ی اصلی')}
             </Link>
           </div>
         </div>
@@ -55,7 +63,7 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div dir="rtl" className="admin-wrapper min-h-screen flex flex-col lg:flex-row">
+    <div dir={i18nDirection} className="admin-wrapper min-h-screen flex flex-col lg:flex-row">
       <DashboardNavbarComponent />
       <div className="flex-1 p-4 md:p-6 text-sm min-w-0">
         <Outlet />

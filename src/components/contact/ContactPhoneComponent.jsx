@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
@@ -7,37 +8,37 @@ import { Clock3, Copy, Handshake, Headset, Mail, PackageSearch } from 'lucide-re
 const CHANNELS = [
   {
     icon: Headset,
-    title: 'مشاوره‌ی فنی خرید',
-    value: 'انتخاب دستگاه و استعلام قیمت',
-    hint: 'راهنمایی برای انتخاب مدل مناسب پروژه',
-    action: 'درخواست مشاوره',
+    title: translateText("مشاوره‌ی فنی خرید"),
+    value: translateText("انتخاب دستگاه و استعلام قیمت"),
+    hint: translateText("راهنمایی برای انتخاب مدل مناسب پروژه"),
+    action: translateText("درخواست مشاوره"),
     anchor: '#contact-form',
   },
   {
     icon: PackageSearch,
-    title: 'پیگیری سفارش',
-    value: 'با کد سفارش، در بخش سفارش‌های من',
-    hint: 'وضعیت پردازش و ارسال، لحظه‌ای',
-    action: 'پیگیری سفارش',
+    title: translateText("پیگیری سفارش"),
+    value: translateText("با کد سفارش، در بخش سفارش‌های من"),
+    hint: translateText("وضعیت پردازش و ارسال، لحظه‌ای"),
+    action: translateText("پیگیری سفارش"),
     to: '/orders',
   },
   {
     icon: Mail,
-    title: 'ایمیل',
+    title: translateText("ایمیل"),
     value: 'info@geokala.ir',
     copy: 'info@geokala.ir',
     href: 'mailto:info@geokala.ir',
-    hint: 'پاسخ‌دهی حداکثر تا ۲۴ ساعت کاری',
-    action: 'ارسال ایمیل',
+    hint: translateText("پاسخ‌دهی حداکثر تا ۲۴ ساعت کاری"),
+    action: translateText("ارسال ایمیل"),
   },
   {
     icon: Handshake,
-    title: 'همکاری و نمایندگی',
+    title: translateText("همکاری و نمایندگی"),
     value: 'partner@geokala.ir',
     copy: 'partner@geokala.ir',
     href: 'mailto:partner@geokala.ir',
-    hint: 'فروشندگان، نمایندگان و تأمین‌کنندگان',
-    action: 'ارسال درخواست',
+    hint: translateText("فروشندگان، نمایندگان و تأمین‌کنندگان"),
+    action: translateText("ارسال درخواست"),
   },
 ];
 
@@ -46,9 +47,9 @@ function ContactPhoneComponent() {
   const copyValue = async (value) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success('در حافظه کپی شد');
+      toast.success(translateText("در حافظه کپی شد"));
     } catch {
-      toast.error('امکان کپی خودکار نیست، مقدار را دستی انتخاب کنید.');
+      toast.error(translateText("امکان کپی خودکار نیست، مقدار را دستی انتخاب کنید."));
     }
   };
 
@@ -73,8 +74,8 @@ function ContactPhoneComponent() {
                   type="button"
                   onClick={() => copyValue(channel.copy)}
                   className="muted hover-yellow transition-colors"
-                  aria-label="کپی"
-                  title="کپی"
+                  aria-label={translateText("کپی")}
+                  title={translateText("کپی")}
                 >
                   <Copy size={15} />
                 </button>

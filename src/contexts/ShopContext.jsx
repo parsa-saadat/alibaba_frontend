@@ -1,3 +1,4 @@
+import { t as translateText } from '../i18n/runtime.js';
 import axios from 'axios';
 import {
   createContext,
@@ -199,12 +200,12 @@ export const ShopProvider = ({ children }) => {
     (productId, quantity = 1) => {
       const u = currentUser();
       if (!getToken() || !u?._id) {
-        const error = new Error('برای افزودن به سبد خرید ابتدا وارد شوید');
+        const error = new Error(translateText("برای افزودن به سبد خرید ابتدا وارد شوید"));
         error.cause = { code: 401 };
         return Promise.reject(error);
       }
       const id = String(productId || '');
-      if (!id) return Promise.reject(new Error('شناسه محصول نامعتبر است'));
+      if (!id) return Promise.reject(new Error(translateText("شناسه محصول نامعتبر است")));
 
       const running = pendingRef.current.get(id);
       if (running) return running;
@@ -287,7 +288,7 @@ export const ShopProvider = ({ children }) => {
     async (productId) => {
       const u = currentUser();
       const id = String(productId || '');
-      if (!getToken() || !u?._id) throw new Error('برای حذف از سبد خرید ابتدا وارد شوید');
+      if (!getToken() || !u?._id) throw new Error(translateText("برای حذف از سبد خرید ابتدا وارد شوید"));
 
       /* اگر از قبل در سبد نیست، خطا نده و فقط استیت را تمیز کن */
       if (!isInCart(id)) {
@@ -321,7 +322,7 @@ export const ShopProvider = ({ children }) => {
   const setCartItemQuantity = useCallback(
     async (productId, quantity) => {
       const u = currentUser();
-      if (!getToken() || !u?._id) throw new Error('برای ویرایش سبد خرید ابتدا وارد شوید');
+      if (!getToken() || !u?._id) throw new Error(translateText("برای ویرایش سبد خرید ابتدا وارد شوید"));
 
       const id = String(productId || '');
       const next = Math.floor(Number(quantity) || 0);
@@ -371,7 +372,7 @@ export const ShopProvider = ({ children }) => {
         setUser(null);
         cartRef.current = [];
         setCart([]);
-        toast.info('نشست شما منقضی شده است؛ دوباره وارد شوید');
+        toast.info(translateText("نشست شما منقضی شده است؛ دوباره وارد شوید"));
       }
       /* خطای شبکه: نشست دست‌نخورده می‌ماند و بار بعد دوباره امتحان می‌شود */
       return false;
@@ -468,7 +469,7 @@ export const ShopProvider = ({ children }) => {
       : [...favorites, id];
     setFavorites(next);
     writeList('favorites', next);
-    toast.success(next.includes(id) ? 'به علاقه‌مندی‌ها اضافه شد' : 'از علاقه‌مندی‌ها حذف شد');
+    toast.success(next.includes(id) ? translateText("به علاقه‌مندی‌ها اضافه شد") : translateText("از علاقه‌مندی‌ها حذف شد"));
   };
 
   const isFavorite = (id) => favorites.includes(id);
@@ -478,7 +479,7 @@ export const ShopProvider = ({ children }) => {
     if (!favorites.length) return;
     setFavorites([]);
     writeList('favorites', []);
-    toast.success('لیست علاقه‌مندی‌ها پاک شد');
+    toast.success(translateText("لیست علاقه‌مندی‌ها پاک شد"));
   };
 
   const toggleCompare = (id) => {
@@ -489,13 +490,13 @@ export const ShopProvider = ({ children }) => {
       return;
     }
     if (compare.length >= 4) {
-      toast.error('حداکثر ۴ محصول برای مقایسه');
+      toast.error(translateText("حداکثر ۴ محصول برای مقایسه"));
       return;
     }
     const next = [...compare, id];
     setCompare(next);
     writeList('compare', next);
-    toast.success('به مقایسه اضافه شد');
+    toast.success(translateText("به مقایسه اضافه شد"));
   };
 
   const clearCompare = () => {

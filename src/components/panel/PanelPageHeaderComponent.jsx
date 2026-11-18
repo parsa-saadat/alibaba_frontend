@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
 
@@ -23,7 +24,7 @@ function PanelPageHeader({
   actions = null,
   onRefresh = null,
   refreshing = false,
-  refreshLabel = 'به‌روزرسانی',
+  refreshLabel = translateText("به‌روزرسانی"),
   children = null,
 }) {
   return (
@@ -60,7 +61,7 @@ function PanelPageHeader({
                 className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5 disabled:opacity-60"
               >
                 <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
-                {refreshing ? 'در حال به‌روزرسانی…' : refreshLabel}
+                {refreshing ? translateText("در حال به‌روزرسانی…") : refreshLabel}
               </button>
             ) : null}
           </div>

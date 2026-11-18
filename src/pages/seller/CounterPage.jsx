@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -40,9 +41,9 @@ const API =
 
 const greeting = () => {
   const hour = new Date().getHours();
-  if (hour < 12) return "صبح بخیر";
-  if (hour < 18) return "بعدازظهر بخیر";
-  return "شب بخیر";
+  if (hour < 12) return translateText("صبح بخیر");
+  if (hour < 18) return translateText("بعدازظهر بخیر");
+  return translateText("شب بخیر");
 };
 
 const dayKey = (date) => {
@@ -57,9 +58,9 @@ const netOf = (sub) =>
 const compactMoney = (amount) => {
   const value = Number(amount) || 0;
   if (value >= 1_000_000_000)
-    return `${toFa((value / 1_000_000_000).toFixed(1))} میلیارد تومان`;
+    return translateText("{{v0}} میلیارد تومان", {v0: (toFa((value / 1_000_000_000).toFixed(1)))});
   if (value >= 1_000_000)
-    return `${toFa((value / 1_000_000).toFixed(1))} میلیون تومان`;
+    return translateText("{{v0}} میلیون تومان", {v0: (toFa((value / 1_000_000).toFixed(1)))});
   return formatPrice(value);
 };
 
@@ -242,7 +243,7 @@ function CounterPage() {
   if (loading) {
     return (
       <div className="py-16">
-        <Loading label="در حال بارگذاری پیشخوان فروشنده…" />
+        <Loading label={translateText("در حال بارگذاری پیشخوان فروشنده…")} />
       </div>
     );
   }
@@ -250,39 +251,39 @@ function CounterPage() {
   const quickLinks = [
     {
       to: "/seller/products",
-      label: "محصولات من",
+      label: translateText("محصولات من"),
       icon: Package,
-      hint: `${toFa(products.length)} کالا`,
+      hint: translateText("{{v0}} کالا", {v0: (toFa(products.length))}),
     },
     {
       to: "/seller/products/create",
-      label: "محصول جدید",
+      label: translateText("محصول جدید"),
       icon: Plus,
-      hint: "افزودن کالا",
+      hint: translateText("افزودن کالا"),
     },
     {
       to: "/seller/orders",
-      label: "سفارش‌ها",
+      label: translateText("سفارش‌ها"),
       icon: ShoppingBag,
-      hint: `${toFa(totals.waiting)} در انتظار`,
+      hint: translateText("{{v0}} در انتظار", {v0: (toFa(totals.waiting))}),
     },
     {
       to: "/seller/stores",
-      label: "فروشگاه‌ها",
+      label: translateText("فروشگاه‌ها"),
       icon: Store,
-      hint: `${toFa(stores.length)} فروشگاه`,
+      hint: translateText("{{v0}} فروشگاه", {v0: (toFa(stores.length))}),
     },
     {
       to: "/seller/plans",
-      label: "پلن و اشتراک",
+      label: translateText("پلن و اشتراک"),
       icon: CreditCard,
-      hint: "ارتقای پلن",
+      hint: translateText("ارتقای پلن"),
     },
     {
       to: "/seller/settings",
-      label: "تنظیمات فروشنده",
+      label: translateText("تنظیمات فروشنده"),
       icon: Settings,
-      hint: "اطلاعات هویتی",
+      hint: translateText("اطلاعات هویتی"),
     },
   ];
 
@@ -305,17 +306,16 @@ function CounterPage() {
                 color: "var(--primary-color)",
               }}
             >
-              <Sparkles size={12} /> پیشخوان فروشنده
-            </span>
+              <Sparkles size={12} />{translateText(" پیشخوان فروشنده ")}</span>
             <h1 className="mt-2 text-lg sm:text-xl font-black">
-              {greeting()}، {userDisplayName(user, "فروشنده ژئو کالا")}
+              {greeting()}{translateText("، ")}{userDisplayName(user, translateText("فروشنده ژئو کالا"))}
             </h1>
             <p className="mt-1 text-xs muted">
               {formatDateLong(new Date())}
               {" • "}
               {totals.waiting > 0
-                ? `${toFa(totals.waiting)} سفارش منتظر تأیید شماست`
-                : "همه‌ی سفارش‌ها بررسی شده‌اند"}
+                ? translateText("{{v0}} سفارش منتظر تأیید شماست", {v0: (toFa(totals.waiting))})
+                : translateText("همه‌ی سفارش‌ها بررسی شده‌اند")}
             </p>
           </div>
 
@@ -324,20 +324,18 @@ function CounterPage() {
               to="/seller/products/create"
               className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
             >
-              <Plus size={14} /> محصول جدید
-            </Link>
+              <Plus size={14} />{translateText(" محصول جدید ")}</Link>
             <Link
               to="/seller/orders"
               className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5"
             >
-              <ShoppingBag size={14} /> سفارش‌ها
-            </Link>
+              <ShoppingBag size={14} />{translateText(" سفارش‌ها ")}</Link>
             <button
               type="button"
               onClick={() => load(true)}
               disabled={refreshing}
               className="btn-ghost !py-2 !px-2.5 text-xs flex items-center gap-1.5 disabled:opacity-60"
-              title="به‌روزرسانی"
+              title={translateText("به‌روزرسانی")}
             >
               <RefreshCw
                 size={14}
@@ -351,47 +349,47 @@ function CounterPage() {
       {/* ───── کارت‌های کلیدی ───── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <KpiTile
-          label="فروش خالص"
+          label={translateText("فروش خالص")}
           value={compactMoney(totals.sales / 10)}
-          hint={`${toFa(totals.items)} قلم فروخته‌شده`}
+          hint={translateText("{{v0}} قلم فروخته‌شده", {v0: (toFa(totals.items))})}
           icon={CircleDollarSign}
           tint="#17994f"
         />
         <KpiTile
-          label="سفارش‌ها"
+          label={translateText("سفارش‌ها")}
           value={toFa(subOrders.length)}
-          hint={`${toFa(totals.delivered)} تحویل‌شده`}
+          hint={translateText("{{v0}} تحویل‌شده", {v0: (toFa(totals.delivered))})}
           icon={ShoppingBag}
           to="/seller/orders"
         />
         <KpiTile
-          label="در انتظار تأیید"
+          label={translateText("در انتظار تأیید")}
           value={toFa(totals.waiting)}
-          hint="نیازمند اقدام"
+          hint={translateText("نیازمند اقدام")}
           icon={Clock3}
           tint="#c2740a"
           to="/seller/orders"
         />
         <KpiTile
-          label="در حال پردازش"
+          label={translateText("در حال پردازش")}
           value={toFa(totals.inProgress)}
-          hint="آماده‌سازی/ارسال"
+          hint={translateText("آماده‌سازی/ارسال")}
           icon={TrendingUp}
           tint="#2563eb"
           to="/seller/orders"
         />
         <KpiTile
-          label="محصولات"
+          label={translateText("محصولات")}
           value={toFa(products.length)}
-          hint={`${toFa(totals.lowStock)} کم‌موجود`}
+          hint={translateText("{{v0}} کم‌موجود", {v0: (toFa(totals.lowStock))})}
           icon={Package}
           tint={totals.lowStock ? "#e53935" : undefined}
           to="/seller/products"
         />
         <KpiTile
-          label="فروشگاه‌ها"
+          label={translateText("فروشگاه‌ها")}
           value={toFa(stores.length)}
-          hint="زیرمجموعه‌ی شما"
+          hint={translateText("زیرمجموعه‌ی شما")}
           icon={Store}
           tint="#7c3aed"
           to="/seller/stores"
@@ -401,8 +399,8 @@ function CounterPage() {
       {/* ───── نمودار + صف اقدام ───── */}
       <div className="grid gap-4 lg:grid-cols-5">
         <Panel
-          title="روند فروش ۷ روز اخیر"
-          hint="مبلغ خالص سفارش‌ها"
+          title={translateText("روند فروش ۷ روز اخیر")}
+          hint={translateText("مبلغ خالص سفارش‌ها")}
           icon={TrendingUp}
           className="lg:col-span-3"
         >
@@ -419,7 +417,7 @@ function CounterPage() {
                 >
                   <span className="text-[9px] muted" dir="ltr">
                     {day.value > 0
-                      ? toFa(Math.round(day.value / 1000000)) + "م"
+                      ? toFa(Math.round(day.value / 1000000)) + translateText("م")
                       : "—"}
                   </span>
                   <div
@@ -441,8 +439,8 @@ function CounterPage() {
         </Panel>
 
         <Panel
-          title="نیازمند اقدام شما"
-          hint={`${toFa(totals.waiting + totals.inProgress)} سفارش`}
+          title={translateText("نیازمند اقدام شما")}
+          hint={translateText("{{v0}} سفارش", {v0: (toFa(totals.waiting + totals.inProgress))})}
           icon={Clock3}
           className="lg:col-span-2"
           action={
@@ -450,13 +448,11 @@ function CounterPage() {
               to="/seller/orders"
               className="text-[11px] font-bold"
               style={{ color: "var(--primary-color)" }}
-            >
-              همه
-            </Link>
+            >{translateText("همه ")}</Link>
           }
         >
           {actionQueue.length === 0 ? (
-            <EmptyRow text="سفارشی در انتظار اقدام نیست." />
+            <EmptyRow text={translateText("سفارشی در انتظار اقدام نیست.")} />
           ) : (
             <div className="space-y-2">
               {actionQueue.map((sub) => {
@@ -496,8 +492,7 @@ function CounterPage() {
                         onClick={() => approve(sub._id)}
                         className="btn-yellow !py-1.5 !px-2 text-[11px] flex items-center gap-1 shrink-0 whitespace-nowrap disabled:opacity-60"
                       >
-                        <Check size={12} /> تأیید
-                      </button>
+                        <Check size={12} />{translateText(" تأیید ")}</button>
                     )}
                     {sub.status === "preparing" && (
                       <button
@@ -505,9 +500,7 @@ function CounterPage() {
                         disabled={busy}
                         onClick={() => nextStatus(sub._id, "ready_to_ship")}
                         className="btn-yellow !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
-                      >
-                        آماده ارسال
-                      </button>
+                      >{translateText("آماده ارسال ")}</button>
                     )}
                     {sub.status === "ready_to_ship" && (
                       <button
@@ -515,9 +508,7 @@ function CounterPage() {
                         disabled={busy}
                         onClick={() => nextStatus(sub._id, "shipped")}
                         className="btn-yellow !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
-                      >
-                        ثبت ارسال
-                      </button>
+                      >{translateText("ثبت ارسال ")}</button>
                     )}
                   </div>
                 );
@@ -530,21 +521,19 @@ function CounterPage() {
       {/* ───── محصولات و فروشگاه‌ها ───── */}
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel
-          title="محصولات اخیر"
-          hint={`${toFa(products.length)} کالا`}
+          title={translateText("محصولات اخیر")}
+          hint={translateText("{{v0}} کالا", {v0: (toFa(products.length))})}
           icon={Package}
           action={
             <Link
               to="/seller/products"
               className="text-[11px] font-bold"
               style={{ color: "var(--primary-color)" }}
-            >
-              مدیریت
-            </Link>
+            >{translateText("مدیریت ")}</Link>
           }
         >
           {products.length === 0 ? (
-            <EmptyRow text="هنوز محصولی ثبت نکرده‌اید." />
+            <EmptyRow text={translateText("هنوز محصولی ثبت نکرده‌اید.")} />
           ) : (
             <div className="space-y-2">
               {products.slice(0, 5).map((product) => {
@@ -563,15 +552,13 @@ function CounterPage() {
                     />
                     <div className="min-w-0 flex-1">
                       <b className="block truncate text-xs">{product.name}</b>
-                      <span className="text-[10px] muted truncate block">
-                        موجودی: {toFa(stock)}
+                      <span className="text-[10px] muted truncate block">{translateText("موجودی: ")}{toFa(stock)}
                         {stock <= 3 && (
                           <span
                             className="ms-1 inline-flex items-center gap-0.5"
                             style={{ color: "#e53935" }}
                           >
-                            <AlertTriangle size={10} /> کم‌موجود
-                          </span>
+                            <AlertTriangle size={10} />{translateText(" کم‌موجود ")}</span>
                         )}
                       </span>
                     </div>
@@ -584,21 +571,19 @@ function CounterPage() {
         </Panel>
 
         <Panel
-          title="فروشگاه‌های من"
-          hint={`${toFa(stores.length)} فروشگاه`}
+          title={translateText("فروشگاه‌های من")}
+          hint={translateText("{{v0}} فروشگاه", {v0: (toFa(stores.length))})}
           icon={Store}
           action={
             <Link
               to="/seller/stores"
               className="text-[11px] font-bold"
               style={{ color: "var(--primary-color)" }}
-            >
-              مدیریت
-            </Link>
+            >{translateText("مدیریت ")}</Link>
           }
         >
           {stores.length === 0 ? (
-            <EmptyRow text="هنوز فروشگاهی نساخته‌اید." />
+            <EmptyRow text={translateText("هنوز فروشگاهی نساخته‌اید.")} />
           ) : (
             <div className="space-y-2">
               {stores.slice(0, 4).map((store) => {
@@ -633,7 +618,7 @@ function CounterPage() {
                     <Link
                       to={`/store/${id}`}
                       className="btn-ghost !p-1.5"
-                      title="مشاهده صفحه فروشگاه"
+                      title={translateText("مشاهده صفحه فروشگاه")}
                     >
                       <ExternalLink size={13} />
                     </Link>
@@ -646,7 +631,7 @@ function CounterPage() {
       </div>
 
       {/* ───── دسترسی سریع ───── */}
-      <Panel title="دسترسی سریع" hint="بخش‌های پنل فروشنده" icon={ExternalLink}>
+      <Panel title={translateText("دسترسی سریع")} hint={translateText("بخش‌های پنل فروشنده")} icon={ExternalLink}>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
           {quickLinks.map((link) => (
             <Link

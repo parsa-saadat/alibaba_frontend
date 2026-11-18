@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import JalaliDateTimePicker from '../../components/common/JalaliDateTimePicker';
 import axios from "axios";
@@ -65,10 +66,10 @@ const EMPTY_SELLER = {
 };
 
 const ROLE_LABELS = {
-  admin: "مدیر سیستم",
-  seller: "فروشنده",
-  user: "کاربر",
-  customer: "کاربر",
+  admin: translateText("مدیر سیستم"),
+  seller: translateText("فروشنده"),
+  user: translateText("کاربر"),
+  customer: translateText("کاربر"),
 };
 
 /* ------------------------------------------------------------------ */
@@ -132,14 +133,14 @@ function ImageUploadSlot({
             className="w-full h-full object-cover"
             onZoom={(f, a) => onZoom({ file: f, alt: a })}
           />
-          <div className="absolute top-2 left-2 flex gap-1">
+          <div className="absolute top-2 start-2 flex gap-1">
             <button
               type="button"
               onClick={() => ref.current?.click()}
               disabled={uploading}
               className="bg-black/75 text-white rounded-full p-1.5 hover:bg-black"
-              aria-label="تعویض تصویر"
-              title="تعویض تصویر"
+              aria-label={translateText("تعویض تصویر")}
+              title={translateText("تعویض تصویر")}
             >
               {uploading ? (
                 <Loader2 size={13} className="animate-spin" />
@@ -152,8 +153,8 @@ function ImageUploadSlot({
               onClick={onRemove}
               disabled={uploading}
               className="bg-black/75 text-white rounded-full p-1.5 hover:bg-red-600"
-              aria-label="حذف تصویر"
-              title="حذف تصویر"
+              aria-label={translateText("حذف تصویر")}
+              title={translateText("حذف تصویر")}
             >
               <X size={13} />
             </button>
@@ -170,12 +171,10 @@ function ImageUploadSlot({
         >
           {uploading ? (
             <>
-              <Loader2 size={20} className="animate-spin" /> در حال آپلود…
-            </>
+              <Loader2 size={20} className="animate-spin" />{translateText(" در حال آپلود… ")}</>
           ) : (
             <>
-              <Upload size={20} /> انتخاب تصویر
-            </>
+              <Upload size={20} />{translateText(" انتخاب تصویر ")}</>
           )}
         </button>
       )}
@@ -231,7 +230,7 @@ function ProfilePage() {
             : res.data.body?.data || [],
         ),
       )
-      .catch(() => toast.error("خطا در دریافت نشانی‌ها"))
+      .catch(() => toast.error(translateText("خطا در دریافت نشانی‌ها")))
       .finally(() => setAddrLoading(false));
   }, [user]);
 
@@ -251,10 +250,8 @@ function ProfilePage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <User size={36} className="mx-auto muted mb-3" />
-        <p className="muted mb-4">برای مشاهده پنل کاربری وارد شوید.</p>
-        <Link to="/auth/pre" className="btn-yellow">
-          ورود
-        </Link>
+        <p className="muted mb-4">{translateText("برای مشاهده پنل کاربری وارد شوید.")}</p>
+        <Link to="/auth/pre" className="btn-yellow">{translateText("ورود ")}</Link>
       </div>
     );
   }
@@ -266,16 +263,16 @@ function ProfilePage() {
     const lastname = profile.lastname.trim();
     const email = profile.email.trim();
 
-    if (!username) return toast.error("نام کاربری نمی‌تواند خالی باشد");
+    if (!username) return toast.error(translateText("نام کاربری نمی‌تواند خالی باشد"));
     if (email && !validateEmailSyntax(email))
-      return toast.error("ایمیل وارد‌شده معتبر نیست");
+      return toast.error(translateText("ایمیل وارد‌شده معتبر نیست"));
 
     const unchanged =
       username === (user.username || "") &&
       firstname === (user.firstname || "") &&
       lastname === (user.lastname || "") &&
       email === (user.email || "");
-    if (unchanged) return toast.info("تغییری برای ذخیره وجود ندارد");
+    if (unchanged) return toast.info(translateText("تغییری برای ذخیره وجود ندارد"));
 
     setSavingName(true);
     axios
@@ -285,11 +282,11 @@ function ProfilePage() {
         authHeaders(),
       )
       .then(() => {
-        toast.success("مشخصات حساب به‌روزرسانی شد");
+        toast.success(translateText("مشخصات حساب به‌روزرسانی شد"));
         refreshUser();
       })
       .catch((err) =>
-        toast.error(err.response?.data?.message || "خطا در ذخیره مشخصات"),
+        toast.error(err.response?.data?.message || translateText("خطا در ذخیره مشخصات")),
       )
       .finally(() => setSavingName(false));
   };
@@ -311,28 +308,28 @@ function ProfilePage() {
   const addAddress = () => {
     const errors = {};
     const required = {
-      full_name: "نام گیرنده را وارد کنید",
-      province: "استان را وارد کنید",
-      city: "شهر را وارد کنید",
-      neighborhood: "محله را وارد کنید",
-      full_address: "نشانی کامل را وارد کنید",
+      full_name: translateText("نام گیرنده را وارد کنید"),
+      province: translateText("استان را وارد کنید"),
+      city: translateText("شهر را وارد کنید"),
+      neighborhood: translateText("محله را وارد کنید"),
+      full_address: translateText("نشانی کامل را وارد کنید"),
     };
     Object.entries(required).forEach(([k, msg]) => {
       if (!String(addr[k]).trim()) errors[k] = msg;
     });
 
     const postal = onlyDigits(addr.postal_code);
-    if (postal.length !== 10) errors.postal_code = "کد پستی باید ۱۰ رقم باشد";
+    if (postal.length !== 10) errors.postal_code = translateText("کد پستی باید ۱۰ رقم باشد");
 
     const building = Number(onlyDigits(addr.building_number));
-    if (!building || building < 1) errors.building_number = "پلاک معتبر نیست";
+    if (!building || building < 1) errors.building_number = translateText("پلاک معتبر نیست");
 
     const unit = Number(onlyDigits(addr.unit));
-    if (!unit || unit < 1) errors.unit = "واحد معتبر نیست";
+    if (!unit || unit < 1) errors.unit = translateText("واحد معتبر نیست");
 
     if (Object.keys(errors).length) {
       setAddrErrors(errors);
-      return toast.error("لطفاً موارد مشخص‌شده را اصلاح کنید");
+      return toast.error(translateText("لطفاً موارد مشخص‌شده را اصلاح کنید"));
     }
 
     setSavingAddr(true);
@@ -355,28 +352,28 @@ function ProfilePage() {
         authHeaders(),
       )
       .then(() => {
-        toast.success("نشانی اضافه شد");
+        toast.success(translateText("نشانی اضافه شد"));
         setShowAddr(false);
         setAddr(EMPTY_ADDR);
         setAddrErrors({});
         loadAddresses();
       })
       .catch((err) =>
-        toast.error(err.response?.data?.message || "خطا در ثبت نشانی"),
+        toast.error(err.response?.data?.message || translateText("خطا در ثبت نشانی")),
       )
       .finally(() => setSavingAddr(false));
   };
 
   const removeAddress = (id) => {
-    if (!window.confirm("آیا از حذف این نشانی مطمئن هستید؟")) return;
+    if (!window.confirm(translateText("آیا از حذف این نشانی مطمئن هستید؟"))) return;
     axios
       .delete(`${API}/users/${user._id}/address/${id}`, authHeaders())
       .then(() => {
-        toast.success("نشانی حذف شد");
+        toast.success(translateText("نشانی حذف شد"));
         loadAddresses();
       })
       .catch((err) =>
-        toast.error(err.response?.data?.message || "خطا در حذف نشانی"),
+        toast.error(err.response?.data?.message || translateText("خطا در حذف نشانی")),
       );
   };
 
@@ -391,10 +388,10 @@ function ProfilePage() {
     e.target.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/"))
-      return toast.error("فقط فایل تصویری مجاز است");
+      return toast.error(translateText("فقط فایل تصویری مجاز است"));
     if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
       return toast.error(
-        `حجم تصویر نباید بیشتر از ${toFa(MAX_IMAGE_MB)} مگابایت باشد`,
+        translateText("حجم تصویر نباید بیشتر از {{v0}} مگابایت باشد", {v0: (toFa(MAX_IMAGE_MB))}),
       );
     }
 
@@ -411,9 +408,9 @@ function ProfilePage() {
       const fileId = res.data?.body?.[0]?._id;
       if (!fileId) throw new Error("empty");
       setSellerField(field, fileId);
-      toast.success("تصویر آپلود شد");
+      toast.success(translateText("تصویر آپلود شد"));
     } catch (err) {
-      toast.error(err.response?.data?.message || "خطا در آپلود تصویر");
+      toast.error(err.response?.data?.message || translateText("خطا در آپلود تصویر"));
     } finally {
       setUploadingField("");
     }
@@ -426,20 +423,20 @@ function ProfilePage() {
     const card = onlyDigits(seller.card_number);
     const sheba = normalizeSheba(seller.sheba_number);
 
-    if (!nationalIDValidator(nationalId)) errors.national_ID = "کد ملی باید ۱۰ رقم باشد";
+    if (!nationalIDValidator(nationalId)) errors.national_ID = translateText("کد ملی باید ۱۰ رقم باشد");
     if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(String(seller.birth_date || "").trim()))
-      errors.birth_date = "تاریخ تولد را از تقویم انتخاب کنید";
+      errors.birth_date = translateText("تاریخ تولد را از تقویم انتخاب کنید");
     if (!seller.firstname_lastname.trim())
-      errors.firstname_lastname = "نام صاحب حساب الزامی است";
-    if (!cardNumberValidator(card)) errors.card_number = "شماره کارت ۱۶ رقمی معتبر نیست";
+      errors.firstname_lastname = translateText("نام صاحب حساب الزامی است");
+    if (!cardNumberValidator(card)) errors.card_number = translateText("شماره کارت ۱۶ رقمی معتبر نیست");
     if (!shebaNumberValidator(sheba))
-      errors.sheba_number = "شبا باید با IR شروع شود و ۲۴ رقم داشته باشد";
-    if (!seller.province.trim()) errors.province = "استان الزامی است";
-    if (!seller.city.trim()) errors.city = "شهر الزامی است";
-    if (!seller.full_address.trim()) errors.full_address = "نشانی کامل الزامی است";
-    if (!seller.identity_image_id) errors.identity_image_id = "تصویر کارت ملی را بارگذاری کنید";
+      errors.sheba_number = translateText("شبا باید با IR شروع شود و ۲۴ رقم داشته باشد");
+    if (!seller.province.trim()) errors.province = translateText("استان الزامی است");
+    if (!seller.city.trim()) errors.city = translateText("شهر الزامی است");
+    if (!seller.full_address.trim()) errors.full_address = translateText("نشانی کامل الزامی است");
+    if (!seller.identity_image_id) errors.identity_image_id = translateText("تصویر کارت ملی را بارگذاری کنید");
     if (!seller.identity_verification_image_id)
-      errors.identity_verification_image_id = "سلفی احراز هویت را بارگذاری کنید";
+      errors.identity_verification_image_id = translateText("سلفی احراز هویت را بارگذاری کنید");
 
     return { errors, nationalId, card, sheba };
   };
@@ -449,7 +446,7 @@ function ProfilePage() {
     const { errors, nationalId, card, sheba } = validateSellerForm();
     if (Object.keys(errors).length) {
       setSellerErrors(errors);
-      toast.error("لطفاً موارد مشخص‌شده را اصلاح کنید");
+      toast.error(translateText("لطفاً موارد مشخص‌شده را اصلاح کنید"));
       return;
     }
     setSellerErrors({});
@@ -478,12 +475,12 @@ function ProfilePage() {
         authHeaders(),
       )
       .then(() => {
-        toast.success("درخواست فروشندگی ثبت شد و در انتظار تأیید مدیر است");
+        toast.success(translateText("درخواست فروشندگی ثبت شد و در انتظار تأیید مدیر است"));
         setSellerErrors({});
         refreshUser();
       })
       .catch((err) =>
-        toast.error(err.response?.data?.message || "خطا در ثبت درخواست"),
+        toast.error(err.response?.data?.message || translateText("خطا در ثبت درخواست")),
       )
       .finally(() => setSubmittingSeller(false));
   };
@@ -510,17 +507,14 @@ function ProfilePage() {
               {userDisplayName(user)}
               {isSeller && isTrustedSeller(user) && (
                 <span className="chip !cursor-default !py-0.5 !px-2 text-[11px] flex items-center gap-1">
-                  <BadgeCheck size={12} className="text-yellow" />
-                  فروشنده مورد اعتماد
-                </span>
+                  <BadgeCheck size={12} className="text-yellow" />{translateText("فروشنده مورد اعتماد ")}</span>
               )}
             </h1>
             <div className="text-xs muted mt-1">
               {user.username ? (
                 <span dir="ltr">@{user.username}</span>
               ) : null}
-              {user.username ? " • " : ""}
-              موبایل: <span dir="ltr">{toFa(user.phone)}</span> • نقش:{" "}
+              {user.username ? " • " : ""}{translateText("موبایل: ")}<span dir="ltr">{toFa(user.phone)}</span>{translateText(" • نقش:")}{" "}
               {ROLE_LABELS[user.role] || user.role}
             </div>
           </div>
@@ -530,40 +524,33 @@ function ProfilePage() {
             to="/address"
             className="btn-ghost text-sm flex items-center gap-1"
           >
-            <MapPin size={16} /> مدیریت نشانی‌ها
-          </Link>
+            <MapPin size={16} />{translateText(" مدیریت نشانی‌ها ")}</Link>
           {isSeller && (
             <Link
               to="/seller"
               className="btn-yellow text-sm flex items-center gap-1"
             >
-              <Store size={16} /> پنل فروشنده
-            </Link>
+              <Store size={16} />{translateText(" پنل فروشنده ")}</Link>
           )}
           {user.role === "admin" && (
             <Link
               to="/dashboard"
               className="btn-yellow text-sm flex items-center gap-1"
             >
-              <ShieldCheck size={16} /> پنل مدیر
-            </Link>
+              <ShieldCheck size={16} />{translateText(" پنل مدیر ")}</Link>
           )}
           <button
             type="button"
             onClick={logout}
             className="btn-ghost text-sm text-red-400"
-          >
-            خروج
-          </button>
+          >{translateText("خروج ")}</button>
         </div>
       </div>
 
       {/* ---------- ویرایش مشخصات ---------- */}
       <div className="card rounded-3xl p-6">
-        <h2 className="font-black mb-1">ویرایش مشخصات</h2>
-        <p className="text-xs muted mb-4">
-          نام و نام خانوادگی در پروفایل، نظرات و صفحه‌ی فروشگاه شما نمایش داده می‌شود.
-        </p>
+        <h2 className="font-black mb-1">{translateText("ویرایش مشخصات")}</h2>
+        <p className="text-xs muted mb-4">{translateText("نام و نام خانوادگی در پروفایل، نظرات و صفحه‌ی فروشگاه شما نمایش داده می‌شود. ")}</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -571,31 +558,25 @@ function ProfilePage() {
           }}
           className="grid sm:grid-cols-2 gap-3 max-w-2xl"
         >
-          <label className="text-xs muted">
-            نام
-            <input
+          <label className="text-xs muted">{translateText("نام ")}<input
               className="input mt-1"
               value={profile.firstname}
               onChange={(e) =>
                 setProfile({ ...profile, firstname: e.target.value })
               }
-              placeholder="مثلاً سارا"
+              placeholder={translateText("مثلاً سارا")}
             />
           </label>
-          <label className="text-xs muted">
-            نام خانوادگی
-            <input
+          <label className="text-xs muted">{translateText("نام خانوادگی ")}<input
               className="input mt-1"
               value={profile.lastname}
               onChange={(e) =>
                 setProfile({ ...profile, lastname: e.target.value })
               }
-              placeholder="مثلاً محمدی"
+              placeholder={translateText("مثلاً محمدی")}
             />
           </label>
-          <label className="text-xs muted">
-            نام کاربری
-            <input
+          <label className="text-xs muted">{translateText("نام کاربری ")}<input
               className="input mt-1"
               dir="ltr"
               value={profile.username}
@@ -606,9 +587,7 @@ function ProfilePage() {
               required
             />
           </label>
-          <label className="text-xs muted">
-            ایمیل
-            <input
+          <label className="text-xs muted">{translateText("ایمیل ")}<input
               className="input mt-1"
               dir="ltr"
               value={profile.email}
@@ -618,7 +597,7 @@ function ProfilePage() {
           </label>
           <div className="sm:col-span-2">
             <button type="submit" disabled={savingName} className="btn-yellow">
-              {savingName ? "در حال ذخیره…" : "ذخیره مشخصات"}
+              {savingName ? translateText("در حال ذخیره…") : translateText("ذخیره مشخصات")}
             </button>
           </div>
         </form>
@@ -631,29 +610,22 @@ function ProfilePage() {
       <div className="card rounded-3xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-black flex items-center gap-2">
-            <MapPin size={18} className="text-yellow" /> نشانی‌های من (
-            {toFa(addresses.length)})
+            <MapPin size={18} className="text-yellow" />{translateText(" نشانی‌های من ( ")}{toFa(addresses.length)})
           </h2>
           <button
             type="button"
             onClick={() => setShowAddr(true)}
             className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1"
           >
-            <Plus size={14} /> نشانی جدید
-          </button>
+            <Plus size={14} />{translateText(" نشانی جدید ")}</button>
         </div>
 
         <div className="space-y-2">
           {addrLoading && addresses.length === 0 && (
-            <div className="text-xs muted text-center py-4">
-              در حال دریافت نشانی‌ها…
-            </div>
+            <div className="text-xs muted text-center py-4">{translateText("در حال دریافت نشانی‌ها… ")}</div>
           )}
           {!addrLoading && addresses.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-theme p-6 text-center text-xs muted">
-              هنوز نشانی‌ای ثبت نکرده‌اید. با دکمه «نشانی جدید» اولین نشانی را
-              اضافه کنید.
-            </div>
+            <div className="rounded-2xl border border-dashed border-theme p-6 text-center text-xs muted">{translateText("هنوز نشانی‌ای ثبت نکرده‌اید. با دکمه «نشانی جدید» اولین نشانی را اضافه کنید. ")}</div>
           )}
           {addresses.map((a) => {
             const ad = a.address || a;
@@ -663,31 +635,26 @@ function ProfilePage() {
                 className="card2 rounded-2xl p-3 flex items-center justify-between gap-2 text-sm"
               >
                 <div className="min-w-0">
-                  <b>{ad.full_name || "نشانی"}</b> — {ad.province}، {ad.city}،{" "}
+                  <b>{ad.full_name || translateText("نشانی")}</b> — {ad.province}{translateText("، ")}{ad.city}{translateText("،")}{" "}
                   {ad.neighborhood}
                   {ad.is_default && (
-                    <span className="chip !py-0 !px-2 text-[10px] mr-2">
-                      پیش‌فرض
-                    </span>
+                    <span className="chip !py-0 !px-2 text-[10px] me-2">{translateText("پیش‌فرض ")}</span>
                   )}
                   <div className="text-xs muted">
-                    {ad.full_address} (پلاک {toFa(ad.building_number ?? "")}،
-                    واحد {toFa(ad.unit ?? "")})
+                    {ad.full_address}{translateText(" (پلاک ")}{toFa(ad.building_number ?? "")}{translateText("، واحد ")}{toFa(ad.unit ?? "")})
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Link
                     to={`/address/${a._id}`}
                     className="btn-ghost !py-1 !px-2.5 text-xs"
-                  >
-                    ویرایش
-                  </Link>
+                  >{translateText("ویرایش ")}</Link>
                   <button
                     type="button"
                     onClick={() => removeAddress(a._id)}
                     className="text-red-400 p-2"
-                    aria-label="حذف نشانی"
-                    title="حذف نشانی"
+                    aria-label={translateText("حذف نشانی")}
+                    title={translateText("حذف نشانی")}
                   >
                     <Trash2 size={15} />
                   </button>
@@ -702,22 +669,20 @@ function ProfilePage() {
       {!isSeller && (
         <div className="card rounded-3xl p-6">
           <h2 className="font-black text-lg flex items-center gap-2 mb-4">
-            <Store size={20} className="text-yellow" /> درخواست فروشندگی در
-            ژئو کالا
-          </h2>
+            <Store size={20} className="text-yellow" />{translateText(" درخواست فروشندگی در ژئو کالا ")}</h2>
 
           <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="نوع فروشنده">
+            <Field label={translateText("نوع فروشنده")}>
               <select
                 className="input"
                 value={seller.seller_type}
                 onChange={(e) => setSellerField("seller_type", e.target.value)}
               >
-                <option value="Individual_seller">فروشنده حقیقی</option>
-                <option value="institutional_seller">فروشنده حقوقی</option>
+                <option value="Individual_seller">{translateText("فروشنده حقیقی")}</option>
+                <option value="institutional_seller">{translateText("فروشنده حقوقی")}</option>
               </select>
             </Field>
-            <Field label="کد ملی (۱۰ رقم)" error={err("national_ID")}>
+            <Field label={translateText("کد ملی (۱۰ رقم)")} error={err("national_ID")}>
               <input
                 className={inputCls("national_ID")}
                 dir="ltr"
@@ -729,17 +694,17 @@ function ProfilePage() {
                 }
               />
             </Field>
-            <Field label="تاریخ تولد (شمسی)" error={err("birth_date")}>
+            <Field label={translateText("تاریخ تولد (شمسی)")} error={err("birth_date")}>
               <JalaliDateTimePicker
                 value={seller.birth_date}
                 onChange={(next) => setSellerField("birth_date", next)}
-                placeholder="مثلاً ۱۳۷۲/۰۴/۱۵"
+                placeholder={translateText("مثلاً ۱۳۷۲/۰۴/۱۵")}
                 withTime={false}
                 valueFormat="jalali"
               />
             </Field>
             <Field
-              label="نام و نام خانوادگی صاحب حساب"
+              label={translateText("نام و نام خانوادگی صاحب حساب")}
               error={err("firstname_lastname")}
             >
               <input
@@ -750,7 +715,7 @@ function ProfilePage() {
                 }
               />
             </Field>
-            <Field label="شماره کارت (۱۶ رقم)" error={err("card_number")}>
+            <Field label={translateText("شماره کارت (۱۶ رقم)")} error={err("card_number")}>
               <input
                 className={inputCls("card_number")}
                 dir="ltr"
@@ -763,7 +728,7 @@ function ProfilePage() {
               />
             </Field>
             <Field
-              label="شماره شبا (با IR یا بدون آن)"
+              label={translateText("شماره شبا (با IR یا بدون آن)")}
               error={err("sheba_number")}
             >
               <input
@@ -781,14 +746,14 @@ function ProfilePage() {
                 }
               />
             </Field>
-            <Field label="استان" error={err("province")}>
+            <Field label={translateText("استان")} error={err("province")}>
               <input
                 className={inputCls("province")}
                 value={seller.province}
                 onChange={(e) => setSellerField("province", e.target.value)}
               />
             </Field>
-            <Field label="شهر" error={err("city")}>
+            <Field label={translateText("شهر")} error={err("city")}>
               <input
                 className={inputCls("city")}
                 value={seller.city}
@@ -796,7 +761,7 @@ function ProfilePage() {
               />
             </Field>
             <Field
-              label="نشانی کامل"
+              label={translateText("نشانی کامل")}
               error={err("full_address")}
               className="sm:col-span-2"
             >
@@ -808,7 +773,7 @@ function ProfilePage() {
             </Field>
 
             <ImageUploadSlot
-              label="تصویر کارت ملی"
+              label={translateText("تصویر کارت ملی")}
               fileId={seller.identity_image_id}
               uploading={uploadingField === "identity_image_id"}
               error={err("identity_image_id")}
@@ -817,7 +782,7 @@ function ProfilePage() {
               onZoom={setZoomFile}
             />
             <ImageUploadSlot
-              label="سلفی احراز هویت (همراه با کارت ملی)"
+              label={translateText("سلفی احراز هویت (همراه با کارت ملی)")}
               fileId={seller.identity_verification_image_id}
               uploading={uploadingField === "identity_verification_image_id"}
               error={err("identity_verification_image_id")}
@@ -835,7 +800,7 @@ function ProfilePage() {
             disabled={submittingSeller || !!uploadingField}
             className="btn-yellow mt-4"
           >
-            {submittingSeller ? "در حال ارسال…" : "ارسال درخواست فروشندگی"}
+            {submittingSeller ? translateText("در حال ارسال…") : translateText("ارسال درخواست فروشندگی")}
           </button>
         </div>
       )}

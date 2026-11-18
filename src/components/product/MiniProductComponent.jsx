@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StorageImageComponent from '../common/StorageImageComponent';
@@ -33,7 +34,7 @@ function MiniProductComponent({ product }) {
       <span className="text-[#999] line-through">{formatPrice(product.price?.amount)}</span>
     );
   } else if (!soldOut) {
-    sub = <span className="text-[#1f8f3a]">موجود در انبار</span>;
+    sub = <span className="text-[#1f8f3a]">{translateText("موجود در انبار")}</span>;
   }
 
   return (
@@ -49,8 +50,7 @@ function MiniProductComponent({ product }) {
         />
         {discount && (
           <span className="absolute top-1.5 start-1.5 bg-white/95 text-[#d0021b] text-[11px] font-bold px-1.5 py-0.5 rounded">
-            {toFa(product.discount.percentage)}٪ تخفیف
-          </span>
+            {toFa(product.discount.percentage)}{translateText("٪ تخفیف ")}</span>
         )}
       </div>
       <div className="px-2.5 pt-2 pb-3">

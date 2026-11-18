@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
@@ -17,12 +18,12 @@ function ThemeToggleComponent({ className = '', showLabel = true, size = 22 }) {
       type="button"
       onClick={toggleTheme}
       className={className}
-      aria-label={dark ? 'تغییر به تم روشن' : 'تغییر به تم تاریک'}
+      aria-label={dark ? translateText("تغییر به تم روشن") : translateText("تغییر به تم تاریک")}
       aria-pressed={!dark}
-      title={dark ? 'تم روشن' : 'تم تیره'}
+      title={dark ? translateText("تم روشن") : translateText("تم تیره")}
     >
       {dark ? <Sun size={size} /> : <Moon size={size} />}
-      {showLabel && <span>{dark ? 'تم روشن' : 'تم تیره'}</span>}
+      {showLabel && <span>{dark ? translateText("تم روشن") : translateText("تم تیره")}</span>}
     </button>
   );
 }

@@ -1,12 +1,13 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BadgePercent, Truck, ShieldCheck, Undo2, Headset } from 'lucide-react';
 
 const perks = [
-  { icon: Truck, title: 'ارسال سریع', desc: 'به سراسر کشور' },
-  { icon: ShieldCheck, title: 'ضمانت اصالت', desc: 'کالای اصل و سالم' },
-  { icon: Undo2, title: 'بازگشت آسان', desc: 'مرجوعی تا ۷ روز' },
-  { icon: Headset, title: 'پشتیبانی', desc: 'همیشه در کنار شما' },
+  { icon: Truck, title: translateText("ارسال سریع"), desc: translateText("به سراسر کشور") },
+  { icon: ShieldCheck, title: translateText("ضمانت اصالت"), desc: translateText("کالای اصل و سالم") },
+  { icon: Undo2, title: translateText("بازگشت آسان"), desc: translateText("مرجوعی تا ۷ روز") },
+  { icon: Headset, title: translateText("پشتیبانی"), desc: translateText("همیشه در کنار شما") },
 ];
 
 function OurPolicyComponent() {
@@ -35,15 +36,11 @@ function OurPolicyComponent() {
           <div className="flex items-center gap-3">
             <BadgePercent size={30} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
             <div>
-              <div className="font-black">فروشنده شوید و بفروشید</div>
-              <div className="text-sm text-gray-300">
-                درخواست فروشندگی ثبت کنید، پلن انتخاب کنید و فروشگاه خود را بسازید.
-              </div>
+              <div className="font-black">{translateText("فروشنده شوید و بفروشید")}</div>
+              <div className="text-sm text-gray-300">{translateText("درخواست فروشندگی ثبت کنید، پلن انتخاب کنید و فروشگاه خود را بسازید. ")}</div>
             </div>
           </div>
-          <Link to="/profile" className="btn-yellow shrink-0">
-            درخواست فروشندگی
-          </Link>
+          <Link to="/profile" className="btn-yellow shrink-0">{translateText("درخواست فروشندگی ")}</Link>
         </div>
       </div>
     </section>

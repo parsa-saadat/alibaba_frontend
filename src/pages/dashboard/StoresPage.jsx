@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -78,7 +79,7 @@ function StoresPage() {
     else setLoading(true);
     try {
       const [storesRes, usersRes, productsRes] = await Promise.all([
-        axios.get(`${API}/perm/stores?limit=100`, authHeaders()),
+        axios.get(`${API}/perm/stores?lang=all&limit=100`, authHeaders()),
         axios.get(`${API}/user?limit=100`, authHeaders()).catch(() => null),
         axios.get(`${API}/perm/products?limit=200`, authHeaders()).catch(() => null),
       ]);
@@ -148,10 +149,10 @@ function StoresPage() {
     setBusyId(getId(store));
     try {
       await axios.put(`${API}/store/${getId(store)}`, { status, contact_info: store.contact_info }, authHeaders());
-      toast.success(`وضعیت فروشگاه به «${statusFa(status)}» تغییر کرد`);
+      toast.success(translateText("وضعیت فروشگاه به «{{v0}}» تغییر کرد", {v0: (statusFa(status))}));
       load(true);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'خطا در تغییر وضعیت فروشگاه');
+      toast.error(error.response?.data?.message || translateText("خطا در تغییر وضعیت فروشگاه"));
     } finally {
       setBusyId('');
     }
@@ -161,11 +162,11 @@ function StoresPage() {
     setBusyId(getId(store));
     try {
       await axios.delete(`${API}/store/${getId(store)}`, authHeaders());
-      toast.success('فروشگاه حذف شد');
+      toast.success(translateText("فروشگاه حذف شد"));
       setDeleteTarget(null);
       load(true);
     } catch {
-      toast.info('حذف ممکن نبود؛ فروشگاه به‌جای آن مسدود شد');
+      toast.info(translateText("حذف ممکن نبود؛ فروشگاه به‌جای آن مسدود شد"));
       await setStoreStatus(store, 'ROOT_DISABLE');
       setDeleteTarget(null);
     } finally {
@@ -176,48 +177,46 @@ function StoresPage() {
   if (loading && stores.length === 0) {
     return (
       <div className="py-16">
-        <Loading label="در حال بارگذاری فروشگاه‌ها…" />
+        <Loading label={translateText("در حال بارگذاری فروشگاه‌ها…")} />
       </div>
     );
   }
 
   const tabs = [
-    { id: 'all', label: 'همه' },
-    { id: 'ENABLE', label: 'فعال' },
-    { id: 'DISABLE', label: 'غیرفعال' },
-    { id: 'ROOT_DISABLE', label: 'مسدود' },
+    { id: 'all', label: translateText("همه") },
+    { id: 'ENABLE', label: translateText("فعال") },
+    { id: 'DISABLE', label: translateText("غیرفعال") },
+    { id: 'ROOT_DISABLE', label: translateText("مسدود") },
   ];
 
   return (
     <div className="space-y-5">
       <PanelPageHeader
         icon={Store}
-        title="مدیریت فروشگاه‌ها"
-        subtitle={`${toFa(stores.length)} فروشگاه • ${toFa(products.length)} کالا • ${toFa(counts.ENABLE)} فعال`}
+        title={translateText("مدیریت فروشگاه‌ها")}
+        subtitle={translateText("{{v0}} فروشگاه • {{v1}} کالا • {{v2}} فعال", {v0: (toFa(stores.length)),v1: (toFa(products.length)),v2: (toFa(counts.ENABLE))})}
         onRefresh={() => load(true)}
         refreshing={refreshing}
         actions={
           <>
             <Link to="/dashboard/sellers" className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5">
-              <UserRound size={14} /> فروشندگان
-            </Link>
+              <UserRound size={14} />{translateText(" فروشندگان ")}</Link>
             <button
               type="button"
               onClick={() => setStoreModal(null)}
               className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
             >
-              <Plus size={14} /> فروشگاه جدید
-            </button>
+              <Plus size={14} />{translateText(" فروشگاه جدید ")}</button>
           </>
         }
       />
 
       {/* ───── آمار ───── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="کل فروشگاه‌ها" value={toFa(counts.all)} hint={`${toFa(products.length)} کالا`} icon={Store} />
-        <StatTile label="فعال" value={toFa(counts.ENABLE)} hint="در دسترس مشتری" icon={CheckCircle2} tint="#17994f" />
-        <StatTile label="غیرفعال" value={toFa(counts.DISABLE)} hint="موقتاً بسته" icon={PauseCircle} tint="#c2740a" />
-        <StatTile label="مسدود" value={toFa(counts.ROOT_DISABLE)} hint="توسط مدیریت" icon={Ban} tint="#e53935" />
+        <StatTile label={translateText("کل فروشگاه‌ها")} value={toFa(counts.all)} hint={translateText("{{v0}} کالا", {v0: (toFa(products.length))})} icon={Store} />
+        <StatTile label={translateText("فعال")} value={toFa(counts.ENABLE)} hint={translateText("در دسترس مشتری")} icon={CheckCircle2} tint="#17994f" />
+        <StatTile label={translateText("غیرفعال")} value={toFa(counts.DISABLE)} hint={translateText("موقتاً بسته")} icon={PauseCircle} tint="#c2740a" />
+        <StatTile label={translateText("مسدود")} value={toFa(counts.ROOT_DISABLE)} hint={translateText("توسط مدیریت")} icon={Ban} tint="#e53935" />
       </div>
 
       {/* ───── فیلتر و جستجو ───── */}
@@ -243,23 +242,23 @@ function StoresPage() {
               </button>
             );
           })}
-          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)} نتیجه</span>
+          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)}{translateText(" نتیجه")}</span>
         </div>
 
         <div className="relative">
-          <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
+          <Search size={15} className="absolute end-3 top-1/2 -translate-y-1/2 muted" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="جستجوی نام فروشگاه، ایمیل یا مالک…"
-            className="input !py-2.5 !pr-9 text-xs w-full"
+            placeholder={translateText("جستجوی نام فروشگاه، ایمیل یا مالک…")}
+            className="input !py-2.5 !pe-9 text-xs w-full"
           />
           {search && (
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="btn-ghost !p-1 absolute left-2 top-1/2 -translate-y-1/2"
-              aria-label="پاک کردن جستجو"
+              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
+              aria-label={translateText("پاک کردن جستجو")}
             >
               <X size={13} />
             </button>
@@ -276,9 +275,9 @@ function StoresPage() {
           >
             <Store size={24} />
           </span>
-          <b className="block text-sm">فروشگاهی پیدا نشد</b>
+          <b className="block text-sm">{translateText("فروشگاهی پیدا نشد")}</b>
           <p className="text-xs muted">
-            {stores.length === 0 ? 'فروشگاهی ثبت نشده است.' : 'فیلتر یا عبارت جستجو را تغییر دهید.'}
+            {stores.length === 0 ? translateText("فروشگاهی ثبت نشده است.") : translateText("فیلتر یا عبارت جستجو را تغییر دهید.")}
           </p>
         </section>
       ) : (
@@ -307,13 +306,13 @@ function StoresPage() {
                   {store.banner_image_id && (
                     <StorageImageComponent
                       file={store.banner_image_id}
-                      alt={`بنر ${store.name}`}
+                      alt={translateText("بنر {{v0}}", {v0: (store.name)})}
                       className="w-full h-full object-cover"
                       onZoom={zoomable(store.banner_image_id)}
                     />
                   )}
                   <span
-                    className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black backdrop-blur"
+                    className="absolute top-2 start-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black backdrop-blur"
                     style={{ background: meta.bg, color: meta.color }}
                   >
                     <StatusIcon size={11} /> {statusFa(store.status)}
@@ -340,12 +339,12 @@ function StoresPage() {
 
                     <div className="min-w-0 flex-1">
                       <Link to={`/store/${id}`} className="block truncate text-sm font-black hover:underline">
-                        {store.name || 'بدون نام'}
+                        {store.name || translateText("بدون نام")}
                       </Link>
                       <div className="mt-1 flex items-center gap-1 text-[11px] muted min-w-0">
                         <UserRound size={11} className="shrink-0" />
                         <span className="truncate">
-                          {userFullName(owner) || owner?.username || 'مالک نامشخص'}
+                          {userFullName(owner) || owner?.username || translateText("مالک نامشخص")}
                         </span>
                         {owner?.seller_trust === true && <BadgeCheck size={12} style={{ color: '#17994f' }} />}
                       </div>
@@ -354,13 +353,11 @@ function StoresPage() {
                           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--text)' }}
                         >
-                          <Package size={10} /> {toFa(stats.count)} کالا
-                        </span>
+                          <Package size={10} /> {toFa(stats.count)}{translateText(" کالا ")}</span>
                         <span
                           className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--muted)' }}
-                        >
-                          موجودی: {toFa(stats.stock)}
+                        >{translateText("موجودی: ")}{toFa(stats.stock)}
                         </span>
                       </div>
                     </div>
@@ -390,8 +387,7 @@ function StoresPage() {
                       onClick={() => setStoreModal(store)}
                       className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                     >
-                      <Pencil size={13} /> ویرایش
-                    </button>
+                      <Pencil size={13} />{translateText(" ویرایش ")}</button>
 
                     {!rooted && (
                       <button
@@ -401,7 +397,7 @@ function StoresPage() {
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                       >
                         {store.status === 'ENABLE' ? <PauseCircle size={13} /> : <CheckCircle2 size={13} />}
-                        {store.status === 'ENABLE' ? 'غیرفعال' : 'فعال'}
+                        {store.status === 'ENABLE' ? translateText("غیرفعال") : translateText("فعال")}
                       </button>
                     )}
 
@@ -412,30 +408,27 @@ function StoresPage() {
                         onClick={() => setStoreStatus(store, 'ENABLE')}
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                         style={{ color: '#17994f' }}
-                        title="برداشتن مسدودی و فعال‌سازی دوباره‌ی فروشگاه"
+                        title={translateText("برداشتن مسدودی و فعال‌سازی دوباره‌ی فروشگاه")}
                       >
-                        <CheckCircle2 size={13} /> رفع مسدودی
-                      </button>
+                        <CheckCircle2 size={13} />{translateText(" رفع مسدودی ")}</button>
                     ) : (
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => {
-                          if (window.confirm(`فروشگاه «${store.name}» مسدود شود؟ فروشنده دیگر نمی‌تواند آن را ویرایش یا فعال کند.`)) {
+                          if (window.confirm(translateText("فروشگاه «{{v0}}» مسدود شود؟ فروشنده دیگر نمی‌تواند آن را ویرایش یا فعال کند.", {v0: (store.name)}))) {
                             setStoreStatus(store, 'ROOT_DISABLE');
                           }
                         }}
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                         style={{ color: '#e53935' }}
-                        title="مسدودسازی توسط مدیریت"
+                        title={translateText("مسدودسازی توسط مدیریت")}
                       >
-                        <Ban size={13} /> مسدودسازی
-                      </button>
+                        <Ban size={13} />{translateText(" مسدودسازی ")}</button>
                     )}
 
                     <Link to={`/store/${id}`} className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1">
-                      <ExternalLink size={13} /> صفحه
-                    </Link>
+                      <ExternalLink size={13} />{translateText(" صفحه ")}</Link>
 
                     <button
                       type="button"
@@ -443,7 +436,7 @@ function StoresPage() {
                       onClick={() => setDeleteTarget(store)}
                       className="btn-ghost !p-2 ms-auto disabled:opacity-50"
                       style={{ color: '#e53935' }}
-                      title="حذف یا مسدودسازی فروشگاه"
+                      title={translateText("حذف یا مسدودسازی فروشگاه")}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -479,24 +472,19 @@ function StoresPage() {
               <Trash2 size={24} />
             </span>
             <div className="space-y-1">
-              <b className="block text-sm">حذف فروشگاه</b>
+              <b className="block text-sm">{translateText("حذف فروشگاه")}</b>
               <p className="text-xs muted leading-6">
-                «{deleteTarget.name}» حذف شود؟ اگر حذف ممکن نباشد، فروشگاه مسدود می‌شود و کالاهایش از دسترس خارج می‌شوند.
-              </p>
+                «{deleteTarget.name}{translateText("» حذف شود؟ اگر حذف ممکن نباشد، فروشگاه مسدود می‌شود و کالاهایش از دسترس خارج می‌شوند. ")}</p>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <button type="button" onClick={() => setDeleteTarget(null)} className="btn-ghost !py-2 !px-4 text-xs">
-                انصراف
-              </button>
+              <button type="button" onClick={() => setDeleteTarget(null)} className="btn-ghost !py-2 !px-4 text-xs">{translateText("انصراف ")}</button>
               <button
                 type="button"
                 disabled={busyId === getId(deleteTarget)}
                 onClick={() => deleteStore(deleteTarget)}
                 className="btn-yellow !py-2 !px-4 text-xs disabled:opacity-60"
                 style={{ background: '#e53935', color: '#fff' }}
-              >
-                بله، حذف کن
-              </button>
+              >{translateText("بله، حذف کن ")}</button>
             </div>
           </div>
         </div>

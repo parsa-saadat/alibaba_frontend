@@ -1,3 +1,5 @@
+import LanguageSelector from '../common/locale/LanguageSelectorComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -36,7 +38,7 @@ function AuthShellComponent({ title, subtitle, children, footer }) {
           className="mb-5 inline-flex w-max items-center gap-1.5 text-[11px] text-white/70 transition hover:text-white"
         >
           <ArrowRight size={13} />
-          بازگشت به فروشگاه
+          {translateText('بازگشت به فروشگاه ')}
         </Link>
 
         <div className="card rounded-[28px] p-6 shadow-2xl sm:p-8">
@@ -45,12 +47,16 @@ function AuthShellComponent({ title, subtitle, children, footer }) {
             <div
               aria-hidden="true"
               className="my-5 h-px w-20"
-              style={{ background: 'linear-gradient(90deg, transparent, var(--primary-color), transparent)' }}
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent, var(--primary-color), transparent)',
+              }}
             />
             <h1 className="text-lg font-black sm:text-xl">{title}</h1>
             {subtitle && <p className="mt-2 text-xs leading-6 muted">{subtitle}</p>}
           </div>
 
+          <LanguageSelector variant="auth" placement="card" />
           <div className="mt-6">{children}</div>
         </div>
 

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -92,7 +93,7 @@ const decorate = (html, resolved) => {
     } else {
       img.setAttribute('width', '240');
       img.setAttribute('height', '160');
-      img.setAttribute('alt', img.getAttribute('alt') || 'در حال بارگذاری تصویر…');
+      img.setAttribute('alt', img.getAttribute('alt') || translateText("در حال بارگذاری تصویر…"));
     }
   });
 
@@ -213,9 +214,7 @@ function MarkdownContentComponent({ content, className = '' }) {
 
   if (!html) {
     return (
-      <p className="muted" style={{ margin: 0 }}>
-        توضیحاتی برای این محصول ثبت نشده است.
-      </p>
+      <p className="muted" style={{ margin: 0 }}>{translateText("توضیحاتی برای این محصول ثبت نشده است. ")}</p>
     );
   }
 
@@ -247,7 +246,7 @@ function MarkdownContentComponent({ content, className = '' }) {
           <button
             type="button"
             onClick={closeZoom}
-            aria-label="بستن"
+            aria-label={translateText("بستن")}
             style={{
               position: 'absolute',
               top: 18,

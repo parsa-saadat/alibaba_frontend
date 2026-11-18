@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import axios from 'axios';
 import { getBody, getId, isDirectImage } from './response.js';
 
@@ -95,7 +96,7 @@ export const resolveStorageImage = async (file, force = false) => {
     .then((response) => {
       if (response.data?.success === false) throw new Error(response.data.message);
       const url = fileDataUrl(getBody(response));
-      if (!url) throw new Error('فایل تصویری معتبری دریافت نشد.');
+      if (!url) throw new Error(translateText("فایل تصویری معتبری دریافت نشد."));
       return url;
     })
     .catch((error) => {

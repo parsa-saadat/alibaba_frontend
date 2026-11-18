@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 
 /*
@@ -56,7 +57,7 @@ function BrandLogoComponent({
   size = 'sm',
   tone = 'auto',
   className = '',
-  alt = 'ژئو کالا',
+  alt = translateText("ژئو کالا"),
 }) {
   const darkSrc = variant === 'full' ? '/logo.png' : '/logo-mark.png';
   const lightSrc = variant === 'full' ? '/logo-on-light.png' : '/logo-mark-on-light.png';

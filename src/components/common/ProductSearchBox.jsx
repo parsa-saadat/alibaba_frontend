@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -100,7 +101,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       () => {
         load()
           .catch((err) => {
-            if (!axios.isCancel(err)) setError('ارتباط با بک‌اند برقرار نشد.');
+            if (!axios.isCancel(err)) setError(translateText("ارتباط با بک‌اند برقرار نشد."));
           })
           .finally(() => {
             if (!controller.signal.aborted) setLoading(false);
@@ -147,7 +148,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
         setQuery('');
         setOpen(true);
       }}
-      aria-label="پاک کردن جستجو"
+      aria-label={translateText("پاک کردن جستجو")}
       className={hero ? 'shrink-0 muted hover:text-yellow transition-colors' : 'search-clear'}
     >
       <X size={15} />
@@ -167,10 +168,10 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       aria-expanded={open}
       aria-controls={listId}
       aria-autocomplete="list"
-      aria-label="جستجو در تجهیزات ژئو کالا"
+      aria-label={translateText("جستجو در تجهیزات ژئو کالا")}
       placeholder={
         placeholder ||
-        (hero ? 'جستجوی جی‌پی‌اس، توتال استیشن…' : 'جستجو در تجهیزات، برند یا دسته‌بندی…')
+        (hero ? translateText("جستجوی جی‌پی‌اس، توتال استیشن…") : translateText("جستجو در تجهیزات، برند یا دسته‌بندی…"))
       }
       className={
         hero
@@ -183,7 +184,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
   const submitButton = (
     <button
       type="submit"
-      aria-label="جستجو"
+      aria-label={translateText("جستجو")}
       className={
         hero
           ? 'btn-yellow !rounded-full flex shrink-0 items-center justify-center gap-1.5 !p-0 h-9 w-9 sm:h-auto sm:w-auto sm:!px-6 sm:!py-2 text-sm'
@@ -191,7 +192,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       }
     >
       <Search size={hero ? 16 : 15} className="shrink-0" />
-      <span className={hero ? 'hidden sm:inline' : ''}>جستجو</span>
+      <span className={hero ? 'hidden sm:inline' : ''}>{translateText("جستجو")}</span>
     </button>
   );
 
@@ -214,7 +215,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
           <div className="relative flex-1 min-w-0">
             <Search
               size={17}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 muted pointer-events-none"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 muted pointer-events-none"
             />
             {input}
             {clearButton}
@@ -227,23 +228,21 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
         <div
           id={listId}
           role="listbox"
-          aria-label="نتایج جستجو"
+          aria-label={translateText("نتایج جستجو")}
           className={`search-dropdown card ${hero ? '!rounded-2xl shadow-2xl' : ''}`}
         >
           <div className="search-dropdown-heading">
             <span className="flex items-center gap-1.5">
               {trimmed ? (
                 <>
-                  {localMatch ? 'نزدیک‌ترین نتایج برای' : 'نتایج برای'} «{trimmed}»
+                  {localMatch ? translateText("نزدیک‌ترین نتایج برای") : translateText("نتایج برای")} «{trimmed}»
                 </>
               ) : (
                 <>
-                  <TrendingUp size={14} className="text-yellow" />
-                  پرطرفدارترین محصولات
-                </>
+                  <TrendingUp size={14} className="text-yellow" />{translateText("پرطرفدارترین محصولات ")}</>
               )}
             </span>
-            {loading && <Loading label="در حال جستجو…" className="!text-xs" />}
+            {loading && <Loading label={translateText("در حال جستجو…")} className="!text-xs" />}
           </div>
 
           <div className={`search-results ${hero ? 'is-grid' : ''}`}>
@@ -254,9 +253,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
                   type="button"
                   onClick={() => setRetry((value) => value + 1)}
                   className="btn-ghost mt-3 text-xs"
-                >
-                  تلاش دوباره
-                </button>
+                >{translateText("تلاش دوباره ")}</button>
               </div>
             ) : loading && !results.length ? (
               <div className={hero ? 'col-span-full p-3 grid sm:grid-cols-2 gap-2' : 'p-3 space-y-2'} aria-hidden="true">
@@ -266,9 +263,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
               </div>
             ) : results.length === 0 ? (
               <div className={hero ? 'col-span-full p-8 text-center text-sm muted' : 'p-6 text-center text-sm muted'}>
-                <PackageSearch size={26} className="mx-auto mb-2 opacity-60" />
-                محصولی مطابق جستجو پیدا نشد.
-              </div>
+                <PackageSearch size={26} className="mx-auto mb-2 opacity-60" />{translateText("محصولی مطابق جستجو پیدا نشد. ")}</div>
             ) : (
               results.map((product, index) => (
                 <Link
@@ -288,11 +283,10 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
                   <div className="min-w-0 flex-1">
                     <div className="font-bold text-sm truncate">{product.name}</div>
                     <div className="text-xs muted truncate flex items-center gap-1.5">
-                      <span>{product.brand || 'بدون برند'}</span>
+                      <span>{product.brand || translateText("بدون برند")}</span>
                       {hasDiscount(product) ? (
                         <span className="text-yellow font-bold">
-                          • {toFa(product.discount.percentage)}٪ تخفیف
-                        </span>
+                          • {toFa(product.discount.percentage)}{translateText("٪ تخفیف ")}</span>
                       ) : (
                         product.store_name && <span>• {product.store_name}</span>
                       )}
@@ -309,7 +303,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
           <button type="button" onClick={submitSearch} className="search-all">
             <span className="flex items-center gap-1.5">
               <Clock3 size={14} className="opacity-60" />
-              {trimmed ? 'مشاهده همه نتایج در صفحه محصولات' : 'مشاهده همه محصولات'}
+              {trimmed ? translateText("مشاهده همه نتایج در صفحه محصولات") : translateText("مشاهده همه محصولات")}
             </span>
             <ArrowUpLeft size={15} />
           </button>

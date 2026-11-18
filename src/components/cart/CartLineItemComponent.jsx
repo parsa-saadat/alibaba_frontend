@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BadgeCheck, Loader2, ShieldCheck, Store, Trash2, Truck } from 'lucide-react';
@@ -37,9 +38,7 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
     >
       {busy && (
         <span className="absolute end-3 top-3 inline-flex items-center gap-1 text-[10px] muted">
-          <Loader2 size={12} className="animate-spin" />
-          همگام‌سازی
-        </span>
+          <Loader2 size={12} className="animate-spin" />{translateText("همگام‌سازی ")}</span>
       )}
 
       <div className="flex gap-3 sm:gap-4">
@@ -71,8 +70,8 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
               onClick={onRemove}
               disabled={busy}
               className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-red-400 transition hover:bg-red-500/10 disabled:opacity-40"
-              aria-label="حذف از سبد خرید"
-              title="حذف از سبد خرید"
+              aria-label={translateText("حذف از سبد خرید")}
+              title={translateText("حذف از سبد خرید")}
             >
               <Trash2 size={16} />
             </button>
@@ -90,18 +89,14 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
             )}
             {product.warranty && (
               <span className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-bold muted" style={{ background: 'var(--card2)' }}>
-                <ShieldCheck size={11} />
-                گارانتی
-              </span>
+                <ShieldCheck size={11} />{translateText("گارانتی ")}</span>
             )}
             {product.seller_trust === true && (
               <span
                 className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-bold"
                 style={{ background: 'rgba(23,153,79,0.14)', color: '#17994f' }}
               >
-                <BadgeCheck size={11} />
-                فروشنده تأیید شده
-              </span>
+                <BadgeCheck size={11} />{translateText("فروشنده تأیید شده ")}</span>
             )}
             {product.store_name && (
               <span className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-bold muted" style={{ background: 'var(--card2)' }}>
@@ -114,21 +109,16 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
           {/* وضعیت موجودی */}
           <div className="mt-1.5 text-[11px]">
             {soldOut ? (
-              <span className="font-bold" style={{ color: '#e53935' }}>
-                این کالا ناموجود شده است
-              </span>
+              <span className="font-bold" style={{ color: '#e53935' }}>{translateText("این کالا ناموجود شده است ")}</span>
             ) : Number.isFinite(stock) ? (
               atMax ? (
-                <span style={{ color: '#c2740a' }}>
-                  حداکثر موجودی ({toFa(stock)} عدد) در سبد شماست
-                </span>
+                <span style={{ color: '#c2740a' }}>{translateText("حداکثر موجودی (")}{toFa(stock)}{translateText(" عدد) در سبد شماست ")}</span>
               ) : (
                 <span className="muted">
-                  <Truck size={11} className="inline align-[-1px]" /> موجودی: {toFa(stock)} عدد
-                </span>
+                  <Truck size={11} className="inline align-[-1px]" />{translateText(" موجودی: ")}{toFa(stock)}{translateText(" عدد ")}</span>
               )
             ) : (
-              <span className="muted">آماده‌ی ارسال</span>
+              <span className="muted">{translateText("آماده‌ی ارسال")}</span>
             )}
           </div>
 
@@ -156,7 +146,7 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
                 {formatPrice(total)}
               </div>
               {quantity > 1 && (
-                <div className="text-[10px] muted">واحد: {formatPrice(unit)}</div>
+                <div className="text-[10px] muted">{translateText("واحد: ")}{formatPrice(unit)}</div>
               )}
             </div>
           </div>

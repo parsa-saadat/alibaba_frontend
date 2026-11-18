@@ -1,3 +1,6 @@
+import { dateFormatter } from '../../i18n/date-policy';
+import { language, currency, formatMoney } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import { getId, isDirectImage } from './response.js';
 import {
   JALALI_MONTHS,
@@ -7,18 +10,15 @@ import {
   toGregorian,
 } from './jalali.js';
 
-const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
 
 /* برای استفاده‌ی مستقیم در فرم‌ها */
 export { faDigits };
-const UNITS = { CM: 'سانتی‌متر', M: 'متر', G: 'گرم', KG: 'کیلوگرم' };
+const UNITS = { CM: translateText("سانتی‌متر"), M: translateText("متر"), G: translateText("گرم"), KG: translateText("کیلوگرم") };
 
-export const toFa = (value) => String(value ?? '').replace(/\d/g, (digit) => FA_DIGITS[+digit]);
+export const toFa = (value) => language === 'fa' ? String(value ?? '').replace(/\d/g, (digit) => FA_DIGITS[+digit]) : String(value ?? '');
 
-export const formatPrice = (amount) => {
-  const toman = Math.round(Number(amount || 0) / 10);
-  return `${toFa(toman.toLocaleString('en-US'))} تومان`;
-};
+export const formatPrice = (amount, code = currency) => formatMoney(amount, code);
 
 export const finalPrice = (product) => {
   if (!product) return 0;
@@ -26,7 +26,8 @@ export const finalPrice = (product) => {
   const percentage = Number(product.discount?.percentage || 0);
   const expiry = product.discount?.expirationDate;
   const active = percentage > 0 && (!expiry || new Date(expiry) > new Date());
-  return active ? Math.round(amount * (1 - percentage / 100)) : amount;
+  const scale = product.price?.currency === 'IRR' ? 1 : 100;
+  return active ? Math.round(amount * (1 - percentage / 100) * scale) / scale : amount;
 };
 
 export const hasDiscount = (product) =>
@@ -55,18 +56,18 @@ export const measurementUnit = (measurement, fallback = '') => {
 
 export const formatMeasurement = (measurement, fallbackUnit = '') => {
   const value = measurementValue(measurement);
-  if (value === null) return 'ثبت نشده';
+  if (value === null) return translateText("ثبت نشده");
   const unit = measurementUnit(measurement, fallbackUnit).toUpperCase();
   const number = toFa(value.toLocaleString('en-US', { maximumFractionDigits: 6 }));
   return `${number} ${UNITS[unit] || unit}`.trim();
 };
 
 export const formatDimensions = (dimensions) => {
-  if (!dimensions || typeof dimensions !== 'object') return 'ثبت نشده';
+  if (!dimensions || typeof dimensions !== 'object') return translateText("ثبت نشده");
   const parts = ['length', 'width', 'height']
     .filter((axis) => measurementValue(dimensions[axis]) !== null)
     .map((axis) => formatMeasurement(dimensions[axis], dimensions.unit));
-  return parts.length ? parts.join(' × ') : 'ثبت نشده';
+  return parts.length ? parts.join(' × ') : translateText("ثبت نشده");
 };
 
 export const formatWeight = (weight) => formatMeasurement(weight);
@@ -87,88 +88,74 @@ export const productImage = (product) => productImages(product).find(isDirectIma
  *   formatDateLong   → شنبه ۲۲ آبان ۱۴۰۵
  * منبع تبدیل، utils/helpers/jalali.js است (همان که تقویم فرم محصول از آن استفاده می‌کند).
  */
-const WEEKDAY_FA = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+const WEEKDAY_FA = [translateText("یکشنبه"), translateText("دوشنبه"), translateText("سه‌شنبه"), translateText("چهارشنبه"), translateText("پنجشنبه"), translateText("جمعه"), translateText("شنبه")];
 
 const validDate = (date) => {
   const value = date instanceof Date ? date : new Date(date);
   return Number.isNaN(value.getTime()) ? null : value;
 };
 
-export const formatDate = (date) => {
-  if (!date) return 'ثبت نشده';
-  const value = validDate(date);
-  if (!value) return 'ثبت نشده';
-  const j = jalaliOfDate(value);
-  return `${faDigits(j.jy)}/${faDigits(String(j.jm).padStart(2, '0'))}/${faDigits(String(j.jd).padStart(2, '0'))}`;
+const localizedDate = (date, options) => {
+  const value = date ? validDate(date) : null;
+  return value ? dateFormatter(language, options).format(value) : translateText("ثبت نشده");
 };
-
-export const formatDateTime = (date) => {
-  if (!date) return 'ثبت نشده';
-  const value = validDate(date);
-  if (!value) return 'ثبت نشده';
-  const hour = faDigits(String(value.getHours()).padStart(2, '0'));
-  const minute = faDigits(String(value.getMinutes()).padStart(2, '0'));
-  return `${formatDate(value)} — ${hour}:${minute}`;
-};
-
-export const formatDateLong = (date) => {
-  if (!date) return 'ثبت نشده';
-  const value = validDate(date);
-  if (!value) return 'ثبت نشده';
-  const j = jalaliOfDate(value);
-  return `${WEEKDAY_FA[value.getDay()]} ${faDigits(j.jd)} ${JALALI_MONTHS[j.jm - 1]} ${faDigits(j.jy)}`;
-};
-
-/* فقط روز یا فقط سال شمسی (برای نمودارها و فیلترها) */
-export const formatDayOfMonth = (date) => {
-  const value = validDate(date);
-  return value ? faDigits(jalaliOfDate(value).jd) : '';
-};
-
-export const formatJalaliYear = (date = new Date()) => {
-  const value = validDate(date) || new Date();
-  return faDigits(jalaliOfDate(value).jy);
-};
+export const formatDate = date => localizedDate(date, { year: 'numeric', month: '2-digit', day: '2-digit' });
+export const formatDateTime = date => localizedDate(date, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+export const formatDateLong = date => localizedDate(date, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+export const formatDayOfMonth = date => localizedDate(date, { day: 'numeric' });
+// Retain the public helper name for callers; year follows the selected calendar.
+export const formatJalaliYear = (date = new Date()) => localizedDate(date, { year: 'numeric' });
 
 /* سال تولید محصول در بک‌اند میلادی ذخیره می‌شود؛ نمایش شمسی است */
 export const formatProductionYear = (year) => {
   const value = Number(year);
-  if (!Number.isFinite(value) || value <= 0) return 'ثبت نشده';
-  return faDigits(jalaliYearOfGregorian(value));
+  if (!Number.isFinite(value) || value <= 0) return translateText("ثبت نشده");
+  return language === 'fa' ? faDigits(jalaliYearOfGregorian(value)) : String(value);
 };
 
 /* سال شمسی → سال میلادی (برای پارامترهای فیلتر بک‌اند) */
 export const productionYearForApi = (jalaliYear) => {
-  const value = Number(String(jalaliYear).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+  if (language !== 'fa') return String(jalaliYear || '');
+  const value = Number(String(jalaliYear).replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
   if (!Number.isFinite(value) || value <= 0) return '';
   return String(toGregorian(value, 1, 1).gy);
 };
 
 export const STATUS_FA = {
-  awaiting_approval: 'در انتظار تأیید فروشنده',
-  preparing: 'در حال آماده‌سازی',
-  ready_to_ship: 'آماده ارسال',
-  shipped: 'ارسال شده',
-  delivered: 'تحویل داده شده',
-  cancelled: 'لغو شده',
-  rejected: 'رد شده',
-  finalized: 'نهایی شده',
-  awaiting_payment: 'در انتظار پرداخت',
-  paid: 'پرداخت شده',
-  unpaid: 'پرداخت نشده',
-  pending: 'در انتظار پرداخت',
-  failed: 'ناموفق',
-  ACTIVE: 'فعال',
-  INACTIVE: 'غیرفعال',
-  ENABLE: 'فعال',
-  DISABLE: 'غیرفعال',
-  ROOT_DISABLE: 'مسدود توسط مدیریت',
-  IN_STOCK: 'موجود',
-  OUT_OF_STOCK: 'ناموجود',
-  PUBLIC: 'عمومی',
-  PRIVATE: 'خصوصی',
-  Individual_seller: 'فروشنده حقیقی',
-  institutional_seller: 'فروشنده حقوقی',
+  awaiting_approval: translateText("در انتظار تأیید فروشنده"),
+  preparing: translateText("در حال آماده‌سازی"),
+  ready_to_ship: translateText("آماده ارسال"),
+  shipped: translateText("ارسال شده"),
+  delivered: translateText("تحویل داده شده"),
+  cancelled: translateText("لغو شده"),
+  rejected: translateText("رد شده"),
+  finalized: translateText("نهایی شده"),
+  awaiting_payment: translateText("در انتظار پرداخت"),
+  paid: translateText("پرداخت شده"),
+  unpaid: translateText("پرداخت نشده"),
+  pending: translateText("در انتظار پرداخت"),
+  failed: translateText("ناموفق"),
+  ACTIVE: translateText("فعال"),
+  INACTIVE: translateText("غیرفعال"),
+  ENABLE: translateText("فعال"),
+  DISABLE: translateText("غیرفعال"),
+  ROOT_DISABLE: translateText("مسدود توسط مدیریت"),
+  IN_STOCK: translateText("موجود"),
+  OUT_OF_STOCK: translateText("ناموجود"),
+  PUBLIC: translateText("عمومی"),
+  PRIVATE: translateText("خصوصی"),
+  Individual_seller: translateText("فروشنده حقیقی"),
+  institutional_seller: translateText("فروشنده حقوقی"),
 };
 
 export const statusFa = (status) => (status ? (STATUS_FA[status] ?? status) : '—');
+
+// Existing identity API stores a Jalali date string; localize display without changing storage.
+export const formatStoredBirthDate = value => {
+  if (!value) return '—';
+  const normalized = String(value).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const parts = normalized.split('/').map(Number);
+  if (parts.length !== 3 || parts.some(n=>!Number.isFinite(n))) return String(value);
+  const {gy,gm,gd} = toGregorian(parts[0],parts[1],parts[2]);
+  return formatDate(new Date(gy,gm-1,gd));
+};

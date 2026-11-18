@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, GitCompareArrows, Check } from 'lucide-react';
@@ -98,9 +99,7 @@ function ProductComponent({
 
         {soldOut && (
           <div className="absolute inset-0 bg-black/45 grid place-items-center">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/70 text-white">
-              ناموجود
-            </span>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/70 text-white">{translateText("ناموجود ")}</span>
           </div>
         )}
 
@@ -110,7 +109,7 @@ function ProductComponent({
             onClick={() => toggleFavorite(id)}
             className={circle}
             style={{ color: fav ? '#ff4d6d' : 'var(--text-color)' }}
-            aria-label="افزودن به علاقه‌مندی"
+            aria-label={translateText("افزودن به علاقه‌مندی")}
             aria-pressed={fav}
           >
             <Heart size={16} fill={fav ? '#ff4d6d' : 'none'} />
@@ -120,7 +119,7 @@ function ProductComponent({
             onClick={() => toggleCompare(id)}
             className={circle}
             style={{ color: inCompare ? 'var(--primary-color)' : 'var(--text-color)' }}
-            aria-label="مقایسه محصول"
+            aria-label={translateText("مقایسه محصول")}
             aria-pressed={inCompare}
           >
             <GitCompareArrows size={16} />
@@ -135,8 +134,7 @@ function ProductComponent({
             className="px-1.5 py-px rounded-sm font-black whitespace-nowrap"
             style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
           >
-            {toFa(product.discount.percentage)}٪ تخفیف
-          </span>
+            {toFa(product.discount.percentage)}{translateText("٪ تخفیف ")}</span>
         )}
         {product.brand && <span className="muted font-semibold truncate">{product.brand}</span>}
       </div>
@@ -149,7 +147,7 @@ function ProductComponent({
       {/* ───── امتیاز ───── */}
       <div className="mt-1 h-[18px] flex items-center gap-1 text-xs muted">
         <Check size={12} strokeWidth={3} />
-        {rating > 0 ? `امتیاز ${toFa(rating.toFixed(1))}` : 'ضمانت اصالت'}
+        {rating > 0 ? translateText("امتیاز {{v0}}", {v0: (toFa(rating.toFixed(1)))}) : translateText("ضمانت اصالت")}
       </div>
 
       {/* ───── قیمت ───── */}
@@ -165,11 +163,11 @@ function ProductComponent({
       {/* ───── موجودی ───── */}
       <div className="mt-1.5 text-sm">
         {soldOut ? (
-          <span className="text-rose-500 font-bold">ناموجود</span>
+          <span className="text-rose-500 font-bold">{translateText("ناموجود")}</span>
         ) : stock !== null ? (
-          <span>موجودی: {toFa(stock)}</span>
+          <span>{translateText("موجودی: ")}{toFa(stock)}</span>
         ) : (
-          <span>موجود</span>
+          <span>{translateText("موجود")}</span>
         )}
       </div>
 

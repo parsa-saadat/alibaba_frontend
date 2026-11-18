@@ -1,3 +1,5 @@
+import { direction as i18nDirection } from '../../../i18n/runtime';
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -38,14 +40,14 @@ const EMPTY = {
 };
 
 const FIELDS = [
-  { key: 'full_name', label: 'نام و نام خانوادگی گیرنده', col: 2, placeholder: 'مثلاً علی کریمی' },
-  { key: 'province', label: 'استان', placeholder: 'تهران' },
-  { key: 'city', label: 'شهر', placeholder: 'تهران' },
-  { key: 'neighborhood', label: 'محله', placeholder: 'ونک' },
-  { key: 'postal_code', label: 'کد پستی (۱۰ رقم)', placeholder: '1435896321', ltr: true, numeric: true, maxLength: 10 },
-  { key: 'full_address', label: 'نشانی کامل', col: 2, placeholder: 'خیابان، کوچه، پلاک و نشانه‌های محلی' },
-  { key: 'building_number', label: 'پلاک', numeric: true },
-  { key: 'unit', label: 'واحد', numeric: true },
+  { key: 'full_name', label: translateText("نام و نام خانوادگی گیرنده"), col: 2, placeholder: translateText("مثلاً علی کریمی") },
+  { key: 'province', label: translateText("استان"), placeholder: translateText("تهران") },
+  { key: 'city', label: translateText("شهر"), placeholder: translateText("تهران") },
+  { key: 'neighborhood', label: translateText("محله"), placeholder: translateText("ونک") },
+  { key: 'postal_code', label: translateText("کد پستی (۱۰ رقم)"), placeholder: '1435896321', ltr: true, numeric: true, maxLength: 10 },
+  { key: 'full_address', label: translateText("نشانی کامل"), col: 2, placeholder: translateText("خیابان، کوچه، پلاک و نشانه‌های محلی") },
+  { key: 'building_number', label: translateText("پلاک"), numeric: true },
+  { key: 'unit', label: translateText("واحد"), numeric: true },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -75,15 +77,10 @@ function EmptyState({ onAdd }) {
       >
         <MapPin size={28} style={{ color: 'var(--accent-text)' }} />
       </span>
-      <h2 className="mt-4 text-base font-black">هنوز نشانی‌ای ثبت نکرده‌اید</h2>
-      <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
-        برای ثبت سفارش، دست‌کم یک نشانی تحویل لازم است. نشانی را یک‌بار ثبت کنید تا در خریدهای بعدی
-        سریع‌تر باشد.
-      </p>
+      <h2 className="mt-4 text-base font-black">{translateText("هنوز نشانی‌ای ثبت نکرده‌اید")}</h2>
+      <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">{translateText("برای ثبت سفارش، دست‌کم یک نشانی تحویل لازم است. نشانی را یک‌بار ثبت کنید تا در خریدهای بعدی سریع‌تر باشد. ")}</p>
       <button type="button" onClick={onAdd} className="btn-yellow mt-5 inline-flex items-center gap-2 !py-2.5">
-        <Plus size={16} />
-        افزودن نشانی
-      </button>
+        <Plus size={16} />{translateText("افزودن نشانی ")}</button>
     </div>
   );
 }
@@ -158,11 +155,11 @@ function AddressPage() {
     const required = FIELDS.filter((f) => f.key !== 'unit');
     const missing = required.find((f) => !String(form[f.key] || '').trim());
     if (missing) {
-      setFormError(`«${missing.label}» را وارد کنید.`);
+      setFormError(translateText("«{{v0}}» را وارد کنید.", {v0: (missing.label)}));
       return;
     }
     if (form.postal_code && !/^\d{10}$/.test(String(form.postal_code).trim())) {
-      setFormError('کد پستی باید ۱۰ رقم باشد.');
+      setFormError(translateText("کد پستی باید ۱۰ رقم باشد."));
       return;
     }
 
@@ -188,11 +185,11 @@ function AddressPage() {
         authHeaders(),
       )
       .then(() => {
-        toast.success('نشانی ثبت شد');
+        toast.success(translateText("نشانی ثبت شد"));
         closeForm();
         loadAddresses();
       })
-      .catch((err) => setFormError(err.response?.data?.message || 'ثبت نشانی ناموفق بود.'))
+      .catch((err) => setFormError(err.response?.data?.message || translateText("ثبت نشانی ناموفق بود.")))
       .finally(() => setSaving(false));
   };
 
@@ -203,11 +200,11 @@ function AddressPage() {
     axios
       .delete(`${API}/users/${userId}/address/${id}`, authHeaders())
       .then(() => {
-        toast.success('نشانی حذف شد');
+        toast.success(translateText("نشانی حذف شد"));
         setDeleteTarget(null);
         loadAddresses();
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'حذف نشانی ناموفق بود'))
+      .catch((err) => toast.error(err.response?.data?.message || translateText("حذف نشانی ناموفق بود")))
       .finally(() => setBusyId(''));
   };
 
@@ -234,10 +231,10 @@ function AddressPage() {
         authHeaders(),
       )
       .then(() => {
-        toast.success('نشانی پیش‌فرض تغییر کرد');
+        toast.success(translateText("نشانی پیش‌فرض تغییر کرد"));
         loadAddresses();
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'تغییر پیش‌فرض ناموفق بود'))
+      .catch((err) => toast.error(err.response?.data?.message || translateText("تغییر پیش‌فرض ناموفق بود")))
       .finally(() => setBusyId(''));
   };
 
@@ -245,10 +242,10 @@ function AddressPage() {
     const ad = item.address || item;
     const text = [
       ad.full_name,
-      `${ad.province || ''}، ${ad.city || ''}، ${ad.neighborhood || ''}`,
+      translateText("{{v0}}، {{v1}}، {{v2}}", {v0: (ad.province || ''),v1: (ad.city || ''),v2: (ad.neighborhood || '')}),
       ad.full_address,
-      `پلاک ${ad.building_number || '-'}، واحد ${ad.unit || '-'}`,
-      `کد پستی ${ad.postal_code || '-'}`,
+      translateText("پلاک {{v0}}، واحد {{v1}}", {v0: (ad.building_number || '-'),v1: (ad.unit || '-')}),
+      translateText("کد پستی {{v0}}", {v0: (ad.postal_code || '-')}),
     ]
       .filter(Boolean)
       .join('\n');
@@ -258,7 +255,7 @@ function AddressPage() {
       setCopiedId(item._id);
       setTimeout(() => setCopiedId(''), 1500);
     } catch {
-      toast.error('کپی نشد؛ دستی انتخاب کنید.');
+      toast.error(translateText("کپی نشد؛ دستی انتخاب کنید."));
     }
   };
 
@@ -279,11 +276,9 @@ function AddressPage() {
           >
             <MapPin size={28} style={{ color: 'var(--accent-text)' }} />
           </span>
-          <h1 className="mt-4 text-base font-black">برای مدیریت نشانی‌ها وارد شوید</h1>
-          <p className="mt-2 text-xs muted">پس از ورود می‌توانید نشانی‌های تحویل سفارش را ثبت و ویرایش کنید.</p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
-            ورود به حساب
-          </Link>
+          <h1 className="mt-4 text-base font-black">{translateText("برای مدیریت نشانی‌ها وارد شوید")}</h1>
+          <p className="mt-2 text-xs muted">{translateText("پس از ورود می‌توانید نشانی‌های تحویل سفارش را ثبت و ویرایش کنید.")}</p>
+          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">{translateText("ورود به حساب ")}</Link>
         </div>
       </div>
     );
@@ -301,16 +296,14 @@ function AddressPage() {
             <MapPin size={20} style={{ color: 'var(--accent-text)' }} />
           </span>
           <div className="min-w-0">
-            <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">
-              نشانی‌های من
-              <span
+            <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">{translateText("نشانی‌های من ")}<span
                 className="rounded-full px-2 py-0.5 text-[11px] font-black"
                 style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
               >
                 {toFa(normalised.length)}
               </span>
             </h1>
-            <p className="mt-0.5 text-[11px] muted">نشانی پیش‌فرض در ثبت سفارش به‌صورت خودکار انتخاب می‌شود.</p>
+            <p className="mt-0.5 text-[11px] muted">{translateText("نشانی پیش‌فرض در ثبت سفارش به‌صورت خودکار انتخاب می‌شود.")}</p>
           </div>
         </div>
 
@@ -319,9 +312,7 @@ function AddressPage() {
           onClick={() => setFormOpen(true)}
           className="btn-yellow inline-flex items-center justify-center gap-1.5 !py-2.5 text-sm"
         >
-          <Plus size={16} />
-          افزودن نشانی جدید
-        </button>
+          <Plus size={16} />{translateText("افزودن نشانی جدید ")}</button>
       </header>
 
       {/* لیست */}
@@ -347,30 +338,26 @@ function AddressPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
                     <Building2 size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
-                    <h2 className="truncate text-sm font-black">{ad.full_name || 'نشانی بدون نام'}</h2>
+                    <h2 className="truncate text-sm font-black">{ad.full_name || translateText("نشانی بدون نام")}</h2>
                   </div>
                   {isDefault && (
                     <span
                       className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black text-white"
                       style={{ background: '#17994f' }}
                     >
-                      <CheckCircle2 size={11} />
-                      پیش‌فرض
-                    </span>
+                      <CheckCircle2 size={11} />{translateText("پیش‌فرض ")}</span>
                   )}
                 </div>
 
                 <p className="mt-2 text-xs leading-6" style={{ color: 'var(--text)' }}>
-                  {[ad.province, ad.city, ad.neighborhood].filter(Boolean).join('، ')}
+                  {[ad.province, ad.city, ad.neighborhood].filter(Boolean).join(translateText("، "))}
                 </p>
                 <p className="mt-0.5 text-xs leading-6 muted">{ad.full_address || '—'}</p>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] muted">
-                  <span className="inline-flex items-center gap-1">
-                    پلاک <b style={{ color: 'var(--text)' }}>{toFa(ad.building_number ?? '-')}</b>
+                  <span className="inline-flex items-center gap-1">{translateText("پلاک ")}<b style={{ color: 'var(--text)' }}>{toFa(ad.building_number ?? '-')}</b>
                   </span>
-                  <span className="inline-flex items-center gap-1">
-                    واحد <b style={{ color: 'var(--text)' }}>{toFa(ad.unit ?? '-')}</b>
+                  <span className="inline-flex items-center gap-1">{translateText("واحد ")}<b style={{ color: 'var(--text)' }}>{toFa(ad.unit ?? '-')}</b>
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Hash size={11} className="shrink-0" />
@@ -386,9 +373,7 @@ function AddressPage() {
                     onClick={() => setEditTarget(item)}
                     className="btn-ghost inline-flex items-center gap-1 !py-1.5 !px-2.5 text-[11px]"
                   >
-                    <Pencil size={12} />
-                    ویرایش
-                  </button>
+                    <Pencil size={12} />{translateText("ویرایش ")}</button>
 
                   {!isDefault && (
                     <button
@@ -397,9 +382,7 @@ function AddressPage() {
                       disabled={busy}
                       className="btn-ghost inline-flex items-center gap-1 !py-1.5 !px-2.5 text-[11px] disabled:opacity-50"
                     >
-                      <Check size={12} />
-                      پیش‌فرض
-                    </button>
+                      <Check size={12} />{translateText("پیش‌فرض ")}</button>
                   )}
 
                   <button
@@ -412,15 +395,15 @@ function AddressPage() {
                     ) : (
                       <Copy size={12} />
                     )}
-                    {copiedId === item._id ? 'کپی شد' : 'کپی'}
+                    {copiedId === item._id ? translateText("کپی شد") : translateText("کپی")}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(item)}
                     className="btn-ghost ms-auto inline-flex items-center gap-1 !p-2 text-[11px] text-rose-500"
-                    aria-label="حذف نشانی"
-                    title="حذف نشانی"
+                    aria-label={translateText("حذف نشانی")}
+                    title={translateText("حذف نشانی")}
                   >
                     <Trash2 size={13} />
                   </button>
@@ -448,7 +431,7 @@ function AddressPage() {
       {/* مودال افزودن نشانی */}
       {formOpen && (
         <div
-          dir="rtl"
+          dir={i18nDirection}
           className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center"
           role="dialog"
           aria-modal="true"
@@ -456,7 +439,7 @@ function AddressPage() {
         >
           <button
             type="button"
-            aria-label="بستن فرم نشانی"
+            aria-label={translateText("بستن فرم نشانی")}
             onClick={closeForm}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
@@ -467,10 +450,8 @@ function AddressPage() {
           >
             <div className="mb-4 flex items-center justify-between gap-3 border-b border-theme pb-3">
               <h2 id="add-address-title" className="flex items-center gap-2 text-base font-black">
-                <MapPin size={17} style={{ color: 'var(--accent-text)' }} />
-                نشانی جدید
-              </h2>
-              <button type="button" onClick={closeForm} aria-label="بستن" className="btn-ghost !p-2">
+                <MapPin size={17} style={{ color: 'var(--accent-text)' }} />{translateText("نشانی جدید ")}</h2>
+              <button type="button" onClick={closeForm} aria-label={translateText("بستن")} className="btn-ghost !p-2">
                 <X size={16} />
               </button>
             </div>
@@ -502,11 +483,9 @@ function AddressPage() {
                 disabled={saving}
                 className="btn-yellow inline-flex flex-1 items-center justify-center gap-2 !py-2.5 text-sm disabled:opacity-60"
               >
-                {saving ? 'در حال ذخیره…' : 'ذخیره نشانی'}
+                {saving ? translateText("در حال ذخیره…") : translateText("ذخیره نشانی")}
               </button>
-              <button type="button" onClick={closeForm} className="btn-ghost !py-2.5 text-sm">
-                انصراف
-              </button>
+              <button type="button" onClick={closeForm} className="btn-ghost !py-2.5 text-sm">{translateText("انصراف ")}</button>
             </div>
           </form>
         </div>
@@ -515,7 +494,7 @@ function AddressPage() {
       {/* تأیید حذف */}
       {deleteTarget && (
         <div
-          dir="rtl"
+          dir={i18nDirection}
           className="fixed inset-0 z-[70] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
@@ -523,7 +502,7 @@ function AddressPage() {
         >
           <button
             type="button"
-            aria-label="بستن"
+            aria-label={translateText("بستن")}
             onClick={() => setDeleteTarget(null)}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
@@ -531,12 +510,9 @@ function AddressPage() {
             <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-rose-500/12">
               <Trash2 size={20} className="text-rose-500" />
             </span>
-            <h2 id="delete-address-title" className="mt-3 text-sm font-black">
-              حذف این نشانی؟
-            </h2>
+            <h2 id="delete-address-title" className="mt-3 text-sm font-black">{translateText("حذف این نشانی؟ ")}</h2>
             <p className="mt-1.5 text-[11px] leading-6 muted">
-              «{deleteTarget.ad?.full_name || 'نشانی'}» برای همیشه حذف می‌شود. این کار قابل بازگشت نیست.
-            </p>
+              «{deleteTarget.ad?.full_name || translateText("نشانی")}{translateText("» برای همیشه حذف می‌شود. این کار قابل بازگشت نیست. ")}</p>
             <div className="mt-4 flex items-center gap-2">
               <button
                 type="button"
@@ -544,16 +520,12 @@ function AddressPage() {
                 disabled={busyId === deleteTarget._id}
                 className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-rose-500 py-2.5 text-sm font-black text-white transition hover:bg-rose-600 disabled:opacity-60"
               >
-                <Trash2 size={15} />
-                حذف کن
-              </button>
+                <Trash2 size={15} />{translateText("حذف کن ")}</button>
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 className="btn-ghost flex-1 !py-2.5 text-sm"
-              >
-                انصراف
-              </button>
+              >{translateText("انصراف ")}</button>
             </div>
           </div>
         </div>

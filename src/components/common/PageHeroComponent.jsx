@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Sparkles } from 'lucide-react';
@@ -14,8 +15,8 @@ function PageHeroComponent({ breadcrumb, badge, title, description, highlights =
     >
       <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-20">
         <nav className="flex items-center gap-1.5 text-[11px] text-white/60">
-          <Link to="/" className="hover:text-white transition-colors">خانه</Link>
-          <ChevronLeft size={12} />
+          <Link to="/" className="hover:text-white transition-colors">{translateText("خانه")}</Link>
+          <ChevronLeft className="logical-icon" size={12} />
           <span className="text-white/90">{breadcrumb}</span>
         </nav>
 

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -23,10 +24,10 @@ import { getBody } from '../../utils/helpers/response';
 /* ------------------------------------------------------------------ */
 
 const SORTS = [
-  { key: 'newest', label: 'تازه‌ترین' },
-  { key: 'cheap', label: 'ارزان‌ترین' },
-  { key: 'expensive', label: 'گران‌ترین' },
-  { key: 'discount', label: 'بیشترین تخفیف' },
+  { key: 'newest', label: translateText("تازه‌ترین") },
+  { key: 'cheap', label: translateText("ارزان‌ترین") },
+  { key: 'expensive', label: translateText("گران‌ترین") },
+  { key: 'discount', label: translateText("بیشترین تخفیف") },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -117,7 +118,7 @@ function FavoritesPage() {
   const handleClear = () => {
     clearFavorites();
     setConfirmClear(false);
-    toast.success('لیست علاقه‌مندی‌ها پاک شد');
+    toast.success(translateText("لیست علاقه‌مندی‌ها پاک شد"));
   };
 
   /* ---------- حالت خالی ---------- */
@@ -135,9 +136,7 @@ function FavoritesPage() {
             <Heart size={20} style={{ color: '#ff4d6d' }} fill="#ff4d6d" />
           </span>
           <div className="min-w-0">
-            <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">
-              علاقه‌مندی‌های من
-              <span
+            <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">{translateText("علاقه‌مندی‌های من ")}<span
                 className="rounded-full px-2 py-0.5 text-[11px] font-black"
                 style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
               >
@@ -146,8 +145,8 @@ function FavoritesPage() {
             </h1>
             <p className="mt-0.5 text-[11px] muted">
               {discounted > 0
-                ? `${toFa(discounted)} کالا از لیست شما تخفیف دارد — قبل از پایان تخفیف بررسی کنید.`
-                : 'کالاهایی که ذخیره کرده‌اید همیشه همین‌جا در دسترس‌اند.'}
+                ? translateText("{{v0}} کالا از لیست شما تخفیف دارد — قبل از پایان تخفیف بررسی کنید.", {v0: (toFa(discounted))})
+                : translateText("کالاهایی که ذخیره کرده‌اید همیشه همین‌جا در دسترس‌اند.")}
             </p>
           </div>
         </div>
@@ -160,9 +159,7 @@ function FavoritesPage() {
                 onClick={() => setConfirmClear(true)}
                 className="btn-ghost inline-flex h-10 items-center gap-1.5 !py-0 text-xs text-red-400 hover:!border-red-400"
               >
-                <Trash2 size={14} />
-                پاک کردن همه
-              </button>
+                <Trash2 size={14} />{translateText("پاک کردن همه ")}</button>
             ) : (
               <div className="flex items-center gap-2">
                 <button
@@ -170,14 +167,12 @@ function FavoritesPage() {
                   onClick={handleClear}
                   className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-red-500 px-3 text-xs font-black text-white"
                 >
-                  <Trash2 size={14} />
-                  مطمئنم، پاک کن
-                </button>
+                  <Trash2 size={14} />{translateText("مطمئنم، پاک کن ")}</button>
                 <button
                   type="button"
                   onClick={() => setConfirmClear(false)}
                   className="btn-ghost grid h-10 w-10 place-items-center !p-0"
-                  aria-label="انصراف"
+                  aria-label={translateText("انصراف")}
                 >
                   <X size={15} />
                 </button>
@@ -199,17 +194,15 @@ function FavoritesPage() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="جستجو در علاقه‌مندی‌ها…"
+              placeholder={translateText("جستجو در علاقه‌مندی‌ها…")}
               className="input h-10 !pe-9 text-xs"
-              aria-label="جستجو در علاقه‌مندی‌ها"
+              aria-label={translateText("جستجو در علاقه‌مندی‌ها")}
             />
           </div>
 
           <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto sm:flex-wrap sm:overflow-visible">
             <span className="me-1 inline-flex shrink-0 items-center gap-1 text-[11px] muted">
-              <ArrowUpDown size={13} />
-              مرتب‌سازی
-            </span>
+              <ArrowUpDown size={13} />{translateText("مرتب‌سازی ")}</span>
             {SORTS.map((item) => {
               const on = sort === item.key;
               return (
@@ -242,19 +235,13 @@ function FavoritesPage() {
           >
             <Heart size={28} style={{ color: '#ff4d6d' }} />
           </span>
-          <h2 className="mt-4 text-base font-black">لیست علاقه‌مندی‌های شما خالی است</h2>
-          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
-            روی آیکن قلب هر کالا بزنید تا اینجا ذخیره شود و بعداً راحت پیدایش کنید.
-          </p>
+          <h2 className="mt-4 text-base font-black">{translateText("لیست علاقه‌مندی‌های شما خالی است")}</h2>
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">{translateText("روی آیکن قلب هر کالا بزنید تا اینجا ذخیره شود و بعداً راحت پیدایش کنید. ")}</p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <Link to="/products" className="btn-yellow inline-flex items-center gap-2">
-              <ShoppingBag size={16} />
-              شروع خرید
-            </Link>
+              <ShoppingBag size={16} />{translateText("شروع خرید ")}</Link>
             <Link to="/" className="btn-ghost inline-flex items-center gap-2">
-              <Sparkles size={16} />
-              پیشنهادهای امروز
-            </Link>
+              <Sparkles size={16} />{translateText("پیشنهادهای امروز ")}</Link>
           </div>
         </div>
       ) : (
@@ -265,22 +252,19 @@ function FavoritesPage() {
               style={{ borderColor: 'var(--border)', background: 'var(--card2)' }}
             >
               <X size={13} />
-              {toFa(missing)} کالا از این لیست در فروشگاه موجود نیست و حذف شد.
-            </div>
+              {toFa(missing)}{translateText(" کالا از این لیست در فروشگاه موجود نیست و حذف شد. ")}</div>
           )}
 
           {visible.length === 0 && !loading ? (
             <div className="card rounded-3xl p-10 text-center">
               <Search size={28} className="mx-auto muted" />
-              <div className="mt-3 text-sm font-black">چیزی با این جستجو پیدا نشد</div>
+              <div className="mt-3 text-sm font-black">{translateText("چیزی با این جستجو پیدا نشد")}</div>
               <button
                 type="button"
                 onClick={() => setQuery('')}
                 className="btn-ghost mt-4 inline-flex items-center gap-1.5 text-xs"
               >
-                <X size={14} />
-                پاک کردن جستجو
-              </button>
+                <X size={14} />{translateText("پاک کردن جستجو ")}</button>
             </div>
           ) : (
             <ProductGridComponent products={visible} loading={loading} columns={4} />
@@ -288,9 +272,7 @@ function FavoritesPage() {
 
           {visible.length > 0 && (
             <div className="mt-4 flex items-center gap-1.5 rounded-2xl border border-theme px-3 py-2.5 text-[11px] muted">
-              <Heart size={13} style={{ color: '#ff4d6d' }} fill="#ff4d6d" />
-              با زدن قلب هر کارت، آن کالا از این لیست حذف می‌شود.
-            </div>
+              <Heart size={13} style={{ color: '#ff4d6d' }} fill="#ff4d6d" />{translateText("با زدن قلب هر کارت، آن کالا از این لیست حذف می‌شود. ")}</div>
           )}
         </>
       )}

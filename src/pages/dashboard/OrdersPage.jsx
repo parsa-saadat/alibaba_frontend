@@ -1,3 +1,6 @@
+const formatPrice = amount => formatOrderMoney(amount, 'IRR');
+import { formatMoney as formatOrderMoney } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -20,7 +23,7 @@ import {
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
-import { formatPrice, toFa, statusFa, formatDateTime } from '../../utils/helpers/format';
+import { formatPrice as formatCatalogPrice, toFa, statusFa, formatDateTime } from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
 import { userFullName } from '../../utils/helpers/user';
 import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
@@ -39,10 +42,10 @@ import {
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const PAY_FILTERS = [
-  ['ALL', 'همه'],
-  ['paid', 'پرداخت‌شده'],
-  ['pending', 'در انتظار پرداخت'],
-  ['failed', 'ناموفق'],
+  ['ALL', translateText("همه")],
+  ['paid', translateText("پرداخت‌شده")],
+  ['pending', translateText("در انتظار پرداخت")],
+  ['failed', translateText("ناموفق")],
 ];
 
 const payStatusOf = (order) => order.payment?.status || order.payment_status || 'pending';
@@ -209,25 +212,25 @@ function OrdersPage() {
   };
 
   const approveSubOrder = (subId) =>
-    run(subId, axios.put(`${API}/order/sub/${subId}/approve`, {}, authHeaders()), 'مرسوله تأیید شد', 'خطا در تأیید مرسوله');
+    run(subId, axios.put(`${API}/order/sub/${subId}/approve`, {}, authHeaders()), translateText("مرسوله تأیید شد"), translateText("خطا در تأیید مرسوله"));
 
   const updateSubOrderStatus = (subId, status) =>
     run(
       subId,
       axios.put(`${API}/order/sub/${subId}/status`, { status }, authHeaders()),
-      `وضعیت به «${statusFa(status)}» تغییر کرد`,
-      'خطا در تغییر وضعیت',
+      translateText("وضعیت به «{{v0}}» تغییر کرد", {v0: (statusFa(status))}),
+      translateText("خطا در تغییر وضعیت"),
     );
 
   const submitCancelSubOrder = (e) => {
     e.preventDefault();
-    if (!cancelReason.trim()) return toast.error('دلیل لغو الزامی است');
+    if (!cancelReason.trim()) return toast.error(translateText("دلیل لغو الزامی است"));
     const id = cancelTarget;
     run(
       id,
       axios.put(`${API}/order/sub/${id}/cancel`, { reason: cancelReason.trim() }, authHeaders()),
-      'مرسوله لغو شد',
-      'خطا در لغو مرسوله',
+      translateText("مرسوله لغو شد"),
+      translateText("خطا در لغو مرسوله"),
     ).then(() => {
       setCancelTarget(null);
       setCancelReason('');
@@ -237,7 +240,7 @@ function OrdersPage() {
   if (loading && orders.length === 0) {
     return (
       <div className="py-16">
-        <Loading label="در حال بارگذاری سفارش‌ها…" />
+        <Loading label={translateText("در حال بارگذاری سفارش‌ها…")} />
       </div>
     );
   }
@@ -246,16 +249,16 @@ function OrdersPage() {
     <div className="space-y-4">
       <PanelPageHeader
         icon={ClipboardList}
-        title="سفارش‌ها"
-        subtitle="جزئیات کامل سفارش‌ها، کالاها، مشتری، پرداخت و مرسوله‌ی هر فروشگاه"
+        title={translateText("سفارش‌ها")}
+        subtitle={translateText("جزئیات کامل سفارش‌ها، کالاها، مشتری، پرداخت و مرسوله‌ی هر فروشگاه")}
         onRefresh={() => load()}
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="کل سفارش‌ها" value={toFa(summary.total)} icon={ReceiptText} />
-        <StatTile label="پرداخت‌شده" value={toFa(summary.paid)} icon={PackageCheck} tint="#17994f" />
-        <StatTile label="در انتظار پرداخت" value={toFa(summary.pending)} icon={Clock3} tint="#c2740a" />
-        <StatTile label="مجموع پرداخت‌شده" value={formatPrice(summary.revenue)} icon={Wallet} />
+        <StatTile label={translateText("کل سفارش‌ها")} value={toFa(summary.total)} icon={ReceiptText} />
+        <StatTile label={translateText("پرداخت‌شده")} value={toFa(summary.paid)} icon={PackageCheck} tint="#17994f" />
+        <StatTile label={translateText("در انتظار پرداخت")} value={toFa(summary.pending)} icon={Clock3} tint="#c2740a" />
+        <StatTile label={translateText("مجموع پرداخت‌شده")} value={formatPrice(summary.revenue)} icon={Wallet} />
       </div>
 
       <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
@@ -274,27 +277,25 @@ function OrdersPage() {
         </div>
 
         <div className="relative w-full sm:w-80">
-          <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
+          <Search size={15} className="absolute end-3 top-1/2 -translate-y-1/2 muted" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="شماره سفارش، مشتری، موبایل، کالا یا فروشگاه…"
-            className="input !py-2 !pr-9 text-xs"
+            placeholder={translateText("شماره سفارش، مشتری، موبایل، کالا یا فروشگاه…")}
+            className="input !py-2 !pe-9 text-xs"
           />
         </div>
       </div>
 
       {loadError && (
         <div className="card rounded-2xl p-6 text-center space-y-3">
-          <p className="text-sm muted">دریافت سفارش‌ها ناموفق بود.</p>
-          <button type="button" onClick={load} className="btn-yellow !py-2 text-xs">
-            تلاش دوباره
-          </button>
+          <p className="text-sm muted">{translateText("دریافت سفارش‌ها ناموفق بود.")}</p>
+          <button type="button" onClick={load} className="btn-yellow !py-2 text-xs">{translateText("تلاش دوباره ")}</button>
         </div>
       )}
 
       {!loadError && filteredOrders.length === 0 ? (
-        <div className="card rounded-2xl p-10 text-center muted">سفارشی یافت نشد.</div>
+        <div className="card rounded-2xl p-10 text-center muted">{translateText("سفارشی یافت نشد.")}</div>
       ) : (
         <div className="space-y-3">
           {filteredOrders.map((o) => {
@@ -315,7 +316,7 @@ function OrdersPage() {
                   type="button"
                   onClick={() => toggleOrder(o)}
                   aria-expanded={isOpen}
-                  className="w-full p-4 text-right flex items-center justify-between gap-4 flex-wrap hover:bg-white/[0.02]"
+                  className="w-full p-4 text-start flex items-center justify-between gap-4 flex-wrap hover:bg-white/[0.02]"
                 >
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -324,21 +325,19 @@ function OrdersPage() {
                       </b>
                       <PayStatusChip status={payStatus} />
                       <span className="chip !cursor-default !py-0.5 !px-2 text-[11px]">
-                        {toFa(subs.length)} مرسوله
-                      </span>
+                        {toFa(subs.length)}{translateText(" مرسوله ")}</span>
                       <span className="chip !cursor-default !py-0.5 !px-2 text-[11px]">
-                        {toFa(itemsCount)} کالا
-                      </span>
+                        {toFa(itemsCount)}{translateText(" کالا ")}</span>
                     </div>
                     <div className="text-xs muted flex items-center gap-3 flex-wrap">
                       <span className="flex items-center gap-1">
                         <User2 size={12} />
-                        {userFullName(customer) || customer?.username || addr?.full_name || 'مشتری'}
+                        {userFullName(customer) || customer?.username || addr?.full_name || translateText("مشتری")}
                         {customer?.phone ? ` (${toFa(customer.phone)})` : ''}
                       </span>
                       {addr && (
                         <span className="flex items-center gap-1">
-                          <MapPin size={12} /> {addr.province}، {addr.city}
+                          <MapPin size={12} /> {addr.province}{translateText("، ")}{addr.city}
                         </span>
                       )}
                       <span>{formatDateTime(o.created_at ?? o.create_at)}</span>
@@ -354,11 +353,11 @@ function OrdersPage() {
                 {isOpen && (
                   <div className="p-4 pt-4 space-y-4 border-t border-theme">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                      <InfoBox icon={User2} title="اطلاعات مشتری">
-                        <InfoLine label="نام" value={userFullName(customer) || addr?.full_name} />
-                        <InfoLine label="نام کاربری" value={customer?.username} ltr />
-                        <InfoLine label="موبایل" value={customer?.phone ? toFa(customer.phone) : ''} />
-                        <InfoLine label="ایمیل" value={customer?.email} ltr />
+                      <InfoBox icon={User2} title={translateText("اطلاعات مشتری")}>
+                        <InfoLine label={translateText("نام")} value={userFullName(customer) || addr?.full_name} />
+                        <InfoLine label={translateText("نام کاربری")} value={customer?.username} ltr />
+                        <InfoLine label={translateText("موبایل")} value={customer?.phone ? toFa(customer.phone) : ''} />
+                        <InfoLine label={translateText("ایمیل")} value={customer?.email} ltr />
                         {customerId && (
                           <div className="pt-1 text-[10px] muted" dir="ltr">
                             ID: {customerId}
@@ -366,26 +365,26 @@ function OrdersPage() {
                         )}
                       </InfoBox>
 
-                      <InfoBox icon={MapPin} title="نشانی تحویل">
+                      <InfoBox icon={MapPin} title={translateText("نشانی تحویل")}>
                         <AddressLines address={addr} />
                       </InfoBox>
 
-                      <InfoBox icon={CreditCard} title="پرداخت و مبالغ" className="md:col-span-2 xl:col-span-1">
-                        <InfoLine label="وضعیت" value={<PayStatusChip status={payStatus} />} />
-                        <InfoLine label="درگاه" value={o.payment?.payment_gateway || o.payment?.method} />
-                        <InfoLine label="کد پیگیری" value={o.payment?.ref_id} ltr />
-                        <InfoLine label="شناسه تراکنش" value={o.payment?.authority} ltr />
-                        <InfoLine label="تاریخ پرداخت" value={o.payment?.paid_at ? formatDateTime(o.payment.paid_at) : ''} />
+                      <InfoBox icon={CreditCard} title={translateText("پرداخت و مبالغ")} className="md:col-span-2 xl:col-span-1">
+                        <InfoLine label={translateText("وضعیت")} value={<PayStatusChip status={payStatus} />} />
+                        <InfoLine label={translateText("درگاه")} value={o.payment?.payment_gateway || o.payment?.method} />
+                        <InfoLine label={translateText("کد پیگیری")} value={o.payment?.ref_id} ltr />
+                        <InfoLine label={translateText("شناسه تراکنش")} value={o.payment?.authority} ltr />
+                        <InfoLine label={translateText("تاریخ پرداخت")} value={o.payment?.paid_at ? formatDateTime(o.payment.paid_at) : ''} />
                         <div className="my-1 border-t border-theme" />
-                        <InfoLine label="جمع کالاها" value={formatPrice(o.total_amount ?? 0)} />
-                        <InfoLine label="تخفیف" value={formatPrice(o.total_discount ?? 0)} />
-                        <InfoLine label="مبلغ نهایی" value={formatPrice(o.final_amount ?? 0)} />
-                        <InfoLine label="پرداخت‌شده" value={formatPrice(o.paid_amount ?? 0)} />
+                        <InfoLine label={translateText("جمع کالاها")} value={formatPrice(o.total_amount ?? 0)} />
+                        <InfoLine label={translateText("تخفیف")} value={formatPrice(o.total_discount ?? 0)} />
+                        <InfoLine label={translateText("مبلغ نهایی")} value={formatPrice(o.final_amount ?? 0)} />
+                        <InfoLine label={translateText("پرداخت‌شده")} value={formatPrice(o.paid_amount ?? 0)} />
                       </InfoBox>
                     </div>
 
                     {o.customer_notes && (
-                      <InfoBox icon={StickyNote} title="یادداشت مشتری">
+                      <InfoBox icon={StickyNote} title={translateText("یادداشت مشتری")}>
                         <p className="leading-6 break-words">{o.customer_notes}</p>
                       </InfoBox>
                     )}
@@ -411,14 +410,13 @@ function OrdersPage() {
                                     <StoreIcon size={12} />
                                     {getId(sub.store_id) ? (
                                       <Link to={`/store/${getId(sub.store_id)}`} className="font-bold hover:underline" style={{ color: 'var(--text)' }}>
-                                        {store?.name || 'فروشگاه'}
+                                        {store?.name || translateText("فروشگاه")}
                                       </Link>
                                     ) : (
                                       '—'
                                     )}
                                   </span>
-                                  <span>
-                                    فروشنده: {userFullName(seller) || seller?.username || '—'}
+                                  <span>{translateText("فروشنده: ")}{userFullName(seller) || seller?.username || '—'}
                                     {seller?.phone ? ` (${toFa(seller.phone)})` : ''}
                                   </span>
                                 </div>
@@ -434,7 +432,7 @@ function OrdersPage() {
                             <CancellationInfo sub={sub} />
 
                             <details className="rounded-xl p-3" style={{ background: 'var(--card)' }}>
-                              <summary className="cursor-pointer text-[11px] font-black">تاریخچه‌ی وضعیت مرسوله</summary>
+                              <summary className="cursor-pointer text-[11px] font-black">{translateText("تاریخچه‌ی وضعیت مرسوله")}</summary>
                               <div className="mt-3">
                                 <OrderTimeline history={sub.status_history || []} />
                               </div>
@@ -442,13 +440,12 @@ function OrdersPage() {
 
                             <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-theme">
                               <div className="flex items-center gap-3 flex-wrap text-[11px]">
-                                <span className="muted">
-                                  جمع اقلام: <b style={{ color: 'var(--text)' }}>{formatPrice(sub.amount ?? sub.subtotal ?? 0)}</b>
+                                <span className="muted">{translateText("جمع اقلام: ")}<b style={{ color: 'var(--text)' }}>{formatPrice(sub.amount ?? sub.subtotal ?? 0)}</b>
                                 </span>
                                 {Number(sub.discount_applied) > 0 && (
-                                  <span style={{ color: '#e53935' }}>تخفیف: {formatPrice(sub.discount_applied)}</span>
+                                  <span style={{ color: '#e53935' }}>{translateText("تخفیف: ")}{formatPrice(sub.discount_applied)}</span>
                                 )}
-                                <span className="font-black text-yellow">خالص مرسوله: {formatPrice(netOf(sub))}</span>
+                                <span className="font-black text-yellow">{translateText("خالص مرسوله: ")}{formatPrice(netOf(sub))}</span>
                               </div>
 
                               <div className="flex items-center gap-1.5 flex-wrap">
@@ -459,23 +456,16 @@ function OrdersPage() {
                                     onClick={() => approveSubOrder(sub._id)}
                                     className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
                                   >
-                                    <Check size={13} /> تأیید مرسوله
-                                  </button>
+                                    <Check size={13} />{translateText(" تأیید مرسوله ")}</button>
                                 )}
                                 {st === 'preparing' && (
-                                  <button type="button" disabled={busy} onClick={() => updateSubOrderStatus(sub._id, 'ready_to_ship')} className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60">
-                                    آماده ارسال
-                                  </button>
+                                  <button type="button" disabled={busy} onClick={() => updateSubOrderStatus(sub._id, 'ready_to_ship')} className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60">{translateText("آماده ارسال ")}</button>
                                 )}
                                 {st === 'ready_to_ship' && (
-                                  <button type="button" disabled={busy} onClick={() => updateSubOrderStatus(sub._id, 'shipped')} className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60">
-                                    ثبت ارسال
-                                  </button>
+                                  <button type="button" disabled={busy} onClick={() => updateSubOrderStatus(sub._id, 'shipped')} className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60">{translateText("ثبت ارسال ")}</button>
                                 )}
                                 {st === 'shipped' && (
-                                  <button type="button" disabled={busy} onClick={() => updateSubOrderStatus(sub._id, 'delivered')} className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60">
-                                    ثبت تحویل
-                                  </button>
+                                  <button type="button" disabled={busy} onClick={() => updateSubOrderStatus(sub._id, 'delivered')} className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60">{translateText("ثبت تحویل ")}</button>
                                 )}
                                 {!['delivered', 'cancelled', 'rejected', 'finalized'].includes(st) && (
                                   <button
@@ -487,9 +477,7 @@ function OrdersPage() {
                                     }}
                                     className="btn-ghost !py-1.5 !px-3 text-xs disabled:opacity-60"
                                     style={{ color: '#e53935' }}
-                                  >
-                                    لغو مرسوله
-                                  </button>
+                                  >{translateText("لغو مرسوله ")}</button>
                                 )}
                               </div>
                             </div>
@@ -516,8 +504,8 @@ function OrdersPage() {
             className="card rounded-3xl p-6 w-full max-w-md space-y-3"
           >
             <div className="flex items-center justify-between border-b border-theme pb-3">
-              <h3 className="font-black">لغو مرسوله</h3>
-              <button type="button" onClick={() => setCancelTarget(null)} className="btn-ghost !p-1.5" aria-label="بستن">
+              <h3 className="font-black">{translateText("لغو مرسوله")}</h3>
+              <button type="button" onClick={() => setCancelTarget(null)} className="btn-ghost !p-1.5" aria-label={translateText("بستن")}>
                 <X size={16} />
               </button>
             </div>
@@ -525,18 +513,14 @@ function OrdersPage() {
               className="input"
               rows={3}
               maxLength={500}
-              placeholder="دلیل لغو سفارش را وارد کنید…"
+              placeholder={translateText("دلیل لغو سفارش را وارد کنید…")}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
               required
             />
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setCancelTarget(null)} className="btn-ghost !py-2 text-xs">
-                انصراف
-              </button>
-              <button type="submit" disabled={busyId === cancelTarget} className="btn-yellow !py-2 text-xs disabled:opacity-60">
-                تأیید لغو
-              </button>
+              <button type="button" onClick={() => setCancelTarget(null)} className="btn-ghost !py-2 text-xs">{translateText("انصراف ")}</button>
+              <button type="submit" disabled={busyId === cancelTarget} className="btn-yellow !py-2 text-xs disabled:opacity-60">{translateText("تأیید لغو ")}</button>
             </div>
           </form>
         </div>

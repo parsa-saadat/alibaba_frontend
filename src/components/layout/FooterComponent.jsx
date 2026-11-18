@@ -1,3 +1,5 @@
+import LanguageSelector from '../common/locale/LanguageSelectorComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatJalaliYear } from '../../utils/helpers/format';
@@ -35,68 +37,68 @@ import { getId } from '../../utils/helpers/response';
 const CATEGORY_ICONS = [Satellite, Crosshair, Camera, Tablet, Ruler, Package];
 
 const FALLBACK_CATEGORIES = [
-  'جی‌پی‌اس ایستگاهی (RTK)',
-  'دوربین نقشه‌برداری',
-  'توتال استیشن',
-  'کنترولر و دیتالاگر',
-  'متر و اسکنر لیزری',
-  'لوازم جانبی نقشه‌برداری',
+  translateText('جی‌پی‌اس ایستگاهی (RTK)'),
+  translateText('دوربین نقشه‌برداری'),
+  translateText('توتال استیشن'),
+  translateText('کنترولر و دیتالاگر'),
+  translateText('متر و اسکنر لیزری'),
+  translateText('لوازم جانبی نقشه‌برداری'),
 ];
 
 const LINK_COLUMNS = [
   {
-    title: 'خرید و سفارش',
+    title: translateText('خرید و سفارش'),
     items: [
-      { label: 'همه محصولات', to: '/products' },
-      { label: 'تخفیف‌های فعال', to: '/products?discount=true' },
-      { label: 'سبد خرید', to: '/cart' },
-      { label: 'لیست علاقه‌مندی', to: '/favorites' },
-      { label: 'مقایسه محصولات', to: '/compare' },
-      { label: 'پیگیری سفارش‌ها', to: '/orders' },
+      { label: translateText('همه محصولات'), to: '/products' },
+      { label: translateText('تخفیف‌های فعال'), to: '/products?discount=true' },
+      { label: translateText('سبد خرید'), to: '/cart' },
+      { label: translateText('لیست علاقه‌مندی'), to: '/favorites' },
+      { label: translateText('مقایسه محصولات'), to: '/compare' },
+      { label: translateText('پیگیری سفارش‌ها'), to: '/orders' },
     ],
   },
   {
-    title: 'فروش در ژئو کالا',
+    title: translateText('فروش در ژئو کالا'),
     items: [
-      { label: 'شروع فروش', to: '/seller' },
-      { label: 'پنل فروشنده', to: '/seller' },
-      { label: 'پلن‌ها و تعرفه', to: '/seller/plans' },
-      { label: 'راهنمای فروش', to: '/guide/selling' },
-      { label: 'قوانین فروشندگان', to: '/terms/sellers' },
+      { label: translateText('شروع فروش'), to: '/seller' },
+      { label: translateText('پنل فروشنده'), to: '/seller' },
+      { label: translateText('پلن‌ها و تعرفه'), to: '/seller/plans' },
+      { label: translateText('راهنمای فروش'), to: '/guide/selling' },
+      { label: translateText('قوانین فروشندگان'), to: '/terms/sellers' },
     ],
   },
   {
-    title: 'راهنما و پشتیبانی',
+    title: translateText('راهنما و پشتیبانی'),
     items: [
-      { label: 'تماس با ما', to: '/contact' },
-      { label: 'درباره ژئو کالا', to: '/about' },
-      { label: 'راهنمای خرید', to: '/guide/buying' },
-      { label: 'سوالات متداول', to: '/contact#faq' },
-      { label: 'قوانین مشتریان', to: '/terms/customers' },
-      { label: 'قوانین خریداران', to: '/terms/buyers' },
-      { label: 'حریم خصوصی', to: '/privacy' },
+      { label: translateText('تماس با ما'), to: '/contact' },
+      { label: translateText('درباره ژئو کالا'), to: '/about' },
+      { label: translateText('راهنمای خرید'), to: '/guide/buying' },
+      { label: translateText('سوالات متداول'), to: '/contact#faq' },
+      { label: translateText('قوانین مشتریان'), to: '/terms/customers' },
+      { label: translateText('قوانین خریداران'), to: '/terms/buyers' },
+      { label: translateText('حریم خصوصی'), to: '/privacy' },
     ],
   },
 ];
 
 const STATS = [
-  { value: '۱۳۸۳', label: 'سال آغاز فعالیت' },
-  { value: '۲', label: 'شعبه فعال' },
-  { value: '۲۴/۷', label: 'پشتیبانی' },
+  { value: translateText('۱۳۸۳'), label: translateText('سال آغاز فعالیت') },
+  { value: translateText('۲'), label: translateText('شعبه فعال') },
+  { value: translateText('۲۴/۷'), label: translateText('پشتیبانی') },
 ];
 
 const TRUST_ITEMS = [
-  { icon: Truck, title: 'ارسال سریع', desc: 'تحویل ۱ تا ۳ روز کاری' },
-  { icon: ShieldCheck, title: 'تضمین اصالت کالا', desc: 'ضمانت بازگشت وجه' },
-  { icon: CreditCard, title: 'پرداخت امن', desc: 'درگاه بانکی معتبر' },
-  { icon: Headset, title: 'پشتیبانی ۲۴ ساعته', desc: '۷ روز هفته، پاسخگو' },
+  { icon: Truck, title: translateText('ارسال سریع'), desc: translateText('تحویل ۱ تا ۳ روز کاری') },
+  { icon: ShieldCheck, title: translateText('تضمین اصالت کالا'), desc: translateText('ضمانت بازگشت وجه') },
+  { icon: CreditCard, title: translateText('پرداخت امن'), desc: translateText('درگاه بانکی معتبر') },
+  { icon: Headset, title: translateText('پشتیبانی ۲۴ ساعته'), desc: translateText('۷ روز هفته، پاسخگو') },
 ];
 
 const CONTACTS = [
-  { icon: Phone, text: '۰۹۱۲۹۳۲۷۵۱۵ — شعبه تهران', href: 'tel:+989129327515' },
-  { icon: Phone, text: '۰۹۱۰۲۴۰۱۰۰۷ — شعبه مازندران', href: 'tel:+989102401007' },
+  { icon: Phone, text: translateText('۰۹۱۲۹۳۲۷۵۱۵ — شعبه تهران'), href: 'tel:+989129327515' },
+  { icon: Phone, text: translateText('۰۹۱۰۲۴۰۱۰۰۷ — شعبه مازندران'), href: 'tel:+989102401007' },
   { icon: Mail, text: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
-  { icon: MapPin, text: 'تهران · مازندران، هچیرود' },
+  { icon: MapPin, text: translateText('تهران · مازندران، هچیرود') },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -113,7 +115,7 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 py-4 text-right lg:pointer-events-none lg:mb-4 lg:py-0"
+        className="flex w-full items-center justify-between gap-2 py-4 text-start lg:pointer-events-none lg:mb-4 lg:py-0"
       >
         <span className="flex items-center gap-2 text-sm font-extrabold text-white">
           {Icon && <Icon size={16} style={{ color: 'var(--primary-color)' }} />}
@@ -138,7 +140,11 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
                 className="group flex items-center gap-2 py-1 text-[0.82rem] text-[#a9b6d8] transition-colors hover:text-white"
               >
                 {item.Icon ? (
-                  <item.Icon size={14} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
+                  <item.Icon
+                    size={14}
+                    className="shrink-0"
+                    style={{ color: 'var(--primary-color)' }}
+                  />
                 ) : (
                   <span
                     className="h-px w-2 shrink-0 transition-all duration-200 group-hover:w-4"
@@ -178,7 +184,7 @@ function FooterComponent() {
       }));
     }
     return categories.map((category, i) => ({
-      label: category.name || 'دسته‌بندی',
+      label: category.name || translateText('دسته‌بندی'),
       to: `/products?category_id=${getId(category)}`,
       Icon: CATEGORY_ICONS[i % CATEGORY_ICONS.length],
     }));
@@ -191,6 +197,9 @@ function FooterComponent() {
       className="site-footer relative mt-16 overflow-x-clip pt-8 text-[#dfe6fb]"
       style={{ background: 'linear-gradient(180deg, #0c1a3d 0%, #060d21 100%)' }}
     >
+      <div className="hidden md:block max-w-7xl mx-auto px-4 mb-6 relative z-10">
+        <LanguageSelector variant="main" placement="footer" />
+      </div>
       {/* درخشش‌های تزئینی */}
       <div
         aria-hidden
@@ -221,8 +230,10 @@ function FooterComponent() {
                 <Store size={20} />
               </span>
               <div>
-                <b className="block text-sm">کسب‌وکار دارید؟</b>
-                <span className="block text-xs opacity-80">تجهیزات نقشه‌برداری خود را در ژئو کالا بفروشید</span>
+                <b className="block text-sm">{translateText('کسب‌وکار دارید؟')}</b>
+                <span className="block text-xs opacity-80">
+                  {translateText('تجهیزات نقشه‌برداری خود را در ژئو کالا بفروشید')}
+                </span>
               </div>
             </div>
             <Link
@@ -230,7 +241,7 @@ function FooterComponent() {
               className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5"
               style={{ color: 'var(--navy)' }}
             >
-              شروع فروش
+              {translateText('شروع فروش ')}
               <ArrowLeft size={16} />
             </Link>
           </div>
@@ -253,7 +264,9 @@ function FooterComponent() {
                 </span>
                 <div className="min-w-0">
                   <b className="block truncate text-xs text-white md:text-sm">{item.title}</b>
-                  <span className="block truncate text-[11px] text-[#8fa0c9] md:text-xs">{item.desc}</span>
+                  <span className="block truncate text-[11px] text-[#8fa0c9] md:text-xs">
+                    {item.desc}
+                  </span>
                 </div>
               </div>
             );
@@ -267,19 +280,23 @@ function FooterComponent() {
             <Link to="/" className="inline-flex flex-col items-start gap-2">
               <BrandLogoComponent variant="full" size="md" tone="white" />
               <span className="text-[11px] text-[#8fa0c9]">
-                بازارگاه تخصصی تجهیزات نقشه‌برداری
+                {translateText('بازارگاه تخصصی تجهیزات نقشه‌برداری ')}
               </span>
             </Link>
 
             <p className="mt-4 max-w-sm text-xs leading-6 text-[#8fa0c9]">
-              ژئو کالا بازارگاه تخصصی تجهیزات نقشه‌برداری است؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و
-              کنترولر، با مشاوره‌ی فنی و ضمانت اصالت کالا. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا.
+              {translateText(
+                'ژئو کالا بازارگاه تخصصی تجهیزات نقشه‌برداری است؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و کنترولر، با مشاوره‌ی فنی و ضمانت اصالت کالا. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا. ',
+              )}
             </p>
 
             {/* آمار */}
             <div className="mt-6 grid max-w-sm grid-cols-3 gap-2">
               {STATS.map((stat) => (
-                <div key={stat.label} className="rounded-xl bg-white/[0.04] px-2 py-3 text-center ring-1 ring-white/[0.06]">
+                <div
+                  key={stat.label}
+                  className="rounded-xl bg-white/[0.04] px-2 py-3 text-center ring-1 ring-white/[0.06]"
+                >
                   <b className="block text-sm font-black" style={{ color: 'var(--primary-color)' }}>
                     {stat.value}
                   </b>
@@ -287,12 +304,16 @@ function FooterComponent() {
                 </div>
               ))}
             </div>
-
           </div>
 
           {/* دسته‌بندی‌ها */}
           <div className="lg:col-span-2">
-            <FooterSection title="دسته‌بندی‌ها" icon={Sparkles} items={categoryItems} defaultOpen />
+            <FooterSection
+              title={translateText('دسته‌بندی‌ها')}
+              icon={Sparkles}
+              items={categoryItems}
+              defaultOpen
+            />
           </div>
 
           {/* ستون‌های ثابت */}
@@ -319,7 +340,10 @@ function FooterComponent() {
               return (
                 <li key={c.text}>
                   {c.href ? (
-                    <a href={c.href} className="flex items-center gap-2 transition-colors hover:text-white">
+                    <a
+                      href={c.href}
+                      className="flex items-center gap-2 transition-colors hover:text-white"
+                    >
                       {content}
                     </a>
                   ) : (
@@ -332,7 +356,7 @@ function FooterComponent() {
 
           <span className="inline-flex w-max items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[11px] text-[#c9d4ef]">
             <BadgeCheck size={14} style={{ color: 'var(--primary-color)' }} />
-            نماد اعتماد الکترونیکی
+            {translateText('نماد اعتماد الکترونیکی ')}
           </span>
         </div>
       </div>
@@ -340,34 +364,41 @@ function FooterComponent() {
       {/* نوار پایانی */}
       <div className="relative border-t border-white/[0.08] bg-black/20">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
-          <p className="text-center text-[11px] text-[#8fa0c9] lg:text-right">
-            © {year} ژئو کالا — تمامی حقوق محفوظ است. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا
+          <p className="text-center text-[11px] text-[#8fa0c9] lg:text-start">
+            © {year}
+            {translateText(
+              ' ژئو کالا — تمامی حقوق محفوظ است. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا ',
+            )}
           </p>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#8fa0c9]">
             <Link to="/terms/customers" className="transition-colors hover:text-white">
-              قوانین مشتریان
+              {translateText('قوانین مشتریان ')}
             </Link>
             <Link to="/terms/buyers" className="transition-colors hover:text-white">
-              قوانین خریداران
+              {translateText('قوانین خریداران ')}
             </Link>
             <Link to="/terms/sellers" className="transition-colors hover:text-white">
-              قوانین فروشندگان
+              {translateText('قوانین فروشندگان ')}
             </Link>
-            <Link to="/privacy" className="transition-colors hover:text-white">حریم خصوصی</Link>
-            <Link to="/contact" className="transition-colors hover:text-white">تماس با ما</Link>
+            <Link to="/privacy" className="transition-colors hover:text-white">
+              {translateText('حریم خصوصی')}
+            </Link>
+            <Link to="/contact" className="transition-colors hover:text-white">
+              {translateText('تماس با ما')}
+            </Link>
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="inline-flex items-center gap-1 transition-colors hover:text-white"
             >
-              بازگشت به بالا
+              {translateText('بازگشت به بالا ')}
               <ArrowUp size={12} />
             </button>
           </nav>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {['شتاب', 'زرین‌پال', 'ساماندهی'].map((gateway) => (
+            {[translateText('شتاب'), translateText('زرین‌پال'), translateText('ساماندهی')].map((gateway) => (
               <span
                 key={gateway}
                 className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#c9d4ef]"

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -20,22 +21,22 @@ import ContactDepartmentsComponent from '../../components/contact/ContactDepartm
 import ContactFaqComponent from '../../components/contact/ContactFaqComponent';
 
 const STATS = [
-  { icon: Clock3, title: 'پاسخ زیر ۲۴ ساعت', desc: 'به همه پیام‌ها' },
-  { icon: Headset, title: 'مشاوره‌ی تخصصی', desc: 'کارشناس نقشه‌برداری' },
-  { icon: MessageSquare, title: 'دو شعبه‌ی فعال', desc: 'تهران و مازندران' },
+  { icon: Clock3, title: translateText("پاسخ زیر ۲۴ ساعت"), desc: translateText("به همه پیام‌ها") },
+  { icon: Headset, title: translateText("مشاوره‌ی تخصصی"), desc: translateText("کارشناس نقشه‌برداری") },
+  { icon: MessageSquare, title: translateText("دو شعبه‌ی فعال"), desc: translateText("تهران و مازندران") },
 ];
 
 const HOURS = [
-  { day: 'شنبه تا چهارشنبه', time: '۹:۰۰ تا ۱۸:۰۰' },
-  { day: 'پنجشنبه', time: '۹:۰۰ تا ۱۴:۰۰' },
-  { day: 'جمعه', time: 'تعطیل — فرم و ایمیل فعال است' },
+  { day: translateText("شنبه تا چهارشنبه"), time: translateText("۹:۰۰ تا ۱۸:۰۰") },
+  { day: translateText("پنجشنبه"), time: translateText("۹:۰۰ تا ۱۴:۰۰") },
+  { day: translateText("جمعه"), time: translateText("تعطیل — فرم و ایمیل فعال است") },
 ];
 
 const DIRECT = [
-  { icon: Phone, label: 'شعبه تهران', value: '۰۹۱۲۹۳۲۷۵۱۵', href: 'tel:+989129327515' },
-  { icon: Phone, label: 'شعبه مازندران (هچیرود)', value: '۰۹۱۰۲۴۰۱۰۰۷', href: 'tel:+989102401007' },
-  { icon: Mail, label: 'پشتیبانی', value: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
-  { icon: Mail, label: 'همکاری و نمایندگی', value: 'partner@geokala.ir', href: 'mailto:partner@geokala.ir' },
+  { icon: Phone, label: translateText("شعبه تهران"), value: translateText("۰۹۱۲۹۳۲۷۵۱۵"), href: 'tel:+989129327515' },
+  { icon: Phone, label: translateText("شعبه مازندران (هچیرود)"), value: translateText("۰۹۱۰۲۴۰۱۰۰۷"), href: 'tel:+989102401007' },
+  { icon: Mail, label: translateText("پشتیبانی"), value: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
+  { icon: Mail, label: translateText("همکاری و نمایندگی"), value: 'partner@geokala.ir', href: 'mailto:partner@geokala.ir' },
 ];
 
 /*
@@ -47,25 +48,21 @@ function ContactPage() {
     <div className="pb-4">
       {/* بنر صفحه — همان بنر «درباره ما» */}
       <PageHeroComponent
-        breadcrumb="تماس با ما"
-        badge="تیم فنی و پشتیبانی ژئو کالا"
-        title="مشاوره‌ی خرید تجهیزات نقشه‌برداری"
-        description="از انتخاب مدل درست جی‌پی‌اس یا توتال استیشن تا پیگیری سفارش و خدمات پس از فروش؛ کارشناسان ما در شعبه‌های تهران و هچیرود پاسخ‌گوی شما هستند."
+        breadcrumb={translateText("تماس با ما")}
+        badge={translateText("تیم فنی و پشتیبانی ژئو کالا")}
+        title={translateText("مشاوره‌ی خرید تجهیزات نقشه‌برداری")}
+        description={translateText("از انتخاب مدل درست جی‌پی‌اس یا توتال استیشن تا پیگیری سفارش و خدمات پس از فروش؛ کارشناسان ما در شعبه‌های تهران و هچیرود پاسخ‌گوی شما هستند.")}
         highlights={STATS.map((stat) => ({ icon: stat.icon, label: stat.title }))}
         actions={
           <>
             <a href="tel:+989129327515" className="btn-yellow inline-flex items-center gap-2">
-              <Phone size={16} />
-              تماس با شعبه تهران
-            </a>
+              <Phone size={16} />{translateText("تماس با شعبه تهران ")}</a>
             <a
               href="#contact-form"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
             >
-              <MessageSquare size={16} />
-              ارسال پیام
-            </a>
+              <MessageSquare size={16} />{translateText("ارسال پیام ")}</a>
           </>
         }
       />
@@ -79,12 +76,10 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 py-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <span className="text-[11px] font-bold text-yellow">ارسال پیام</span>
-            <h2 className="mt-1.5 font-black text-lg">فرم تماس و پاسخ کارشناس</h2>
+            <span className="text-[11px] font-bold text-yellow">{translateText("ارسال پیام")}</span>
+            <h2 className="mt-1.5 font-black text-lg">{translateText("فرم تماس و پاسخ کارشناس")}</h2>
           </div>
-          <p className="max-w-md text-xs muted leading-6">
-            دقیق‌ترین راه برای پیگیری مکتوب؛ پیام شما با شماره پیگیری در ایمیل ثبت می‌شود.
-          </p>
+          <p className="max-w-md text-xs muted leading-6">{translateText("دقیق‌ترین راه برای پیگیری مکتوب؛ پیام شما با شماره پیگیری در ایمیل ثبت می‌شود. ")}</p>
         </div>
 
         <div
@@ -99,9 +94,7 @@ function ContactPage() {
             {/* تماس مستقیم */}
             <div className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <Phone size={16} className="text-yellow" />
-                تماس مستقیم
-              </h3>
+                <Phone size={16} className="text-yellow" />{translateText("تماس مستقیم ")}</h3>
               <ul className="mt-3 space-y-2.5">
                 {DIRECT.map((item) => {
                   const Icon = item.icon;
@@ -133,9 +126,7 @@ function ContactPage() {
             {/* ساعات کاری */}
             <div className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <Clock3 size={16} className="text-yellow" />
-                ساعات پاسخ‌دهی
-              </h3>
+                <Clock3 size={16} className="text-yellow" />{translateText("ساعات پاسخ‌دهی ")}</h3>
               <ul className="mt-3 space-y-2 text-xs">
                 {HOURS.map((row) => (
                   <li key={row.day} className="flex items-center justify-between gap-2">
@@ -144,47 +135,37 @@ function ContactPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 rounded-xl px-3 py-2 text-[11px] leading-6" style={{ background: 'var(--card2)' }}>
-                فرم تماس و ایمیل شبانه‌روزی ثبت می‌شود؛ پاسخ‌دهی در ساعات کاری انجام می‌گیرد.
-              </p>
+              <p className="mt-3 rounded-xl px-3 py-2 text-[11px] leading-6" style={{ background: 'var(--card2)' }}>{translateText("فرم تماس و ایمیل شبانه‌روزی ثبت می‌شود؛ پاسخ‌دهی در ساعات کاری انجام می‌گیرد. ")}</p>
             </div>
 
             {/* میان‌بُرها */}
             <div className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <ShieldCheck size={16} className="text-yellow" />
-                قبل از تماس بخوانید
-              </h3>
+                <ShieldCheck size={16} className="text-yellow" />{translateText("قبل از تماس بخوانید ")}</h3>
               <div className="mt-3 space-y-2">
                 <Link
                   to="/terms/customers"
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={14} className="text-yellow" />
-                    قوانین و مقررات مشتریان
-                  </span>
-                  <ChevronLeft size={14} className="muted" />
+                    <FileText size={14} className="text-yellow" />{translateText("قوانین و مقررات مشتریان ")}</span>
+                  <ChevronLeft size={14} className="logical-icon muted" />
                 </Link>
                 <Link
                   to="/terms/buyers"
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={14} className="text-yellow" />
-                    قوانین خریداران
-                  </span>
-                  <ChevronLeft size={14} className="muted" />
+                    <FileText size={14} className="text-yellow" />{translateText("قوانین خریداران ")}</span>
+                  <ChevronLeft size={14} className="logical-icon muted" />
                 </Link>
                 <Link
                   to="/orders"
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <MapPin size={14} className="text-yellow" />
-                    پیگیری سفارش‌های من
-                  </span>
-                  <ChevronLeft size={14} className="muted" />
+                    <MapPin size={14} className="text-yellow" />{translateText("پیگیری سفارش‌های من ")}</span>
+                  <ChevronLeft size={14} className="logical-icon muted" />
                 </Link>
               </div>
             </div>
@@ -196,13 +177,10 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <span className="text-[11px] font-bold text-yellow">شعبه‌های ما</span>
-            <h2 className="mt-1.5 font-black text-lg">حضوری هم می‌توانید سر بزنید</h2>
+            <span className="text-[11px] font-bold text-yellow">{translateText("شعبه‌های ما")}</span>
+            <h2 className="mt-1.5 font-black text-lg">{translateText("حضوری هم می‌توانید سر بزنید")}</h2>
           </div>
-          <p className="max-w-md text-xs muted leading-6">
-            هر شعبه شماره‌ی مستقیم و دکمه‌ی مسیریابی دارد؛ پیش از مراجعه تماس بگیرید تا هماهنگی انجام
-            شود.
-          </p>
+          <p className="max-w-md text-xs muted leading-6">{translateText("هر شعبه شماره‌ی مستقیم و دکمه‌ی مسیریابی دارد؛ پیش از مراجعه تماس بگیرید تا هماهنگی انجام شود. ")}</p>
         </div>
         <ContactOfficeComponent />
       </section>
@@ -211,13 +189,11 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="flex items-end justify-between gap-3 mb-4">
           <div>
-            <span className="text-[11px] font-bold text-yellow">دپارتمان‌ها</span>
-            <h2 className="mt-1.5 font-black text-lg">با دپارتمان درست حرف بزنید</h2>
-            <p className="text-xs muted mt-1">هر درخواست را مستقیم به تیم تخصصی خودش بفرستید</p>
+            <span className="text-[11px] font-bold text-yellow">{translateText("دپارتمان‌ها")}</span>
+            <h2 className="mt-1.5 font-black text-lg">{translateText("با دپارتمان درست حرف بزنید")}</h2>
+            <p className="text-xs muted mt-1">{translateText("هر درخواست را مستقیم به تیم تخصصی خودش بفرستید")}</p>
           </div>
-          <Link to="/about" className="text-xs font-bold text-yellow inline-flex items-center gap-1">
-            درباره تیم ما
-            <ChevronLeft size={14} />
+          <Link to="/about" className="text-xs font-bold text-yellow inline-flex items-center gap-1">{translateText("درباره تیم ما ")}<ChevronLeft className="logical-icon" size={14} />
           </Link>
         </div>
         <ContactDepartmentsComponent />
@@ -239,24 +215,17 @@ function ContactPage() {
           }}
         >
           <div>
-            <h2 className="font-black text-lg">هنوز جواب سوالتان را پیدا نکردید؟</h2>
-            <p className="text-xs muted mt-1.5 leading-6">
-              کارشناسان ما شنبه تا پنجشنبه از ۹ صبح تا ۶ عصر پاسخ‌گو هستند؛ فرم همین صفحه هم شبانه‌روزی
-              ثبت می‌شود.
-            </p>
+            <h2 className="font-black text-lg">{translateText("هنوز جواب سوالتان را پیدا نکردید؟")}</h2>
+            <p className="text-xs muted mt-1.5 leading-6">{translateText("کارشناسان ما شنبه تا پنجشنبه از ۹ صبح تا ۶ عصر پاسخ‌گو هستند؛ فرم همین صفحه هم شبانه‌روزی ثبت می‌شود. ")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             <a href="tel:+989129327515" className="btn-yellow inline-flex items-center gap-2">
-              <Phone size={16} />
-              ۰۹۱۲۹۳۲۷۵۱۵
-            </a>
+              <Phone size={16} />{translateText("۰۹۱۲۹۳۲۷۵۱۵ ")}</a>
             <a
               href="mailto:info@geokala.ir"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold"
               style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
-            >
-              ایمیل به پشتیبانی
-            </a>
+            >{translateText("ایمیل به پشتیبانی ")}</a>
           </div>
         </div>
       </section>

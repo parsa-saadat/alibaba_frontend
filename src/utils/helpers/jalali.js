@@ -1,3 +1,6 @@
+import { dateFormatter } from '../../i18n/date-policy';
+import { language } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 /*
  * تاریخ شمسی (جلالی) — تبدیل دوطرفه با میلادی، بدون هیچ کتابخانه‌ی اضافه
  * --------------------------------------------------------------------
@@ -8,13 +11,13 @@
  * الگوریتم: چرخه‌ی ۳۳ ساله، معتبر برای بازه‌ی ۱۹۰۰ تا ۲۱۰۰ میلادی.
  */
 
-const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
 
-export const faDigits = (value) => String(value ?? '').replace(/\d/g, (d) => FA_DIGITS[+d]);
+export const faDigits = (value) => language === 'fa' ? String(value ?? '').replace(/\d/g, (d) => FA_DIGITS[+d]) : String(value ?? '');
 export const enDigits = (value) =>
   String(value ?? '')
-    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
-    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
 
 export const pad2 = (n) => String(n).padStart(2, '0');
 
@@ -96,22 +99,22 @@ export function jalaliMonthLength(jy, jm) {
 }
 
 export const JALALI_MONTHS = [
-  'فروردین',
-  'اردیبهشت',
-  'خرداد',
-  'تیر',
-  'مرداد',
-  'شهریور',
-  'مهر',
-  'آبان',
-  'آذر',
-  'دی',
-  'بهمن',
-  'اسفند',
+  translateText("فروردین"),
+  translateText("اردیبهشت"),
+  translateText("خرداد"),
+  translateText("تیر"),
+  translateText("مرداد"),
+  translateText("شهریور"),
+  translateText("مهر"),
+  translateText("آبان"),
+  translateText("آذر"),
+  translateText("دی"),
+  translateText("بهمن"),
+  translateText("اسفند"),
 ];
 
 /* شنبه‌اول هفته — ۰ = شنبه */
-export const JALALI_WEEKDAYS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+export const JALALI_WEEKDAYS = [translateText("ش"), translateText("ی"), translateText("د"), translateText("س"), translateText("چ"), translateText("پ"), translateText("ج")];
 
 /* jsDay (۰=یکشنبه) → ستون در جدول شمسی (۰=شنبه) */
 export const weekdayColumn = (jsDay) => (jsDay + 1) % 7;
@@ -124,16 +127,14 @@ export const jalaliLabel = ({ jy, jm, jd }) => `${faDigits(jy)}/${faDigits(pad2(
 
 export const jalaliDateLabel = (date) => {
   const value = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(value.getTime())) return 'ثبت نشده';
-  return jalaliLabel(jalaliOfDate(value));
+  if (Number.isNaN(value.getTime())) return translateText("ثبت نشده");
+  return dateFormatter(language, { year: 'numeric', month: '2-digit', day: '2-digit' }).format(value);
 };
 
 export const jalaliDateTimeLabel = (date) => {
   const value = date instanceof Date ? date : new Date(date);
-  if (Number.isNaN(value.getTime())) return 'ثبت نشده';
-  return `${jalaliLabel(jalaliOfDate(value))} — ${faDigits(pad2(value.getHours()))}:${faDigits(
-    pad2(value.getMinutes()),
-  )}`;
+  if (Number.isNaN(value.getTime())) return translateText("ثبت نشده");
+  return dateFormatter(language, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(value);
 };
 
 /* مقدار «YYYY-MM-DDTHH:mm» که input datetime-local و کد فعلی انتظار دارد */

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { BadgeCheck, ShieldOff } from 'lucide-react';
 
@@ -49,21 +50,17 @@ function TrustBadge({
         <span
           className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${className}`}
           style={{ background: 'color-mix(in srgb, #17994f 16%, transparent)', color: 'var(--success-text, #17994f)' }}
-          title="فروشنده‌ی این کالا از سوی ژئو کالا بررسی و تأیید شده است"
+          title={translateText("فروشنده‌ی این کالا از سوی ژئو کالا بررسی و تأیید شده است")}
         >
-          <BadgeCheck size={size} />
-          مورد اعتماد
-        </span>
+          <BadgeCheck size={size} />{translateText("مورد اعتماد ")}</span>
       )}
       {!trusted && untrusted && (
         <span
           className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${className}`}
           style={{ background: 'var(--card2)', color: 'var(--muted)' }}
-          title="فروشنده‌ی این کالا هنوز از سوی ژئو کالا تأیید نشده است"
+          title={translateText("فروشنده‌ی این کالا هنوز از سوی ژئو کالا تأیید نشده است")}
         >
-          <ShieldOff size={size} />
-          بدون تأیید
-        </span>
+          <ShieldOff size={size} />{translateText("بدون تأیید ")}</span>
       )}
       {showDebug && (
         <span className="text-[9px] muted" style={{ direction: 'ltr' }}>

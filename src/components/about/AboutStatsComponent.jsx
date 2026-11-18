@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Package, Store, FolderTree, Heart } from 'lucide-react';
@@ -9,7 +10,7 @@ import { API } from '../../config/api';
 const FALLBACK = { products: 1200, stores: 85, categories: 12 };
 /* سال تجربه: فعالیت از ۱۳۸۳ تا امروز */
 const EXPERIENCE_YEARS = 22;
-const SATISFACTION = '۹۸٪';
+const SATISFACTION = translateText("۹۸٪");
 
 function AboutStatsComponent() {
   const [stats, setStats] = useState(null);
@@ -40,10 +41,10 @@ function AboutStatsComponent() {
   }, []);
 
   const items = [
-    { icon: Package, value: `${toFa(EXPERIENCE_YEARS)} سال`, label: 'تجربه‌ی سران آسیا' },
-    { icon: Store, value: stats ? toFa(stats.stores) : '…', label: 'فروشنده و برند' },
-    { icon: FolderTree, value: stats ? toFa(stats.categories) : '…', label: 'دسته‌بندی نقشه‌برداری' },
-    { icon: Heart, value: SATISFACTION, label: 'رضایت خریداران' },
+    { icon: Package, value: translateText("{{v0}} سال", {v0: (toFa(EXPERIENCE_YEARS))}), label: translateText("تجربه‌ی سران آسیا") },
+    { icon: Store, value: stats ? toFa(stats.stores) : '…', label: translateText("فروشنده و برند") },
+    { icon: FolderTree, value: stats ? toFa(stats.categories) : '…', label: translateText("دسته‌بندی نقشه‌برداری") },
+    { icon: Heart, value: SATISFACTION, label: translateText("رضایت خریداران") },
   ];
 
   return (
@@ -72,9 +73,7 @@ function AboutStatsComponent() {
         })}
       </div>
 
-      <p className="text-center text-[10px] muted mt-2">
-        اعداد به‌صورت زنده از داده‌های بازارگاه خوانده می‌شوند.
-      </p>
+      <p className="text-center text-[10px] muted mt-2">{translateText("اعداد به‌صورت زنده از داده‌های بازارگاه خوانده می‌شوند. ")}</p>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { History, Trash2 } from 'lucide-react';
@@ -50,8 +51,8 @@ function RecentlyViewedComponent({
   /* محصول جاری از فهرست حذف می‌شود (در صفحه‌ی محصول) */
   excludeId = '',
   limit = 8,
-  title = 'اخیراً مشاهده کرده‌اید',
-  subtitle = 'محصولاتی که در این مرورگر باز کرده‌اید',
+  title = translateText("اخیراً مشاهده کرده‌اید"),
+  subtitle = translateText("محصولاتی که در این مرورگر باز کرده‌اید"),
   moreTo = null,
   className = '',
 }) {
@@ -113,11 +114,9 @@ function RecentlyViewedComponent({
       type="button"
       onClick={clear}
       className="inline-flex items-center gap-1 text-xs muted hover:text-yellow transition-colors"
-      title="پاک کردن تاریخچه‌ی بازدید"
+      title={translateText("پاک کردن تاریخچه‌ی بازدید")}
     >
-      <Trash2 size={14} />
-      پاک کردن
-    </button>
+      <Trash2 size={14} />{translateText("پاک کردن ")}</button>
   );
 
   return (
@@ -131,7 +130,7 @@ function RecentlyViewedComponent({
         loading={loading}
         moreTo={moreTo}
         extra={extra}
-        emptyText="هنوز محصولی مشاهده نکرده‌اید"
+        emptyText={translateText("هنوز محصولی مشاهده نکرده‌اید")}
       />
     </div>
   );

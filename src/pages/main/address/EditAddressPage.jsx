@@ -1,3 +1,4 @@
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -63,10 +64,10 @@ function EditAddressPage() {
         authHeaders(),
       )
       .then(() => {
-        toast.success('نشانی بروزرسانی شد');
+        toast.success(translateText("نشانی بروزرسانی شد"));
         navigate('/address');
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'خطا در ویرایش نشانی'));
+      .catch((err) => toast.error(err.response?.data?.message || translateText("خطا در ویرایش نشانی")));
   };
 
   return (
@@ -80,35 +81,34 @@ function EditAddressPage() {
           <ArrowRight size={17} />
         </button>
         <h1 className="font-black text-xl flex items-center gap-2">
-          <MapPin size={20} className="text-yellow" /> ویرایش نشانی
-        </h1>
+          <MapPin size={20} className="text-yellow" />{translateText(" ویرایش نشانی ")}</h1>
       </div>
 
       <form onSubmit={handleSave} className="card rounded-3xl p-6 grid sm:grid-cols-2 gap-3">
         <input
           className="input sm:col-span-2"
-          placeholder="نام و نام خانوادگی گیرنده"
+          placeholder={translateText("نام و نام خانوادگی گیرنده")}
           value={form.full_name}
           onChange={(e) => setForm({ ...form, full_name: e.target.value })}
           required
         />
         <input
           className="input"
-          placeholder="استان"
+          placeholder={translateText("استان")}
           value={form.province}
           onChange={(e) => setForm({ ...form, province: e.target.value })}
           required
         />
         <input
           className="input"
-          placeholder="شهر"
+          placeholder={translateText("شهر")}
           value={form.city}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
           required
         />
         <input
           className="input"
-          placeholder="محله"
+          placeholder={translateText("محله")}
           value={form.neighborhood}
           onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
           required
@@ -116,14 +116,14 @@ function EditAddressPage() {
         <input
           className="input"
           dir="ltr"
-          placeholder="کد پستی ۱۰ رقمی"
+          placeholder={translateText("کد پستی ۱۰ رقمی")}
           value={form.postal_code}
           onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
           required
         />
         <input
           className="input sm:col-span-2"
-          placeholder="آدرس کامل"
+          placeholder={translateText("آدرس کامل")}
           value={form.full_address}
           onChange={(e) => setForm({ ...form, full_address: e.target.value })}
           required
@@ -131,7 +131,7 @@ function EditAddressPage() {
         <input
           className="input"
           type="number"
-          placeholder="پلاک"
+          placeholder={translateText("پلاک")}
           value={form.building_number}
           onChange={(e) => setForm({ ...form, building_number: e.target.value })}
           required
@@ -139,14 +139,12 @@ function EditAddressPage() {
         <input
           className="input"
           type="number"
-          placeholder="واحد"
+          placeholder={translateText("واحد")}
           value={form.unit}
           onChange={(e) => setForm({ ...form, unit: e.target.value })}
           required
         />
-        <button type="submit" className="btn-yellow sm:col-span-2 mt-2">
-          ذخیره تغییرات
-        </button>
+        <button type="submit" className="btn-yellow sm:col-span-2 mt-2">{translateText("ذخیره تغییرات ")}</button>
       </form>
     </div>
   );

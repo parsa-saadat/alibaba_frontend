@@ -1,3 +1,9 @@
+import useLocalizedContent from '../../hooks/useLocalizedContent';
+import { createPortal } from 'react-dom';
+import { language as currentLocale } from '../../i18n/runtime';
+import { cleanTranslations } from '../../i18n/translation-helpers';
+import ContentLanguage from '../common/locale/ContentLanguageComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -12,6 +18,7 @@ import { validateIRPhoneSyntax } from '../../utils/validators/phone.validator';
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const EMPTY = {
+  translations: {},
   name: '',
   description: '',
   status: 'ENABLE',
@@ -30,8 +37,23 @@ function StoreEditorModalComponent({
   onClose,
   onSaved,
 }) {
+  useEffect(() => {
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const key = (e) => {
+      if (e.key === 'Escape') onClose?.();
+    };
+    document.addEventListener('keydown', key);
+    return () => {
+      document.body.style.overflow = overflow;
+      document.removeEventListener('keydown', key);
+      previous?.focus?.();
+    };
+  }, [onClose]);
   const currentUser = getUser();
   const [form, setForm] = useState(EMPTY);
+  const content = useLocalizedContent(form, setForm, ['name', 'description'], 'store');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [zoomFile, setZoomFile] = useState(null);
@@ -63,6 +85,7 @@ function StoreEditorModalComponent({
     }
     setForm({
       name: store.name || '',
+      translations: store.translations || {},
       description: store.description || '',
       status: store.status || 'ENABLE',
       profile_image_id: getId(store.profile_image_id) || '',
@@ -90,7 +113,9 @@ function StoreEditorModalComponent({
       axios
         .get(`${API}/perm/stores`, { ...authHeaders(), params: { user_id: ownerId, limit: 100 } })
         .catch(() => null),
-      planId ? axios.get(`${API}/plan/${planId}`, authHeaders()).catch(() => null) : Promise.resolve(null),
+      planId
+        ? axios.get(`${API}/plan/${planId}`, authHeaders()).catch(() => null)
+        : Promise.resolve(null),
     ]).then(([storesRes, planRes]) => {
       if (cancelled) return;
       const body = storesRes?.data?.body;
@@ -159,10 +184,10 @@ function StoreEditorModalComponent({
       const id = res.data.body?.[0]?._id;
       if (id) {
         setForm((prev) => ({ ...prev, [field]: id }));
-        toast.success('تصویر آپلود شد');
+        toast.success(translateText('تصویر آپلود شد'));
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در آپلود تصویر');
+      toast.error(err.response?.data?.message || translateText('خطا در آپلود تصویر'));
     } finally {
       setUploading('');
     }
@@ -170,16 +195,20 @@ function StoreEditorModalComponent({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (store?.status === 'ROOT_DISABLE' && !isAdmin) return toast.error('این فروشگاه توسط مدیریت مسدود شده است');
-    if (!form.name.trim()) return toast.error('نام فروشگاه الزامی است');
-    if (form.name.trim().length > 50) return toast.error('نام فروشگاه حداکثر ۵۰ کاراکتر است');
-    if (form.description.trim().length > 255) return toast.error('توضیحات فروشگاه حداکثر ۲۵۵ کاراکتر است');
-    if (!form.phone.trim()) return toast.error('شماره تماس فروشگاه الزامی است');
+    const form = content.payload();
+    if (store?.status === 'ROOT_DISABLE' && !isAdmin)
+      return toast.error(translateText('این فروشگاه توسط مدیریت مسدود شده است'));
+    if (!form.name.trim()) return toast.error(translateText('نام فروشگاه الزامی است'));
+    if (form.name.trim().length > 50)
+      return toast.error(translateText('نام فروشگاه حداکثر ۵۰ کاراکتر است'));
+    if (form.description.trim().length > 255)
+      return toast.error(translateText('توضیحات فروشگاه حداکثر ۲۵۵ کاراکتر است'));
+    if (!form.phone.trim()) return toast.error(translateText('شماره تماس فروشگاه الزامی است'));
     if (!validateEmailSyntax(form.email.trim())) {
-      return toast.error('ایمیل تماس معتبر وارد کنید');
+      return toast.error(translateText('ایمیل تماس معتبر وارد کنید'));
     }
     if (!validateIRPhoneSyntax(form.phone.trim())) {
-      return toast.error('شماره موبایل تماس باید با 09 و ۱۱ رقم باشد');
+      return toast.error(translateText('شماره موبایل تماس باید با 09 و ۱۱ رقم باشد'));
     }
 
     const contact_info = { email: form.email.trim() };
@@ -187,11 +216,12 @@ function StoreEditorModalComponent({
     if (form.address.trim()) contact_info.address = form.address.trim();
 
     if (isAdmin && !store && ownerMode === 'other' && !ownerId) {
-      return toast.error('مالک فروشگاه را انتخاب کنید');
+      return toast.error(translateText('مالک فروشگاه را انتخاب کنید'));
     }
 
     const payload = {
       name: form.name.trim(),
+      translations: cleanTranslations(form.translations),
       description: form.description.trim() || undefined,
       contact_info,
     };
@@ -213,19 +243,19 @@ function StoreEditorModalComponent({
         ? axios.put(`${API}/store/${getId(store)}`, payload, authHeaders())
         : axios.post(`${API}/store`, payload, authHeaders());
       await req;
-      toast.success(store ? 'فروشگاه ویرایش شد' : 'فروشگاه جدید ایجاد شد');
+      toast.success(store ? translateText('فروشگاه ویرایش شد') : translateText('فروشگاه جدید ایجاد شد'));
       onSaved?.();
       onClose?.();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در ذخیره فروشگاه');
+      toast.error(err.response?.data?.message || translateText('خطا در ذخیره فروشگاه'));
     } finally {
       setSaving(false);
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="store-editor-overlay fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -233,14 +263,23 @@ function StoreEditorModalComponent({
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="card rounded-3xl p-6 w-full max-w-xl space-y-4 my-8"
+        className="store-editor-dialog card rounded-3xl p-6 w-full max-w-2xl space-y-4"
       >
         <div className="flex items-center justify-between gap-2 border-b border-theme pb-3">
           <h2 className="font-black text-lg flex items-center gap-2">
             <Store size={20} className="text-yellow" />
-            <span>{store ? `ویرایش فروشگاه: ${store.name}` : 'ایجاد فروشگاه جدید'}</span>
+            <span>
+              {store
+                ? translateText('ویرایش فروشگاه: {{v0}}', { v0: store.name })
+                : translateText('ایجاد فروشگاه جدید')}
+            </span>
           </h2>
-          <button type="button" onClick={onClose} className="btn-ghost !p-2" aria-label="بستن">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-ghost !p-2"
+            aria-label={translateText('بستن')}
+          >
             <X size={17} />
           </button>
         </div>
@@ -259,14 +298,14 @@ function StoreEditorModalComponent({
                 }}
                 className={`chip !py-1.5 !px-3 text-[11px] ${ownerMode === 'self' ? 'on' : ''}`}
               >
-                برای خودم
+                {translateText('برای خودم ')}
               </button>
               <button
                 type="button"
                 onClick={() => setOwnerMode('other')}
                 className={`chip !py-1.5 !px-3 text-[11px] ${ownerMode === 'other' ? 'on' : ''}`}
               >
-                برای کاربر دیگر
+                {translateText('برای کاربر دیگر ')}
               </button>
             </div>
 
@@ -274,16 +313,25 @@ function StoreEditorModalComponent({
               <div className="space-y-2">
                 <input
                   className="input !py-2 text-xs"
-                  placeholder="جستجوی نام، نام کاربری یا موبایل مالک…"
+                  placeholder={translateText('جستجوی نام، نام کاربری یا موبایل مالک…')}
                   value={ownerQuery}
                   onChange={(e) => setOwnerQuery(e.target.value)}
                 />
 
                 {owner && !ownerQuery ? (
-                  <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'var(--card2)' }}>
+                  <div
+                    className="flex items-center gap-2 rounded-xl px-3 py-2"
+                    style={{ background: 'var(--card2)' }}
+                  >
                     <span className="min-w-0 flex-1 text-xs truncate">
-                      <b>{[owner.firstname, owner.lastname].filter(Boolean).join(' ') || owner.username}</b>
-                      <span className="muted" dir="ltr"> • {owner.phone}</span>
+                      <b>
+                        {[owner.firstname, owner.lastname].filter(Boolean).join(' ') ||
+                          owner.username}
+                      </b>
+                      <span className="muted" dir="ltr">
+                        {' '}
+                        • {owner.phone}
+                      </span>
                     </span>
                     <button
                       type="button"
@@ -293,7 +341,7 @@ function StoreEditorModalComponent({
                       }}
                       className="btn-ghost !py-1 !px-2 text-[11px]"
                     >
-                      تغییر
+                      {translateText('تغییر ')}
                     </button>
                   </div>
                 ) : (
@@ -302,9 +350,11 @@ function StoreEditorModalComponent({
                     style={{ background: 'var(--card2)' }}
                   >
                     {ownerSearching ? (
-                      <div className="px-3 py-2 text-[11px] muted">در حال جستجو…</div>
+                      <div className="px-3 py-2 text-[11px] muted">{translateText('در حال جستجو…')}</div>
                     ) : ownerResults.length === 0 ? (
-                      <div className="px-3 py-2 text-[11px] muted">کاربری پیدا نشد.</div>
+                      <div className="px-3 py-2 text-[11px] muted">
+                        {translateText('کاربری پیدا نشد.')}
+                      </div>
                     ) : (
                       ownerResults.map((u) => (
                         <button
@@ -314,7 +364,9 @@ function StoreEditorModalComponent({
                           className="w-full px-3 py-2 text-start text-[11px] hover:bg-white/5 flex items-center justify-between gap-2 border-b border-theme last:border-0"
                         >
                           <span className="min-w-0 truncate">
-                            {[u.firstname, u.lastname].filter(Boolean).join(' ') || u.username || 'کاربر'}
+                            {[u.firstname, u.lastname].filter(Boolean).join(' ') ||
+                              u.username ||
+                              translateText('کاربر')}
                           </span>
                           <span className="muted shrink-0" dir="ltr">
                             {u.phone || u.username}
@@ -327,7 +379,9 @@ function StoreEditorModalComponent({
               </div>
             ) : (
               <p className="text-[11px] muted">
-                فروشگاه به نام خود شما ({currentUser?.username || 'مدیر'}) ساخته می‌شود.
+                {translateText('فروشگاه به نام خود شما (')}
+                {currentUser?.username || translateText('مدیر')}
+                {translateText(') ساخته می‌شود. ')}
               </p>
             )}
 
@@ -343,28 +397,34 @@ function StoreEditorModalComponent({
               >
                 {ownerCapacity.max > 0 ? (
                   <>
-                    پلن{ownerCapacity.planName ? ` «${ownerCapacity.planName}»` : ''}: ظرفیت{' '}
-                    {ownerCapacity.used.toLocaleString('fa-IR')} از{' '}
-                    {ownerCapacity.max.toLocaleString('fa-IR')} فروشگاه
+                    {translateText('پلن')}
+                    {ownerCapacity.planName ? ` «${ownerCapacity.planName}»` : ''}
+                    {translateText(': ظرفیت')} {ownerCapacity.used.toLocaleString(currentLocale)}
+                    {translateText(' از')} {ownerCapacity.max.toLocaleString(currentLocale)}
+                    {translateText(' فروشگاه ')}
                     {ownerCapacity.used >= ownerCapacity.max
-                      ? ' — ظرفیت پلن این کاربر پر است؛ ساخت فروشگاه با دسترسی مدیر انجام می‌شود.'
+                      ? translateText(
+                          ' — ظرفیت پلن این کاربر پر است؛ ساخت فروشگاه با دسترسی مدیر انجام می‌شود.',
+                        )
                       : ''}
                   </>
                 ) : (
-                  'این کاربر پلن فروشندگی فعالی ندارد؛ ساخت فروشگاه با دسترسی مدیر مجاز است.'
+                  translateText(
+                    'این کاربر پلن فروشندگی فعالی ندارد؛ ساخت فروشگاه با دسترسی مدیر مجاز است.',
+                  )
                 )}
               </p>
             ) : null}
 
             <label className="text-xs muted block">
-              وضعیت فروشگاه در ابتدا
+              {translateText('وضعیت فروشگاه در ابتدا ')}
               <select
                 className="input mt-1 !py-2"
                 value={createdStatus}
                 onChange={(e) => setCreatedStatus(e.target.value)}
               >
-                <option value="ENABLE">فعال</option>
-                <option value="DISABLE">غیرفعال</option>
+                <option value="ENABLE">{translateText('فعال')}</option>
+                <option value="DISABLE">{translateText('غیرفعال')}</option>
               </select>
             </label>
           </div>
@@ -375,23 +435,23 @@ function StoreEditorModalComponent({
             {form.banner_image_id ? (
               <StorageImageComponent
                 file={form.banner_image_id}
-                alt="بنر فروشگاه"
+                alt={translateText('بنر فروشگاه')}
                 className="w-full h-full object-cover"
                 onZoom={(f, a) => setZoomFile({ file: f, alt: a })}
               />
             ) : (
               <div className="w-full h-full grid place-items-center text-xs text-gray-300">
-                بدون تصویر بنر
+                {translateText('بدون تصویر بنر ')}
               </div>
             )}
             <button
               type="button"
               onClick={() => bannerRef.current?.click()}
               disabled={uploading === 'banner_image_id'}
-              className="absolute bottom-2 left-2 btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 shadow"
+              className="absolute bottom-2 start-2 btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 shadow"
             >
               <Upload size={13} />
-              {uploading === 'banner_image_id' ? 'در حال آپلود…' : 'آپلود بنر'}
+              {uploading === 'banner_image_id' ? translateText('در حال آپلود…') : translateText('آپلود بنر')}
             </button>
             <input
               ref={bannerRef}
@@ -407,13 +467,13 @@ function StoreEditorModalComponent({
               {form.profile_image_id ? (
                 <StorageImageComponent
                   file={form.profile_image_id}
-                  alt="لوگوی فروشگاه"
+                  alt={translateText('لوگوی فروشگاه')}
                   className="w-full h-full object-cover"
                   onZoom={(f, a) => setZoomFile({ file: f, alt: a })}
                 />
               ) : (
                 <div className="w-full h-full grid place-items-center font-black text-brand-yellow">
-                  {form.name?.[0] || 'ف'}
+                  {form.name?.[0] || translateText('ف')}
                 </div>
               )}
             </div>
@@ -425,7 +485,9 @@ function StoreEditorModalComponent({
                 className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1"
               >
                 <Upload size={13} />
-                {uploading === 'profile_image_id' ? 'در حال آپلود…' : 'انتخاب تصویر پروفایل / لوگو'}
+                {uploading === 'profile_image_id'
+                  ? translateText('در حال آپلود…')
+                  : translateText('انتخاب تصویر پروفایل / لوگو')}
               </button>
               <input
                 ref={profileRef}
@@ -438,19 +500,23 @@ function StoreEditorModalComponent({
           </div>
         </div>
 
+        <ContentLanguage editor={content} />
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="text-xs muted sm:col-span-2">
-            نام فروشگاه
+            {translateText('نام فروشگاه ')}
             <input
               className="input mt-1"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
+              value={content.value('name')}
+              dir={content.dir}
+              aria-label={`${content.locale} name`}
+              lang={content.locale}
+              onChange={(e) => content.update('name', e.target.value)}
+              placeholder={content.placeholder('name')}
             />
           </label>
 
           <label className="text-xs muted">
-            ایمیل تماس (الزامی)
+            {translateText('ایمیل تماس (الزامی) ')}
             <input
               className="input mt-1"
               dir="ltr"
@@ -463,7 +529,7 @@ function StoreEditorModalComponent({
           </label>
 
           <label className="text-xs muted">
-            موبایل تماس (09xxxxxxxxx)
+            {translateText('موبایل تماس (09xxxxxxxxx) ')}
             <input
               className="input mt-1"
               dir="ltr"
@@ -474,7 +540,7 @@ function StoreEditorModalComponent({
           </label>
 
           <label className="text-xs muted sm:col-span-2">
-            آدرس فروشگاه
+            {translateText('آدرس فروشگاه ')}
             <input
               className="input mt-1"
               value={form.address}
@@ -483,37 +549,45 @@ function StoreEditorModalComponent({
           </label>
 
           <label className="text-xs muted sm:col-span-2">
-            توضیحات فروشگاه
+            {translateText('توضیحات فروشگاه ')}
             <textarea
               className="input mt-1"
               rows={3}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              value={content.value('description')}
+              dir={content.dir}
+              aria-label={`${content.locale} description`}
+              lang={content.locale}
+              onChange={(e) => content.update('description', e.target.value)}
+              placeholder={content.placeholder('description')}
             />
           </label>
 
           {store && (
             <label className="text-xs muted sm:col-span-2">
-              وضعیت فروشگاه
+              {translateText('وضعیت فروشگاه ')}
               <select
                 className="input mt-1"
                 value={form.status}
                 disabled={!isAdmin && store.status === 'ROOT_DISABLE'}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
               >
-                <option value="ENABLE">فعال</option>
-                <option value="DISABLE">غیرفعال (موقتاً بسته)</option>
+                <option value="ENABLE">{translateText('فعال')}</option>
+                <option value="DISABLE">{translateText('غیرفعال (موقتاً بسته)')}</option>
                 {(isAdmin || store.status === 'ROOT_DISABLE') && (
                   <option value="ROOT_DISABLE" disabled={!isAdmin}>
-                    مسدود توسط مدیریت
+                    {translateText('مسدود توسط مدیریت ')}
                   </option>
                 )}
               </select>
               {form.status === 'ROOT_DISABLE' && (
                 <span className="mt-1.5 block text-[11px]" style={{ color: '#e53935' }}>
                   {isAdmin
-                    ? 'فروشگاه مسدود است؛ فروشنده نمی‌تواند آن را ویرایش یا فعال کند و کالاهایش خرید نمی‌شود.'
-                    : 'این فروشگاه توسط مدیریت مسدود شده است؛ برای رفع مسدودی با پشتیبانی تماس بگیرید.'}
+                    ? translateText(
+                        'فروشگاه مسدود است؛ فروشنده نمی‌تواند آن را ویرایش یا فعال کند و کالاهایش خرید نمی‌شود.',
+                      )
+                    : translateText(
+                        'این فروشگاه توسط مدیریت مسدود شده است؛ برای رفع مسدودی با پشتیبانی تماس بگیرید.',
+                      )}
                 </span>
               )}
             </label>
@@ -522,10 +596,14 @@ function StoreEditorModalComponent({
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-theme">
           <button type="button" onClick={onClose} className="btn-ghost !py-2 text-sm">
-            انصراف
+            {translateText('انصراف ')}
           </button>
           <button type="submit" disabled={saving} className="btn-yellow !py-2 text-sm">
-            {saving ? 'در حال ذخیره…' : store ? 'ذخیره تغییرات' : 'ساخت فروشگاه'}
+            {saving
+              ? translateText('در حال ذخیره…')
+              : store
+                ? translateText('ذخیره تغییرات')
+                : translateText('ساخت فروشگاه')}
           </button>
         </div>
 
@@ -535,7 +613,8 @@ function StoreEditorModalComponent({
           onClose={() => setZoomFile(null)}
         />
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

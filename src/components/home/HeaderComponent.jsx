@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -27,19 +28,13 @@ function HeroSearch() {
   return (
     <section className="px-3 pt-5 pb-6 sm:px-4 sm:pt-8 sm:pb-10" style={{ background: NAVY }}>
       <div className="flex items-center justify-center gap-4 text-base min-[400px]:text-lg sm:gap-12 sm:text-2xl md:text-[28px] font-black">
-        <Link to="/products" className={tab} style={{ color: 'var(--primary-color)' }}>
-          محصولات
-          <span
+        <Link to="/products" className={tab} style={{ color: 'var(--primary-color)' }}>{translateText("محصولات ")}<span
             className="absolute inset-x-0 bottom-0 h-1 rounded-full"
             style={{ background: 'var(--primary-color)' }}
           />
         </Link>
-        <a href="#stores" className={`${tab} text-white`}>
-          فروشگاه‌ها
-        </a>
-        <Link to="/products?discount=true" className={`${tab} text-white`}>
-          تخفیف‌ها
-        </Link>
+        <a href="#stores" className={`${tab} text-white`}>{translateText("فروشگاه‌ها ")}</a>
+        <Link to="/products?discount=true" className={`${tab} text-white`}>{translateText("تخفیف‌ها ")}</Link>
       </div>
 
       <div
@@ -54,12 +49,10 @@ function HeroSearch() {
           style={{ borderTop: '1px solid var(--border)' }}
         >
           <Link to="/products?discount=true" className="flex items-center gap-1.5 hover:text-yellow">
-            <Flame size={16} /> پیشنهادهای ویژه
-          </Link>
+            <Flame size={16} />{translateText(" پیشنهادهای ویژه ")}</Link>
           <span className="hidden sm:block h-4 w-px" style={{ background: 'var(--border)' }} />
           <Link to="/products" className="flex items-center gap-1.5 hover:text-yellow">
-            <TrendingUp size={16} /> پرفروش‌ترین‌ها
-          </Link>
+            <TrendingUp size={16} />{translateText(" پرفروش‌ترین‌ها ")}</Link>
         </div>
       </div>
     </section>
@@ -76,7 +69,7 @@ function WelcomeStrip() {
     <div style={{ background: 'var(--card2)' }}>
       <div className="max-w-[1440px] mx-auto px-4 h-[72px] flex items-center justify-between">
         <h2 className="text-lg sm:text-xl font-black">
-          {user ? `سلام${name ? `، ${name}` : ''}` : 'به فروشگاه خوش آمدید'}
+          {user ? translateText("سلام{{v0}}", {v0: (name ? `، ${name}` : '')}) : translateText("به فروشگاه خوش آمدید")}
         </h2>
 
         <ThemeToggleComponent
@@ -86,16 +79,13 @@ function WelcomeStrip() {
 
         <div className="hidden md:flex items-center gap-4">
           <Link to="/profile" className={link}>
-            <ClipboardList size={22} /> درخواست فروشندگی
-          </Link>
+            <ClipboardList size={22} />{translateText(" درخواست فروشندگی ")}</Link>
           <span className="w-px h-4" style={{ background: 'var(--border)' }} />
           <Link to="/products" className={link}>
-            <Medal size={22} /> پرفروش‌ها
-          </Link>
+            <Medal size={22} />{translateText(" پرفروش‌ها ")}</Link>
           <span className="w-px h-4" style={{ background: 'var(--border)' }} />
           <Link to="/products?discount=true" className={link}>
-            <Sparkles size={22} /> پیشنهاد ویژه
-          </Link>
+            <Sparkles size={22} />{translateText(" پیشنهاد ویژه ")}</Link>
         </div>
       </div>
     </div>
@@ -127,7 +117,7 @@ function CategoryCard({ categories, loading, activeCategoryId, onHoverCategory }
                   >
                     <Tag size={20} strokeWidth={1.5} className="shrink-0" />
                     <span className="flex-1 leading-5 line-clamp-2">{c.name}</span>
-                    <ChevronLeft size={16} className="muted shrink-0" />
+                    <ChevronLeft size={16} className="logical-icon muted shrink-0" />
                   </Link>
                 </li>
               );
@@ -155,23 +145,20 @@ function CategoryShowcase({ category, products, loading }) {
       >
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-base font-black truncate">
-            {category ? category.name : 'محصولات دسته‌بندی'}
+            {category ? category.name : translateText("محصولات دسته‌بندی")}
           </span>
         </div>
         {category && (
           <Link
             to={`/products?category_id=${category._id}`}
             className="text-xs font-semibold flex items-center gap-1 text-yellow shrink-0"
-          >
-            مشاهده همه <ChevronLeft size={14} />
+          >{translateText("مشاهده همه ")}<ChevronLeft className="logical-icon" size={14} />
           </Link>
         )}
       </div>
 
       {categoryProducts.length === 0 ? (
-        <div className="flex-1 grid place-items-center text-sm muted">
-          محصولی در این دسته‌بندی وجود ندارد
-        </div>
+        <div className="flex-1 grid place-items-center text-sm muted">{translateText("محصولی در این دسته‌بندی وجود ندارد ")}</div>
       ) : (
         <div
           className="flex-1 grid gap-3 min-h-0"
@@ -221,21 +208,18 @@ function LatestProducts({ products, loading }) {
         className="flex items-center justify-between pb-3 mb-2 shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
-        <h3 className="text-base font-black">آخرین محصولات</h3>
+        <h3 className="text-base font-black">{translateText("آخرین محصولات")}</h3>
         <Link
           to="/products"
           className="text-xs font-semibold flex items-center gap-1 text-yellow"
-        >
-          همه محصولات <ChevronLeft size={14} />
+        >{translateText("همه محصولات ")}<ChevronLeft className="logical-icon" size={14} />
         </Link>
       </div>
 
       {latest.length === 0 ? (
-        <div className="flex-1 grid place-items-center text-sm muted">
-          محصولی یافت نشد
-        </div>
+        <div className="flex-1 grid place-items-center text-sm muted">{translateText("محصولی یافت نشد ")}</div>
       ) : (
-        <div className="flex-1 overflow-y-auto space-y-2 pl-1 [scrollbar-width:thin]">
+        <div className="flex-1 overflow-y-auto space-y-2 ps-1 [scrollbar-width:thin]">
           {latest.map((p) => (
             <Link
               key={p._id}
@@ -260,9 +244,7 @@ function LatestProducts({ products, loading }) {
                   className="text-sm font-semibold group-hover:text-yellow"
                 />
                 {hasDiscount(p) && (
-                  <span className="inline-block mt-1 text-[11px] text-yellow font-bold">
-                    دارای تخفیف ویژه
-                  </span>
+                  <span className="inline-block mt-1 text-[11px] text-yellow font-bold">{translateText("دارای تخفیف ویژه ")}</span>
                 )}
                 {/* نشان اعتماد فروشنده — فهرست «آخرین محصولات» */}
                 <span className="mt-1 flex min-h-[16px] items-center gap-1">
@@ -270,7 +252,7 @@ function LatestProducts({ products, loading }) {
                 </span>
               </div>
 
-              <ChevronLeft size={16} className="muted shrink-0 group-hover:text-yellow" />
+              <ChevronLeft size={16} className="logical-icon muted shrink-0 group-hover:text-yellow" />
             </Link>
           ))}
         </div>
@@ -344,10 +326,8 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
           className="card mt-3 flex items-center justify-between rounded-xl px-5 sm:px-6 h-16 hover:-translate-y-0.5 transition-transform"
         >
           <span className="text-sm sm:text-[15px]">
-            <b className="text-yellow">ارسال سریع</b> به سراسر کشور و ضمانت اصالت کالا
-          </span>
-          <span className="flex items-center gap-1 text-sm font-bold text-yellow shrink-0">
-            شروع خرید <ChevronLeft size={16} />
+            <b className="text-yellow">{translateText("ارسال سریع")}</b>{translateText(" به سراسر کشور و ضمانت اصالت کالا ")}</span>
+          <span className="flex items-center gap-1 text-sm font-bold text-yellow shrink-0">{translateText("شروع خرید ")}<ChevronLeft className="logical-icon" size={16} />
           </span>
         </Link>
       </div>

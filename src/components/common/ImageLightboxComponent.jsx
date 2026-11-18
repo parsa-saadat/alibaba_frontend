@@ -1,8 +1,9 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { resolveStorageImage } from '../../utils/helpers/storage-files';
 
-function ImageLightboxComponent({ file, alt = 'تصویر', onClose }) {
+function ImageLightboxComponent({ file, alt = translateText("تصویر"), onClose }) {
   const [url, setUrl] = useState('');
   const [scale, setScale] = useState(1);
 
@@ -41,8 +42,8 @@ function ImageLightboxComponent({ file, alt = 'تصویر', onClose }) {
             type="button"
             onClick={() => setScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}
             className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-            title="کوچک‌نمایی"
-            aria-label="کوچک‌نمایی"
+            title={translateText("کوچک‌نمایی")}
+            aria-label={translateText("کوچک‌نمایی")}
           >
             <ZoomOut size={17} />
           </button>
@@ -50,8 +51,8 @@ function ImageLightboxComponent({ file, alt = 'تصویر', onClose }) {
             type="button"
             onClick={() => setScale(1)}
             className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-            title="اندازه اصلی"
-            aria-label="اندازه اصلی"
+            title={translateText("اندازه اصلی")}
+            aria-label={translateText("اندازه اصلی")}
           >
             <RotateCcw size={17} />
           </button>
@@ -59,8 +60,8 @@ function ImageLightboxComponent({ file, alt = 'تصویر', onClose }) {
             type="button"
             onClick={() => setScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}
             className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-            title="بزرگ‌نمایی"
-            aria-label="بزرگ‌نمایی"
+            title={translateText("بزرگ‌نمایی")}
+            aria-label={translateText("بزرگ‌نمایی")}
           >
             <ZoomIn size={17} />
           </button>
@@ -68,8 +69,8 @@ function ImageLightboxComponent({ file, alt = 'تصویر', onClose }) {
             type="button"
             onClick={onClose}
             className="p-2 rounded-lg bg-white/10 hover:bg-red-500/40"
-            title="بستن"
-            aria-label="بستن"
+            title={translateText("بستن")}
+            aria-label={translateText("بستن")}
           >
             <X size={18} />
           </button>
@@ -89,7 +90,7 @@ function ImageLightboxComponent({ file, alt = 'تصویر', onClose }) {
             className="max-w-[90vw] max-h-[82vh] object-contain rounded-xl shadow-2xl"
           />
         ) : (
-          <div className="text-white text-sm">در حال بارگذاری تصویر…</div>
+          <div className="text-white text-sm">{translateText("در حال بارگذاری تصویر…")}</div>
         )}
       </div>
     </div>

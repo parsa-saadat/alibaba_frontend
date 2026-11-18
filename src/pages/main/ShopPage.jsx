@@ -1,3 +1,6 @@
+import { language, currency, formatMoney } from '../../i18n/runtime';
+import { jalaliYearOfGregorian } from '../../utils/helpers/jalali';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -42,22 +45,22 @@ const PAGE_SIZE = 24;
    وقتی دسته‌ی ماکسیمم روی انتهای نوار باشد، «بدون سقف» در نظر گرفته می‌شود؛
    پس این سقف هیچ کالای گران‌تری را از نتایج حذف نمی‌کند. */
 const PRICE_MIN = 0;
-const PRICE_MAX = 200_000_000;
-const PRICE_STEP = 1_000_000;
+const PRICE_MAX = {USD:20000,IRT:200_000_000,IRR:2_000_000_000,TRY:800000,AED:75000,EUR:20000}[currency];
+const PRICE_STEP = PRICE_MAX / 200;
 
-const YEAR_MIN = 1340;
-const YEAR_MAX = 1405;
+const YEAR_MIN = language === 'fa' ? 1340 : 1961;
+const YEAR_MAX = language === 'fa' ? jalaliYearOfGregorian(new Date().getFullYear()) : new Date().getFullYear();
 
 /* تب «تأمین‌کنندگان» (فروشگاه‌هایی که کالا را دارند)، مثل علی‌بابا */
 const SUPPLIER_PAGE_SIZE = 8;
 
 const SUPPLIER_SORTS = [
-  { value: '', label: 'مرتبط‌ترین' },
-  { value: 'products', label: 'بیشترین کالای مطابق' },
-  { value: 'trust', label: 'فروشنده‌ی مورد اعتماد' },
-  { value: 'price_asc', label: 'ارزان‌ترین' },
-  { value: 'price_desc', label: 'گران‌ترین' },
-  { value: 'newest', label: 'جدیدترین فروشگاه' },
+  { value: '', label: translateText("مرتبط‌ترین") },
+  { value: 'products', label: translateText("بیشترین کالای مطابق") },
+  { value: 'trust', label: translateText("فروشنده‌ی مورد اعتماد") },
+  { value: 'price_asc', label: translateText("ارزان‌ترین") },
+  { value: 'price_desc', label: translateText("گران‌ترین") },
+  { value: 'newest', label: translateText("جدیدترین فروشگاه") },
 ];
 
 const FILTER_KEYS = [
@@ -78,17 +81,17 @@ const FILTER_KEYS = [
 ];
 
 const SORTS = [
-  { value: '', label: 'جدیدترین' },
-  { value: 'cheap', label: 'ارزان‌ترین' },
-  { value: 'expensive', label: 'گران‌ترین' },
-  { value: 'discount', label: 'بیشترین تخفیف' },
-  { value: 'sold', label: 'پرفروش‌ترین' },
+  { value: '', label: translateText("جدیدترین") },
+  { value: 'cheap', label: translateText("ارزان‌ترین") },
+  { value: 'expensive', label: translateText("گران‌ترین") },
+  { value: 'discount', label: translateText("بیشترین تخفیف") },
+  { value: 'sold', label: translateText("پرفروش‌ترین") },
 ];
 
 const STOCK_OPTIONS = [
-  { value: '', label: 'همه' },
-  { value: 'IN_STOCK', label: 'موجود' },
-  { value: 'OUT_OF_STOCK', label: 'ناموجود' },
+  { value: '', label: translateText("همه") },
+  { value: 'IN_STOCK', label: translateText("موجود") },
+  { value: 'OUT_OF_STOCK', label: translateText("ناموجود") },
 ];
 
 /*
@@ -127,20 +130,20 @@ const TRACK_BG = {
 /* ------------------------------------------------------------------ */
 
 const faGrouped = (value) =>
-  value !== '' && value != null ? new Intl.NumberFormat('fa-IR').format(Number(value)) : '';
+  value !== '' && value != null ? new Intl.NumberFormat(language).format(Number(value)) : '';
 
 const faPlain = (value) =>
   value !== '' && value != null
-    ? new Intl.NumberFormat('fa-IR', { useGrouping: false }).format(Number(value))
+    ? new Intl.NumberFormat(language, { useGrouping: false }).format(Number(value))
     : '';
 
 /* عدد فشرده برای جا شدن در سایدبار ۲۷۲ پیکسلی: «۱٬۲۵۰٬۰۰۰٬۰۰۰» → «۱٫۳ میلیارد» */
 const faCompact = (value) => {
   const number = Number(value);
-  if (!Number.isFinite(number) || number <= 0) return '۰';
+  if (!Number.isFinite(number) || number <= 0) return translateText("۰");
 
   try {
-    return new Intl.NumberFormat('fa-IR', {
+    return new Intl.NumberFormat(language, {
       notation: 'compact',
       maximumFractionDigits: 1,
     }).format(number);
@@ -184,18 +187,18 @@ function flattenNodes(nodes, out = []) {
 function buildActiveChips(filters, categoryName) {
   const chips = [];
 
-  if (filters.name) chips.push({ key: 'name', label: `نام: ${filters.name}`, patch: { name: '' } });
+  if (filters.name) chips.push({ key: 'name', label: translateText("نام: {{v0}}", {v0: (filters.name)}), patch: { name: '' } });
   if (filters.category_id)
-    chips.push({ key: 'category', label: categoryName || 'دسته‌بندی', patch: { category_id: '' } });
-  if (filters.brand) chips.push({ key: 'brand', label: `برند: ${filters.brand}`, patch: { brand: '' } });
+    chips.push({ key: 'category', label: categoryName || translateText("دسته‌بندی"), patch: { category_id: '' } });
+  if (filters.brand) chips.push({ key: 'brand', label: translateText("برند: {{v0}}", {v0: (filters.brand)}), patch: { brand: '' } });
 
   if (filters.min_price || filters.max_price) {
     const from = filters.min_price ? faCompact(filters.min_price) : '';
     const to = filters.max_price ? faCompact(filters.max_price) : '';
-    const range = from && to ? `${from} تا ${to}` : from ? `از ${from}` : `تا ${to}`;
+    const range = from && to ? translateText("{{v0}} تا {{v1}}", {v0: (from),v1: (to)}) : from ? translateText("از {{v0}}", {v0: (from)}) : translateText("تا {{v0}}", {v0: (to)});
     chips.push({
       key: 'price',
-      label: `قیمت ${range} تومان`,
+      label: `${range} ${currency === "IRT" ? "تومان" : currency}`,
       patch: { min_price: '', max_price: '' },
     });
   }
@@ -203,10 +206,10 @@ function buildActiveChips(filters, categoryName) {
   if (filters.min_production || filters.max_production) {
     const from = filters.min_production ? faPlain(filters.min_production) : '';
     const to = filters.max_production ? faPlain(filters.max_production) : '';
-    const range = from && to ? `${from} تا ${to}` : from ? `از ${from}` : `تا ${to}`;
+    const range = from && to ? translateText("{{v0}} تا {{v1}}", {v0: (from),v1: (to)}) : from ? translateText("از {{v0}}", {v0: (from)}) : translateText("تا {{v0}}", {v0: (to)});
     chips.push({
       key: 'production',
-      label: `سال تولید ${range}`,
+      label: translateText("سال تولید {{v0}}", {v0: (range)}),
       patch: { min_production: '', max_production: '' },
     });
   }
@@ -214,27 +217,27 @@ function buildActiveChips(filters, categoryName) {
   if (filters.stock_status) {
     chips.push({
       key: 'stock',
-      label: filters.stock_status === 'IN_STOCK' ? 'فقط موجود' : 'ناموجود',
+      label: filters.stock_status === 'IN_STOCK' ? translateText("فقط موجود") : translateText("ناموجود"),
       patch: { stock_status: '' },
     });
   }
 
   if (filters.tags)
-    chips.push({ key: 'tags', label: `برچسب: ${filters.tags}`, patch: { tags: '' } });
+    chips.push({ key: 'tags', label: translateText("برچسب: {{v0}}", {v0: (filters.tags)}), patch: { tags: '' } });
 
   if (filters.verified === 'true')
-    chips.push({ key: 'verified', label: 'فقط مورد اعتماد', patch: { verified: '' } });
+    chips.push({ key: 'verified', label: translateText("فقط مورد اعتماد"), patch: { verified: '' } });
   if (filters.min_products)
     chips.push({
       key: 'min_products',
-      label: `حداقل ${faPlain(filters.min_products)} کالا`,
+      label: translateText("حداقل {{v0}} کالا",{v0:(faPlain(filters.min_products))}),
       patch: { min_products: '' },
     });
 
   if (filters.discount === 'true')
-    chips.push({ key: 'discount', label: 'تخفیف‌دار', patch: { discount: '' } });
+    chips.push({ key: 'discount', label: translateText("تخفیف‌دار"), patch: { discount: '' } });
   if (filters.warranty === 'true')
-    chips.push({ key: 'warranty', label: 'گارانتی‌دار', patch: { warranty: '' } });
+    chips.push({ key: 'warranty', label: translateText("گارانتی‌دار"), patch: { warranty: '' } });
 
   return chips;
 }
@@ -333,7 +336,7 @@ function RangeSlider({ min, max, step, from, to, onCommit, format, unit = '' }) 
           max={max}
           step={step}
           value={lo}
-          aria-label="حداقل"
+          aria-label={translateText("حداقل")}
           onChange={(e) => setRange([Math.min(Number(e.target.value), hi), hi])}
           onPointerUp={commit}
           onKeyUp={commit}
@@ -346,7 +349,7 @@ function RangeSlider({ min, max, step, from, to, onCommit, format, unit = '' }) 
           max={max}
           step={step}
           value={hi}
-          aria-label="حداکثر"
+          aria-label={translateText("حداکثر")}
           onChange={(e) => setRange([lo, Math.max(Number(e.target.value), lo)])}
           onPointerUp={commit}
           onKeyUp={commit}
@@ -363,7 +366,7 @@ function RangeSlider({ min, max, step, from, to, onCommit, format, unit = '' }) 
         >
           {format(lo, false)} {unit}
         </span>
-        <span className="shrink-0 muted">تا</span>
+        <span className="shrink-0 muted">{translateText("تا")}</span>
         <span
           className="max-w-[47%] truncate rounded-lg px-2 py-1"
           style={ACCENT_SOFT}
@@ -512,7 +515,7 @@ function CategoryNode({ node, selectedId, expanded, onSelect, onToggle }) {
           <button
             type="button"
             onClick={() => onToggle(node._id)}
-            aria-label={isOpen ? 'بستن زیرمجموعه' : 'باز کردن زیرمجموعه'}
+            aria-label={isOpen ? translateText("بستن زیرمجموعه") : translateText("باز کردن زیرمجموعه")}
             className="grid h-7 w-7 shrink-0 place-items-center rounded-lg muted transition hover:opacity-80"
           >
             <ChevronDown
@@ -561,7 +564,7 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="جستجوی دسته…"
+          placeholder={translateText("جستجوی دسته…")}
           className="input !py-2 !ps-9 text-xs"
         />
       </div>
@@ -575,9 +578,7 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
             !selectedId ? 'font-black' : 'hover:opacity-80'
           }`}
           style={!selectedId ? ACCENT : undefined}
-        >
-          همه دسته‌ها
-        </button>
+        >{translateText("همه دسته‌ها ")}</button>
 
         {matches ? (
           matches.length ? (
@@ -597,7 +598,7 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
               </button>
             ))
           ) : (
-            <p className="px-2 py-3 text-center text-xs muted">دسته‌ای پیدا نشد</p>
+            <p className="px-2 py-3 text-center text-xs muted">{translateText("دسته‌ای پیدا نشد")}</p>
           )
         ) : (
           roots.map((root) => (
@@ -618,9 +619,7 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
               type="button"
               onClick={() => setShowAll(false)}
               className="mt-1 w-full rounded-lg px-2 py-1.5 text-[11px] font-bold muted transition hover:opacity-80"
-            >
-              نمایش کمتر
-            </button>
+            >{translateText("نمایش کمتر ")}</button>
           )
         ) : hiddenCount > 0 ? (
           <button
@@ -628,9 +627,7 @@ function CategoryPicker({ tree, selectedId, expanded, onSelect, onToggle }) {
             onClick={() => setShowAll(true)}
             className="mt-1 w-full rounded-lg px-2 py-1.5 text-[11px] font-bold transition hover:opacity-80"
             style={{ color: 'var(--accent-text)' }}
-          >
-            نمایش {toFa(hiddenCount)} دسته‌ی دیگر
-          </button>
+          >{translateText("نمایش ")}{toFa(hiddenCount)}{translateText(" دسته‌ی دیگر ")}</button>
         ) : null)}
       </div>
     </div>
@@ -658,7 +655,7 @@ function FiltersPanel({
     (filters.discount === 'true' ? 1 : 0) +
     (filters.warranty === 'true' ? 1 : 0);
 
-  const formatPrice = (value, isMax) => (isMax ? 'بدون سقف' : faCompact(value));
+  const formatPrice = (value, isMax) => (isMax ? translateText("بدون سقف") : faCompact(value));
   const formatYear = (value, isMax) => (isMax ? `${faPlain(value)}+` : faPlain(value));
 
   const isSuppliers = mode === 'suppliers';
@@ -667,12 +664,12 @@ function FiltersPanel({
   return (
     <div className="space-y-2">
       {/* مرتب‌سازی — از هدر بخش محصولات به داخل خود فیلترها منتقل شد */}
-      <Section icon={ArrowUpDown} title="مرتب‌سازی" badge={sort ? 1 : 0} defaultOpen>
+      <Section icon={ArrowUpDown} title={translateText("مرتب‌سازی")} badge={sort ? 1 : 0} defaultOpen>
         <SelectField
           value={sort}
           onChange={(v) => onSort?.(v)}
           options={sortOptions}
-          label={isSuppliers ? 'مرتب‌سازی تأمین‌کنندگان' : 'مرتب‌سازی محصولات'}
+          label={isSuppliers ? translateText("مرتب‌سازی تأمین‌کنندگان") : translateText("مرتب‌سازی محصولات")}
           icon={ArrowUpDown}
         />
       </Section>
@@ -680,37 +677,37 @@ function FiltersPanel({
       {isSuppliers && (
         <Section
           icon={StoreIcon}
-          title="فروشنده"
+          title={translateText("فروشنده")}
           badge={(filters.verified === 'true' ? 1 : 0) + (filters.min_products ? 1 : 0)}
         >
           <Switch
             icon={BadgeCheck}
-            label="فقط فروشنده‌ی مورد اعتماد"
+            label={translateText("فقط فروشنده‌ی مورد اعتماد")}
             checked={filters.verified === 'true'}
             onChange={(c) => setFilter({ verified: c ? 'true' : '' })}
           />
           <Switch
             icon={Boxes}
-            label="حداقل ۲ کالای مطابق"
+            label={translateText("حداقل ۲ کالای مطابق")}
             checked={filters.min_products === '2'}
             onChange={(c) => setFilter({ min_products: c ? '2' : '' })}
           />
         </Section>
       )}
 
-      <Section icon={Search} title="جستجو در نام" badge={filters.name ? 1 : 0}>
+      <Section icon={Search} title={translateText("جستجو در نام")} badge={filters.name ? 1 : 0}>
         <div className="relative">
           <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 muted" />
           <DraftField
             value={filters.name}
             onCommit={(v) => setFilter({ name: v })}
-            placeholder="نام محصول…"
+            placeholder={translateText("نام محصول…")}
             className="input !py-2 !ps-9 text-xs"
           />
         </div>
       </Section>
 
-      <Section icon={Layers} title="دسته‌بندی" badge={filters.category_id ? 1 : 0}>
+      <Section icon={Layers} title={translateText("دسته‌بندی")} badge={filters.category_id ? 1 : 0}>
         <CategoryPicker
           tree={categoryTree}
           selectedId={filters.category_id}
@@ -720,12 +717,12 @@ function FiltersPanel({
         />
       </Section>
 
-      <Section icon={Award} title="برند" badge={filters.brand ? 1 : 0} defaultOpen={Boolean(filters.brand)}>
+      <Section icon={Award} title={translateText("برند")} badge={filters.brand ? 1 : 0} defaultOpen={Boolean(filters.brand)}>
         <DraftField
           list={brandListId}
           value={filters.brand}
           onCommit={(v) => setFilter({ brand: v })}
-          placeholder="نام برند…"
+          placeholder={translateText("نام برند…")}
           className="input !py-2 text-xs"
         />
         <datalist id={brandListId}>
@@ -754,7 +751,7 @@ function FiltersPanel({
         )}
       </Section>
 
-      <Section icon={Wallet} title="قیمت" badge={priceCount}>
+      <Section icon={Wallet} title={translateText("قیمت")} badge={priceCount}>
         <RangeSlider
           min={PRICE_MIN}
           max={PRICE_MAX}
@@ -762,14 +759,14 @@ function FiltersPanel({
           from={filters.min_price}
           to={filters.max_price}
           format={formatPrice}
-          unit="تومان"
+          unit={currency === "IRT" ? "تومان" : currency}
           onCommit={(lo, hi) => setFilter({ min_price: lo, max_price: hi })}
         />
       </Section>
 
       <Section
         icon={CalendarDays}
-        title="سال تولید"
+        title={translateText("سال تولید")}
         badge={yearCount}
         defaultOpen={yearCount > 0}
       >
@@ -784,7 +781,7 @@ function FiltersPanel({
         />
       </Section>
 
-      <Section icon={Boxes} title="وضعیت و امکانات" badge={statusCount} defaultOpen={statusCount > 0}>
+      <Section icon={Boxes} title={translateText("وضعیت و امکانات")} badge={statusCount} defaultOpen={statusCount > 0}>
         <Segmented
           options={STOCK_OPTIONS}
           value={filters.stock_status}
@@ -792,13 +789,13 @@ function FiltersPanel({
         />
         <Switch
           icon={Percent}
-          label="فقط کالاهای تخفیف‌دار"
+          label={translateText("فقط کالاهای تخفیف‌دار")}
           checked={filters.discount === 'true'}
           onChange={(c) => setFilter({ discount: c ? 'true' : '' })}
         />
         <Switch
           icon={ShieldCheck}
-          label="دارای گارانتی"
+          label={translateText("دارای گارانتی")}
           checked={filters.warranty === 'true'}
           onChange={(c) => setFilter({ warranty: c ? 'true' : '' })}
         />
@@ -889,7 +886,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="فیلترها">
+    <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={translateText("فیلترها")}>
       <style>{`
         @keyframes shop-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @keyframes shop-fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -897,7 +894,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
 
       <button
         type="button"
-        aria-label="بستن فیلترها"
+        aria-label={translateText("بستن فیلترها")}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         style={{ animation: 'shop-fade-in 0.2s ease-out' }}
@@ -911,9 +908,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
 
         <div className="flex items-center justify-between gap-3 px-4 py-2.5">
           <div className="flex items-center gap-2 text-sm font-black">
-            <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />
-            فیلترها
-          </div>
+            <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />{translateText("فیلترها ")}</div>
           <div className="flex items-center gap-1">
             {activeCount > 0 && (
               <button
@@ -921,15 +916,13 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
                 onClick={onReset}
                 className="rounded-lg px-2.5 py-1.5 text-xs font-bold"
                 style={{ color: 'var(--accent-text)' }}
-              >
-                پاک کردن
-              </button>
+              >{translateText("پاک کردن ")}</button>
             )}
             <button
               ref={closeBtnRef}
               type="button"
               onClick={onClose}
-              aria-label="بستن"
+              aria-label={translateText("بستن")}
               className="grid h-9 w-9 place-items-center rounded-xl transition hover:opacity-80"
             >
               <X size={18} />
@@ -940,9 +933,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
         <div className="flex-1 overflow-y-auto px-4 pb-4">{children}</div>
 
         <div className="border-t border-theme p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <button type="button" onClick={onClose} className="btn-yellow w-full !py-2.5">
-            مشاهده {toFa(total)} کالا
-          </button>
+          <button type="button" onClick={onClose} className="btn-yellow w-full !py-2.5">{translateText("مشاهده ")}{toFa(total)}{translateText(" کالا ")}</button>
         </div>
       </div>
     </div>
@@ -954,16 +945,14 @@ function Pagination({ page, totalPages, onChange }) {
   const items = getPageItems(page, totalPages);
 
   return (
-    <nav aria-label="صفحه‌بندی" className="mt-8 flex flex-wrap items-center justify-center gap-1.5">
+    <nav aria-label={translateText("صفحه‌بندی")} className="mt-8 flex flex-wrap items-center justify-center gap-1.5">
       <button
         type="button"
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
         className="btn-ghost inline-flex items-center gap-1 !py-2 text-xs disabled:opacity-40"
       >
-        <ChevronRight size={14} />
-        قبلی
-      </button>
+        <ChevronRight className="logical-icon" size={14} />{translateText("قبلی ")}</button>
 
       {items.map((item, index) =>
         typeof item === 'number' ? (
@@ -989,9 +978,7 @@ function Pagination({ page, totalPages, onChange }) {
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
         className="btn-ghost inline-flex items-center gap-1 !py-2 text-xs disabled:opacity-40"
-      >
-        بعدی
-        <ChevronLeft size={14} />
+      >{translateText("بعدی ")}<ChevronLeft className="logical-icon" size={14} />
       </button>
     </nav>
   );
@@ -1006,7 +993,7 @@ function ProductsGrid({ products, loading, onClear }) {
 
   if (showSkeletons) {
     return (
-      <div className={GRID_CLASS} aria-busy="true" aria-label="در حال بارگذاری محصولات">
+      <div className={GRID_CLASS} aria-busy="true" aria-label={translateText("در حال بارگذاری محصولات")}>
         {Array.from({ length: 12 }, (_, index) => (
           <ProductSkeleton key={index} />
         ))}
@@ -1018,12 +1005,10 @@ function ProductsGrid({ products, loading, onClear }) {
     return (
       <div className="card rounded-3xl p-10 text-center">
         <PackageSearch size={34} className="mx-auto mb-3 muted" />
-        <div className="font-black">محصولی با این فیلترها پیدا نشد</div>
-        <p className="mt-1 text-xs muted">فیلترها را کمتر کن یا عبارت دیگری جستجو کن.</p>
+        <div className="font-black">{translateText("محصولی با این فیلترها پیدا نشد")}</div>
+        <p className="mt-1 text-xs muted">{translateText("فیلترها را کمتر کن یا عبارت دیگری جستجو کن.")}</p>
         {onClear && (
-          <button type="button" onClick={onClear} className="btn-ghost mt-4 !py-2 text-xs">
-            پاک کردن فیلترها
-          </button>
+          <button type="button" onClick={onClear} className="btn-ghost mt-4 !py-2 text-xs">{translateText("پاک کردن فیلترها ")}</button>
         )}
       </div>
     );
@@ -1046,7 +1031,7 @@ function ProductsGrid({ products, loading, onClear }) {
 function SuppliersList({ suppliers, loading, onClear }) {
   if (loading && suppliers.length === 0) {
     return (
-      <div className="space-y-3" aria-busy="true" aria-label="در حال بارگذاری تأمین‌کنندگان">
+      <div className="space-y-3" aria-busy="true" aria-label={translateText("در حال بارگذاری تأمین‌کنندگان")}>
         {[0, 1, 2].map((i) => (
           <SupplierSkeleton key={i} />
         ))}
@@ -1058,12 +1043,10 @@ function SuppliersList({ suppliers, loading, onClear }) {
     return (
       <div className="card rounded-3xl p-10 text-center">
         <PackageSearch size={34} className="mx-auto mb-3 muted" />
-        <div className="font-black">فروشگاهی با این فیلترها پیدا نشد</div>
-        <p className="mt-1 text-xs muted">فیلترها را کمتر کن یا عبارت دیگری جستجو کن.</p>
+        <div className="font-black">{translateText("فروشگاهی با این فیلترها پیدا نشد")}</div>
+        <p className="mt-1 text-xs muted">{translateText("فیلترها را کمتر کن یا عبارت دیگری جستجو کن.")}</p>
         {onClear && (
-          <button type="button" onClick={onClear} className="btn-ghost mt-4 !py-2 text-xs">
-            پاک کردن فیلترها
-          </button>
+          <button type="button" onClick={onClear} className="btn-ghost mt-4 !py-2 text-xs">{translateText("پاک کردن فیلترها ")}</button>
         )}
       </div>
     );
@@ -1201,7 +1184,7 @@ function ShopPage() {
         })
         .catch(() => {
           if (!controller.signal.aborted) {
-            setError('دریافت تأمین‌کنندگان ناموفق بود. اتصال به بک‌اند را بررسی کنید.');
+            setError(translateText("دریافت تأمین‌کنندگان ناموفق بود. اتصال به بک‌اند را بررسی کنید."));
           }
         })
         .finally(() => {
@@ -1234,7 +1217,7 @@ function ShopPage() {
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          setError('دریافت محصولات ناموفق بود. اتصال به بک‌اند را بررسی کنید.');
+          setError(translateText("دریافت محصولات ناموفق بود. اتصال به بک‌اند را بررسی کنید."));
         }
       })
       .finally(() => {
@@ -1265,11 +1248,11 @@ function ShopPage() {
 
   const title = isSuppliers
     ? filters.name
-      ? `تأمین‌کنندگان «${filters.name}»`
+      ? translateText("تأمین‌کنندگان «{{v0}}»",{v0:(filters.name)})
       : activeCategory
-        ? `تأمین‌کنندگان ${activeCategory.name}`
-        : 'همه‌ی تأمین‌کنندگان'
-    : activeCategory?.name || (filters.name ? `نتایج «${filters.name}»` : 'همه محصولات');
+        ? translateText("تأمین‌کنندگان {{v0}}",{v0:(activeCategory.name)})
+        : translateText("همه‌ی تأمین‌کنندگان")
+    : activeCategory?.name || (filters.name ? translateText("نتایج «{{v0}}»",{v0:(filters.name)}) : translateText("همه محصولات"));
 
   const panelProps = {
     filters,
@@ -1298,16 +1281,12 @@ function ShopPage() {
         <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <nav className="flex flex-wrap items-center gap-1.5 text-[11px] muted">
-              <Link to="/" className="transition hover:opacity-70">
-                خانه
-              </Link>
-              <ChevronLeft size={12} />
-              <Link to="/products" className="transition hover:opacity-70">
-                محصولات
-              </Link>
+              <Link to="/" className="transition hover:opacity-70">{translateText("خانه ")}</Link>
+              <ChevronLeft className="logical-icon" size={12} />
+              <Link to="/products" className="transition hover:opacity-70">{translateText("محصولات ")}</Link>
               {activeCategory && (
                 <>
-                  <ChevronLeft size={12} />
+                  <ChevronLeft className="logical-icon" size={12} />
                   <span className="max-w-[40vw] truncate">{activeCategory.name}</span>
                 </>
               )}
@@ -1316,13 +1295,13 @@ function ShopPage() {
             <p className="mt-1 text-xs muted" aria-live="polite">
               {loading
                 ? isSuppliers
-                  ? 'در حال دریافت تأمین‌کنندگان…'
-                  : 'در حال دریافت کالاها…'
+                  ? translateText("در حال دریافت تأمین‌کنندگان…")
+                  : translateText("در حال دریافت کالاها…")
                 : isSuppliers
                   ? filters.name
-                    ? `${toFa(total)} فروشگاه این کالا را دارند`
-                    : `${toFa(total)} فروشگاه یافت شد`
-                  : `${toFa(total)} کالا یافت شد`}
+                    ? translateText("{{v0}} فروشگاه این کالا را دارند",{v0:(toFa(total))})
+                    : translateText("{{v0}} فروشگاه یافت شد",{v0:(toFa(total))})
+                  : translateText("{{v0}} کالا یافت شد",{v0:(toFa(total))})}
             </p>
           </div>
 
@@ -1333,9 +1312,7 @@ function ShopPage() {
               onClick={() => setFiltersOpen(true)}
               className="btn-ghost inline-flex w-full shrink-0 items-center justify-center gap-2 !py-2 text-xs md:w-auto lg:hidden"
             >
-              <SlidersHorizontal size={15} />
-              فیلترها
-              {chips.length > 0 && (
+              <SlidersHorizontal size={15} />{translateText("فیلترها ")}{chips.length > 0 && (
                 <span className="rounded-full px-1.5 text-[10px] font-black" style={ACCENT}>
                   {toFa(chips.length)}
                 </span>
@@ -1348,13 +1325,13 @@ function ShopPage() {
       {/* تب‌ها: محصولات | تأمین‌کنندگان (مثل علی‌بابا) */}
       <div
         role="tablist"
-        aria-label="نوع نتایج"
+        aria-label={translateText("نوع نتایج")}
         className="flex items-center gap-6 px-1"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         {[
-          { key: 'products', label: 'محصولات', icon: Boxes },
-          { key: 'suppliers', label: 'تأمین‌کنندگان', icon: StoreIcon },
+          { key: 'products', label: translateText("محصولات"), icon: Boxes },
+          { key: 'suppliers', label: translateText("تأمین‌کنندگان"), icon: StoreIcon },
         ].map((item) => {
           const active = (item.key === 'suppliers') === isSuppliers;
           const Icon = item.icon;
@@ -1404,9 +1381,7 @@ function ShopPage() {
             onClick={resetFilters}
             className="text-[11px] font-bold underline-offset-4 hover:underline"
             style={{ color: 'var(--accent-text)' }}
-          >
-            پاک کردن همه
-          </button>
+          >{translateText("پاک کردن همه ")}</button>
         </div>
       )}
 
@@ -1418,9 +1393,7 @@ function ShopPage() {
         >
           <div className="mb-2.5 flex items-center justify-between gap-2 px-1">
             <div className="flex items-center gap-2 text-[13px] font-black">
-              <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />
-              فیلترها
-              {chips.length > 0 && (
+              <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />{translateText("فیلترها ")}{chips.length > 0 && (
                 <span className="rounded-full px-2 py-0.5 text-[10px] font-black" style={ACCENT}>
                   {toFa(chips.length)}
                 </span>
@@ -1432,9 +1405,7 @@ function ShopPage() {
                 onClick={resetFilters}
                 className="inline-flex shrink-0 items-center gap-1 text-[11px] muted transition hover:opacity-70"
               >
-                <RotateCcw size={12} />
-                پاک کردن
-              </button>
+                <RotateCcw size={12} />{translateText("پاک کردن ")}</button>
             )}
           </div>
           <FiltersPanel {...panelProps} scope="desktop" />
@@ -1444,9 +1415,7 @@ function ShopPage() {
           {error ? (
             <div className="card rounded-3xl p-10 text-center">
               <p className="muted">{error}</p>
-              <button type="button" onClick={() => setRetry((v) => v + 1)} className="btn-yellow mt-4">
-                تلاش دوباره
-              </button>
+              <button type="button" onClick={() => setRetry((v) => v + 1)} className="btn-yellow mt-4">{translateText("تلاش دوباره ")}</button>
             </div>
           ) : (
             isSuppliers ? (

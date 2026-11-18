@@ -1,3 +1,5 @@
+import LanguageSelector from '../common/locale/LanguageSelectorComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useState } from 'react';
 import BrandLogoComponent from '../common/BrandLogoComponent';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
@@ -22,12 +24,12 @@ import { useShop } from '../../contexts/ShopContext';
 import { userDisplayName } from '../../utils/helpers/user';
 
 const SELLER_ITEMS = [
-  { path: '/seller', label: 'پیشخوان', icon: LayoutDashboard, end: true },
-  { path: '/seller/products', label: 'محصولات من', icon: Package },
-  { path: '/seller/stores', label: 'فروشگاه‌ها', icon: Store },
-  { path: '/seller/orders', label: 'سفارش‌ها', icon: ShoppingBag },
-  { path: '/seller/plans', label: 'پلن و اشتراک', icon: CreditCard },
-  { path: '/seller/settings', label: 'تنظیمات فروشنده', icon: Settings },
+  { path: '/seller', label: translateText('پیشخوان'), icon: LayoutDashboard, end: true },
+  { path: '/seller/products', label: translateText('محصولات من'), icon: Package },
+  { path: '/seller/stores', label: translateText('فروشگاه‌ها'), icon: Store },
+  { path: '/seller/orders', label: translateText('سفارش‌ها'), icon: ShoppingBag },
+  { path: '/seller/plans', label: translateText('پلن و اشتراک'), icon: CreditCard },
+  { path: '/seller/settings', label: translateText('تنظیمات فروشنده'), icon: Settings },
 ];
 
 function SellerNavbarComponent() {
@@ -49,9 +51,9 @@ function SellerNavbarComponent() {
             <BrandLogoComponent size="sm" tone="white" />
             {!isCompact && (
               <div className="min-w-0">
-                <div className="font-black text-sm truncate">پنل فروشنده</div>
+                <div className="font-black text-sm truncate">{translateText('پنل فروشنده')}</div>
                 <div className="text-[11px] text-[#9aa8cc] truncate">
-                  {userDisplayName(user, 'فروشنده ژئو کالا')}
+                  {userDisplayName(user, translateText('فروشنده ژئو کالا'))}
                 </div>
               </div>
             )}
@@ -61,10 +63,10 @@ function SellerNavbarComponent() {
               type="button"
               onClick={() => setCollapsed(true)}
               className="p-1.5 rounded-lg hover:bg-white/10 text-[#9aa8cc] shrink-0"
-              title="کوچک‌نمایی منو"
-              aria-label="کوچک‌نمایی منو"
+              title={translateText('کوچک‌نمایی منو')}
+              aria-label={translateText('کوچک‌نمایی منو')}
             >
-              <PanelRightClose size={17} />
+              <PanelRightClose className="logical-icon" size={17} />
             </button>
           )}
           {isMobile && (
@@ -72,7 +74,7 @@ function SellerNavbarComponent() {
               type="button"
               onClick={() => setMobileOpen(false)}
               className="p-1.5 rounded-lg hover:bg-white/10"
-              aria-label="بستن منو"
+              aria-label={translateText('بستن منو')}
             >
               <X size={18} />
             </button>
@@ -90,14 +92,17 @@ function SellerNavbarComponent() {
               color: 'var(--primary-color)',
               border: '1px solid rgba(255,214,10,0.35)',
             }}
-            title="باز کردن منو"
-            aria-label="باز کردن منو"
+            title={translateText('باز کردن منو')}
+            aria-label={translateText('باز کردن منو')}
           >
-            <PanelRightOpen size={16} />
+            <PanelRightOpen className="logical-icon" size={16} />
           </button>
         )}
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1" aria-label="ناوبری پنل فروشنده">
+        <nav
+          className="flex-1 overflow-y-auto p-3 space-y-1"
+          aria-label={translateText('ناوبری پنل فروشنده')}
+        >
           {SELLER_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -127,6 +132,7 @@ function SellerNavbarComponent() {
         </nav>
 
         <div className="p-3 border-t border-white/10 space-y-1">
+          <LanguageSelector variant="seller" placement="menu" compact={isCompact} />
           <button
             type="button"
             onClick={toggleTheme}
@@ -135,7 +141,9 @@ function SellerNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-[#d8e1fa] hover:bg-white/10`}
           >
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-            {!isCompact && <span>{theme === 'dark' ? 'تم روشن' : 'تم تاریک'}</span>}
+            {!isCompact && (
+              <span>{theme === 'dark' ? translateText('تم روشن') : translateText('تم تاریک')}</span>
+            )}
           </button>
           {user?.role === 'admin' && (
             <Link
@@ -146,7 +154,7 @@ function SellerNavbarComponent() {
               } py-2.5 rounded-xl text-sm text-brand-yellow hover:bg-white/10`}
             >
               <ShieldCheck size={17} className="shrink-0" />
-              {!isCompact && <span>پنل ادمین</span>}
+              {!isCompact && <span>{translateText('پنل ادمین')}</span>}
             </Link>
           )}
           <Link
@@ -157,7 +165,7 @@ function SellerNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-[#d8e1fa] hover:bg-white/10`}
           >
             <ExternalLink size={17} className="shrink-0" />
-            {!isCompact && <span>مشاهده فروشگاه</span>}
+            {!isCompact && <span>{translateText('مشاهده فروشگاه')}</span>}
           </Link>
           <button
             type="button"
@@ -170,7 +178,7 @@ function SellerNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-red-300 hover:bg-red-500/15`}
           >
             <LogOut size={17} className="shrink-0" />
-            {!isCompact && <span>خروج از حساب</span>}
+            {!isCompact && <span>{translateText('خروج از حساب')}</span>}
           </button>
         </div>
       </div>
@@ -185,17 +193,17 @@ function SellerNavbarComponent() {
             type="button"
             onClick={() => setMobileOpen(true)}
             className="p-2 rounded-lg hover:bg-white/10"
-            aria-label="باز کردن منوی پنل فروشنده"
+            aria-label={translateText('باز کردن منوی پنل فروشنده')}
           >
             <Menu size={19} />
           </button>
-          <span className="font-black text-sm">پنل فروشندگان ژئو کالا</span>
+          <span className="font-black text-sm">{translateText('پنل فروشندگان ژئو کالا')}</span>
         </div>
-        <span className="text-xs text-brand-yellow font-bold">{userDisplayName(user, user?.username)}</span>
+        <LanguageSelector variant="seller" placement="navbar" compact />
       </div>
 
       <aside
-        className={`hidden lg:block shrink-0 border-l border-white/10 transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
+        className={`hidden lg:block shrink-0 border-e border-white/10 transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >

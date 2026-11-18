@@ -1,3 +1,5 @@
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import HeaderComponent from '../../components/home/HeaderComponent';
@@ -48,16 +50,14 @@ const HomePage = () => {
   return (
     /* رنگ‌ها از متغیرهای تم می‌آیند تا صفحه اول در تم روشن و تاریک یکسان باشد
        (قبلاً bg-white/text-[#222] ثابت بود و تم روی صفحه اول کار نمی‌کرد) */
-    <div dir="rtl" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div dir={i18nDirection} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <HeaderComponent products={products} categories={categories} loading={loading} />
 
       {error && !loading && (
         <div className="max-w-[1440px] mx-auto px-4 pt-6">
           <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
-            <span className="text-sm muted">دریافت اطلاعات از بک‌اند ناموفق بود.</span>
-            <button type="button" className="btn-yellow !py-2 text-sm" onClick={() => setRetry((v) => v + 1)}>
-              تلاش دوباره
-            </button>
+            <span className="text-sm muted">{translateText("دریافت اطلاعات از بک‌اند ناموفق بود.")}</span>
+            <button type="button" className="btn-yellow !py-2 text-sm" onClick={() => setRetry((v) => v + 1)}>{translateText("تلاش دوباره ")}</button>
           </div>
         </div>
       )}

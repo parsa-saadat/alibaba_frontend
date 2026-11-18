@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import axios from 'axios';
 import { getBody, getList, getId } from './response.js';
 
@@ -47,7 +48,7 @@ export const fetchCategories = async (signal) => {
       timeout: 15000,
     });
     if (response.data?.success === false) {
-      throw new Error(response.data.message || 'دریافت دسته‌بندی‌ها ناموفق بود.');
+      throw new Error(response.data.message || translateText("دریافت دسته‌بندی‌ها ناموفق بود."));
     }
     const rows = getList(response);
     categories.push(...rows);

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
 import { Extension, Node as TipTapNode, mergeAttributes } from '@tiptap/core';
@@ -41,8 +42,7 @@ import {
 } from 'lucide-react';
 import useMediaSrc from '../../hooks/useMediaSrc';
 
-const API =
-  import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const MD_PATTERNS = [
   /^#{1,6}\s+.+/m,
@@ -72,7 +72,10 @@ const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#0a1736' };
 /* ------------------------------------------------------------------ */
 /* ابزارهای کمکی رسانه                                                 */
 /* ------------------------------------------------------------------ */
-const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+const esc = (v) =>
+  String(v ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;');
 
 const toEmbedUrl = (input) => {
   let u;
@@ -91,9 +94,7 @@ const toEmbedUrl = (input) => {
   if (host === 'youtube.com' || host === 'm.youtube.com') {
     const id =
       u.searchParams.get('v') || (['embed', 'shorts'].includes(parts[0]) ? parts[1] : null);
-    return id && /^[\w-]{6,}$/.test(id)
-      ? `https://www.youtube-nocookie.com/embed/${id}`
-      : null;
+    return id && /^[\w-]{6,}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null;
   }
   if (host === 'vimeo.com' && /^\d+$/.test(parts[0] || '')) {
     return `https://player.vimeo.com/video/${parts[0]}`;
@@ -120,16 +121,14 @@ function MediaView({ node, selected, deleteNode }) {
             <img src={media.url} alt={alt || ''} draggable={false} className="md-media-el" />
           ) : (
             <div className="md-media-loading">
-              {media.failed ? 'تصویر در دسترس نیست' : 'در حال بارگذاری تصویر…'}
+              {media.failed ? translateText('تصویر در دسترس نیست') : translateText('در حال بارگذاری تصویر…')}
             </div>
           ))}
-        {type === 'video' && (
-          <video src={src} controls playsInline className="md-media-el" />
-        )}
+        {type === 'video' && <video src={src} controls playsInline className="md-media-el" />}
         {type === 'embed' && (
           <iframe
             src={src}
-            title="ویدیوی جاسازی‌شده"
+            title={translateText('ویدیوی جاسازی‌شده')}
             allowFullScreen
             loading="lazy"
             className="md-media-el md-media-embed"
@@ -139,8 +138,8 @@ function MediaView({ node, selected, deleteNode }) {
         <button
           type="button"
           className="md-media-del"
-          title="حذف"
-          aria-label="حذف"
+          title={translateText('حذف')}
+          aria-label={translateText('حذف')}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => deleteNode()}
         >
@@ -320,9 +319,7 @@ function ToolBtn({ title, active, disabled, onClick, children, wide = false }) {
 const Sep = () => <span className="w-px h-5 mx-1 bg-current opacity-20 shrink-0" />;
 
 function pickMediaFile(list) {
-  return [...(list || [])].find(
-    (f) => f.type.startsWith('image/') || f.type.startsWith('video/'),
-  );
+  return [...(list || [])].find((f) => f.type.startsWith('image/') || f.type.startsWith('video/'));
 }
 
 /* ------------------------------------------------------------------ */
@@ -449,19 +446,25 @@ function TableMenu({ editor, onClose }) {
       {/* سرصفحه‌ی پنل */}
       <div className="flex items-center justify-between gap-2">
         <b className="text-[11px] flex items-center gap-1.5">
-          <TableIcon size={13} className="text-yellow" /> جدول
+          <TableIcon size={13} className="text-yellow" />
+          {translateText(' جدول ')}
         </b>
-        <button type="button" onClick={onClose} className="btn-ghost !p-1" aria-label="بستن">
+        <button
+          type="button"
+          onClick={onClose}
+          className="btn-ghost !p-1"
+          aria-label={translateText('بستن')}
+        >
           <X size={13} />
         </button>
       </div>
 
       {/* درج جدول جدید */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="w-14 shrink-0 text-[10px] font-black muted">جدول تازه</span>
+        <span className="w-14 shrink-0 text-[10px] font-black muted">{translateText('جدول تازه')}</span>
         {[
-          ['rows', 'سطر', Rows3],
-          ['cols', 'ستون', Columns3],
+          ['rows', translateText('سطر'), Rows3],
+          ['cols', translateText('ستون'), Columns3],
         ].map(([key, label, Icon]) => (
           <div key={key} className="flex items-center gap-1 card rounded-lg px-1.5 py-0.5">
             <Icon size={11} className="muted" />
@@ -470,7 +473,7 @@ function TableMenu({ editor, onClose }) {
               type="button"
               className="btn-ghost !p-0.5"
               onClick={() => setSize((prev) => ({ ...prev, [key]: Math.max(2, prev[key] - 1) }))}
-              aria-label={`کم کردن ${label}`}
+              aria-label={translateText('کم کردن {{v0}}', { v0: label })}
             >
               <Minus size={10} />
             </button>
@@ -479,7 +482,7 @@ function TableMenu({ editor, onClose }) {
               type="button"
               className="btn-ghost !p-0.5"
               onClick={() => setSize((prev) => ({ ...prev, [key]: Math.min(10, prev[key] + 1) }))}
-              aria-label={`زیاد کردن ${label}`}
+              aria-label={translateText('زیاد کردن {{v0}}', { v0: label })}
             >
               <Plus size={10} />
             </button>
@@ -496,65 +499,117 @@ function TableMenu({ editor, onClose }) {
           }
           className="btn-yellow !py-1 !px-2.5 text-[11px] flex items-center gap-1"
         >
-          <TableIcon size={12} /> درج
+          <TableIcon size={12} />
+          {translateText(' درج ')}
         </button>
       </div>
 
       {!inTable ? (
         <p className="text-[11px] muted leading-5">
-          روی یکی از خانه‌های جدول کلیک کنید تا گزینه‌های سرتیتر، افزودن و حذف فعال شوند.
+          {translateText(
+            'روی یکی از خانه‌های جدول کلیک کنید تا گزینه‌های سرتیتر، افزودن و حذف فعال شوند. ',
+          )}
         </p>
       ) : (
         <>
-          <MenuRow label="سطر">
-            <TableAction title="افزودن سطر بالای این سطر" onClick={run((c) => c.addRowBefore())} disabled={!editor.can().addRowBefore()}>
-              <Plus size={11} /> بالا
-            </TableAction>
-            <TableAction title="افزودن سطر پایین این سطر" onClick={run((c) => c.addRowAfter())} disabled={!editor.can().addRowAfter()}>
-              <Plus size={11} /> پایین
+          <MenuRow label={translateText('سطر')}>
+            <TableAction
+              title={translateText('افزودن سطر بالای این سطر')}
+              onClick={run((c) => c.addRowBefore())}
+              disabled={!editor.can().addRowBefore()}
+            >
+              <Plus size={11} />
+              {translateText(' بالا ')}
             </TableAction>
             <TableAction
-              title="همان سطری که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)"
+              title={translateText('افزودن سطر پایین این سطر')}
+              onClick={run((c) => c.addRowAfter())}
+              disabled={!editor.can().addRowAfter()}
+            >
+              <Plus size={11} />
+              {translateText(' پایین ')}
+            </TableAction>
+            <TableAction
+              title={translateText('همان سطری که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)')}
               active={rowIsHeader}
               onClick={() => toggleHeaderAtCursor(editor, 'row')}
               disabled={!inTable}
             >
-              <Heading2 size={11} /> سرتیتر سطر
+              <Heading2 size={11} />
+              {translateText(' سرتیتر سطر ')}
             </TableAction>
-            <TableAction title="حذف سطر جاری" onClick={run((c) => c.deleteRow())} disabled={!editor.can().deleteRow()}>
-              <Minus size={11} /> حذف
+            <TableAction
+              title={translateText('حذف سطر جاری')}
+              onClick={run((c) => c.deleteRow())}
+              disabled={!editor.can().deleteRow()}
+            >
+              <Minus size={11} />
+              {translateText(' حذف ')}
             </TableAction>
           </MenuRow>
 
-          <MenuRow label="ستون">
-            <TableAction title="افزودن ستون سمت چپ" onClick={run((c) => c.addColumnBefore())} disabled={!editor.can().addColumnBefore()}>
-              <Plus size={11} /> چپ
-            </TableAction>
-            <TableAction title="افزودن ستون سمت راست" onClick={run((c) => c.addColumnAfter())} disabled={!editor.can().addColumnAfter()}>
-              <Plus size={11} /> راست
+          <MenuRow label={translateText('ستون')}>
+            <TableAction
+              title={translateText('افزودن ستون سمت چپ')}
+              onClick={run((c) => c.addColumnBefore())}
+              disabled={!editor.can().addColumnBefore()}
+            >
+              <Plus size={11} />
+              {translateText(' چپ ')}
             </TableAction>
             <TableAction
-              title="همان ستونی که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)"
+              title={translateText('افزودن ستون سمت راست')}
+              onClick={run((c) => c.addColumnAfter())}
+              disabled={!editor.can().addColumnAfter()}
+            >
+              <Plus size={11} />
+              {translateText(' راست ')}
+            </TableAction>
+            <TableAction
+              title={translateText(
+                'همان ستونی که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)',
+              )}
               active={colIsHeader}
               onClick={() => toggleHeaderAtCursor(editor, 'col')}
               disabled={!inTable}
             >
-              <Columns3 size={11} /> سرتیتر ستون
+              <Columns3 size={11} />
+              {translateText(' سرتیتر ستون ')}
             </TableAction>
-            <TableAction title="حذف ستون جاری" onClick={run((c) => c.deleteColumn())} disabled={!editor.can().deleteColumn()}>
-              <Minus size={11} /> حذف
+            <TableAction
+              title={translateText('حذف ستون جاری')}
+              onClick={run((c) => c.deleteColumn())}
+              disabled={!editor.can().deleteColumn()}
+            >
+              <Minus size={11} />
+              {translateText(' حذف ')}
             </TableAction>
           </MenuRow>
 
-          <MenuRow label="خانه">
-            <TableAction title="ادغام خانه‌های انتخاب‌شده" onClick={run((c) => c.mergeCells())} disabled={!editor.can().mergeCells()}>
-              <Merge size={11} /> ادغام
+          <MenuRow label={translateText('خانه')}>
+            <TableAction
+              title={translateText('ادغام خانه‌های انتخاب‌شده')}
+              onClick={run((c) => c.mergeCells())}
+              disabled={!editor.can().mergeCells()}
+            >
+              <Merge size={11} />
+              {translateText(' ادغام ')}
             </TableAction>
-            <TableAction title="جدا کردن خانه‌ی ادغام‌شده" onClick={run((c) => c.splitCell())} disabled={!editor.can().splitCell()}>
-              <Split size={11} /> جدا کردن
+            <TableAction
+              title={translateText('جدا کردن خانه‌ی ادغام‌شده')}
+              onClick={run((c) => c.splitCell())}
+              disabled={!editor.can().splitCell()}
+            >
+              <Split size={11} />
+              {translateText(' جدا کردن ')}
             </TableAction>
-            <TableAction title="حذف کل جدول" onClick={run((c) => c.deleteTable())} disabled={!editor.can().deleteTable()}>
-              <Trash2 size={11} /> حذف جدول
+            <TableAction
+              title={translateText('حذف کل جدول')}
+              onClick={run((c) => c.deleteTable())}
+              disabled={!editor.can().deleteTable()}
+            >
+              <Trash2 size={11} />
+              {translateText(' حذف جدول ')}
             </TableAction>
           </MenuRow>
         </>
@@ -602,7 +657,12 @@ function LinkDialog({ state, onSubmit, onClose }) {
             <h3 className="font-black text-sm">{state.title}</h3>
             <p className="text-[11px] muted leading-5 mt-1">{state.hint}</p>
           </div>
-          <button type="button" onClick={onClose} className="btn-ghost !p-1.5" aria-label="بستن">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-ghost !p-1.5"
+            aria-label={translateText('بستن')}
+          >
             <X size={15} />
           </button>
         </div>
@@ -629,10 +689,10 @@ function LinkDialog({ state, onSubmit, onClose }) {
 
         <div className="flex items-center gap-2 justify-end pt-1">
           <button type="button" onClick={onClose} className="btn-ghost !py-1.5 !px-3 text-xs">
-            انصراف
+            {translateText('انصراف ')}
           </button>
           <button type="button" onClick={submit} className="btn-yellow !py-1.5 !px-3.5 text-xs">
-            افزودن
+            {translateText('افزودن ')}
           </button>
         </div>
       </div>
@@ -645,11 +705,14 @@ function LinkDialog({ state, onSubmit, onClose }) {
 /* ------------------------------------------------------------------ */
 function MarkdownEditorComponent({
   value = '',
+  direction = 'ltr',
   onChange,
   onUploadImage,
   onUploadMedia,
-  placeholder = 'توضیحات کامل محصول...',
+  placeholder = translateText('توضیحات کامل محصول...'),
 }) {
+  const placeholderRef = useRef(placeholder);
+  placeholderRef.current = placeholder;
   const [view, setView] = useState('visual');
   const [uploading, setUploading] = useState(false);
   const [tableMenu, setTableMenu] = useState(false);
@@ -678,7 +741,7 @@ function MarkdownEditorComponent({
       TableRow,
       TableHeader,
       TableCell,
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({ placeholder: () => placeholderRef.current }),
       TableKeys,
       LinkShortcut.configure({ onShortcut: () => openLinkRef.current?.() }),
       Markdown.configure({
@@ -698,7 +761,7 @@ function MarkdownEditorComponent({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     editorProps: {
-      attributes: { dir: 'rtl', class: 'md-visual' },
+      attributes: { dir: direction, class: 'md-visual' },
       handlePaste: (_view, event) => {
         const file = pickMediaFile(event.clipboardData?.files);
         if (file && uploadRef.current) {
@@ -722,6 +785,16 @@ function MarkdownEditorComponent({
       onChange?.(inst.storage.markdown.getMarkdown());
     },
   });
+
+  useEffect(() => {
+    if (editor)
+      editor.setOptions({
+        editorProps: {
+          ...editor.options.editorProps,
+          attributes: { ...editor.options.editorProps.attributes, dir: direction },
+        },
+      });
+  }, [editor, direction]);
 
   if (typeof window !== 'undefined' && import.meta.env.DEV) window.__editor = editor;
 
@@ -811,10 +884,10 @@ function MarkdownEditorComponent({
       return undefined;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setToolbarStuck(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '0px' },
-    );
+    const observer = new IntersectionObserver(([entry]) => setToolbarStuck(!entry.isIntersecting), {
+      threshold: 0,
+      rootMargin: '0px',
+    });
     observer.observe(sentinel);
     return () => observer.disconnect();
     /* `editor` هم وابستگی است: تا ادیتور آماده نشود نگهبان در صفحه نیست */
@@ -837,7 +910,7 @@ function MarkdownEditorComponent({
       return;
     }
     const prev = editor.getAttributes('link').href;
-    const url = window.prompt('آدرس لینک', prev || 'https://');
+    const url = window.prompt(translateText('آدرس لینک'), prev || 'https://');
     if (url === null) return;
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
@@ -859,8 +932,10 @@ function MarkdownEditorComponent({
   const openImageDialog = () =>
     setLinkDialog({
       kind: 'image',
-      title: 'افزودن تصویر با لینک',
-      hint: 'آدرس کامل تصویر را با http یا https وارد کنید. تصویر همان‌جا در متن درج می‌شود.',
+      title: translateText('افزودن تصویر با لینک'),
+      hint: translateText(
+        'آدرس کامل تصویر را با http یا https وارد کنید. تصویر همان‌جا در متن درج می‌شود.',
+      ),
       placeholder: 'https://example.com/image.jpg',
       initial: '',
     });
@@ -869,23 +944,30 @@ function MarkdownEditorComponent({
   const openVideoDialog = () =>
     setLinkDialog({
       kind: 'video',
-      title: 'افزودن ویدیو با لینک',
-      hint: 'لینک ویدیوی YouTube، Vimeo یا آپارات را وارد کنید؛ به پخش‌کننده‌ی قابل جاسازی تبدیل می‌شود.',
+      title: translateText('افزودن ویدیو با لینک'),
+      hint: translateText(
+        'لینک ویدیوی YouTube، Vimeo یا آپارات را وارد کنید؛ به پخش‌کننده‌ی قابل جاسازی تبدیل می‌شود.',
+      ),
       placeholder: 'https://www.aparat.com/v/…',
       initial: '',
     });
 
   /* ارسال پاپ‌آپ: پیام خطا برمی‌گرداند یا null (یعنی انجام شد) */
   const submitLink = (raw) => {
-    if (!raw) return 'آدرس را وارد کنید.';
+    if (!raw) return translateText('آدرس را وارد کنید.');
     if (linkDialog?.kind === 'image') {
-      if (!/^https?:\/\//i.test(raw)) return 'آدرس تصویر باید با http یا https شروع شود.';
-      editor.chain().focus().setImage({ src: raw, alt: 'تصویر' }).run();
+      if (!/^https?:\/\//i.test(raw)) return translateText('آدرس تصویر باید با http یا https شروع شود.');
+      editor
+        .chain()
+        .focus()
+        .setImage({ src: raw, alt: translateText('تصویر') })
+        .run();
       setLinkDialog(null);
       return null;
     }
     const src = toEmbedUrl(raw);
-    if (!src) return 'فقط لینک‌های https مربوط به YouTube، Vimeo و Aparat پذیرفته می‌شوند.';
+    if (!src)
+      return translateText('فقط لینک‌های https مربوط به YouTube، Vimeo و Aparat پذیرفته می‌شوند.');
     editor.chain().focus().setEmbed({ src }).run();
     setLinkDialog(null);
     return null;
@@ -934,213 +1016,267 @@ function MarkdownEditorComponent({
           fullscreen
             ? undefined
             : {
-                top: 'calc(var(--header-h, 0px) + var(--editor-bar-h, 0px))',
+                top: 'var(--header-h, 0px)',
                 background: 'var(--card)',
               }
         }
       >
-      {/* نوار ابزار */}
-      <div
-        ref={toolbarRef}
-        className="flex items-center justify-between gap-2 flex-wrap px-3 py-2 border-b border-theme"
-        style={{ background: 'var(--card)' }}
-      >
-        <div className="flex items-center gap-1 flex-wrap">
-          <ToolBtn title="واگرد" disabled={notVisual || !editor.can().undo()}
-            onClick={() => editor.chain().focus().undo().run()}>
-            <Undo2 size={15} />
-          </ToolBtn>
-          <ToolBtn title="ازنو" disabled={notVisual || !editor.can().redo()}
-            onClick={() => editor.chain().focus().redo().run()}>
-            <Redo2 size={15} />
-          </ToolBtn>
+        {/* نوار ابزار */}
+        <div
+          ref={toolbarRef}
+          className="flex items-center justify-between gap-2 flex-wrap px-3 py-2 border-b border-theme"
+          style={{ background: 'var(--card)' }}
+        >
+          <div className="flex items-center gap-1 flex-wrap">
+            <ToolBtn
+              title={translateText('واگرد')}
+              disabled={notVisual || !editor.can().undo()}
+              onClick={() => editor.chain().focus().undo().run()}
+            >
+              <Undo2 size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('ازنو')}
+              disabled={notVisual || !editor.can().redo()}
+              onClick={() => editor.chain().focus().redo().run()}
+            >
+              <Redo2 size={15} />
+            </ToolBtn>
 
-          <Sep />
+            <Sep />
 
-          <ToolBtn title="تیتر ۲" active={editor.isActive('heading', { level: 2 })} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
-            <Heading2 size={15} />
-          </ToolBtn>
-          <ToolBtn title="تیتر ۳" active={editor.isActive('heading', { level: 3 })} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
-            <Heading3 size={15} />
-          </ToolBtn>
-          <ToolBtn title="بولد (Ctrl+B)" active={editor.isActive('bold')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleBold().run()}>
-            <Bold size={15} />
-          </ToolBtn>
-          <ToolBtn title="ایتالیک (Ctrl+I)" active={editor.isActive('italic')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleItalic().run()}>
-            <Italic size={15} />
-          </ToolBtn>
-          <ToolBtn title="خط‌خورده" active={editor.isActive('strike')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleStrike().run()}>
-            <Strikethrough size={15} />
-          </ToolBtn>
-          <ToolBtn title="لیست نقطه‌ای" active={editor.isActive('bulletList')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}>
-            <List size={15} />
-          </ToolBtn>
-          <ToolBtn title="لیست شماره‌دار" active={editor.isActive('orderedList')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}>
-            <ListOrdered size={15} />
-          </ToolBtn>
-          <ToolBtn title="نقل‌قول" active={editor.isActive('blockquote')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-            <Quote size={15} />
-          </ToolBtn>
-          <ToolBtn title="کد درون‌خطی" active={editor.isActive('code')} disabled={notVisual}
-            onClick={() => editor.chain().focus().toggleCode().run()}>
-            <Code size={15} />
-          </ToolBtn>
-          <ToolBtn title="لینک (Ctrl+K)" active={editor.isActive('link')} disabled={notVisual} onClick={setLink}>
-            <Link2 size={15} />
-          </ToolBtn>
+            <ToolBtn
+              title={translateText('تیتر ۲')}
+              active={editor.isActive('heading', { level: 2 })}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            >
+              <Heading2 size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('تیتر ۳')}
+              active={editor.isActive('heading', { level: 3 })}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            >
+              <Heading3 size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('بولد (Ctrl+B)')}
+              active={editor.isActive('bold')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleBold().run()}
+            >
+              <Bold size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('ایتالیک (Ctrl+I)')}
+              active={editor.isActive('italic')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+            >
+              <Italic size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('خط‌خورده')}
+              active={editor.isActive('strike')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+            >
+              <Strikethrough size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('لیست نقطه‌ای')}
+              active={editor.isActive('bulletList')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+            >
+              <List size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('لیست شماره‌دار')}
+              active={editor.isActive('orderedList')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            >
+              <ListOrdered size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('نقل‌قول')}
+              active={editor.isActive('blockquote')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            >
+              <Quote size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('کد درون‌خطی')}
+              active={editor.isActive('code')}
+              disabled={notVisual}
+              onClick={() => editor.chain().focus().toggleCode().run()}
+            >
+              <Code size={15} />
+            </ToolBtn>
+            <ToolBtn
+              title={translateText('لینک (Ctrl+K)')}
+              active={editor.isActive('link')}
+              disabled={notVisual}
+              onClick={setLink}
+            >
+              <Link2 size={15} />
+            </ToolBtn>
 
-          <Sep />
+            <Sep />
 
-          {onUploadImage && (
-            <div className="relative">
-              <ToolBtn
-                title="افزودن تصویر"
-                disabled={uploading || notVisual}
-                active={imageMenu}
-                onClick={() => setImageMenu((v) => !v)}
-              >
-                <span className="flex items-center gap-0.5">
-                  <ImagePlus size={15} />
-                  <ChevronDown size={11} />
-                </span>
-              </ToolBtn>
-              {imageMenu && !notVisual && (
-                <div
-                  className="absolute z-[60] mt-1 w-52 card rounded-xl p-1.5 shadow-2xl space-y-1"
-                  style={{ right: 0 }}
-                  onMouseDown={(e) => e.preventDefault()}
+            {onUploadImage && (
+              <div className="relative">
+                <ToolBtn
+                  title={translateText('افزودن تصویر')}
+                  disabled={uploading || notVisual}
+                  active={imageMenu}
+                  onClick={() => setImageMenu((v) => !v)}
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageMenu(false);
-                      imageInputRef.current?.click();
-                    }}
-                    className="w-full text-right btn-ghost !py-1.5 !px-2 text-xs flex items-center gap-1.5"
+                  <span className="flex items-center gap-0.5">
+                    <ImagePlus size={15} />
+                    <ChevronDown size={11} />
+                  </span>
+                </ToolBtn>
+                {imageMenu && !notVisual && (
+                  <div
+                    className="absolute z-[60] mt-1 w-52 card rounded-xl p-1.5 shadow-2xl space-y-1"
+                    style={{ right: 0 }}
+                    onMouseDown={(e) => e.preventDefault()}
                   >
-                    <ImagePlus size={13} /> آپلود از دستگاه
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageMenu(false);
-                      openImageDialog();
-                    }}
-                    className="w-full text-right btn-ghost !py-1.5 !px-2 text-xs flex items-center gap-1.5"
-                  >
-                    <Link2 size={13} /> افزودن با لینک
-                  </button>
-                </div>
-              )}
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = '';
-                  handleFile(file);
-                }}
-              />
-            </div>
-          )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageMenu(false);
+                        imageInputRef.current?.click();
+                      }}
+                      className="w-full text-start btn-ghost !py-1.5 !px-2 text-xs flex items-center gap-1.5"
+                    >
+                      <ImagePlus size={13} />
+                      {translateText(' آپلود از دستگاه ')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageMenu(false);
+                        openImageDialog();
+                      }}
+                      className="w-full text-start btn-ghost !py-1.5 !px-2 text-xs flex items-center gap-1.5"
+                    >
+                      <Link2 size={13} />
+                      {translateText(' افزودن با لینک ')}
+                    </button>
+                  </div>
+                )}
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    handleFile(file);
+                  }}
+                />
+              </div>
+            )}
 
-          {onUploadMedia && (
-            <>
-              <ToolBtn title="آپلود ویدیو" disabled={uploading || notVisual}
-                onClick={() => videoInputRef.current?.click()}>
-                <VideoIcon size={15} />
-              </ToolBtn>
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept="video/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = '';
-                  handleFile(file);
-                }}
-              />
-            </>
-          )}
+            {onUploadMedia && (
+              <>
+                <ToolBtn
+                  title={translateText('آپلود ویدیو')}
+                  disabled={uploading || notVisual}
+                  onClick={() => videoInputRef.current?.click()}
+                >
+                  <VideoIcon size={15} />
+                </ToolBtn>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    handleFile(file);
+                  }}
+                />
+              </>
+            )}
 
-          <ToolBtn
-            title="افزودن ویدیو با لینک (YouTube / Vimeo / Aparat)"
-            disabled={notVisual}
-            onClick={openVideoDialog}
-          >
-            <MonitorPlay size={15} />
-          </ToolBtn>
+            <ToolBtn
+              title={translateText('افزودن ویدیو با لینک (YouTube / Vimeo / Aparat)')}
+              disabled={notVisual}
+              onClick={openVideoDialog}
+            >
+              <MonitorPlay size={15} />
+            </ToolBtn>
 
-          <Sep />
+            <Sep />
 
-          <ToolBtn
-            title="جدول و تنظیمات آن"
-            active={tableMenu || inTable}
-            disabled={notVisual}
-            onClick={() => setTableMenu((v) => !v)}
-          >
-            <span className="flex items-center gap-0.5">
-              <TableIcon size={15} />
-              <ChevronDown size={11} />
-            </span>
-          </ToolBtn>
+            <ToolBtn
+              title={translateText('جدول و تنظیمات آن')}
+              active={tableMenu || inTable}
+              disabled={notVisual}
+              onClick={() => setTableMenu((v) => !v)}
+            >
+              <span className="flex items-center gap-0.5">
+                <TableIcon size={15} />
+                <ChevronDown size={11} />
+              </span>
+            </ToolBtn>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setFullscreen((v) => !v)}
+              className="chip !py-1 !px-2.5 flex items-center gap-1 text-xs"
+              title={fullscreen ? translateText('خروج از تمام‌صفحه (Esc)') : translateText('ویرایش تمام‌صفحه')}
+              aria-pressed={fullscreen}
+              style={fullscreen ? ACTIVE_STYLE : undefined}
+            >
+              {fullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              <span className="hidden sm:inline">
+                {fullscreen ? translateText('خروج') : translateText('تمام‌صفحه')}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('visual')}
+              className={`chip !py-1 !px-2.5 flex items-center gap-1 text-xs ${view === 'visual' ? 'on' : ''}`}
+            >
+              <Edit3 size={13} />
+              <span>{translateText('ویرایشگر')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('source')}
+              className={`chip !py-1 !px-2.5 flex items-center gap-1 text-xs ${view === 'source' ? 'on' : ''}`}
+            >
+              <Code2 size={13} />
+              <span>{translateText('کد Markdown')}</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setFullscreen((v) => !v)}
-            className="chip !py-1 !px-2.5 flex items-center gap-1 text-xs"
-            title={fullscreen ? 'خروج از تمام‌صفحه (Esc)' : 'ویرایش تمام‌صفحه'}
-            aria-pressed={fullscreen}
-            style={fullscreen ? ACTIVE_STYLE : undefined}
-          >
-            {fullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
-            <span className="hidden sm:inline">{fullscreen ? 'خروج' : 'تمام‌صفحه'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setView('visual')}
-            className={`chip !py-1 !px-2.5 flex items-center gap-1 text-xs ${view === 'visual' ? 'on' : ''}`}
-          >
-            <Edit3 size={13} />
-            <span>ویرایشگر</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setView('source')}
-            className={`chip !py-1 !px-2.5 flex items-center gap-1 text-xs ${view === 'source' ? 'on' : ''}`}
-          >
-            <Code2 size={13} />
-            <span>کد Markdown</span>
-          </button>
-        </div>
-      </div>
-
-      {/*
+        {/*
         پنل پیشرفته‌ی جدول — دقیقاً زیر نوار ابزار می‌نشیند (هر دو با هم چسبان‌اند)
         و اگر بلندتر از کادر دید شد، داخل خودش اسکرول می‌شود.
       */}
-      {tableMenu && view === 'visual' && (
-        <div
-          data-table-panel="1"
-          className="max-h-[calc(100dvh-var(--header-h,0px)-var(--editor-bar-h,0px)-96px)] overflow-y-auto border-b border-theme"
-          style={{ background: 'var(--card2)' }}
-        >
-          <TableMenu editor={editor} onClose={() => setTableMenu(false)} />
-        </div>
-      )}
+        {tableMenu && view === 'visual' && (
+          <div
+            data-table-panel="1"
+            className="max-h-[calc(100dvh-var(--header-h,0px)-var(--editor-bar-h,0px)-96px)] overflow-y-auto border-b border-theme"
+            style={{ background: 'var(--card2)' }}
+          >
+            <TableMenu editor={editor} onClose={() => setTableMenu(false)} />
+          </div>
+        )}
       </div>
 
       {/* نوار میان‌بر جدول، وقتی داخل جدول هستیم */}
@@ -1153,44 +1289,63 @@ function MarkdownEditorComponent({
           }`}
           style={{ background: 'var(--card2)' }}
         >
-          <span className="font-black muted">جدول:</span>
-          <ToolBtn title="سطر جدید پایین" onClick={() => editor.chain().focus().addRowAfter().run()}>
+          <span className="font-black muted">{translateText('جدول:')}</span>
+          <ToolBtn
+            title={translateText('سطر جدید پایین')}
+            onClick={() => editor.chain().focus().addRowAfter().run()}
+          >
             <Rows3 size={13} />
           </ToolBtn>
-          <ToolBtn title="ستون جدید راست" onClick={() => editor.chain().focus().addColumnAfter().run()}>
+          <ToolBtn
+            title={translateText('ستون جدید راست')}
+            onClick={() => editor.chain().focus().addColumnAfter().run()}
+          >
             <Columns3 size={13} />
           </ToolBtn>
           <ToolBtn
-            title="سرتیتر سطر (همان سطر مکان‌نما)"
+            title={translateText('سرتیتر سطر (همان سطر مکان‌نما)')}
             active={axisIsHeader(editor, 'row')}
             onClick={() => toggleHeaderAtCursor(editor, 'row')}
           >
             <ArrowUp size={13} />
           </ToolBtn>
           <ToolBtn
-            title="سرتیتر ستون (همان ستون مکان‌نما)"
+            title={translateText('سرتیتر ستون (همان ستون مکان‌نما)')}
             active={axisIsHeader(editor, 'col')}
             onClick={() => toggleHeaderAtCursor(editor, 'col')}
           >
             <ArrowRight size={13} />
           </ToolBtn>
-          <ToolBtn title="ادغام خانه‌ها" disabled={!editor.can().mergeCells()}
-            onClick={() => editor.chain().focus().mergeCells().run()}>
+          <ToolBtn
+            title={translateText('ادغام خانه‌ها')}
+            disabled={!editor.can().mergeCells()}
+            onClick={() => editor.chain().focus().mergeCells().run()}
+          >
             <Merge size={13} />
           </ToolBtn>
-          <ToolBtn title="جدا کردن خانه" disabled={!editor.can().splitCell()}
-            onClick={() => editor.chain().focus().splitCell().run()}>
+          <ToolBtn
+            title={translateText('جدا کردن خانه')}
+            disabled={!editor.can().splitCell()}
+            onClick={() => editor.chain().focus().splitCell().run()}
+          >
             <Split size={13} />
           </ToolBtn>
-          <ToolBtn title="حذف سطر" onClick={() => editor.chain().focus().deleteRow().run()}>
+          <ToolBtn
+            title={translateText('حذف سطر')}
+            onClick={() => editor.chain().focus().deleteRow().run()}
+          >
             <Minus size={13} />
           </ToolBtn>
-          <ToolBtn title="حذف جدول" onClick={() => editor.chain().focus().deleteTable().run()}>
+          <ToolBtn
+            title={translateText('حذف جدول')}
+            onClick={() => editor.chain().focus().deleteTable().run()}
+          >
             <Trash2 size={13} />
           </ToolBtn>
-          <ToolBtn title="تنظیمات بیشتر" onClick={() => setTableMenu(true)}>
+          <ToolBtn title={translateText('تنظیمات بیشتر')} onClick={() => setTableMenu(true)}>
             <span className="flex items-center gap-0.5 text-[11px]">
-              بیشتر <ChevronDown size={11} />
+              {translateText('بیشتر ')}
+              <ChevronDown size={11} />
             </span>
           </ToolBtn>
         </div>
@@ -1212,6 +1367,7 @@ function MarkdownEditorComponent({
       {/* ناحیه کد Markdown */}
       <textarea
         value={value}
+        placeholder={placeholder}
         onChange={(e) => onChange?.(e.target.value)}
         dir="ltr"
         rows={11}
@@ -1228,7 +1384,7 @@ function MarkdownEditorComponent({
           }`}
           style={{ background: 'var(--card)' }}
         >
-          <span className="text-amber-400 font-bold">در حال آپلود…</span>
+          <span className="text-amber-400 font-bold">{translateText('در حال آپلود…')}</span>
         </div>
       )}
 

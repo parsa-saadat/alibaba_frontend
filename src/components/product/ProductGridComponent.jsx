@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { PackageSearch } from 'lucide-react';
 import ProductComponent from './ProductComponent';
@@ -7,7 +8,7 @@ import { getId } from '../../utils/helpers/response';
 function ProductGridComponent({
   products = [],
   loading = false,
-  emptyTitle = 'محصولی یافت نشد',
+  emptyTitle = translateText("محصولی یافت نشد"),
   columns = 4,
   skeletonCount,
   /* اگر مقدار داشته باشد، تعداد ستون‌ها بر اساس عرض واقعی ظرف حساب می‌شود
@@ -38,7 +39,7 @@ function ProductGridComponent({
         className={`${gridClass} gap-3`}
         style={gridStyle}
         aria-busy="true"
-        aria-label="در حال بارگذاری محصولات"
+        aria-label={translateText("در حال بارگذاری محصولات")}
       >
         {Array.from({ length: skeletonCount || columns * 2 }, (_, index) => (
           <div key={index} className="card rounded-2xl overflow-hidden" aria-hidden="true">
@@ -84,7 +85,7 @@ function ProductGridComponent({
       {loading && (
         <div className="absolute inset-0 flex justify-center items-start pt-16">
           <Loading
-            label="در حال به‌روزرسانی محصولات…"
+            label={translateText("در حال به‌روزرسانی محصولات…")}
             className="card rounded-full px-5 py-3 shadow-xl sticky top-44"
           />
         </div>

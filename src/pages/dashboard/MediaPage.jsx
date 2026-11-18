@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { formatDateLong } from '../../utils/helpers/format';
 import axios from 'axios';
@@ -17,9 +18,9 @@ const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 
 const PAGE_SIZE = 24;
 
 const TYPES = [
-  ['', 'همه'],
-  ['image', 'تصاویر'],
-  ['video', 'ویدیوها'],
+  ['', translateText("همه")],
+  ['image', translateText("تصاویر")],
+  ['video', translateText("ویدیوها")],
 ];
 
 /* ------------------------------------------------------------------ */
@@ -31,9 +32,9 @@ const isImage = (file) => String(file?.contentType || '').startsWith('image/');
 const formatSize = (bytes) => {
   const value = Number(bytes);
   if (!Number.isFinite(value) || value <= 0) return '—';
-  if (value < 1024) return `${toFa(value)} بایت`;
-  if (value < 1024 * 1024) return `${toFa(Math.round(value / 1024))} کیلوبایت`;
-  return `${toFa((value / (1024 * 1024)).toFixed(1))} مگابایت`;
+  if (value < 1024) return translateText("{{v0}} بایت", {v0: (toFa(value))});
+  if (value < 1024 * 1024) return translateText("{{v0}} کیلوبایت", {v0: (toFa(Math.round(value / 1024)))});
+  return translateText("{{v0}} مگابایت", {v0: (toFa((value / (1024 * 1024)).toFixed(1)))});
 };
 
 const formatDate = (value) => {
@@ -74,7 +75,7 @@ function MediaThumb({ file, onZoom }) {
     return (
       <div className="grid h-full w-full place-items-center gap-1 bg-black/25 text-[#8fa0c9]">
         <ImageOff size={22} />
-        <span className="text-[9px]">تصویر باز نشد</span>
+        <span className="text-[9px]">{translateText("تصویر باز نشد")}</span>
       </div>
     );
   }
@@ -104,11 +105,11 @@ function MediaThumb({ file, onZoom }) {
       type="button"
       onClick={() => onZoom(file)}
       className="group relative block h-full w-full overflow-hidden"
-      title="بزرگ‌نمایی"
+      title={translateText("بزرگ‌نمایی")}
     >
       <img
         src={url}
-        alt={file?.name || 'تصویر'}
+        alt={file?.name || translateText("تصویر")}
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
         decoding="async"
@@ -179,7 +180,7 @@ function CopyIdButton({ id }) {
 
     /* اگر کپی خودکار ممکن نشد، متن شناسه را انتخاب می‌کنیم تا با Ctrl+C کپی شود */
     selectText(document.querySelector(`[data-id-text="${CSS.escape(id)}"]`));
-    toast.info('کپی خودکار ممکن نشد؛ شناسه انتخاب شد — Ctrl+C بزن');
+    toast.info(translateText("کپی خودکار ممکن نشد؛ شناسه انتخاب شد — Ctrl+C بزن"));
   };
 
   return (
@@ -187,10 +188,10 @@ function CopyIdButton({ id }) {
       type="button"
       onClick={copy}
       className="inline-flex items-center gap-1 rounded-lg border border-theme px-2 py-1 text-[10px] font-bold transition hover:border-[var(--primary-color)]"
-      title="کپی شناسه"
+      title={translateText("کپی شناسه")}
     >
       {done ? <Check size={11} /> : <Copy size={11} />}
-      {done ? 'کپی شد' : 'کپی آیدی'}
+      {done ? translateText("کپی شد") : translateText("کپی آیدی")}
     </button>
   );
 }
@@ -238,7 +239,7 @@ function MediaPage() {
       setTotalPages(Number(body?.totalPages ?? 1) || 1);
     } catch (e) {
       const status = e.response?.status;
-      const message = e.response?.data?.message || 'دریافت فهرست رسانه‌ها ناموفق بود';
+      const message = e.response?.data?.message || translateText("دریافت فهرست رسانه‌ها ناموفق بود");
 
       setFiles([]);
       setTotal(0);
@@ -271,11 +272,11 @@ function MediaPage() {
       });
       const created = getBody(res);
       const count = Array.isArray(created) ? created.length : 1;
-      toast.success(`${toFa(count)} فایل آپلود شد`);
+      toast.success(translateText("{{v0}} فایل آپلود شد", {v0: (toFa(count))}));
       setPage(1);
       await load();
     } catch (e) {
-      toast.error(e.response?.data?.message || 'آپلود ناموفق بود');
+      toast.error(e.response?.data?.message || translateText("آپلود ناموفق بود"));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -283,16 +284,16 @@ function MediaPage() {
   };
 
   const remove = (file) => {
-    if (!window.confirm(`«${file.name}» حذف شود؟ این کار برگشت‌پذیر نیست.`)) return;
+    if (!window.confirm(translateText("«{{v0}}» حذف شود؟ این کار برگشت‌پذیر نیست.", {v0: (file.name)}))) return;
 
     axios
       .delete(`${API}/storage/${encodeURIComponent(getId(file))}`, authHeaders())
       .then(() => {
-        toast.success('فایل حذف شد');
+        toast.success(translateText("فایل حذف شد"));
         setFiles((prev) => prev.filter((f) => getId(f) !== getId(file)));
         setTotal((t) => Math.max(0, t - 1));
       })
-      .catch((e) => toast.error(e.response?.data?.message || 'حذف ناموفق بود'));
+      .catch((e) => toast.error(e.response?.data?.message || translateText("حذف ناموفق بود")));
   };
 
   const stats = useMemo(() => {
@@ -305,30 +306,20 @@ function MediaPage() {
     return (
       <div className="card rounded-3xl p-8 text-center">
         <ShieldAlert size={40} className="mx-auto mb-3 text-yellow" />
-        <h1 className="text-lg font-black">دسترسی به کتابخانه‌ی رسانه ممکن نشد</h1>
-        <p className="mx-auto mt-2 max-w-lg text-xs leading-6 muted">
-          پاسخ سرور: <b dir="ltr">{denied}</b>
+        <h1 className="text-lg font-black">{translateText("دسترسی به کتابخانه‌ی رسانه ممکن نشد")}</h1>
+        <p className="mx-auto mt-2 max-w-lg text-xs leading-6 muted">{translateText("پاسخ سرور: ")}<b dir="ltr">{denied}</b>
         </p>
-        <ul className="mx-auto mt-4 max-w-lg space-y-2 text-right text-xs leading-6 muted">
-          <li>
-            ۱. با <b>حساب ادمین</b> وارد شوید (در حالت دمو: شماره <b dir="ltr">09120000001</b> و کد{' '}
+        <ul className="mx-auto mt-4 max-w-lg space-y-2 text-start text-xs leading-6 muted">
+          <li>{translateText("۱. با ")}<b>{translateText("حساب ادمین")}</b>{translateText(" وارد شوید (در حالت دمو: شماره ")}<b dir="ltr">09120000001</b>{translateText(" و کد")}{' '}
             <b dir="ltr">123456</b>).
           </li>
-          <li>
-            ۲. اگر بک‌اند واقعی را اجرا می‌کنید، فایل{' '}
-            <b dir="ltr">src/routes/storage/storage.route.js</b> را از بسته‌ی دور ۷ جایگزین کنید؛
-            در نسخه‌ی قدیمی، مسیر <b dir="ltr">GET /storage</b> توکن را بررسی نمی‌کرد و همیشه همین
-            خطا را می‌داد.
-          </li>
-          <li>۳. توکن شما منقضی شده باشد هم همین خطا را می‌گیرید؛ یک‌بار خارج و دوباره وارد شوید.</li>
+          <li>{translateText("۲. اگر بک‌اند واقعی را اجرا می‌کنید، فایل")}{' '}
+            <b dir="ltr">src/routes/storage/storage.route.js</b>{translateText(" را از بسته‌ی دور ۷ جایگزین کنید؛ در نسخه‌ی قدیمی، مسیر ")}<b dir="ltr">GET /storage</b>{translateText(" توکن را بررسی نمی‌کرد و همیشه همین خطا را می‌داد. ")}</li>
+          <li>{translateText("۳. توکن شما منقضی شده باشد هم همین خطا را می‌گیرید؛ یک‌بار خارج و دوباره وارد شوید.")}</li>
         </ul>
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-          <button type="button" onClick={() => { setDenied(''); load(); }} className="btn-yellow !py-2 text-sm">
-            تلاش دوباره
-          </button>
-          <Link to="/auth/pre" className="btn-ghost !py-2 text-sm">
-            ورود با حساب ادمین
-          </Link>
+          <button type="button" onClick={() => { setDenied(''); load(); }} className="btn-yellow !py-2 text-sm">{translateText("تلاش دوباره ")}</button>
+          <Link to="/auth/pre" className="btn-ghost !py-2 text-sm">{translateText("ورود با حساب ادمین ")}</Link>
         </div>
       </div>
     );
@@ -338,8 +329,8 @@ function MediaPage() {
     <div className="space-y-4">
       <PanelPageHeader
         icon={Images}
-        title="کتابخانه‌ی رسانه"
-        subtitle="مدیریت تصاویر و فایل‌های بارگذاری‌شده"
+        title={translateText("کتابخانه‌ی رسانه")}
+        subtitle={translateText("مدیریت تصاویر و فایل‌های بارگذاری‌شده")}
         onRefresh={() => load()}
       />
 
@@ -348,18 +339,10 @@ function MediaPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="flex items-center gap-2 text-base font-black sm:text-lg">
-              <ImageIcon size={18} className="text-yellow" />
-              کتابخانه‌ی رسانه
-            </h1>
-            <p className="mt-1 text-xs muted">
-              همه‌ی عکس‌های پروژه یک‌جا؛ شناسه‌ی هر فایل را کپی کن یا حذفش کن.
-              <span className="mx-1">•</span>
-              مجموع: <b>{toFa(total)}</b> فایل
-              {files.length > 0 && (
+              <ImageIcon size={18} className="text-yellow" />{translateText("کتابخانه‌ی رسانه ")}</h1>
+            <p className="mt-1 text-xs muted">{translateText("همه‌ی عکس‌های پروژه یک‌جا؛ شناسه‌ی هر فایل را کپی کن یا حذفش کن. ")}<span className="mx-1">•</span>{translateText("مجموع: ")}<b>{toFa(total)}</b>{translateText(" فایل ")}{files.length > 0 && (
                 <>
-                  <span className="mx-1">—</span>
-                  در این صفحه: {toFa(stats.images)} تصویر
-                  {stats.others > 0 ? ` و ${toFa(stats.others)} فایل دیگر` : ''}
+                  <span className="mx-1">—</span>{translateText("در این صفحه: ")}{toFa(stats.images)}{translateText(" تصویر ")}{stats.others > 0 ? translateText(" و {{v0}} فایل دیگر", {v0: (toFa(stats.others))}) : ''}
                 </>
               )}
             </p>
@@ -381,7 +364,7 @@ function MediaPage() {
               className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-sm disabled:opacity-60"
             >
               {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
-              {uploading ? 'در حال آپلود…' : 'آپلود فایل'}
+              {uploading ? translateText("در حال آپلود…") : translateText("آپلود فایل")}
             </button>
           </div>
         </div>
@@ -405,12 +388,12 @@ function MediaPage() {
           </div>
 
           <div className="relative w-full sm:w-80">
-            <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
+            <Search size={15} className="absolute end-3 top-1/2 -translate-y-1/2 muted" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="جستجو با نام فایل یا شناسه…"
-              className="input !py-2 !pr-9 text-xs"
+              placeholder={translateText("جستجو با نام فایل یا شناسه…")}
+              className="input !py-2 !pe-9 text-xs"
             />
           </div>
         </div>
@@ -431,21 +414,19 @@ function MediaPage() {
         className={`rounded-2xl border-2 border-dashed p-3 text-center text-xs transition ${
           dragOver ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/5' : 'border-theme muted'
         }`}
-      >
-        فایل‌ها را اینجا رها کن (تصویر یا ویدیو، حداکثر ۱۰ مگابایت برای هر فایل)
-      </div>
+      >{translateText("فایل‌ها را اینجا رها کن (تصویر یا ویدیو، حداکثر ۱۰ مگابایت برای هر فایل) ")}</div>
 
       {/* شبکه‌ی فایل‌ها */}
       {loading ? (
         <div className="py-16">
-          <Loading label="در حال بارگذاری رسانه‌ها…" />
+          <Loading label={translateText("در حال بارگذاری رسانه‌ها…")} />
         </div>
       ) : files.length === 0 ? (
         <div className="card rounded-3xl p-12 text-center">
           <ImageIcon size={34} className="mx-auto mb-3 muted" />
-          <div className="font-black">فایلی پیدا نشد</div>
+          <div className="font-black">{translateText("فایلی پیدا نشد")}</div>
           <p className="mt-1 text-xs muted">
-            {query || type ? 'فیلتر را عوض کن یا عبارت دیگری جستجو کن.' : 'اولین فایل را آپلود کن.'}
+            {query || type ? translateText("فیلتر را عوض کن یا عبارت دیگری جستجو کن.") : translateText("اولین فایل را آپلود کن.")}
           </p>
         </div>
       ) : (
@@ -460,7 +441,7 @@ function MediaPage() {
 
                 <div className="space-y-1.5 p-2.5">
                   <div className="truncate text-[11px] font-bold" title={file.name}>
-                    {file.name || 'بدون نام'}
+                    {file.name || translateText("بدون نام")}
                   </div>
                   <div className="flex items-center justify-between gap-1 text-[10px] muted">
                     <span>{formatSize(file.size)}</span>
@@ -475,7 +456,7 @@ function MediaPage() {
                     {id}
                   </div>
                   {file.used_by?.length > 0 && (
-                    <div className="truncate text-[10px] text-yellow" title={file.used_by.join('، ')}>
+                    <div className="truncate text-[10px] text-yellow" title={file.used_by.join(translateText("، "))}>
                       {file.used_by[0]}
                     </div>
                   )}
@@ -486,11 +467,9 @@ function MediaPage() {
                       type="button"
                       onClick={() => remove(file)}
                       className="inline-flex items-center gap-1 rounded-lg border border-theme px-2 py-1 text-[10px] font-bold text-red-400 transition hover:border-red-400"
-                      title="حذف فایل"
+                      title={translateText("حذف فایل")}
                     >
-                      <Trash2 size={11} />
-                      حذف
-                    </button>
+                      <Trash2 size={11} />{translateText("حذف ")}</button>
                   </div>
                 </div>
               </article>
@@ -507,20 +486,15 @@ function MediaPage() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="btn-ghost !py-2 text-xs disabled:opacity-40"
-          >
-            قبلی
-          </button>
-          <span className="text-xs muted">
-            صفحه‌ی {toFa(page)} از {toFa(totalPages)}
+          >{translateText("قبلی ")}</button>
+          <span className="text-xs muted">{translateText("صفحه‌ی ")}{toFa(page)}{translateText(" از ")}{toFa(totalPages)}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="btn-ghost !py-2 text-xs disabled:opacity-40"
-          >
-            بعدی
-          </button>
+          >{translateText("بعدی ")}</button>
         </div>
       )}
 

@@ -1,3 +1,6 @@
+import LanguageSelector from '../common/locale/LanguageSelectorComponent';
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import { Outlet, Link } from 'react-router-dom';
 import { Clock3, ShieldAlert, Store } from 'lucide-react';
 import SellerNavbarComponent from '../panel/SellerNavbarComponent';
@@ -6,7 +9,8 @@ import { useShop } from '../../contexts/ShopContext';
 /* کارت پیام تمام‌صفحه برای حالت‌هایی که کاربر اجازه‌ی ورود به پنل فروشنده را ندارد */
 function GateCard({ icon: Icon, title, text, actions }) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col gap-4 items-center justify-center p-6">
+      <LanguageSelector variant="seller" />
       <div className="card rounded-3xl p-8 max-w-md w-full text-center space-y-4">
         <Icon size={38} className="mx-auto text-yellow" />
         <h1 className="font-black text-xl">{title}</h1>
@@ -24,10 +28,10 @@ const SellerLayout = () => {
     return (
       <GateCard
         icon={Store}
-        title="ورود به پنل فروشندگان"
+        title={translateText('ورود به پنل فروشندگان')}
         actions={
           <Link to="/auth/pre" className="btn-yellow inline-block">
-            ورود به حساب
+            {translateText('ورود به حساب ')}
           </Link>
         }
       />
@@ -42,17 +46,17 @@ const SellerLayout = () => {
     return (
       <GateCard
         icon={ShieldAlert}
-        title="این بخش مخصوص فروشندگان است"
-        text={
-          'حساب شما هنوز فروشنده نیست. برای شروع فروش، درخواست فروشندگی را از صفحه‌ی پروفایل ثبت کنید.'
-        }
+        title={translateText('این بخش مخصوص فروشندگان است')}
+        text={translateText(
+          'حساب شما هنوز فروشنده نیست. برای شروع فروش، درخواست فروشندگی را از صفحه‌ی پروفایل ثبت کنید.',
+        )}
         actions={
           <>
             <Link to="/profile" className="btn-yellow inline-block">
-              ثبت درخواست فروشندگی
+              {translateText('ثبت درخواست فروشندگی ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">
-              صفحه‌ی اصلی
+              {translateText('صفحه‌ی اصلی ')}
             </Link>
           </>
         }
@@ -65,15 +69,17 @@ const SellerLayout = () => {
     return (
       <GateCard
         icon={Clock3}
-        title="درخواست فروشندگی در انتظار تأیید است"
-        text="درخواست شما ثبت شده و پس از بررسی و تأیید مدیر، پنل فروشنده برایتان باز می‌شود. بعد از تأیید یک‌بار خارج و دوباره وارد شوید."
+        title={translateText('درخواست فروشندگی در انتظار تأیید است')}
+        text={translateText(
+          'درخواست شما ثبت شده و پس از بررسی و تأیید مدیر، پنل فروشنده برایتان باز می‌شود. بعد از تأیید یک‌بار خارج و دوباره وارد شوید.',
+        )}
         actions={
           <>
             <Link to="/profile" className="btn-yellow inline-block">
-              مشاهده پروفایل
+              {translateText('مشاهده پروفایل ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">
-              صفحه‌ی اصلی
+              {translateText('صفحه‌ی اصلی ')}
             </Link>
           </>
         }
@@ -82,7 +88,7 @@ const SellerLayout = () => {
   }
 
   return (
-    <div dir="rtl" className="admin-wrapper min-h-screen flex flex-col lg:flex-row">
+    <div dir={i18nDirection} className="admin-wrapper min-h-screen flex flex-col lg:flex-row">
       <SellerNavbarComponent />
       <div className="flex-1 p-4 md:p-6 text-sm min-w-0">
         <Outlet />

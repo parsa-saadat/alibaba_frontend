@@ -1,3 +1,5 @@
+import { language } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
 import {
@@ -49,7 +51,7 @@ function DayCell({ day, selected, today, onClick }) {
 export default function JalaliDateTimePicker({
   value = '',
   onChange,
-  placeholder = 'انتخاب تاریخ شمسی',
+  placeholder = translateText("انتخاب تاریخ شمسی"),
   withTime = true,
   /* قالب مقدار: 'local' → «YYYY-MM-DDTHH:mm» (فرم محصول)
                   'jalali' → «1403/05/22» (تاریخ تولد در پنل) */
@@ -246,6 +248,10 @@ export default function JalaliDateTimePicker({
     setDraft('');
   };
 
+  if (language !== 'fa') return <input className="input" dir="ltr" type={withTime ? 'datetime-local' : 'date'}
+    value={selectedDate ? toLocalInputValue(selectedDate).slice(0, withTime ? 16 : 10) : ''}
+    onChange={e => emit(e.target.value ? new Date(e.target.value.length === 10 ? e.target.value + 'T00:00' : e.target.value) : null)} />;
+
   return (
     <div className="relative" ref={boxRef}>
       <div className="flex items-center gap-1 mt-1">
@@ -253,7 +259,7 @@ export default function JalaliDateTimePicker({
           <input
             autoFocus
             className="input !py-2 text-xs w-full"
-            placeholder="۱۴۰۵/۰۸/۲۰"
+            placeholder={translateText("۱۴۰۵/۰۸/۲۰")}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commitDraft}
@@ -290,17 +296,14 @@ export default function JalaliDateTimePicker({
             type="button"
             onClick={() => setTyping(true)}
             className="text-[10px] muted hover:text-yellow underline decoration-dotted"
-          >
-            ورود دستی
-          </button>
+          >{translateText("ورود دستی ")}</button>
           <span className="muted text-[10px]">·</span>
           <button
             type="button"
             onClick={() => emit(null)}
             className="text-[10px] muted hover:text-red-400 inline-flex items-center gap-0.5"
           >
-            <X size={10} /> پاک کردن
-          </button>
+            <X size={10} />{translateText(" پاک کردن ")}</button>
         </div>
       )}
 
@@ -314,7 +317,7 @@ export default function JalaliDateTimePicker({
             visibility: pos ? 'visible' : 'hidden',
           }}
           role="dialog"
-          aria-label="تقویم شمسی"
+          aria-label={translateText("تقویم شمسی")}
         >
           {/* هدر تقویم */}
           <div className="flex items-center justify-between gap-1 mb-2">
@@ -322,16 +325,16 @@ export default function JalaliDateTimePicker({
               type="button"
               onClick={() => moveMonth(-1)}
               className="btn-ghost !p-1"
-              aria-label="ماه قبل"
+              aria-label={translateText("ماه قبل")}
             >
-              <ChevronRight size={14} />
+              <ChevronRight className="logical-icon" size={14} />
             </button>
             <div className="flex items-center justify-center gap-1">
               <select
                 className="input !py-1 !px-1.5 text-[11px] font-black !w-auto"
                 value={cursor.jm}
                 onChange={(e) => setCursor((prev) => ({ ...prev, jm: Number(e.target.value) }))}
-                aria-label="ماه"
+                aria-label={translateText("ماه")}
               >
                 {JALALI_MONTHS.map((name, i) => (
                   <option key={name} value={i + 1}>
@@ -343,7 +346,7 @@ export default function JalaliDateTimePicker({
                 className="input !py-1 !px-1.5 text-[11px] font-black !w-auto"
                 value={cursor.jy}
                 onChange={(e) => setCursor((prev) => ({ ...prev, jy: Number(e.target.value) }))}
-                aria-label="سال"
+                aria-label={translateText("سال")}
               >
                 {yearOptions.map((y) => (
                   <option key={y} value={y}>
@@ -356,9 +359,9 @@ export default function JalaliDateTimePicker({
               type="button"
               onClick={() => moveMonth(1)}
               className="btn-ghost !p-1"
-              aria-label="ماه بعد"
+              aria-label={translateText("ماه بعد")}
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft className="logical-icon" size={14} />
             </button>
           </div>
 
@@ -404,7 +407,7 @@ export default function JalaliDateTimePicker({
                 className="input !py-1 !px-1.5 text-[11px] !w-auto"
                 value={selectedDate ? selectedDate.getHours() : 23}
                 onChange={(e) => setTime(Number(e.target.value), selectedDate?.getMinutes() ?? 0)}
-                aria-label="ساعت"
+                aria-label={translateText("ساعت")}
               >
                 {HOURS.map((h) => (
                   <option key={h} value={h}>
@@ -417,7 +420,7 @@ export default function JalaliDateTimePicker({
                 className="input !py-1 !px-1.5 text-[11px] !w-auto"
                 value={selectedDate ? Math.round(selectedDate.getMinutes() / 5) * 5 : 0}
                 onChange={(e) => setTime(selectedDate?.getHours() ?? 23, Number(e.target.value))}
-                aria-label="دقیقه"
+                aria-label={translateText("دقیقه")}
               >
                 {MINUTES.map((m) => (
                   <option key={m} value={m}>
@@ -438,25 +441,16 @@ export default function JalaliDateTimePicker({
                 setTime(today.getHours(), Math.ceil(today.getMinutes() / 5) * 5);
               }}
               className="chip !py-1 !px-2 text-[10px]"
-            >
-              امروز
-            </button>
-            <button type="button" onClick={() => shiftDays(1)} className="chip !py-1 !px-2 text-[10px]">
-              فردا
-            </button>
-            <button type="button" onClick={() => shiftDays(7)} className="chip !py-1 !px-2 text-[10px]">
-              یک هفته
-            </button>
-            <button type="button" onClick={() => shiftDays(30)} className="chip !py-1 !px-2 text-[10px]">
-              یک ماه
-            </button>
+            >{translateText("امروز ")}</button>
+            <button type="button" onClick={() => shiftDays(1)} className="chip !py-1 !px-2 text-[10px]">{translateText("فردا ")}</button>
+            <button type="button" onClick={() => shiftDays(7)} className="chip !py-1 !px-2 text-[10px]">{translateText("یک هفته ")}</button>
+            <button type="button" onClick={() => shiftDays(30)} className="chip !py-1 !px-2 text-[10px]">{translateText("یک ماه ")}</button>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="btn-yellow !py-1 !px-2.5 text-[10px] flex items-center gap-1 me-auto"
             >
-              <Check size={10} /> تأیید
-            </button>
+              <Check size={10} />{translateText(" تأیید ")}</button>
           </div>
         </div>
       )}

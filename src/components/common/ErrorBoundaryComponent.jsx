@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { AlertTriangle, Home, RotateCcw } from 'lucide-react';
 
@@ -19,7 +20,7 @@ class ErrorBoundaryComponent extends React.Component {
 
   componentDidCatch(error, info) {
     /* برای دیدن جزئیات در کنسول مرورگر */
-    console.error('[GeoCala] خطای رندر:', error, info?.componentStack);
+    console.error(translateText("[GeoCala] خطای رندر:"), error, info?.componentStack);
   }
 
   componentDidUpdate(prevProps) {
@@ -39,7 +40,7 @@ class ErrorBoundaryComponent extends React.Component {
     /* اگر کاربر fallback داده باشد (مثلاً ویرایشگر متن ساده)، همان را نشان بده */
     if (this.props.fallback) return this.props.fallback;
 
-    const message = String(error?.message || error || 'خطای نامشخص');
+    const message = String(error?.message || error || translateText("خطای نامشخص"));
 
     return (
       <div className="mx-auto max-w-2xl px-4 py-14">
@@ -51,11 +52,8 @@ class ErrorBoundaryComponent extends React.Component {
             <AlertTriangle size={22} />
           </span>
 
-          <h1 className="mt-4 text-base font-black sm:text-lg">این بخش بالا نیامد</h1>
-          <p className="mx-auto mt-2 max-w-md text-xs leading-6 muted">
-            یک خطای غیرمنتظره رخ داد و برای اینکه بقیه‌ی سایت سالم بماند، این صفحه متوقف شد. با
-            «تلاش دوباره» یا رفتن به صفحه‌ی اصلی معمولاً حل می‌شود.
-          </p>
+          <h1 className="mt-4 text-base font-black sm:text-lg">{translateText("این بخش بالا نیامد")}</h1>
+          <p className="mx-auto mt-2 max-w-md text-xs leading-6 muted">{translateText("یک خطای غیرمنتظره رخ داد و برای اینکه بقیه‌ی سایت سالم بماند، این صفحه متوقف شد. با «تلاش دوباره» یا رفتن به صفحه‌ی اصلی معمولاً حل می‌شود. ")}</p>
 
           <div
             className="mt-4 overflow-x-auto rounded-xl px-3 py-2 text-start text-[11px] leading-6"
@@ -67,9 +65,7 @@ class ErrorBoundaryComponent extends React.Component {
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button type="button" onClick={this.reset} className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-xs">
-              <RotateCcw size={14} />
-              تلاش دوباره
-            </button>
+              <RotateCcw size={14} />{translateText("تلاش دوباره ")}</button>
             <a
               href="/"
               onClick={(e) => {
@@ -78,16 +74,12 @@ class ErrorBoundaryComponent extends React.Component {
               }}
               className="btn-ghost inline-flex items-center gap-1.5 !py-2 text-xs"
             >
-              <Home size={14} />
-              صفحه‌ی اصلی
-            </a>
+              <Home size={14} />{translateText("صفحه‌ی اصلی ")}</a>
             <button
               type="button"
               onClick={() => window.location.reload()}
               className="btn-ghost !py-2 text-xs"
-            >
-              بارگذاری مجدد سایت
-            </button>
+            >{translateText("بارگذاری مجدد سایت ")}</button>
           </div>
         </div>
       </div>

@@ -1,3 +1,6 @@
+import LanguageSelector from './components/common/locale/LanguageSelectorComponent';
+import { direction } from './i18n/runtime';
+import { t as translateText } from './i18n/runtime.js';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -64,9 +67,11 @@ import ErrorBoundaryComponent from './components/common/ErrorBoundaryComponent';
 
 const App = () => {
   return (
-    <ShopProvider>
-      <MainApp />
-    </ShopProvider>
+    <>
+      <ShopProvider>
+        <MainApp />
+      </ShopProvider>
+    </>
   );
 };
 
@@ -88,7 +93,7 @@ const MainApp = () => {
             style={{ border: '3px solid rgba(255,255,255,.14)', borderTopColor: '#ffd60a' }}
           />
           <p className="text-sm font-bold" style={{ color: '#eef2ff' }}>
-            در حال بارگذاری ژئو کالا…
+            {translateText('در حال بارگذاری ژئو کالا… ')}
           </p>
         </div>
       </div>
@@ -103,7 +108,7 @@ const MainApp = () => {
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
-        rtl
+        rtl={direction === 'rtl'}
         pauseOnFocusLoss
         draggable
         pauseOnHover
@@ -114,85 +119,89 @@ const MainApp = () => {
       <RouteProgress />
       <ErrorBoundaryComponent resetKey={location.pathname}>
         <Routes>
-        {/* Main Layout Routes */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ShopPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/terms/:audience" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/guide" element={<GuidePage />} />
-          <Route path="/guide/:topic" element={<GuidePage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/compare" element={<ComparePage />} />
-          <Route path="/address" element={<AddressPage />} />
-          <Route path="/address/:addressId" element={<EditAddressPage />} />
-          <Route path="/product/:id" element={<ProductPage />} />
-          <Route path="/store/:id" element={<StorePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/auth/pre" element={<PrePage />} />
-          <Route path="/auth/verify" element={<VerifyPage />} />
-          <Route path="/auth/register" element={<RegisterPage />} />
-          <Route path="/checkout" element={<CreateOrderPage />} />
-          <Route path="/order/create" element={<CreateOrderPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/order" element={<OrdersPage />} />
-          <Route path="/orders/:orderId" element={<SingleOrderPage />} />
-          <Route path="/order/:orderId" element={<SingleOrderPage />} />
-        </Route>
-
-        {/* Admin Dashboard Routes (/dashboard & /admin) */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<CounterPage />} />
-          <Route path="sellers" element={<SellersPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="stores" element={<StoresPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="products/create" element={<CreateProductPage />} />
-          <Route path="products/:productId" element={<EditProductPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="orders" element={<AdminOrdersPage />} />
-          <Route path="plans" element={<PlansPage />} />
-          <Route path="media" element={<MediaPage />} />
-        </Route>
-
-        <Route path="/admin" element={<DashboardLayout />}>
-          <Route index element={<CounterPage />} />
-          <Route path="sellers" element={<SellersPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="stores" element={<StoresPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="products/create" element={<CreateProductPage />} />
-          <Route path="products/:productId" element={<EditProductPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="orders" element={<AdminOrdersPage />} />
-          <Route path="plans" element={<PlansPage />} />
-          <Route path="media" element={<MediaPage />} />
-        </Route>
-
-        {/* Seller Dashboard Routes */}
-        <Route path="/seller" element={<SellerLayout />}>
-          <Route index element={<SellerCounterPage />} />
-          <Route path="products" element={<SellerProductsPage />} />
-          <Route path="products/create" element={<SellerCreateProductPage />} />
-          <Route path="products/:productId" element={<SellerEditProductPage />} />
-          <Route path="stores" element={<SellerStoresPage />} />
-          <Route path="orders" element={<SellerOrdersPage />} />
-          <Route path="plans" element={<SellerPlansPage />} />
-          <Route path="settings" element={<SellerSettingPage />} />
-        </Route>
-
-        {/* Admin Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/dashboard/pre" element={<PreAdminPage />} />
-          <Route path="/dashboard/verify" element={<VerifyAdminPage />} />
-        </Route>
-
-        <Route path="*" element={<NotFoundPage />} /> {/* 404 Page */}
+          {/* Main Layout Routes */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ShopPage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/terms/:audience" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/guide" element={<GuidePage />} />
+            <Route path="/guide/:topic" element={<GuidePage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/address" element={<AddressPage />} />
+            <Route path="/address/:addressId" element={<EditAddressPage />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/store/:id" element={<StorePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/auth/pre" element={<PrePage />} />
+            <Route path="/auth/verify" element={<VerifyPage />} />
+            <Route path="/auth/register" element={<RegisterPage />} />
+            <Route path="/checkout" element={<CreateOrderPage />} />
+            <Route path="/order/create" element={<CreateOrderPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/order" element={<OrdersPage />} />
+            <Route path="/orders/:orderId" element={<SingleOrderPage />} />
+            <Route path="/order/:orderId" element={<SingleOrderPage />} />
+          </Route>
+          {/* Admin Dashboard Routes (/dashboard & /admin) */}
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<CounterPage />} />
+            <Route path="sellers" element={<SellersPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="stores" element={<StoresPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="products/create" element={<CreateProductPage />} />
+            <Route path="products/:productId" element={<EditProductPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="plans" element={<PlansPage />} />
+            <Route path="media" element={<MediaPage />} />
+          </Route>
+          <Route path="/admin" element={<DashboardLayout />}>
+            <Route index element={<CounterPage />} />
+            <Route path="sellers" element={<SellersPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="stores" element={<StoresPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="products/create" element={<CreateProductPage />} />
+            <Route path="products/:productId" element={<EditProductPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="plans" element={<PlansPage />} />
+            <Route path="media" element={<MediaPage />} />
+          </Route>
+          {/* Seller Dashboard Routes */}
+          <Route path="/seller" element={<SellerLayout />}>
+            <Route index element={<SellerCounterPage />} />
+            <Route path="products" element={<SellerProductsPage />} />
+            <Route path="products/create" element={<SellerCreateProductPage />} />
+            <Route path="products/:productId" element={<SellerEditProductPage />} />
+            <Route path="stores" element={<SellerStoresPage />} />
+            <Route path="orders" element={<SellerOrdersPage />} />
+            <Route path="plans" element={<SellerPlansPage />} />
+            <Route path="settings" element={<SellerSettingPage />} />
+          </Route>
+          {/* Admin Auth Routes */}
+          <Route element={<AuthLayout />}>
+            <Route path="/dashboard/pre" element={<PreAdminPage />} />
+            <Route path="/dashboard/verify" element={<VerifyAdminPage />} />
+          </Route>
+          <Route
+            path="*"
+            element={
+              <>
+                <LanguageSelector variant="main" />
+                <NotFoundPage />
+              </>
+            }
+          />{' '}
+          {/* 404 Page */}
         </Routes>
       </ErrorBoundaryComponent>
     </>

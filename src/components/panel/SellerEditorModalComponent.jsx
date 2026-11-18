@@ -1,3 +1,5 @@
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -29,8 +31,8 @@ import { userFullName } from '../../utils/helpers/user';
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const SELLER_TYPES = [
-  ['Individual_seller', 'فروشنده حقیقی'],
-  ['institutional_seller', 'فروشنده حقوقی'],
+  ['Individual_seller', translateText("فروشنده حقیقی")],
+  ['institutional_seller', translateText("فروشنده حقوقی")],
 ];
 
 /* ------------------------------------------------------------------ */
@@ -72,40 +74,40 @@ const BOOLEAN_KEYS = ['seller_approved_status', 'seller_trust'];
 /* ------------------------------------------------------------------ */
 const RULES = {
   username: {
-    label: 'نام کاربری',
-    test: (v) => (v.trim().length >= 3 ? '' : 'نام کاربری حداقل ۳ نویسه باشد.'),
+    label: translateText("نام کاربری"),
+    test: (v) => (v.trim().length >= 3 ? '' : translateText("نام کاربری حداقل ۳ نویسه باشد.")),
   },
   email: {
-    label: 'ایمیل',
-    test: (v) => (!v.trim() || validateEmailSyntax(v.trim()) ? '' : 'ایمیل معتبر نیست.'),
+    label: translateText("ایمیل"),
+    test: (v) => (!v.trim() || validateEmailSyntax(v.trim()) ? '' : translateText("ایمیل معتبر نیست.")),
   },
   seller_type: {
-    label: 'نوع فروشنده',
-    test: (v) => (v ? '' : 'نوع فروشنده را انتخاب کنید.'),
+    label: translateText("نوع فروشنده"),
+    test: (v) => (v ? '' : translateText("نوع فروشنده را انتخاب کنید.")),
   },
   national_ID: {
-    label: 'کد ملی',
-    test: (v) => (nationalIDValidator(v.trim()) ? '' : 'کد ملی معتبر نیست (۱۰ رقم با رقم کنترل درست).'),
+    label: translateText("کد ملی"),
+    test: (v) => (nationalIDValidator(v.trim()) ? '' : translateText("کد ملی معتبر نیست (۱۰ رقم با رقم کنترل درست).")),
   },
   birth_date: {
-    label: 'تاریخ تولد',
+    label: translateText("تاریخ تولد"),
     test: (v) =>
-      /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(v.trim()) ? '' : 'قالب تاریخ تولد: ۱۳۷۲/۰۴/۱۵',
+      /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(v.trim()) ? '' : translateText("قالب تاریخ تولد: ۱۳۷۲/۰۴/۱۵"),
   },
-  province: { label: 'استان', test: (v) => (v.trim() ? '' : 'استان الزامی است.') },
-  city: { label: 'شهر', test: (v) => (v.trim() ? '' : 'شهر الزامی است.') },
-  full_address: { label: 'نشانی کامل', test: (v) => (v.trim() ? '' : 'نشانی کامل الزامی است.') },
+  province: { label: translateText("استان"), test: (v) => (v.trim() ? '' : translateText("استان الزامی است.")) },
+  city: { label: translateText("شهر"), test: (v) => (v.trim() ? '' : translateText("شهر الزامی است.")) },
+  full_address: { label: translateText("نشانی کامل"), test: (v) => (v.trim() ? '' : translateText("نشانی کامل الزامی است.")) },
   card_number: {
-    label: 'شماره کارت',
-    test: (v) => (cardNumberValidator(v.replace(/[\s-]/g, '')) ? '' : 'شماره کارت ۱۶ رقمی معتبر نیست.'),
+    label: translateText("شماره کارت"),
+    test: (v) => (cardNumberValidator(v.replace(/[\s-]/g, '')) ? '' : translateText("شماره کارت ۱۶ رقمی معتبر نیست.")),
   },
   sheba_number: {
-    label: 'شماره شبا',
-    test: (v) => (shebaNumberValidator(v.trim()) ? '' : 'شبا باید با IR شروع شود و ۲۴ رقم داشته باشد.'),
+    label: translateText("شماره شبا"),
+    test: (v) => (shebaNumberValidator(v.trim()) ? '' : translateText("شبا باید با IR شروع شود و ۲۴ رقم داشته باشد.")),
   },
   firstname_lastname: {
-    label: 'نام صاحب حساب',
-    test: (v) => (v.trim() ? '' : 'نام صاحب حساب الزامی است.'),
+    label: translateText("نام صاحب حساب"),
+    test: (v) => (v.trim() ? '' : translateText("نام صاحب حساب الزامی است.")),
   },
 };
 
@@ -123,9 +125,7 @@ function Field({ id, label, hint, error, className = '', legacy = false, childre
       {error ? (
         <span className="mt-1 block text-[11px] font-bold text-red-400">{error}</span>
       ) : legacy ? (
-        <span className="mt-1 block text-[10px] text-amber-400">
-          مقدار فعلی معتبر نیست؛ چون تغییرش ندادی ذخیره را بلاک نمی‌کند.
-        </span>
+        <span className="mt-1 block text-[10px] text-amber-400">{translateText("مقدار فعلی معتبر نیست؛ چون تغییرش ندادی ذخیره را بلاک نمی‌کند. ")}</span>
       ) : (
         hint && <span className="mt-1 block text-[10px] muted">{hint}</span>
       )}
@@ -170,7 +170,7 @@ function Toggle({ checked, onChange, title, desc, disabled = false }) {
       aria-checked={checked}
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
-      className={`flex w-full items-center justify-between gap-3 rounded-xl border border-theme px-3 py-2 text-right transition ${
+      className={`flex w-full items-center justify-between gap-3 rounded-xl border border-theme px-3 py-2 text-start transition ${
         disabled ? 'cursor-not-allowed opacity-50' : 'hover:border-[var(--primary-color)]'
       }`}
     >
@@ -235,7 +235,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
     setServerError('');
   };
 
-  const title = useMemo(() => userFullName(seller) || seller?.username || 'فروشنده', [seller]);
+  const title = useMemo(() => userFullName(seller) || seller?.username || translateText("فروشنده"), [seller]);
 
   if (!seller || !form || !initial) return null;
 
@@ -255,7 +255,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
     /* قاعده‌ی وابستگی وضعیت‌ها */
     if (form.seller_trust && !form.seller_approved_status)
-      next.seller_trust = 'فقط فروشنده‌ی تأییدشده می‌تواند «مورد اعتماد» شود.';
+      next.seller_trust = translateText("فقط فروشنده‌ی تأییدشده می‌تواند «مورد اعتماد» شود.");
 
     setErrors(next);
     return next;
@@ -312,7 +312,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
     setServerError('');
 
     if (!dirtyKeys.length) {
-      toast.info('تغییری اعمال نشده است.');
+      toast.info(translateText("تغییری اعمال نشده است."));
       return;
     }
 
@@ -321,7 +321,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
     if (errorKeys.length) {
       focusFirstError(errorKeys);
       setServerError(
-        `این فیلدها را اصلاح کن: ${errorKeys.map((key) => RULES[key]?.label || key).join('، ')}`,
+        translateText("این فیلدها را اصلاح کن: {{v0}}", {v0: (errorKeys.map((key) => RULES[key]?.label || key).join('، '))}),
       );
       return;
     }
@@ -339,14 +339,14 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
     if (userKeys.length)
       jobs.push({
-        label: 'اطلاعات حساب کاربری',
+        label: translateText("اطلاعات حساب کاربری"),
         keys: userKeys,
         run: () => axios.put(`${API}/user/${id}`, userPatch, authHeaders()),
       });
 
     if (sellerKeys.length)
       jobs.push({
-        label: 'اطلاعات فروشندگی',
+        label: translateText("اطلاعات فروشندگی"),
         keys: sellerKeys.flatMap((key) =>
           key === 'address' ? ADDRESS_KEYS : key === 'settlement_account' ? ACCOUNT_KEYS : [key],
         ),
@@ -354,7 +354,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
       });
 
     if (!jobs.length) {
-      toast.info('تغییری برای ذخیره وجود ندارد.');
+      toast.info(translateText("تغییری برای ذخیره وجود ندارد."));
       return;
     }
 
@@ -369,7 +369,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
       if (trustDirty) {
         const trustJob = {
-          label: 'نشان اعتماد فروشنده',
+          label: translateText("نشان اعتماد فروشنده"),
           keys: ['seller_trust'],
           run: () =>
             axios.put(`${API}/seller/${id}/trust`, { trust: nextTrust }, authHeaders()),
@@ -388,7 +388,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
         .filter(({ result }) => result.status === 'rejected')
         .map(
           ({ result, job }) =>
-            `${job.label}: ${result.reason?.response?.data?.message || result.reason?.message || 'خطای نامشخص'}`,
+            `${job.label}: ${result.reason?.response?.data?.message || result.reason?.message || translateText("خطای نامشخص")}`,
         );
 
       const succeeded = results.length - failures.length;
@@ -412,7 +412,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
       }
 
       if (failures.length === 0) {
-        toast.success('اطلاعات فروشنده ذخیره شد');
+        toast.success(translateText("اطلاعات فروشنده ذخیره شد"));
         onClose?.();
         return;
       }
@@ -420,9 +420,9 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
       const message = failures.join(' • ');
       setServerError(message);
       if (succeeded > 0) {
-        toast.warn('بخشی از تغییرات ذخیره شد؛ جزئیات در بالای فرم.');
+        toast.warn(translateText("بخشی از تغییرات ذخیره شد؛ جزئیات در بالای فرم."));
       } else {
-        toast.error('ذخیره نشد؛ پیام خطا در بالای فرم است.');
+        toast.error(translateText("ذخیره نشد؛ پیام خطا در بالای فرم است."));
       }
     } finally {
       setSaving(false);
@@ -442,13 +442,13 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
       className="fixed inset-0 z-[120] grid place-items-center bg-black/60 p-3 backdrop-blur-sm sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label={`ویرایش فروشنده ${title}`}
+      aria-label={translateText("ویرایش فروشنده {{v0}}", {v0: (title)})}
       onMouseDown={(e) => e.target === e.currentTarget && !saving && onClose?.()}
     >
       <form
         onSubmit={submit}
         className="card flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl"
-        dir="rtl"
+        dir={i18nDirection}
       >
         {/* سرصفحه */}
         <div
@@ -456,15 +456,12 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
           style={{ borderBottom: '1px solid var(--border, rgba(255,255,255,0.08))' }}
         >
           <div className="min-w-0">
-            <h2 className="flex items-center gap-2 text-base font-black sm:text-lg">
-              ویرایش فروشنده
-              {dirtyKeys.length > 0 && (
+            <h2 className="flex items-center gap-2 text-base font-black sm:text-lg">{translateText("ویرایش فروشنده ")}{dirtyKeys.length > 0 && (
                 <span
                   className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                   style={{ background: 'rgba(255,214,10,0.16)', color: 'var(--primary-color)' }}
                 >
-                  {toFa(dirtyKeys.length)} تغییر
-                </span>
+                  {toFa(dirtyKeys.length)}{translateText(" تغییر ")}</span>
               )}
             </h2>
             <p className="mt-0.5 truncate text-xs muted">
@@ -477,7 +474,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             onClick={onClose}
             disabled={saving}
             className="btn-ghost !p-2"
-            aria-label="بستن"
+            aria-label={translateText("بستن")}
           >
             <X size={16} />
           </button>
@@ -500,11 +497,11 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
           {/* حساب کاربری */}
           <SectionCard
             icon={User}
-            title="حساب کاربری"
-            desc="نام و نام خانوادگی در پروفایل، فروشگاه و نوبار نمایش داده می‌شود"
+            title={translateText("حساب کاربری")}
+            desc={translateText("نام و نام خانوادگی در پروفایل، فروشگاه و نوبار نمایش داده می‌شود")}
           >
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field id="firstname" label="نام">
+              <Field id="firstname" label={translateText("نام")}>
                 <input
                   id="in-firstname"
                   className="input"
@@ -512,7 +509,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                   onChange={set('firstname')}
                 />
               </Field>
-              <Field id="lastname" label="نام خانوادگی">
+              <Field id="lastname" label={translateText("نام خانوادگی")}>
                 <input
                   id="in-lastname"
                   className="input"
@@ -520,7 +517,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                   onChange={set('lastname')}
                 />
               </Field>
-              <Field id="username" label="نام کاربری" hint="یکتا؛ با آن وارد می‌شود" error={errors.username}>
+              <Field id="username" label={translateText("نام کاربری")} hint={translateText("یکتا؛ با آن وارد می‌شود")} error={errors.username}>
                 <input
                   id="in-username"
                   className="input"
@@ -529,7 +526,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                   onChange={set('username')}
                 />
               </Field>
-              <Field id="email" label="ایمیل" error={errors.email}>
+              <Field id="email" label={translateText("ایمیل")} error={errors.email}>
                 <input
                   id="in-email"
                   className="input"
@@ -539,7 +536,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                   placeholder="name@example.com"
                 />
               </Field>
-              <Field id="phone" label="موبایل (ثابت)" hint="شماره‌ی ورود کاربر است و اینجا تغییر نمی‌کند">
+              <Field id="phone" label={translateText("موبایل (ثابت)")} hint={translateText("شماره‌ی ورود کاربر است و اینجا تغییر نمی‌کند")}>
                 <input
                   id="in-phone"
                   className="input opacity-60"
@@ -554,11 +551,11 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
           {/* هویتی */}
           <SectionCard
             icon={IdCard}
-            title="اطلاعات هویتی"
-            desc="ادمین محدودیت «قفل هویت بعد از تأیید» را ندارد"
+            title={translateText("اطلاعات هویتی")}
+            desc={translateText("ادمین محدودیت «قفل هویت بعد از تأیید» را ندارد")}
           >
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field id="seller_type" label="نوع فروشنده" error={errors.seller_type}>
+              <Field id="seller_type" label={translateText("نوع فروشنده")} error={errors.seller_type}>
                 <select
                   id="in-seller_type"
                   className="input"
@@ -575,8 +572,8 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
               <Field
                 id="national_ID"
-                label="کد ملی"
-                hint="۱۰ رقم با رقم کنترل"
+                label={translateText("کد ملی")}
+                hint={translateText("۱۰ رقم با رقم کنترل")}
                 error={errors.national_ID}
                 legacy={isLegacyInvalid('national_ID')}
               >
@@ -592,15 +589,15 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
               <Field
                 id="birth_date"
-                label="تاریخ تولد"
-                hint="قالب: ۱۳۷۲/۰۴/۱۵"
+                label={translateText("تاریخ تولد")}
+                hint={translateText("قالب: ۱۳۷۲/۰۴/۱۵")}
                 error={errors.birth_date}
                 legacy={isLegacyInvalid('birth_date')}
               >
                 <JalaliDateTimePicker
                   value={form.birth_date}
                   onChange={(next) => set('birth_date')({ target: { value: next } })}
-                  placeholder="۱۳۷۲/۰۴/۱۵"
+                  placeholder={translateText("۱۳۷۲/۰۴/۱۵")}
                   withTime={false}
                   valueFormat="jalali"
                 />
@@ -608,8 +605,8 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
               <Field
                 id="identity_image_id"
-                label="شناسه‌ی تصویر کارت ملی"
-                hint="شناسه‌ی فایل در /storage (یا آدرس کامل تصویر)"
+                label={translateText("شناسه‌ی تصویر کارت ملی")}
+                hint={translateText("شناسه‌ی فایل در /storage (یا آدرس کامل تصویر)")}
               >
                 <input
                   id="in-identity_image_id"
@@ -622,8 +619,8 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
               <Field
                 id="identity_verification_image_id"
-                label="شناسه‌ی تصویر سلفی احراز"
-                hint="شناسه‌ی فایل در /storage (یا آدرس کامل تصویر)"
+                label={translateText("شناسه‌ی تصویر سلفی احراز")}
+                hint={translateText("شناسه‌ی فایل در /storage (یا آدرس کامل تصویر)")}
                 className="sm:col-span-2"
               >
                 <input
@@ -638,9 +635,9 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
           </SectionCard>
 
           {/* نشانی */}
-          <SectionCard icon={MapPin} title="نشانی فروشنده">
+          <SectionCard icon={MapPin} title={translateText("نشانی فروشنده")}>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field id="province" label="استان" error={errors.province}>
+              <Field id="province" label={translateText("استان")} error={errors.province}>
                 <input
                   id="in-province"
                   className="input"
@@ -648,12 +645,12 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                   onChange={set('province')}
                 />
               </Field>
-              <Field id="city" label="شهر" error={errors.city}>
+              <Field id="city" label={translateText("شهر")} error={errors.city}>
                 <input id="in-city" className="input" value={form.city} onChange={set('city')} />
               </Field>
               <Field
                 id="full_address"
-                label="نشانی کامل"
+                label={translateText("نشانی کامل")}
                 error={errors.full_address}
                 className="sm:col-span-2"
               >
@@ -670,14 +667,14 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
           {/* حساب تسویه */}
           <SectionCard
             icon={CreditCard}
-            title="حساب تسویه"
-            desc="فقط ادمین می‌تواند بعد از تأیید هم تغییر دهد"
+            title={translateText("حساب تسویه")}
+            desc={translateText("فقط ادمین می‌تواند بعد از تأیید هم تغییر دهد")}
           >
             <div className="grid gap-3 sm:grid-cols-2">
               <Field
                 id="card_number"
-                label="شماره کارت"
-                hint="۱۶ رقم، الگوریتم لان"
+                label={translateText("شماره کارت")}
+                hint={translateText("۱۶ رقم، الگوریتم لان")}
                 error={errors.card_number}
                 legacy={isLegacyInvalid('card_number')}
               >
@@ -692,8 +689,8 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
               </Field>
               <Field
                 id="sheba_number"
-                label="شماره شبا"
-                hint="IR + ۲۴ رقم"
+                label={translateText("شماره شبا")}
+                hint={translateText("IR + ۲۴ رقم")}
                 error={errors.sheba_number}
                 legacy={isLegacyInvalid('sheba_number')}
               >
@@ -708,7 +705,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
               </Field>
               <Field
                 id="firstname_lastname"
-                label="نام صاحب حساب"
+                label={translateText("نام صاحب حساب")}
                 error={errors.firstname_lastname}
                 className="sm:col-span-2"
               >
@@ -723,7 +720,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
           </SectionCard>
 
           {/* وضعیت‌ها */}
-          <SectionCard icon={ShieldCheck} title="وضعیت فروشندگی">
+          <SectionCard icon={ShieldCheck} title={translateText("وضعیت فروشندگی")}>
             <div className="grid gap-2 sm:grid-cols-3">
               <Toggle
                 checked={form.seller_approved_status}
@@ -736,21 +733,21 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                     seller_trust: value ? prev.seller_trust : false,
                   }))
                 }
-                title="تأییدشده"
-                desc="با تأیید، هویت قفل می‌شود"
+                title={translateText("تأییدشده")}
+                desc={translateText("با تأیید، هویت قفل می‌شود")}
               />
               <Toggle
                 checked={form.seller_active_status === 'ACTIVE'}
                 onChange={(value) => set('seller_active_status')(value ? 'ACTIVE' : 'INACTIVE')}
-                title="فعال"
-                desc="امکان ثبت محصول"
+                title={translateText("فعال")}
+                desc={translateText("امکان ثبت محصول")}
               />
               <Toggle
                 checked={form.seller_trust}
                 onChange={(value) => set('seller_trust')(value)}
                 disabled={!form.seller_approved_status}
-                title="مورد اعتماد"
-                desc={trustBlocked ? 'ابتدا تأییدشده کن' : 'نشان اعتماد در فروشگاه'}
+                title={translateText("مورد اعتماد")}
+                desc={trustBlocked ? translateText("ابتدا تأییدشده کن") : translateText("نشان اعتماد در فروشگاه")}
               />
             </div>
           </SectionCard>
@@ -767,9 +764,9 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             ) : (
               <ShieldOff size={13} />
             )}
-            {form.seller_trust ? 'نشان اعتماد فعال' : 'بدون نشان اعتماد'}
+            {form.seller_trust ? translateText("نشان اعتماد فعال") : translateText("بدون نشان اعتماد")}
             <span className="mx-1">•</span>
-            {dirtyKeys.length ? `${toFa(dirtyKeys.length)} تغییر ذخیره‌نشده` : 'همه‌چیز ذخیره شده'}
+            {dirtyKeys.length ? translateText("{{v0}} تغییر ذخیره‌نشده", {v0: (toFa(dirtyKeys.length))}) : translateText("همه‌چیز ذخیره شده")}
           </div>
 
           <div className="flex items-center gap-2">
@@ -779,19 +776,15 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
               disabled={!dirtyKeys.length || saving}
               className="btn-ghost inline-flex items-center gap-1.5 !py-2 text-xs disabled:opacity-40"
             >
-              <RotateCcw size={13} />
-              بازنشانی
-            </button>
-            <button type="button" onClick={onClose} className="btn-ghost !py-2 text-sm">
-              انصراف
-            </button>
+              <RotateCcw size={13} />{translateText("بازنشانی ")}</button>
+            <button type="button" onClick={onClose} className="btn-ghost !py-2 text-sm">{translateText("انصراف ")}</button>
             <button
               type="submit"
               disabled={saving || !dirtyKeys.length}
               className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-sm disabled:opacity-50"
             >
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-              {saving ? 'در حال ذخیره…' : 'ذخیره تغییرات'}
+              {saving ? translateText("در حال ذخیره…") : translateText("ذخیره تغییرات")}
             </button>
           </div>
         </div>

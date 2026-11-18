@@ -1,8 +1,10 @@
+import { language } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 export const PLACEHOLDER = 'https://placehold.co/400x400?text=No+Image';
 
 export const getId = (p) => p?._id || p?.id;
 
-export const getName = (p) => p?.name || p?.title || 'بدون نام';
+export const getName = (p) => p?.name || p?.title || translateText("بدون نام");
 
 export const getImage = (p) => {
   const img = p?.images?.[0] ?? p?.image ?? p?.thumbnail;
@@ -20,4 +22,4 @@ export const getFinalPrice = (p) => {
   return d > 0 ? Math.round(price - (price * d) / 100) : price;
 };
 
-export const formatPrice = (n) => Number(n || 0).toLocaleString('fa-IR');
+export const formatPrice = (n) => Number(n || 0).toLocaleString(language);

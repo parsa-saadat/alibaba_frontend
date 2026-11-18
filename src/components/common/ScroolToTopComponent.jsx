@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LoaderCircle } from 'lucide-react';
 
-export function Loading({ label = 'در حال بارگذاری…', className = '' }) {
+export function Loading({ label = translateText("در حال بارگذاری…"), className = '' }) {
   return (
     <div className={`loading-label ${className}`} role="status" aria-live="polite">
       <LoaderCircle size={19} className="animate-spin" aria-hidden="true" />

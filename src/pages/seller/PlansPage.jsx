@@ -1,3 +1,8 @@
+import { dateFormatter } from '../../i18n/date-policy';
+import { language } from '../../i18n/runtime';
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { currency as displayCurrency, formatMoney } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -29,24 +34,24 @@ const PAY_PREFIX = import.meta.env.VITE_PAYMENT_PREFIX || '';
 /* ------------------------------------------------------------------ */
 /* Helpers                                                              */
 /* ------------------------------------------------------------------ */
-const faNumber = new Intl.NumberFormat('fa-IR');
+const faNumber = new Intl.NumberFormat(language);
 const fa = (n) => faNumber.format(Number(n) || 0);
-const fa2 = (n) => String(n).padStart(2, '0').replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const fa2 = (n) => String(n).padStart(2, '0').replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
 /** تبدیل هر مبلغ به تومان */
 const toToman = (amount, currency) =>
-  Math.round(currency === 'IRR' ? Number(amount) / 10 : Number(amount));
+  Number(amount);
 
 const ERROR_FA = {
-  'This plan is already active': 'این پلن هم‌اکنون برای شما فعال است',
-  'Plan is not active': 'این پلن دیگر در دسترس نیست',
-  'Plan not found': 'پلن پیدا نشد',
-  'Payment gateway is not available': 'درگاه پرداخت در دسترس نیست، کمی بعد دوباره تلاش کنید',
-  'Payment configuration is incomplete': 'پیکربندی درگاه پرداخت ناقص است. با پشتیبانی تماس بگیرید',
-  'Failed to generate payment link': 'ساخت لینک پرداخت ناموفق بود',
-  'Payment was cancelled by user': 'پرداخت توسط شما لغو شد',
-  'Payment not found': 'تراکنش پیدا نشد',
-  'Authentication required': 'ابتدا وارد حساب کاربری شوید',
+  'This plan is already active': translateText("این پلن هم‌اکنون برای شما فعال است"),
+  'Plan is not active': translateText("این پلن دیگر در دسترس نیست"),
+  'Plan not found': translateText("پلن پیدا نشد"),
+  'Payment gateway is not available': translateText("درگاه پرداخت در دسترس نیست، کمی بعد دوباره تلاش کنید"),
+  'Payment configuration is incomplete': translateText("پیکربندی درگاه پرداخت ناقص است. با پشتیبانی تماس بگیرید"),
+  'Failed to generate payment link': translateText("ساخت لینک پرداخت ناموفق بود"),
+  'Payment was cancelled by user': translateText("پرداخت توسط شما لغو شد"),
+  'Payment not found': translateText("تراکنش پیدا نشد"),
+  'Authentication required': translateText("ابتدا وارد حساب کاربری شوید"),
 };
 
 const faError = (err, fallback) => {
@@ -55,12 +60,12 @@ const faError = (err, fallback) => {
 };
 
 function durationLabel(days) {
-  if (days === null || days === undefined) return 'نامحدود';
-  if (days === 30) return 'ماهانه';
-  if (days === 90) return '۳ ماهه';
-  if (days === 180) return '۶ ماهه';
-  if (days === 365) return 'سالانه';
-  return `${fa(days)} روزه`;
+  if (days === null || days === undefined) return translateText("نامحدود");
+  if (days === 30) return translateText("ماهانه");
+  if (days === 90) return translateText("۳ ماهه");
+  if (days === 180) return translateText("۶ ماهه");
+  if (days === 365) return translateText("سالانه");
+  return translateText("{{v0}} روزه", {v0: (fa(days))});
 }
 
 /** تخفیف فقط وقتی معتبر است که درصد > 0 و تاریخ انقضا نگذشته باشد */
@@ -72,7 +77,8 @@ function getPricing(plan, now) {
   const expires = d?.expirationDate ? new Date(d.expirationDate) : null;
   const valid =
     pct > 0 && expires && !Number.isNaN(expires.getTime()) && expires.getTime() > now;
-  const final = valid ? Math.round((amount * (100 - pct)) / 100) : amount;
+  const scale = currency === 'IRR' ? 1 : 100;
+  const final = valid ? Math.round((amount * (100 - pct)) / 100 * scale) / scale : amount;
   return { amount, final, hasDiscount: valid, pct, expires };
 }
 
@@ -128,8 +134,8 @@ function Countdown({ expires, now }) {
   return (
     <div className="mt-2 flex items-center gap-1.5 text-[11px] muted">
       <Timer size={12} />
-      <span>پایان تخفیف تا</span>
-      {days > 0 && <span>{fa(days)} روز و</span>}
+      <span>{translateText("پایان تخفیف تا")}</span>
+      {days > 0 && <span>{fa(days)}{translateText(" روز و")}</span>}
       <span dir="ltr" className="font-black tabular-nums" style={{ color: 'var(--primary-color)' }}>
         {clock}
       </span>
@@ -150,11 +156,10 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
     >
       {plan.is_featured && (
         <div
-          className="absolute top-0 left-0 px-4 py-1.5 text-[11px] font-black rounded-br-2xl flex items-center gap-1"
+          className="absolute top-0 start-0 px-4 py-1.5 text-[11px] font-black rounded-ee-2xl flex items-center gap-1"
           style={{ background: 'var(--primary-color)', color: '#0a1736' }}
         >
-          <Crown size={12} /> پیشنهادی
-        </div>
+          <Crown size={12} />{translateText(" پیشنهادی ")}</div>
       )}
 
       <div className={plan.is_featured ? 'mt-6' : ''}>
@@ -172,36 +177,27 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
       <div className="mt-5 mb-5 pb-5 border-b border-theme">
         {p.hasDiscount && (
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs muted line-through">{fa(p.amount)} تومان</span>
+            <span className="text-xs muted line-through">{formatMoney(p.amount)}</span>
             <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">
-              {fa(p.pct)}٪ تخفیف
-            </span>
+              {fa(p.pct)}{translateText("٪ تخفیف ")}</span>
           </div>
         )}
         <div className="flex items-baseline gap-1.5">
-          <span className="font-black text-3xl text-yellow">{fa(p.final)}</span>
-          <span className="text-xs muted">تومان</span>
+          <span className="font-black text-3xl text-yellow">{formatMoney(p.final)}</span>
+          <span className="text-xs muted">{displayCurrency}</span>
         </div>
         {p.hasDiscount && p.expires && <Countdown expires={p.expires} now={now} />}
       </div>
 
       <ul className="space-y-3 flex-1 mb-6">
-        <Feature icon={Package}>
-          تا <b>{fa(f.max_products)}</b> محصول
-        </Feature>
-        <Feature icon={Store}>
-          تا <b>{fa(f.max_shops)}</b> فروشگاه
-        </Feature>
-        <Feature icon={ImageIcon}>
-          تا <b>{fa(f.max_images_per_product)}</b> تصویر برای هر محصول
-        </Feature>
-        <Feature icon={Check}>فعال‌سازی آنی پس از پرداخت</Feature>
+        <Feature icon={Package}>{translateText("تا ")}<b>{fa(f.max_products)}</b>{translateText(" محصول ")}</Feature>
+        <Feature icon={Store}>{translateText("تا ")}<b>{fa(f.max_shops)}</b>{translateText(" فروشگاه ")}</Feature>
+        <Feature icon={ImageIcon}>{translateText("تا ")}<b>{fa(f.max_images_per_product)}</b>{translateText(" تصویر برای هر محصول ")}</Feature>
+        <Feature icon={Check}>{translateText("فعال‌سازی آنی پس از پرداخت")}</Feature>
       </ul>
 
       {active && (
-        <div className="text-[11px] text-emerald-400 font-bold text-center mb-2">
-          پلن فعلی شما
-          {active.expires && ` • تا ${active.expires.toLocaleDateString('fa-IR')}`}
+        <div className="text-[11px] text-emerald-400 font-bold text-center mb-2">{translateText("پلن فعلی شما ")}{active.expires && translateText(" • تا {{v0}}", {v0: (dateFormatter(language, {dateStyle:'medium'}).format(active.expires))})}
         </div>
       )}
 
@@ -213,12 +209,11 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
       >
         {busy ? (
           <>
-            <Loader2 size={16} className="animate-spin" /> در حال انتقال به درگاه…
-          </>
+            <Loader2 size={16} className="animate-spin" />{translateText(" در حال انتقال به درگاه… ")}</>
         ) : active ? (
-          'فعال است'
+          translateText("فعال است")
         ) : (
-          'خرید و فعال‌سازی'
+          translateText("خرید و فعال‌سازی")
         )}
       </button>
     </div>
@@ -251,19 +246,14 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
           <Crown size={22} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-black text-sm flex items-center gap-2">
-            پلن فعلی: {plan.name}
+          <div className="font-black text-sm flex items-center gap-2">{translateText("پلن فعلی: ")}{plan.name}
           </div>
-          <div className="text-xs muted mt-1">
-            پلن دائمی — بدون محدودیت زمانی
-          </div>
+          <div className="text-xs muted mt-1">{translateText("پلن دائمی — بدون محدودیت زمانی ")}</div>
         </div>
         <span
           className="text-[11px] px-2.5 py-1 rounded-full font-black shrink-0"
           style={{ background: 'var(--primary-color)', color: '#0a1736' }}
-        >
-          فعال
-        </span>
+        >{translateText("فعال ")}</span>
       </div>
     );
   }
@@ -292,13 +282,13 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
 
   let mainText;
   if (expired) {
-    mainText = 'پلن شما منقضی شده است';
+    mainText = translateText("پلن شما منقضی شده است");
   } else if (days > 0) {
-    mainText = `${fa(days)} روز و ${fa(hours)} ساعت و ${fa(minutes)} دقیقه باقی‌مانده`;
+    mainText = translateText("{{v0}} روز و {{v1}} ساعت و {{v2}} دقیقه باقی‌مانده", {v0: (fa(days)),v1: (fa(hours)),v2: (fa(minutes))});
   } else if (hours > 0) {
-    mainText = `${fa(hours)} ساعت و ${fa(minutes)} دقیقه و ${fa(seconds)} ثانیه باقی‌مانده`;
+    mainText = translateText("{{v0}} ساعت و {{v1}} دقیقه و {{v2}} ثانیه باقی‌مانده", {v0: (fa(hours)),v1: (fa(minutes)),v2: (fa(seconds))});
   } else {
-    mainText = `${fa(minutes)} دقیقه و ${fa(seconds)} ثانیه باقی‌مانده`;
+    mainText = translateText("{{v0}} دقیقه و {{v1}} ثانیه باقی‌مانده", {v0: (fa(minutes)),v1: (fa(seconds))});
   }
 
   return (
@@ -314,8 +304,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="font-black text-sm">
-          پلن فعلی: {plan.name}
+        <div className="font-black text-sm">{translateText("پلن فعلی: ")}{plan.name}
         </div>
 
         <div
@@ -323,13 +312,12 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
           style={{ color }}
         >
           <Clock size={12} />
-          <span dir="rtl">{mainText}</span>
+          <span dir={i18nDirection}>{mainText}</span>
         </div>
 
-        <div className="text-[11px] muted mt-1">
-          تاریخ پایان:{' '}
+        <div className="text-[11px] muted mt-1">{translateText("تاریخ پایان:")}{' '}
           <span className="font-bold" dir="ltr">
-            {new Date(expires).toLocaleDateString('fa-IR')}
+            {dateFormatter(language, {dateStyle:'medium'}).format(new Date(expires))}
           </span>
         </div>
       </div>
@@ -343,12 +331,10 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
         >
           {buyingId === plan._id ? (
             <>
-              <Loader2 size={13} className="animate-spin" /> در حال انتقال…
-            </>
+              <Loader2 size={13} className="animate-spin" />{translateText(" در حال انتقال… ")}</>
           ) : (
             <>
-              <RefreshCw size={13} /> تمدید / خرید پلن جدید
-            </>
+              <RefreshCw size={13} />{translateText(" تمدید / خرید پلن جدید ")}</>
           )}
         </button>
       )}
@@ -375,10 +361,10 @@ function SkeletonCard() {
 function PaymentBanner({ result, onClose }) {
   if (!result) return null;
   const cfg = {
-    verifying: { icon: Loader2, spin: true, color: 'var(--primary-color)', title: 'در حال تأیید پرداخت…' },
-    success: { icon: CheckCircle2, color: '#34d399', title: 'پرداخت موفق بود و پلن شما فعال شد' },
-    cancelled: { icon: XCircle, color: '#f59e0b', title: 'پرداخت انجام نشد یا لغو شد' },
-    error: { icon: XCircle, color: '#f87171', title: result.message || 'تأیید پرداخت ناموفق بود' },
+    verifying: { icon: Loader2, spin: true, color: 'var(--primary-color)', title: translateText("در حال تأیید پرداخت…") },
+    success: { icon: CheckCircle2, color: '#34d399', title: translateText("پرداخت موفق بود و پلن شما فعال شد") },
+    cancelled: { icon: XCircle, color: '#f59e0b', title: translateText("پرداخت انجام نشد یا لغو شد") },
+    error: { icon: XCircle, color: '#f87171', title: result.message || translateText("تأیید پرداخت ناموفق بود") },
   }[result.type];
   const Icon = cfg.icon;
 
@@ -388,13 +374,12 @@ function PaymentBanner({ result, onClose }) {
       <div className="flex-1 min-w-0">
         <div className="font-black text-sm">{cfg.title}</div>
         {result.type === 'success' && result.refId && (
-          <div className="text-xs muted mt-1">
-            کد پیگیری: <span dir="ltr" className="font-black">{result.refId}</span>
+          <div className="text-xs muted mt-1">{translateText("کد پیگیری: ")}<span dir="ltr" className="font-black">{result.refId}</span>
           </div>
         )}
       </div>
       {result.type !== 'verifying' && (
-        <button type="button" onClick={onClose} className="btn-ghost !p-1.5" aria-label="بستن">
+        <button type="button" onClick={onClose} className="btn-ghost !p-1.5" aria-label={translateText("بستن")}>
           <X size={14} />
         </button>
       )}
@@ -457,13 +442,13 @@ function PlansPage() {
         refreshUser?.();
       })
       .catch((err) =>
-        setResult({ type: 'error', message: faError(err, 'تأیید پرداخت ناموفق بود') }),
+        setResult({ type: 'error', message: faError(err, translateText("تأیید پرداخت ناموفق بود")) }),
       );
   }, [searchParams, setSearchParams, refreshUser]);
 
   const buyPlan = (plan) => {
     if (!user) {
-      toast.info('برای خرید پلن ابتدا وارد حساب کاربری شوید');
+      toast.info(translateText("برای خرید پلن ابتدا وارد حساب کاربری شوید"));
       return navigate('/auth/pre');
     }
     setBuyingId(plan._id);
@@ -476,11 +461,11 @@ function PlansPage() {
           window.location.href = url;
           return;
         }
-        toast.error('لینک پرداخت دریافت نشد');
+        toast.error(translateText("لینک پرداخت دریافت نشد"));
         setBuyingId('');
       })
       .catch((err) => {
-        toast.error(faError(err, 'خطا در شروع پرداخت'));
+        toast.error(faError(err, translateText("خطا در شروع پرداخت")));
         setBuyingId('');
       });
   };
@@ -500,8 +485,8 @@ function PlansPage() {
 
       <PanelPageHeader
         icon={Sparkles}
-        title="پلن‌های فروشندگی"
-        subtitle="پلن مناسب کسب‌وکار خود را انتخاب کنید؛ بعد از پرداخت، محدودیت‌های فروشگاه و محصولات بلافاصله به‌روزرسانی می‌شود."
+        title={translateText("پلن‌های فروشندگی")}
+        subtitle={translateText("پلن مناسب کسب‌وکار خود را انتخاب کنید؛ بعد از پرداخت، محدودیت‌های فروشگاه و محصولات بلافاصله به‌روزرسانی می‌شود.")}
         onRefresh={loadPlans}
       />
 
@@ -515,17 +500,14 @@ function PlansPage() {
 
       {!loading && error && (
         <div className="card rounded-3xl p-10 text-center">
-          <p className="muted mb-4 text-sm">دریافت پلن‌ها با خطا مواجه شد.</p>
+          <p className="muted mb-4 text-sm">{translateText("دریافت پلن‌ها با خطا مواجه شد.")}</p>
           <button type="button" onClick={loadPlans} className="btn-ghost inline-flex items-center gap-2 text-sm">
-            <RefreshCw size={15} /> تلاش دوباره
-          </button>
+            <RefreshCw size={15} />{translateText(" تلاش دوباره ")}</button>
         </div>
       )}
 
       {!loading && !error && plans.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-theme p-10 text-center text-sm muted">
-          در حال حاضر پلن فعالی برای خرید وجود ندارد.
-        </div>
+        <div className="rounded-3xl border border-dashed border-theme p-10 text-center text-sm muted">{translateText("در حال حاضر پلن فعالی برای خرید وجود ندارد. ")}</div>
       )}
 
       {!loading && !error && plans.length > 0 && (

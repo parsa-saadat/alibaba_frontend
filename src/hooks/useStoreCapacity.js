@@ -1,3 +1,5 @@
+import { language as currentLocale } from '../i18n/runtime';
+import { t as translateText } from '../i18n/runtime.js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { API } from '../config/api';
@@ -130,15 +132,15 @@ export default function useStoreCapacity() {
 
     const blockedText =
       reason === 'not-seller'
-        ? 'برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید.'
+        ? translateText("برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید.")
         : reason === 'no-plan'
-          ? 'پلن فروشندگی فعالی ندارید؛ ابتدا یک پلن تهیه کنید.'
+          ? translateText("پلن فروشندگی فعالی ندارید؛ ابتدا یک پلن تهیه کنید.")
           : reason === 'expired'
-            ? 'اعتبار پلن فروشندگی شما تمام شده است؛ برای ساخت فروشگاه پلن را تمدید کنید.'
+            ? translateText("اعتبار پلن فروشندگی شما تمام شده است؛ برای ساخت فروشگاه پلن را تمدید کنید.")
             : reason === 'no-capacity'
-              ? 'پلن فعلی شما امکان ساخت فروشگاه ندارد.'
+              ? translateText("پلن فعلی شما امکان ساخت فروشگاه ندارد.")
               : reason === 'full'
-                ? `ظرفیت فروشگاه پلن شما (${maxShops.toLocaleString('fa-IR')} فروشگاه) پر شده است.`
+                ? translateText("ظرفیت فروشگاه پلن شما ({{v0}} فروشگاه) پر شده است.", {v0: (maxShops.toLocaleString(currentLocale))})
                 : '';
 
     return {

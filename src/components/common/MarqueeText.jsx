@@ -1,3 +1,4 @@
+import { direction as i18nDirection } from '../../i18n/runtime';
 import React, { useEffect, useRef, useState } from 'react';
 
 /*
@@ -31,12 +32,12 @@ function MarqueeText({ text, className = '', title }) {
   return (
     <div
       ref={wrapRef}
-      dir="rtl"
+      dir={i18nDirection}
       className={`marquee ${shift > 0 ? 'is-overflow' : ''} ${className}`}
       style={
         shift > 0
           ? {
-              '--marquee-shift': `${shift}px`,
+              '--marquee-shift': `${shift * (i18nDirection === 'rtl' ? 1 : -1)}px`,
               '--marquee-duration': `${Math.min(18, Math.max(7, shift / 22))}s`,
             }
           : undefined

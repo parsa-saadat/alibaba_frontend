@@ -1,3 +1,6 @@
+const formatPrice = amount => formatOrderMoney(amount, 'IRR');
+import { formatMoney as formatOrderMoney } from '../../../i18n/runtime';
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -19,7 +22,7 @@ import {
 
 import { useShop } from '../../../contexts/ShopContext';
 import { authHeaders } from '../../../utils/helpers/storage';
-import { formatPrice, toFa, formatDateTime, statusFa } from '../../../utils/helpers/format';
+import { formatPrice as formatCatalogPrice, toFa, formatDateTime, statusFa } from '../../../utils/helpers/format';
 
 const API =
   import.meta.env.VITE_APP_API_URL ||
@@ -34,9 +37,9 @@ function statusTone(status = '') {
 }
 
 const FILTERS = [
-  { key: 'all', label: 'همه سفارش‌ها' },
-  { key: 'pending', label: 'در انتظار پرداخت' },
-  { key: 'paid', label: 'پرداخت‌شده' },
+  { key: 'all', label: translateText("همه سفارش‌ها") },
+  { key: 'pending', label: translateText("در انتظار پرداخت") },
+  { key: 'paid', label: translateText("پرداخت‌شده") },
 ];
 
 function Chip({ tone, children }) {
@@ -102,7 +105,7 @@ function OrdersPage() {
         const body = res.data?.body;
         setOrders(Array.isArray(body) ? body : body?.data || []);
       })
-      .catch(() => setError('دریافت سفارش‌ها ناموفق بود.'))
+      .catch(() => setError(translateText("دریافت سفارش‌ها ناموفق بود.")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -142,9 +145,9 @@ function OrdersPage() {
           body.url ||
           (body.authority ? `https://sandbox.zarinpal.com/pg/StartPay/${body.authority}` : null);
         if (url && /^https?:/.test(url)) window.location.href = url;
-        else toast.info('درخواست پرداخت ارسال شد');
+        else toast.info(translateText("درخواست پرداخت ارسال شد"));
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'خطا در شروع پرداخت'))
+      .catch((err) => toast.error(err.response?.data?.message || translateText("خطا در شروع پرداخت")))
       .finally(() => setPayBusy(''));
   };
 
@@ -159,11 +162,9 @@ function OrdersPage() {
           >
             <ReceiptText size={28} style={{ color: 'var(--accent-text)' }} />
           </span>
-          <h1 className="mt-4 text-base font-black">برای دیدن سفارش‌ها وارد شوید</h1>
-          <p className="mt-2 text-xs muted">وضعیت سفارش‌ها، مرسوله‌ها و پرداخت‌ها در این بخش نمایش داده می‌شود.</p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
-            ورود به حساب
-          </Link>
+          <h1 className="mt-4 text-base font-black">{translateText("برای دیدن سفارش‌ها وارد شوید")}</h1>
+          <p className="mt-2 text-xs muted">{translateText("وضعیت سفارش‌ها، مرسوله‌ها و پرداخت‌ها در این بخش نمایش داده می‌شود.")}</p>
+          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">{translateText("ورود به حساب ")}</Link>
         </div>
       </div>
     );
@@ -182,16 +183,14 @@ function OrdersPage() {
               <ReceiptText size={20} style={{ color: 'var(--accent-text)' }} />
             </span>
             <div>
-              <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">
-                سفارش‌های من
-                <span
+              <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">{translateText("سفارش‌های من ")}<span
                   className="rounded-full px-2 py-0.5 text-[11px] font-black"
                   style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
                 >
                   {toFa(stats.count)}
                 </span>
               </h1>
-              <p className="mt-0.5 text-[11px] muted">وضعیت پرداخت، مرسوله‌ها و فاکتور هر سفارش</p>
+              <p className="mt-0.5 text-[11px] muted">{translateText("وضعیت پرداخت، مرسوله‌ها و فاکتور هر سفارش")}</p>
             </div>
           </div>
 
@@ -200,16 +199,14 @@ function OrdersPage() {
             onClick={load}
             className="btn-ghost inline-flex items-center justify-center gap-1.5 !py-2 text-xs"
           >
-            <RotateCcw size={14} />
-            بروزرسانی
-          </button>
+            <RotateCcw size={14} />{translateText("بروزرسانی ")}</button>
         </div>
 
         {stats.count > 0 && (
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <SummaryTile icon={Package} value={toFa(stats.count)} label="کل سفارش‌ها" />
-            <SummaryTile icon={PackageCheck} value={toFa(stats.paid)} label="پرداخت‌شده" />
-            <SummaryTile icon={Banknote} value={formatPrice(stats.spent)} label="مجموع خرید" />
+            <SummaryTile icon={Package} value={toFa(stats.count)} label={translateText("کل سفارش‌ها")} />
+            <SummaryTile icon={PackageCheck} value={toFa(stats.paid)} label={translateText("پرداخت‌شده")} />
+            <SummaryTile icon={Banknote} value={formatPrice(stats.spent)} label={translateText("مجموع خرید")} />
           </div>
         )}
 
@@ -249,9 +246,7 @@ function OrdersPage() {
           <div className="card rounded-3xl p-10 text-center">
             <p className="text-sm muted">{error}</p>
             <button type="button" onClick={load} className="btn-yellow mt-4 inline-flex items-center gap-2">
-              <RotateCcw size={15} />
-              تلاش دوباره
-            </button>
+              <RotateCcw size={15} />{translateText("تلاش دوباره ")}</button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="card rounded-3xl px-6 py-14 text-center">
@@ -262,21 +257,17 @@ function OrdersPage() {
               <ClipboardList size={28} style={{ color: 'var(--accent-text)' }} />
             </span>
             <h2 className="mt-4 text-base font-black">
-              {orders.length === 0 ? 'هنوز سفارشی ثبت نکرده‌اید' : 'سفارشی با این فیلتر نیست'}
+              {orders.length === 0 ? translateText("هنوز سفارشی ثبت نکرده‌اید") : translateText("سفارشی با این فیلتر نیست")}
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
               {orders.length === 0
-                ? 'اولین خریدتان را انجام دهید تا وضعیت سفارش و مرسوله‌ها اینجا نمایش داده شود.'
-                : 'فیلتر را عوض کنید تا سفارش‌های دیگر را ببینید.'}
+                ? translateText("اولین خریدتان را انجام دهید تا وضعیت سفارش و مرسوله‌ها اینجا نمایش داده شود.")
+                : translateText("فیلتر را عوض کنید تا سفارش‌های دیگر را ببینید.")}
             </p>
             {orders.length === 0 ? (
-              <Link to="/products" className="btn-yellow mt-5 inline-flex items-center gap-2">
-                شروع خرید
-              </Link>
+              <Link to="/products" className="btn-yellow mt-5 inline-flex items-center gap-2">{translateText("شروع خرید ")}</Link>
             ) : (
-              <button type="button" onClick={() => setFilter('all')} className="btn-ghost mt-5">
-                نمایش همه سفارش‌ها
-              </button>
+              <button type="button" onClick={() => setFilter('all')} className="btn-ghost mt-5">{translateText("نمایش همه سفارش‌ها ")}</button>
             )}
           </div>
         ) : (
@@ -318,26 +309,26 @@ function OrdersPage() {
                           #{order.order_number || String(order._id).slice(-8)}
                         </span>
                         <Chip tone={statusTone(payStatus)}>
-                          {isPaid ? 'پرداخت‌شده' : 'در انتظار پرداخت'}
+                          {isPaid ? translateText("پرداخت‌شده") : translateText("در انتظار پرداخت")}
                         </Chip>
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] muted">
                         <span>{formatDateTime(order.created_at)}</span>
                         <span>•</span>
-                        <span>{toFa(subs.length)} مرسوله</span>
+                        <span>{toFa(subs.length)}{translateText(" مرسوله")}</span>
                         <span>•</span>
-                        <span>{toFa(itemCount)} قلم کالا</span>
+                        <span>{toFa(itemCount)}{translateText(" قلم کالا")}</span>
                         {order.payment?.ref_id && (
                           <>
                             <span>•</span>
-                            <span dir="ltr">رهگیری: {order.payment.ref_id}</span>
+                            <span dir="ltr">{translateText("رهگیری: ")}{order.payment.ref_id}</span>
                           </>
                         )}
                       </div>
                       {preview.length > 0 && (
                         <p className="mt-1 line-clamp-1 text-[11px] muted">
-                          {preview.join('، ')}
-                          {itemCount > preview.length ? ' و …' : ''}
+                          {preview.join(translateText("، "))}
+                          {itemCount > preview.length ? translateText(" و …") : ''}
                         </p>
                       )}
                     </div>
@@ -349,8 +340,7 @@ function OrdersPage() {
                         {formatPrice(order.final_amount ?? order.total_amount ?? order.amount)}
                       </div>
                       {Number(order.total_discount) > 0 && (
-                        <div className="mt-0.5 text-[10px] muted">
-                          تخفیف: {formatPrice(order.total_discount)}
+                        <div className="mt-0.5 text-[10px] muted">{translateText("تخفیف: ")}{formatPrice(order.total_discount)}
                         </div>
                       )}
                     </div>
@@ -374,16 +364,14 @@ function OrdersPage() {
                           className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-xs disabled:opacity-60"
                         >
                           <CreditCard size={14} />
-                          {payBusy === order._id ? 'در حال انتقال…' : 'پرداخت آنلاین'}
+                          {payBusy === order._id ? translateText("در حال انتقال…") : translateText("پرداخت آنلاین")}
                         </button>
                       )}
                       <Link
                         to={`/order/${order._id}`}
                         className="btn-ghost inline-flex items-center gap-1.5 !py-2 text-xs"
                       >
-                        <ExternalLink size={14} />
-                        مشاهده فاکتور
-                      </Link>
+                        <ExternalLink size={14} />{translateText("مشاهده فاکتور ")}</Link>
                     </div>
 
                     {/* مرسوله‌ها */}
@@ -397,9 +385,7 @@ function OrdersPage() {
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="inline-flex items-center gap-1 text-[11px] font-bold muted">
-                                <Store size={12} />
-                                مرسوله
-                              </span>
+                                <Store size={12} />{translateText("مرسوله ")}</span>
                               <span className="text-xs font-black" dir="ltr">
                                 #{sub.order_number || String(sub._id).slice(-6)}
                               </span>
@@ -419,7 +405,7 @@ function OrdersPage() {
                                   style={{ borderColor: 'var(--border)' }}
                                 >
                                   <span className="min-w-0 flex-1 truncate">
-                                    {item.product_name ?? item.name ?? 'کالا'}
+                                    {item.product_name ?? item.name ?? translateText("کالا")}
                                   </span>
                                   <span className="shrink-0 muted">×{toFa(item.quantity ?? 1)}</span>
                                   {item.unit_price != null && (
@@ -442,7 +428,7 @@ function OrdersPage() {
                                   sub.shipping_address.full_address,
                                 ]
                                   .filter(Boolean)
-                                  .join('، ')}
+                                  .join(translateText("، "))}
                               </span>
                             </p>
                           )}
@@ -454,14 +440,13 @@ function OrdersPage() {
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-theme px-3 py-2 text-[11px]">
                       <span className="inline-flex items-center gap-1 muted">
                         <Truck size={13} />
-                        {Number(order.total_discount) > 0 ? 'با احتساب تخفیف' : 'مبلغ نهایی'}
+                        {Number(order.total_discount) > 0 ? translateText("با احتساب تخفیف") : translateText("مبلغ نهایی")}
                       </span>
                       <span className="font-black">{formatPrice(order.final_amount ?? order.total_amount ?? order.amount)}</span>
                     </div>
 
                     {order.customer_notes && (
-                      <p className="mt-2 rounded-xl px-3 py-2 text-[11px] muted" style={{ background: 'var(--card2)' }}>
-                        یادداشت شما: {order.customer_notes}
+                      <p className="mt-2 rounded-xl px-3 py-2 text-[11px] muted" style={{ background: 'var(--card2)' }}>{translateText("یادداشت شما: ")}{order.customer_notes}
                       </p>
                     )}
                   </div>

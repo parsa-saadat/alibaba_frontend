@@ -1,3 +1,4 @@
+import { t as translateText } from '../i18n/runtime.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useShop } from '../contexts/ShopContext';
@@ -74,7 +75,7 @@ export default function useCartQuantity(productId, { stock = null, soldOut = fal
         qtyRef.current = fallback;
         if (mountedRef.current) {
           setQty(fallback);
-          toast.error(cartErrorMessage(error, 'خطا در به‌روزرسانی سبد خرید'));
+          toast.error(cartErrorMessage(error, translateText("خطا در به‌روزرسانی سبد خرید")));
         }
       } finally {
         if (mountedRef.current) setBusy(false);
@@ -109,7 +110,7 @@ export default function useCartQuantity(productId, { stock = null, soldOut = fal
   /* ---------- اکشن‌ها ---------- */
   const increment = () => {
     if (!loggedIn) {
-      toast.error('برای افزودن به سبد خرید ابتدا وارد شوید');
+      toast.error(translateText("برای افزودن به سبد خرید ابتدا وارد شوید"));
       return;
     }
     if (soldOut) return;

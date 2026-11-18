@@ -1,3 +1,4 @@
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -27,7 +28,7 @@ function RegisterPage() {
 
   const sendCode = (e) => {
     e.preventDefault();
-    if (!validateIRPhoneSyntax(phone)) return toast.error('شماره موبایل معتبر نیست');
+    if (!validateIRPhoneSyntax(phone)) return toast.error(translateText("شماره موبایل معتبر نیست"));
     axios
       .post(`${API}/auth/pre`, { phone })
       .then((res) => {
@@ -35,27 +36,27 @@ function RegisterPage() {
           setDevCode(res.data.body || '');
           setCode(res.data.body || '');
           setStep(2);
-          toast.success('کد تایید ارسال شد');
+          toast.success(translateText("کد تایید ارسال شد"));
         } else toast.error(res.data.message);
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'ارتباط با سرور برقرار نشد'));
+      .catch((err) => toast.error(err.response?.data?.message || translateText("ارتباط با سرور برقرار نشد")));
   };
 
   const verify = (e) => {
     e.preventDefault();
-    if (!validateOtpSyntax(code)) return toast.error('کد ۶ رقمی را وارد کنید');
+    if (!validateOtpSyntax(code)) return toast.error(translateText("کد ۶ رقمی را وارد کنید"));
     axios
       .post(`${API}/auth/login`, { phone, code })
       .then((res) => {
         setPending(res.data.body);
         setStep(3);
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'کد نامعتبر است'));
+      .catch((err) => toast.error(err.response?.data?.message || translateText("کد نامعتبر است")));
   };
 
   const finish = (e) => {
     e.preventDefault();
-    if (!username.trim()) return toast.error('نام کاربری را وارد کنید');
+    if (!username.trim()) return toast.error(translateText("نام کاربری را وارد کنید"));
     axios
       .put(
         `${API}/user/${pending.user._id}`,
@@ -73,32 +74,30 @@ function RegisterPage() {
           firstname: firstname.trim(),
           lastname: lastname.trim(),
         });
-        toast.success('ثبت‌نام کامل شد');
+        toast.success(translateText("ثبت‌نام کامل شد"));
         navigate('/');
       })
       .catch((err) => {
         login(pending.token, pending.user);
-        toast.warn(err.response?.data?.message || 'نام کاربری ذخیره نشد');
+        toast.warn(err.response?.data?.message || translateText("نام کاربری ذخیره نشد"));
         navigate('/');
       });
   };
 
   return (
     <AuthShellComponent
-      title="ایجاد حساب کاربری"
-      subtitle="با شماره موبایل ثبت‌نام کنید"
+      title={translateText("ایجاد حساب کاربری")}
+      subtitle={translateText("با شماره موبایل ثبت‌نام کنید")}
       footer={
-        <>
-          حساب دارید؟{' '}
-          <Link to="/auth/pre" className="font-bold text-yellow">وارد شوید</Link>
+        <>{translateText("حساب دارید؟")}{' '}
+          <Link to="/auth/pre" className="font-bold text-yellow">{translateText("وارد شوید")}</Link>
         </>
       }
     >
         {step === 1 && (
           <form onSubmit={sendCode} className="space-y-4">
             <span className="text-sm font-bold flex items-center gap-1">
-              <Smartphone size={15} /> شماره موبایل
-            </span>
+              <Smartphone size={15} />{translateText(" شماره موبایل ")}</span>
             <input
               className="input"
               dir="ltr"
@@ -111,16 +110,14 @@ function RegisterPage() {
             <button
               type="submit"
               className="btn-yellow w-full flex items-center justify-center gap-2"
-            >
-              ارسال کد تایید <ArrowLeft size={16} />
+            >{translateText("ارسال کد تایید ")}<ArrowLeft size={16} />
             </button>
           </form>
         )}
         {step === 2 && (
           <form onSubmit={verify} className="space-y-4">
             <span className="text-sm font-bold flex items-center gap-1">
-              <KeyRound size={15} /> کد ۶ رقمی
-            </span>
+              <KeyRound size={15} />{translateText(" کد ۶ رقمی ")}</span>
             <input
               className="input text-center tracking-[.5em] text-xl font-black"
               dir="ltr"
@@ -130,37 +127,31 @@ function RegisterPage() {
               required
             />
             {devCode && (
-              <div className="text-xs p-2 rounded-lg text-center bg-navy text-brand-yellow">
-                حالت توسعه — کد شما: <b dir="ltr">{toFa(devCode)}</b>
+              <div className="text-xs p-2 rounded-lg text-center bg-navy text-brand-yellow">{translateText("حالت توسعه — کد شما: ")}<b dir="ltr">{toFa(devCode)}</b>
               </div>
             )}
-            <button type="submit" className="btn-yellow w-full">
-              تایید و ادامه
-            </button>
+            <button type="submit" className="btn-yellow w-full">{translateText("تایید و ادامه ")}</button>
             <button
               type="button"
               onClick={() => setStep(1)}
               className="w-full text-sm muted"
-            >
-              تغییر شماره موبایل
-            </button>
+            >{translateText("تغییر شماره موبایل ")}</button>
           </form>
         )}
         {step === 3 && (
           <form onSubmit={finish} className="space-y-4">
             <span className="text-sm font-bold flex items-center gap-1">
-              <User size={15} /> مشخصات شما
-            </span>
+              <User size={15} />{translateText(" مشخصات شما ")}</span>
             <div className="grid grid-cols-2 gap-2">
               <input
                 className="input"
-                placeholder="نام"
+                placeholder={translateText("نام")}
                 value={firstname}
                 onChange={(e) => setFirstname(e.target.value)}
               />
               <input
                 className="input"
-                placeholder="نام خانوادگی"
+                placeholder={translateText("نام خانوادگی")}
                 value={lastname}
                 onChange={(e) => setLastname(e.target.value)}
               />
@@ -168,17 +159,13 @@ function RegisterPage() {
             <input
               className="input"
               dir="ltr"
-              placeholder="نام کاربری — مثلاً ali_rezai"
+              placeholder={translateText("نام کاربری — مثلاً ali_rezai")}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
-            <p className="text-[11px] muted leading-5">
-              نام و نام خانوادگی اختیاری است و بعداً از پنل کاربری قابل تغییر است.
-            </p>
-            <button type="submit" className="btn-yellow w-full">
-              تکمیل ثبت‌نام
-            </button>
+            <p className="text-[11px] muted leading-5">{translateText("نام و نام خانوادگی اختیاری است و بعداً از پنل کاربری قابل تغییر است. ")}</p>
+            <button type="submit" className="btn-yellow w-full">{translateText("تکمیل ثبت‌نام ")}</button>
           </form>
         )}
 

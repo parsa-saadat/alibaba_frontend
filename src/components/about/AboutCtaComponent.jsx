@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Headset, Store } from 'lucide-react';
@@ -14,29 +15,19 @@ function AboutCtaComponent() {
         }}
       >
         <div className="max-w-xl">
-          <h2 className="font-black text-lg sm:text-2xl text-white leading-tight">
-            ژئو کالا برای کار شما ساخته شده
-          </h2>
-          <p className="text-xs sm:text-sm text-white/70 leading-7 mt-2">
-            اگر فروشنده‌ی تجهیزات نقشه‌برداری هستی، فروشگاهت را در ژئو کالا بساز و به نقشه‌برداران
-            سراسر کشور دسترسی پیدا کن. اگر خریدار هستی، مدل‌ها را مقایسه کن و با مشورت کارشناس
-           خرید کن.
-          </p>
+          <h2 className="font-black text-lg sm:text-2xl text-white leading-tight">{translateText("ژئو کالا برای کار شما ساخته شده ")}</h2>
+          <p className="text-xs sm:text-sm text-white/70 leading-7 mt-2">{translateText("اگر فروشنده‌ی تجهیزات نقشه‌برداری هستی، فروشگاهت را در ژئو کالا بساز و به نقشه‌برداران سراسر کشور دسترسی پیدا کن. اگر خریدار هستی، مدل‌ها را مقایسه کن و با مشورت کارشناس خرید کن. ")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Link to="/seller" className="btn-yellow inline-flex items-center gap-2">
-            <Store size={16} />
-            فروشنده شوید
-          </Link>
+            <Store size={16} />{translateText("فروشنده شوید ")}</Link>
           <Link
             to="/contact"
             className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
             style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
           >
-            <Headset size={16} />
-            گفتگو با ما
-            <ChevronLeft size={14} />
+            <Headset size={16} />{translateText("گفتگو با ما ")}<ChevronLeft className="logical-icon" size={14} />
           </Link>
         </div>
       </div>

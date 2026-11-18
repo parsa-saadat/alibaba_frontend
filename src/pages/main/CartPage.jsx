@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -31,9 +32,9 @@ const SYNC_DELAY_MS = 900;
 
 /* مراحل خرید — فعلاً فقط مرحله‌ی اول در این صفحه است */
 const STEPS = [
-  { label: 'سبد خرید', icon: ShoppingCart, active: true },
-  { label: 'اطلاعات ارسال', icon: Truck },
-  { label: 'پرداخت', icon: CreditCard },
+  { label: translateText("سبد خرید"), icon: ShoppingCart, active: true },
+  { label: translateText("اطلاعات ارسال"), icon: Truck },
+  { label: translateText("پرداخت"), icon: CreditCard },
 ];
 
 function StepsStrip() {
@@ -162,7 +163,7 @@ function CartPage() {
         else await setCartItemQuantity(productId, pending.quantity);
         setSyncState(Object.keys(pendingRef.current).length ? 'pending' : 'saved');
       } catch (error) {
-        toast.error(cartErrorMessage(error, 'خطا در همگام‌سازی سبد خرید'));
+        toast.error(cartErrorMessage(error, translateText("خطا در همگام‌سازی سبد خرید")));
         setSyncState('idle');
         setQtys((prev) => {
           const next = { ...prev };
@@ -224,7 +225,7 @@ function CartPage() {
     const stock =
       product?.stock == null || product?.stock === '' ? null : Number(product.stock);
     if (stock !== null && Number.isFinite(stock) && nextQuantity > stock) {
-      toast.warn(`حداکثر موجودی این کالا ${toFa(stock)} عدد است`);
+      toast.warn(translateText("حداکثر موجودی این کالا {{v0}} عدد است", {v0: (toFa(stock))}));
       return;
     }
 
@@ -267,13 +268,9 @@ function CartPage() {
           >
             <ShoppingCart size={28} style={{ color: 'var(--accent-text)' }} />
           </span>
-          <h1 className="mt-4 text-base font-black">برای دیدن سبد خرید وارد شوید</h1>
-          <p className="mt-2 text-xs leading-6 muted">
-            سبد خرید به حساب شما گره خورده است تا از هر دستگاهی در دسترس باشد.
-          </p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
-            ورود به حساب
-            <ArrowLeft size={15} />
+          <h1 className="mt-4 text-base font-black">{translateText("برای دیدن سبد خرید وارد شوید")}</h1>
+          <p className="mt-2 text-xs leading-6 muted">{translateText("سبد خرید به حساب شما گره خورده است تا از هر دستگاهی در دسترس باشد. ")}</p>
+          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">{translateText("ورود به حساب ")}<ArrowLeft size={15} />
           </Link>
         </div>
       </div>
@@ -283,7 +280,7 @@ function CartPage() {
   if (!cartReady || (detailsLoading && items.length === 0)) {
     return (
       <div className="mx-auto max-w-5xl px-3 py-20">
-        <Loading label="در حال بارگذاری سبد خرید…" />
+        <Loading label={translateText("در حال بارگذاری سبد خرید…")} />
       </div>
     );
   }
@@ -313,18 +310,12 @@ function CartPage() {
           >
             <ShoppingCart size={28} style={{ color: 'var(--accent-text)' }} />
           </span>
-          <h1 className="mt-4 text-base font-black">سبد خرید شما خالی است</h1>
-          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
-            کالاهای مورد علاقه‌تان را به سبد اضافه کنید تا همین‌جا جمع‌بندی شوند.
-          </p>
+          <h1 className="mt-4 text-base font-black">{translateText("سبد خرید شما خالی است")}</h1>
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">{translateText("کالاهای مورد علاقه‌تان را به سبد اضافه کنید تا همین‌جا جمع‌بندی شوند. ")}</p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <Link to="/products" className="btn-yellow inline-flex items-center gap-2">
-              <Sparkles size={16} />
-              شروع خرید
-            </Link>
-            <Link to="/favorites" className="btn-ghost inline-flex items-center gap-2">
-              علاقه‌مندی‌ها
-            </Link>
+              <Sparkles size={16} />{translateText("شروع خرید ")}</Link>
+            <Link to="/favorites" className="btn-ghost inline-flex items-center gap-2">{translateText("علاقه‌مندی‌ها ")}</Link>
           </div>
         </div>
       ) : (
@@ -339,18 +330,13 @@ function CartPage() {
                 <ShoppingCart size={17} style={{ color: 'var(--accent-text)' }} />
               </span>
               <div className="min-w-0">
-                <h1 className="flex items-center gap-2 text-base font-black sm:text-lg">
-                  سبد خرید
-                  <span
+                <h1 className="flex items-center gap-2 text-base font-black sm:text-lg">{translateText("سبد خرید ")}<span
                     className="rounded-full px-2 py-0.5 text-[11px] font-black"
                     style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
                   >
-                    {toFa(visibleItems.length)} کالا · {toFa(pieceCount)} عدد
-                  </span>
+                    {toFa(visibleItems.length)}{translateText(" کالا · ")}{toFa(pieceCount)}{translateText(" عدد ")}</span>
                 </h1>
-                <p className="mt-0.5 text-[11px] muted">
-                  تعداد را تغییر دهید؛ تغییرات خودکار در حساب‌تان ذخیره می‌شود.
-                </p>
+                <p className="mt-0.5 text-[11px] muted">{translateText("تعداد را تغییر دهید؛ تغییرات خودکار در حساب‌تان ذخیره می‌شود. ")}</p>
               </div>
             </div>
 
@@ -372,13 +358,9 @@ function CartPage() {
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-theme px-3 py-2.5 text-[11px] muted">
                 <span className="inline-flex items-center gap-1.5">
-                  <Check size={13} style={{ color: '#17994f' }} />
-                  قیمت‌ها نهایی و شامل تخفیف هستند
-                </span>
+                  <Check size={13} style={{ color: '#17994f' }} />{translateText("قیمت‌ها نهایی و شامل تخفیف هستند ")}</span>
                 <span className="inline-flex items-center gap-1.5">
-                  <PackageCheck size={13} style={{ color: '#17994f' }} />
-                  موجودی در لحظه‌ی ثبت سفارش کنترل می‌شود
-                </span>
+                  <PackageCheck size={13} style={{ color: '#17994f' }} />{translateText("موجودی در لحظه‌ی ثبت سفارش کنترل می‌شود ")}</span>
               </div>
             </div>
 
@@ -398,7 +380,7 @@ function CartPage() {
           >
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
               <div className="leading-tight">
-                <div className="text-[10px] muted">مبلغ قابل پرداخت</div>
+                <div className="text-[10px] muted">{translateText("مبلغ قابل پرداخت")}</div>
                 <div className="text-base font-black" style={{ color: 'var(--accent-text)' }}>
                   {formatPrice(subtotal)}
                 </div>
@@ -413,9 +395,7 @@ function CartPage() {
                   <LoaderCircle size={16} className="animate-spin" />
                 ) : (
                   <ArrowLeft size={16} />
-                )}
-                ادامه‌ی خرید
-              </button>
+                )}{translateText("ادامه‌ی خرید ")}</button>
             </div>
           </div>
           {/* فاصله برای نوار ثابت موبایل */}

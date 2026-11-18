@@ -1,3 +1,5 @@
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -24,14 +26,14 @@ const EMPTY = {
 };
 
 const FIELDS = [
-  { key: 'full_name', label: 'نام و نام خانوادگی گیرنده', placeholder: 'مثلاً سارا محمدی', span: 2, autoComplete: 'name' },
-  { key: 'province', label: 'استان', placeholder: 'تهران', autoComplete: 'address-level1' },
-  { key: 'city', label: 'شهر', placeholder: 'تهران', autoComplete: 'address-level2' },
-  { key: 'neighborhood', label: 'محله', placeholder: 'ولنجک' },
-  { key: 'postal_code', label: 'کد پستی (۱۰ رقم)', placeholder: '1234567890', ltr: true, numeric: true, maxLength: 10 },
-  { key: 'full_address', label: 'نشانی کامل', placeholder: 'خیابان، کوچه، ساختمان', span: 2, autoComplete: 'street-address' },
-  { key: 'building_number', label: 'پلاک', placeholder: '12', ltr: true, numeric: true },
-  { key: 'unit', label: 'واحد', placeholder: '3', ltr: true, numeric: true },
+  { key: 'full_name', label: translateText("نام و نام خانوادگی گیرنده"), placeholder: translateText("مثلاً سارا محمدی"), span: 2, autoComplete: 'name' },
+  { key: 'province', label: translateText("استان"), placeholder: translateText("تهران"), autoComplete: 'address-level1' },
+  { key: 'city', label: translateText("شهر"), placeholder: translateText("تهران"), autoComplete: 'address-level2' },
+  { key: 'neighborhood', label: translateText("محله"), placeholder: translateText("ولنجک") },
+  { key: 'postal_code', label: translateText("کد پستی (۱۰ رقم)"), placeholder: '1234567890', ltr: true, numeric: true, maxLength: 10 },
+  { key: 'full_address', label: translateText("نشانی کامل"), placeholder: translateText("خیابان، کوچه، ساختمان"), span: 2, autoComplete: 'street-address' },
+  { key: 'building_number', label: translateText("پلاک"), placeholder: '12', ltr: true, numeric: true },
+  { key: 'unit', label: translateText("واحد"), placeholder: '3', ltr: true, numeric: true },
 ];
 
 function AddressFormModalComponent({
@@ -96,16 +98,16 @@ function AddressFormModalComponent({
 
   const validate = () => {
     const next = {};
-    if (form.full_name.trim().length < 3) next.full_name = 'نام گیرنده را کامل وارد کنید.';
-    if (!form.province.trim()) next.province = 'استان را وارد کنید.';
-    if (!form.city.trim()) next.city = 'شهر را وارد کنید.';
-    if (!form.neighborhood.trim()) next.neighborhood = 'محله را وارد کنید.';
-    if (!form.full_address.trim()) next.full_address = 'نشانی کامل را وارد کنید.';
+    if (form.full_name.trim().length < 3) next.full_name = translateText("نام گیرنده را کامل وارد کنید.");
+    if (!form.province.trim()) next.province = translateText("استان را وارد کنید.");
+    if (!form.city.trim()) next.city = translateText("شهر را وارد کنید.");
+    if (!form.neighborhood.trim()) next.neighborhood = translateText("محله را وارد کنید.");
+    if (!form.full_address.trim()) next.full_address = translateText("نشانی کامل را وارد کنید.");
     if (!/^\d{10}$/.test(String(form.postal_code).replace(/\D/g, ''))) {
-      next.postal_code = 'کد پستی باید ۱۰ رقم باشد.';
+      next.postal_code = translateText("کد پستی باید ۱۰ رقم باشد.");
     }
-    if (!Number(form.building_number)) next.building_number = 'پلاک معتبر نیست.';
-    if (!Number(form.unit)) next.unit = 'واحد معتبر نیست.';
+    if (!Number(form.building_number)) next.building_number = translateText("پلاک معتبر نیست.");
+    if (!Number(form.unit)) next.unit = translateText("واحد معتبر نیست.");
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -113,11 +115,11 @@ function AddressFormModalComponent({
   const submit = (event) => {
     event.preventDefault();
     if (!userId) {
-      toast.error('برای ثبت نشانی باید وارد حساب شوید.');
+      toast.error(translateText("برای ثبت نشانی باید وارد حساب شوید."));
       return;
     }
     if (!validate()) {
-      toast.error('لطفاً موارد مشخص‌شده را اصلاح کنید.');
+      toast.error(translateText("لطفاً موارد مشخص‌شده را اصلاح کنید."));
       return;
     }
 
@@ -142,17 +144,17 @@ function AddressFormModalComponent({
 
     request
       .then((res) => {
-        toast.success(isEdit ? 'نشانی ویرایش شد' : 'نشانی ثبت شد');
+        toast.success(isEdit ? translateText("نشانی ویرایش شد") : translateText("نشانی ثبت شد"));
         onSaved?.(res?.data?.body || null);
         onClose?.();
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'ثبت نشانی ناموفق بود.'))
+      .catch((err) => toast.error(err.response?.data?.message || translateText("ثبت نشانی ناموفق بود.")))
       .finally(() => setSaving(false));
   };
 
   return (
     <div
-      dir="rtl"
+      dir={i18nDirection}
       className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
       role="dialog"
       aria-modal="true"
@@ -160,7 +162,7 @@ function AddressFormModalComponent({
     >
       <button
         type="button"
-        aria-label="بستن فرم نشانی"
+        aria-label={translateText("بستن فرم نشانی")}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
@@ -173,9 +175,9 @@ function AddressFormModalComponent({
         <div className="mb-4 flex items-center justify-between gap-3 border-b border-theme pb-3">
           <h2 id="address-modal-title" className="flex items-center gap-2 text-base font-black">
             <MapPin size={17} style={{ color: 'var(--accent-text)' }} />
-            {isEdit ? 'ویرایش نشانی' : 'نشانی جدید'}
+            {isEdit ? translateText("ویرایش نشانی") : translateText("نشانی جدید")}
           </h2>
-          <button type="button" onClick={onClose} aria-label="بستن" className="btn-ghost !p-2">
+          <button type="button" onClick={onClose} aria-label={translateText("بستن")} className="btn-ghost !p-2">
             <X size={16} />
           </button>
         </div>
@@ -208,12 +210,10 @@ function AddressFormModalComponent({
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-theme pt-3">
-          <button type="button" onClick={onClose} className="btn-ghost !py-2 text-xs">
-            انصراف
-          </button>
+          <button type="button" onClick={onClose} className="btn-ghost !py-2 text-xs">{translateText("انصراف ")}</button>
           <button type="submit" disabled={saving} className="btn-yellow inline-flex items-center gap-2 !py-2 text-xs disabled:opacity-60">
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            {saving ? 'در حال ذخیره…' : isEdit ? 'ذخیره تغییرات' : 'ذخیره نشانی'}
+            {saving ? translateText("در حال ذخیره…") : isEdit ? translateText("ذخیره تغییرات") : translateText("ذخیره نشانی")}
           </button>
         </div>
       </form>

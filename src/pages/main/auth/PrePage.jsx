@@ -1,3 +1,4 @@
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -15,44 +16,41 @@ function PrePage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateIRPhoneSyntax(phone)) {
-      toast.error('شماره موبایل معتبر نیست');
+      toast.error(translateText("شماره موبایل معتبر نیست"));
       return;
     }
     axios
       .post(`${API}/auth/pre`, { phone })
       .then((res) => {
         if (res.data.success) {
-          toast.success('کد تایید ارسال شد');
+          toast.success(translateText("کد تایید ارسال شد"));
           const dev = res.data.body ? `&code=${res.data.body}` : '';
           navigate(`/auth/verify?phone=${phone}${dev}`);
         } else {
-          toast.error(res.data.message || 'خطا در ارسال کد');
+          toast.error(res.data.message || translateText("خطا در ارسال کد"));
         }
       })
-      .catch((err) => toast.error(err.response?.data?.message || 'ارتباط با سرور برقرار نشد'));
+      .catch((err) => toast.error(err.response?.data?.message || translateText("ارتباط با سرور برقرار نشد")));
   };
 
   return (
     <AuthShellComponent
-      title="ورود به حساب کاربری"
-      subtitle="ورود با شماره موبایل و کد تایید یک‌بارمصرف"
+      title={translateText("ورود به حساب کاربری")}
+      subtitle={translateText("ورود با شماره موبایل و کد تایید یک‌بارمصرف")}
       footer={
-        <>
-          حساب ندارید؟{' '}
-          <Link to="/auth/register" className="font-bold text-yellow">ثبت‌نام کنید</Link>
+        <>{translateText("حساب ندارید؟")}{' '}
+          <Link to="/auth/register" className="font-bold text-yellow">{translateText("ثبت‌نام کنید")}</Link>
         </>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <span className="text-sm font-bold flex items-center gap-1 mb-2">
-            <Smartphone size={15} /> شماره موبایل
-          </span>
+            <Smartphone size={15} />{translateText(" شماره موبایل ")}</span>
           <input className="input" dir="ltr" type="tel" placeholder="0912xxxxxxx" value={phone}
             onChange={(e) => setPhone(e.target.value)} required />
         </div>
-        <button type="submit" className="btn-yellow w-full flex items-center justify-center gap-2">
-          ارسال کد تایید <ArrowLeft size={16} />
+        <button type="submit" className="btn-yellow w-full flex items-center justify-center gap-2">{translateText("ارسال کد تایید ")}<ArrowLeft size={16} />
         </button>
       </form>
     </AuthShellComponent>

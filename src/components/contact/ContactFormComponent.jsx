@@ -1,17 +1,18 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { CheckCircle2, Loader2, Send } from 'lucide-react';
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
 
-const EMPTY = { name: '', email: '', phone: '', subject: 'پشتیبانی خرید', message: '' };
+const EMPTY = { name: '', email: '', phone: '', subject: translateText("پشتیبانی خرید"), message: '' };
 
 const SUBJECTS = [
-  'پشتیبانی خرید',
-  'پشتیبانی فروشندگان',
-  'همکاری و تبلیغات',
-  'پیگیری سفارش',
-  'پیشنهاد و انتقاد',
-  'سایر موارد',
+  translateText("پشتیبانی خرید"),
+  translateText("پشتیبانی فروشندگان"),
+  translateText("همکاری و تبلیغات"),
+  translateText("پیگیری سفارش"),
+  translateText("پیشنهاد و انتقاد"),
+  translateText("سایر موارد"),
 ];
 
 function ContactFormComponent() {
@@ -29,13 +30,13 @@ function ContactFormComponent() {
   // اعتبارسنجی سمت کاربر پیش از ارسال
   const validate = () => {
     const next = {};
-    if (form.name.trim().length < 3) next.name = 'نام و نام خانوادگی را کامل وارد کنید.';
-    if (!form.email.trim()) next.email = 'ایمیل الزامی است.';
-    else if (!validateEmailSyntax(form.email.trim())) next.email = 'قالب ایمیل درست نیست.';
+    if (form.name.trim().length < 3) next.name = translateText("نام و نام خانوادگی را کامل وارد کنید.");
+    if (!form.email.trim()) next.email = translateText("ایمیل الزامی است.");
+    else if (!validateEmailSyntax(form.email.trim())) next.email = translateText("قالب ایمیل درست نیست.");
     if (form.phone && !/^0?9\d{9}$/.test(form.phone.replace(/[^\d]/g, ''))) {
-      next.phone = 'شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود.';
+      next.phone = translateText("شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود.");
     }
-    if (form.message.trim().length < 10) next.message = 'متن پیام باید حداقل ۱۰ کاراکتر باشد.';
+    if (form.message.trim().length < 10) next.message = translateText("متن پیام باید حداقل ۱۰ کاراکتر باشد.");
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -43,7 +44,7 @@ function ContactFormComponent() {
   const submit = async (event) => {
     event.preventDefault();
     if (!validate()) {
-      toast.error('لطفاً خطاهای فرم را برطرف کنید.');
+      toast.error(translateText("لطفاً خطاهای فرم را برطرف کنید."));
       return;
     }
     setSending(true);
@@ -52,9 +53,9 @@ function ContactFormComponent() {
       await new Promise((resolve) => setTimeout(resolve, 900));
       setSent(true);
       setForm(EMPTY);
-      toast.success('پیام شما ثبت شد؛ کارشناسان تا ۲۴ ساعت پاسخ می‌دهند.');
+      toast.success(translateText("پیام شما ثبت شد؛ کارشناسان تا ۲۴ ساعت پاسخ می‌دهند."));
     } catch {
-      toast.error('ارسال پیام ناموفق بود، دوباره تلاش کنید.');
+      toast.error(translateText("ارسال پیام ناموفق بود، دوباره تلاش کنید."));
     } finally {
       setSending(false);
     }
@@ -70,36 +71,30 @@ function ContactFormComponent() {
         >
           <CheckCircle2 size={28} />
         </span>
-        <h3 className="font-black text-lg mt-4">پیام شما ثبت شد</h3>
-        <p className="text-sm muted mt-2 leading-6">
-          شماره پیگیری پیام شما در ایمیل‌تان ارسال می‌شود. میانگین زمان پاسخ‌دهی ما کمتر از ۲۴ ساعت
-          کاری است.
-        </p>
+        <h3 className="font-black text-lg mt-4">{translateText("پیام شما ثبت شد")}</h3>
+        <p className="text-sm muted mt-2 leading-6">{translateText("شماره پیگیری پیام شما در ایمیل‌تان ارسال می‌شود. میانگین زمان پاسخ‌دهی ما کمتر از ۲۴ ساعت کاری است. ")}</p>
         <button
           type="button"
           onClick={() => setSent(false)}
           className="btn-yellow mt-5 inline-flex items-center gap-2"
         >
-          <Send size={16} />
-          ارسال پیام جدید
-        </button>
+          <Send size={16} />{translateText("ارسال پیام جدید ")}</button>
       </div>
     );
   }
 
   return (
     <form onSubmit={submit} className="card rounded-3xl p-5 sm:p-7" noValidate>
-      <h2 className="font-black text-xl">فرم تماس</h2>
-      <p className="text-xs muted mt-1 mb-5">فرم زیر را کامل کنید؛ همه فیلدهای ستاره‌دار الزامی‌اند.</p>
+      <h2 className="font-black text-xl">{translateText("فرم تماس")}</h2>
+      <p className="text-xs muted mt-1 mb-5">{translateText("فرم زیر را کامل کنید؛ همه فیلدهای ستاره‌دار الزامی‌اند.")}</p>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="text-xs font-bold mb-1.5 block">
-            نام و نام خانوادگی <span className="text-yellow">*</span>
+          <span className="text-xs font-bold mb-1.5 block">{translateText("نام و نام خانوادگی ")}<span className="text-yellow">*</span>
           </span>
           <input
             className="input"
-            placeholder="مثل: سارا محمدی"
+            placeholder={translateText("مثل: سارا محمدی")}
             value={form.name}
             onChange={change('name')}
             style={errors.name ? { borderColor: '#ef4444' } : undefined}
@@ -108,8 +103,7 @@ function ContactFormComponent() {
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold mb-1.5 block">
-            ایمیل <span className="text-yellow">*</span>
+          <span className="text-xs font-bold mb-1.5 block">{translateText("ایمیل ")}<span className="text-yellow">*</span>
           </span>
           <input
             className="input"
@@ -123,7 +117,7 @@ function ContactFormComponent() {
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold mb-1.5 block">شماره موبایل (اختیاری)</span>
+          <span className="text-xs font-bold mb-1.5 block">{translateText("شماره موبایل (اختیاری)")}</span>
           <input
             className="input"
             dir="ltr"
@@ -137,7 +131,7 @@ function ContactFormComponent() {
         </label>
 
         <label className="block">
-          <span className="text-xs font-bold mb-1.5 block">موضوع</span>
+          <span className="text-xs font-bold mb-1.5 block">{translateText("موضوع")}</span>
           <select className="input" value={form.subject} onChange={change('subject')}>
             {SUBJECTS.map((subject) => (
               <option key={subject} value={subject}>
@@ -148,13 +142,12 @@ function ContactFormComponent() {
         </label>
 
         <label className="block sm:col-span-2">
-          <span className="text-xs font-bold mb-1.5 block">
-            متن پیام <span className="text-yellow">*</span>
+          <span className="text-xs font-bold mb-1.5 block">{translateText("متن پیام ")}<span className="text-yellow">*</span>
           </span>
           <textarea
             className="input resize-y"
             rows={6}
-            placeholder="مشکل یا درخواست خود را با جزئیات بنویسید…"
+            placeholder={translateText("مشکل یا درخواست خود را با جزئیات بنویسید…")}
             value={form.message}
             onChange={change('message')}
             style={errors.message ? { borderColor: '#ef4444' } : undefined}
@@ -163,20 +156,18 @@ function ContactFormComponent() {
             {errors.message ? (
               <span className="text-[11px]" style={{ color: '#ef4444' }}>{errors.message}</span>
             ) : (
-              <span className="text-[11px] muted">هرچه دقیق‌تر بنویسید، سریع‌تر پاسخ می‌گیرید.</span>
+              <span className="text-[11px] muted">{translateText("هرچه دقیق‌تر بنویسید، سریع‌تر پاسخ می‌گیرید.")}</span>
             )}
-            <span className="text-[11px] muted">{form.message.length} کاراکتر</span>
+            <span className="text-[11px] muted">{form.message.length}{translateText(" کاراکتر")}</span>
           </div>
         </label>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
-        <span className="text-[11px] muted leading-5">
-          با ارسال این فرم، قوانین حریم خصوصی ژئو کالا را می‌پذیرید.
-        </span>
+        <span className="text-[11px] muted leading-5">{translateText("با ارسال این فرم، قوانین حریم خصوصی ژئو کالا را می‌پذیرید. ")}</span>
         <button type="submit" className="btn-yellow inline-flex items-center gap-2" disabled={sending}>
           {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-          {sending ? 'در حال ارسال…' : 'ارسال پیام'}
+          {sending ? translateText("در حال ارسال…") : translateText("ارسال پیام")}
         </button>
       </div>
     </form>

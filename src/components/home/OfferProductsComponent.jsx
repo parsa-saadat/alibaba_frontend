@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Flame, Timer } from 'lucide-react';
 import ProductScrollerComponent from '../product/ProductScrollerComponent';
@@ -33,14 +34,14 @@ function OfferProductsComponent({ products = [], loading = false, limit = 14 }) 
 
   return (
     <ProductScrollerComponent
-      partone="پیشنهادهای"
-      parttwo="شگفت‌انگیز"
+      partone={translateText("پیشنهادهای")}
+      parttwo={translateText("شگفت‌انگیز")}
       icon={Flame}
-      subtitle="تخفیف‌های فعال امشب — کارت‌ها را کنار بکشید"
+      subtitle={translateText("تخفیف‌های فعال امشب — کارت‌ها را کنار بکشید")}
       extra={
         <span className="flex items-center gap-2 rounded-full border border-theme px-3 py-1 text-xs sm:text-sm font-bold shrink-0">
           <Timer size={15} className="text-yellow" />
-          <span className="muted">پایان تا</span>
+          <span className="muted">{translateText("پایان تا")}</span>
           <span dir="ltr" className="tabular-nums">
             {toFa(countdown)}
           </span>
@@ -49,7 +50,7 @@ function OfferProductsComponent({ products = [], loading = false, limit = 14 }) 
       products={deals}
       loading={loading}
       moreTo="/products?discount=true"
-      emptyText="تخفیف فعالی موجود نیست"
+      emptyText={translateText("تخفیف فعالی موجود نیست")}
     />
   );
 }

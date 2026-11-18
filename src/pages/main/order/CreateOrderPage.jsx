@@ -1,3 +1,6 @@
+const formatPrice = amount => formatCatalogPrice(amount);
+import { formatMoney as formatOrderMoney } from '../../../i18n/runtime';
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -25,7 +28,7 @@ import { useShop } from '../../../contexts/ShopContext';
 import { authHeaders } from '../../../utils/helpers/storage';
 import StorageImageComponent from '../../../components/common/StorageImageComponent';
 import AddressFormModalComponent from '../../../components/address/AddressFormModalComponent';
-import { formatPrice, finalPrice, toFa, productImages } from '../../../utils/helpers/format';
+import { formatPrice as formatCatalogPrice, finalPrice, toFa, productImages } from '../../../utils/helpers/format';
 import { getItemQuantity } from '../../../utils/helpers/cart';
 
 const API =
@@ -43,9 +46,9 @@ const EMPTY = {
 };
 
 const STEPS = [
-  { key: 'address', label: 'آدرس و ثبت سفارش' },
-  { key: 'pay', label: 'پرداخت' },
-  { key: 'done', label: 'پایان' },
+  { key: 'address', label: translateText("آدرس و ثبت سفارش") },
+  { key: 'pay', label: translateText("پرداخت") },
+  { key: 'done', label: translateText("پایان") },
 ];
 
 /* رنگ‌ها فقط از متغیرهای تم می‌آیند تا در تم روشن و تاریک یکسان باشد */
@@ -74,7 +77,7 @@ function Stepper({ current = 0 }) {
               {done ? <Check size={12} /> : toFa(index + 1)}
             </span>
             <span className={active ? 'font-black' : 'muted'}>{step.label}</span>
-            {index < STEPS.length - 1 && <ChevronLeft size={13} className="muted opacity-60" />}
+            {index < STEPS.length - 1 && <ChevronLeft size={13} className="logical-icon muted opacity-60" />}
           </li>
         );
       })}
@@ -178,8 +181,8 @@ function CreateOrderPage() {
 
   /* مرحله‌ی ۱: فقط ثبت سفارش (بدون پرداخت) */
   const submitOrder = async () => {
-    if (!selected) return toast.error('یک آدرس انتخاب کنید');
-    if (!items.length) return toast.error('سبد خرید خالی است');
+    if (!selected) return toast.error(translateText("یک آدرس انتخاب کنید"));
+    if (!items.length) return toast.error(translateText("سبد خرید خالی است"));
     setPaying(true);
     try {
       const res = await axios.post(
@@ -189,7 +192,7 @@ function CreateOrderPage() {
       );
       const body = res.data.body || {};
       const parent = body.parent || body;
-      if (!parent?._id) throw new Error('شناسه‌ی سفارش دریافت نشد');
+      if (!parent?._id) throw new Error(translateText("شناسه‌ی سفارش دریافت نشد"));
       setPlaced({
         id: parent._id,
         number: parent.order_number,
@@ -198,9 +201,9 @@ function CreateOrderPage() {
       });
       refreshCart();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      toast.success('سفارش شما ثبت شد؛ حالا پرداخت را انجام دهید');
+      toast.success(translateText("سفارش شما ثبت شد؛ حالا پرداخت را انجام دهید"));
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || 'خطا در ثبت سفارش');
+      toast.error(err.response?.data?.message || err.message || translateText("خطا در ثبت سفارش"));
     } finally {
       setPaying(false);
     }
@@ -222,12 +225,12 @@ function CreateOrderPage() {
         window.location.href = url;
         return;
       }
-      toast.info('درخواست پرداخت ثبت شد؛ وضعیت را در «سفارش‌های من» ببینید');
+      toast.info(translateText("درخواست پرداخت ثبت شد؛ وضعیت را در «سفارش‌های من» ببینید"));
       navigate(`/orders/${placed.id}`);
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          'اتصال به درگاه ناموفق بود؛ از «سفارش‌های من» می‌توانید دوباره پرداخت کنید',
+          translateText("اتصال به درگاه ناموفق بود؛ از «سفارش‌های من» می‌توانید دوباره پرداخت کنید"),
       );
     } finally {
       setPayingNow(false);
@@ -243,13 +246,9 @@ function CreateOrderPage() {
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl" style={ACCENT_SOFT}>
             <Lock size={24} />
           </span>
-          <h1 className="mt-4 text-lg font-black">برای تسویه حساب وارد شوید</h1>
-          <p className="mt-2 text-xs muted">
-            برای ثبت سفارش و پرداخت، ابتدا با شماره موبایل خود وارد حساب کاربری شوید.
-          </p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex">
-            ورود به حساب
-          </Link>
+          <h1 className="mt-4 text-lg font-black">{translateText("برای تسویه حساب وارد شوید")}</h1>
+          <p className="mt-2 text-xs muted">{translateText("برای ثبت سفارش و پرداخت، ابتدا با شماره موبایل خود وارد حساب کاربری شوید. ")}</p>
+          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex">{translateText("ورود به حساب ")}</Link>
         </div>
       </main>
     );
@@ -269,24 +268,21 @@ function CreateOrderPage() {
           >
             <CheckCircle2 size={26} />
           </span>
-          <h1 className="mt-4 text-lg font-black sm:text-xl">سفارش شما ثبت شد</h1>
-          <p className="mx-auto mt-2 max-w-md text-xs leading-6 muted">
-            سفارش با موفقیت ثبت شد. برای نهایی شدن و ارسال به فروشنده، پرداخت را انجام دهید. اگر الان
-            نمی‌خواهید پرداخت کنید، بعداً هم از بخش «سفارش‌های من» می‌توانید پرداخت کنید.
-          </p>
+          <h1 className="mt-4 text-lg font-black sm:text-xl">{translateText("سفارش شما ثبت شد")}</h1>
+          <p className="mx-auto mt-2 max-w-md text-xs leading-6 muted">{translateText("سفارش با موفقیت ثبت شد. برای نهایی شدن و ارسال به فروشنده، پرداخت را انجام دهید. اگر الان نمی‌خواهید پرداخت کنید، بعداً هم از بخش «سفارش‌های من» می‌توانید پرداخت کنید. ")}</p>
 
           <dl className="mx-auto mt-5 max-w-sm space-y-2 rounded-2xl p-4 text-xs" style={{ background: 'var(--card2)' }}>
             <div className="flex items-center justify-between gap-2">
-              <dt className="muted">شماره سفارش</dt>
+              <dt className="muted">{translateText("شماره سفارش")}</dt>
               <dd className="font-black" dir="ltr">{placed.number || String(placed.id).slice(-8)}</dd>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <dt className="muted">تعداد اقلام</dt>
-              <dd className="font-bold">{toFa(placed.count)} عدد</dd>
+              <dt className="muted">{translateText("تعداد اقلام")}</dt>
+              <dd className="font-bold">{toFa(placed.count)}{translateText(" عدد")}</dd>
             </div>
             <div className="flex items-center justify-between gap-2 border-t pt-2" style={{ borderColor: 'var(--border)' }}>
-              <dt className="font-bold">مبلغ قابل پرداخت</dt>
-              <dd className="text-base font-black text-yellow">{formatPrice(placed.amount)}</dd>
+              <dt className="font-bold">{translateText("مبلغ قابل پرداخت")}</dt>
+              <dd className="text-base font-black text-yellow">{formatOrderMoney(placed.amount, 'IRR')}</dd>
             </div>
           </dl>
 
@@ -298,17 +294,13 @@ function CreateOrderPage() {
               className="btn-yellow inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {payingNow ? <Loader2 size={17} className="animate-spin" /> : <CreditCard size={17} />}
-              {payingNow ? 'در حال انتقال به درگاه…' : 'پرداخت آنلاین'}
+              {payingNow ? translateText("در حال انتقال به درگاه…") : translateText("پرداخت آنلاین")}
             </button>
-            <Link to={`/orders/${placed.id}`} className="btn-ghost inline-flex items-center justify-center gap-2">
-              پرداخت بعداً و مشاهده سفارش
-            </Link>
+            <Link to={`/orders/${placed.id}`} className="btn-ghost inline-flex items-center justify-center gap-2">{translateText("پرداخت بعداً و مشاهده سفارش ")}</Link>
           </div>
 
           <p className="mt-4 flex items-start justify-center gap-1.5 text-[10px] leading-5 muted">
-            <Lock size={12} className="mt-0.5 shrink-0" />
-            پرداخت از طریق درگاه بانکی امن انجام می‌شود و اطلاعات کارت شما در سایت ذخیره نمی‌شود.
-          </p>
+            <Lock size={12} className="mt-0.5 shrink-0" />{translateText("پرداخت از طریق درگاه بانکی امن انجام می‌شود و اطلاعات کارت شما در سایت ذخیره نمی‌شود. ")}</p>
         </section>
       </main>
     );
@@ -336,17 +328,11 @@ function CreateOrderPage() {
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl" style={ACCENT_SOFT}>
             <Package size={24} />
           </span>
-          <h1 className="mt-4 text-lg font-black">سبد خرید شما خالی است</h1>
-          <p className="mt-2 text-xs muted">
-            برای تسویه حساب، ابتدا کالاهای مورد نظرتان را به سبد خرید اضافه کنید.
-          </p>
+          <h1 className="mt-4 text-lg font-black">{translateText("سبد خرید شما خالی است")}</h1>
+          <p className="mt-2 text-xs muted">{translateText("برای تسویه حساب، ابتدا کالاهای مورد نظرتان را به سبد خرید اضافه کنید. ")}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <Link to="/products" className="btn-yellow">
-              شروع خرید
-            </Link>
-            <Link to="/favorites" className="btn-ghost">
-              علاقه‌مندی‌ها
-            </Link>
+            <Link to="/products" className="btn-yellow">{translateText("شروع خرید ")}</Link>
+            <Link to="/favorites" className="btn-ghost">{translateText("علاقه‌مندی‌ها ")}</Link>
           </div>
         </div>
       </main>
@@ -365,22 +351,15 @@ function CreateOrderPage() {
         <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <nav className="flex flex-wrap items-center gap-1.5 text-[11px] muted">
-              <Link to="/" className="transition hover:opacity-70">
-                خانه
-              </Link>
-              <ChevronLeft size={12} />
-              <Link to="/cart" className="transition hover:opacity-70">
-                سبد خرید
-              </Link>
-              <ChevronLeft size={12} />
-              <span>تسویه حساب</span>
+              <Link to="/" className="transition hover:opacity-70">{translateText("خانه ")}</Link>
+              <ChevronLeft className="logical-icon" size={12} />
+              <Link to="/cart" className="transition hover:opacity-70">{translateText("سبد خرید ")}</Link>
+              <ChevronLeft className="logical-icon" size={12} />
+              <span>{translateText("تسویه حساب")}</span>
             </nav>
-            <h1 className="mt-2 text-lg font-black sm:text-xl md:text-2xl">
-              تسویه حساب و ثبت سفارش
-            </h1>
+            <h1 className="mt-2 text-lg font-black sm:text-xl md:text-2xl">{translateText("تسویه حساب و ثبت سفارش ")}</h1>
             <p className="mt-1 text-xs muted">
-              {toFa(itemCount)} قلم کالا در {toFa(items.length)} ردیف — اول سفارش ثبت می‌شود، بعد پرداخت را انجام می‌دهید.
-            </p>
+              {toFa(itemCount)}{translateText(" قلم کالا در ")}{toFa(items.length)}{translateText(" ردیف — اول سفارش ثبت می‌شود، بعد پرداخت را انجام می‌دهید. ")}</p>
           </div>
 
           <div className="shrink-0">
@@ -394,11 +373,11 @@ function CreateOrderPage() {
         <div className="min-w-0 space-y-4">
           <SectionCard
             icon={MapPin}
-            title="آدرس تحویل"
+            title={translateText("آدرس تحویل")}
             hint={
               addresses.length
-                ? 'یکی از آدرس‌های ثبت‌شده را انتخاب کنید'
-                : 'برای ادامه، یک آدرس ثبت کنید'
+                ? translateText("یکی از آدرس‌های ثبت‌شده را انتخاب کنید")
+                : translateText("برای ادامه، یک آدرس ثبت کنید")
             }
             action={
               <button
@@ -406,9 +385,7 @@ function CreateOrderPage() {
                 onClick={() => setShowForm(true)}
                 className="btn-ghost inline-flex items-center gap-1.5 !px-3 !py-1.5 text-[11px] sm:text-xs"
               >
-                <Plus size={14} />
-                آدرس جدید
-              </button>
+                <Plus size={14} />{translateText("آدرس جدید ")}</button>
             }
           >
             {addresses.length === 0 ? (
@@ -417,9 +394,7 @@ function CreateOrderPage() {
                 style={{ background: 'var(--card2)', border: '1px dashed var(--border)' }}
               >
                 <MapPin size={22} className="mx-auto muted" />
-                <p className="mt-2 text-xs muted">
-                  هنوز آدرسی ثبت نکرده‌اید. با دکمه‌ی «آدرس جدید» اولین آدرس را اضافه کنید.
-                </p>
+                <p className="mt-2 text-xs muted">{translateText("هنوز آدرسی ثبت نکرده‌اید. با دکمه‌ی «آدرس جدید» اولین آدرس را اضافه کنید. ")}</p>
               </div>
             ) : (
               <div className="grid gap-2 sm:grid-cols-2">
@@ -459,26 +434,24 @@ function CreateOrderPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <b className="truncate text-xs">{a.title || ad.full_name || 'آدرس'}</b>
+                          <b className="truncate text-xs">{a.title || ad.full_name || translateText("آدرس")}</b>
                           {isDefault && (
                             <span
                               className="rounded-full px-1.5 py-0.5 text-[9px] font-black"
                               style={ACCENT_SOFT}
-                            >
-                              پیش‌فرض
-                            </span>
+                            >{translateText("پیش‌فرض ")}</span>
                           )}
                         </div>
                         <p className="mt-1 flex items-center gap-1 text-[11px] muted">
                           <Home size={11} className="shrink-0" />
                           <span className="truncate">
-                            {[ad.province, ad.city, ad.neighborhood].filter(Boolean).join('، ')}
+                            {[ad.province, ad.city, ad.neighborhood].filter(Boolean).join(translateText("، "))}
                           </span>
                         </p>
                         <p className="mt-0.5 line-clamp-2 text-[11px] leading-5">
                           {ad.full_address}
-                          {ad.building_number ? ` — پلاک ${toFa(ad.building_number)}` : ''}
-                          {ad.unit ? `، واحد ${toFa(ad.unit)}` : ''}
+                          {ad.building_number ? translateText(" — پلاک {{v0}}", {v0: (toFa(ad.building_number))}) : ''}
+                          {ad.unit ? translateText("، واحد {{v0}}", {v0: (toFa(ad.unit))}) : ''}
                         </p>
                         {ad.postal_code && (
                           <p className="mt-1 text-[10px] muted" dir="ltr">
@@ -495,8 +468,8 @@ function CreateOrderPage() {
 
           <SectionCard
             icon={Package}
-            title={`اقلام سفارش (${toFa(items.length)})`}
-            hint="قیمت‌ها پس از اعمال تخفیف نمایش داده می‌شوند"
+            title={translateText("اقلام سفارش ({{v0}})", {v0: (toFa(items.length))})}
+            hint={translateText("قیمت‌ها پس از اعمال تخفیف نمایش داده می‌شوند")}
           >
             <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {items.map(({ _id, product, quantity }) => {
@@ -522,13 +495,12 @@ function CreateOrderPage() {
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] muted">
                         <span className="inline-flex items-center gap-1">
                           <Store size={11} />
-                          {product.store_name || 'فروشگاه'}
+                          {product.store_name || translateText("فروشگاه")}
                         </span>
                         <span
                           className="rounded-full px-1.5 py-0.5"
                           style={{ background: 'var(--card2)' }}
-                        >
-                          تعداد: {toFa(quantity)}
+                        >{translateText("تعداد: ")}{toFa(quantity)}
                         </span>
                       </div>
                     </div>
@@ -537,8 +509,7 @@ function CreateOrderPage() {
                       <b className="block text-xs font-black text-yellow sm:text-sm">
                         {formatPrice(unit * quantity)}
                       </b>
-                      <span className="mt-0.5 block text-[10px] muted">
-                        هر عدد {formatPrice(unit)}
+                      <span className="mt-0.5 block text-[10px] muted">{translateText("هر عدد ")}{formatPrice(unit)}
                       </span>
                     </div>
                   </li>
@@ -547,16 +518,16 @@ function CreateOrderPage() {
             </ul>
           </SectionCard>
 
-          <SectionCard icon={StickyNote} title="یادداشت سفارش" hint="اختیاری — برای فروشنده">
+          <SectionCard icon={StickyNote} title={translateText("یادداشت سفارش")} hint={translateText("اختیاری — برای فروشنده")}>
             <textarea
               className="input text-xs leading-6"
               rows={3}
               maxLength={500}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="مثلاً ساعت مناسب تحویل یا توضیح بسته‌بندی…"
+              placeholder={translateText("مثلاً ساعت مناسب تحویل یا توضیح بسته‌بندی…")}
             />
-            <div className="mt-1 text-end text-[10px] muted">{toFa(note.length)} / ۵۰۰</div>
+            <div className="mt-1 text-end text-[10px] muted">{toFa(note.length)}{translateText(" / ۵۰۰")}</div>
           </SectionCard>
         </div>
 
@@ -567,23 +538,22 @@ function CreateOrderPage() {
               <span className="grid h-9 w-9 place-items-center rounded-2xl" style={ACCENT_SOFT}>
                 <ReceiptText size={17} />
               </span>
-              <h2 className="text-sm font-black sm:text-base">خلاصه‌ی سفارش</h2>
+              <h2 className="text-sm font-black sm:text-base">{translateText("خلاصه‌ی سفارش")}</h2>
             </div>
 
             <dl className="space-y-2 text-xs">
               <div className="flex items-center justify-between gap-2">
-                <dt className="muted">تعداد اقلام</dt>
-                <dd className="font-bold">{toFa(itemCount)} عدد</dd>
+                <dt className="muted">{translateText("تعداد اقلام")}</dt>
+                <dd className="font-bold">{toFa(itemCount)}{translateText(" عدد")}</dd>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <dt className="muted">جمع کالاها</dt>
+                <dt className="muted">{translateText("جمع کالاها")}</dt>
                 <dd className="font-bold">{formatPrice(subtotal)}</dd>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <dt className="muted">تخفیف</dt>
+                <dt className="muted">{translateText("تخفیف")}</dt>
                 <dd className="font-bold" style={{ color: '#17994f' }}>
-                  {toFa(0)} تومان
-                </dd>
+                  {toFa(0)}{translateText(" تومان ")}</dd>
               </div>
             </dl>
 
@@ -591,7 +561,7 @@ function CreateOrderPage() {
               className="mt-3 flex items-center justify-between gap-2 border-t pt-3"
               style={{ borderColor: 'var(--border)' }}
             >
-              <span className="text-xs font-bold">قابل پرداخت</span>
+              <span className="text-xs font-bold">{translateText("قابل پرداخت")}</span>
               <b className="text-base font-black text-yellow sm:text-lg">{formatPrice(subtotal)}</b>
             </div>
 
@@ -602,20 +572,15 @@ function CreateOrderPage() {
               className="btn-yellow mt-4 flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {paying ? <Loader2 size={17} className="animate-spin" /> : <ReceiptText size={17} />}
-              {paying ? 'در حال ثبت سفارش…' : 'ثبت سفارش'}
+              {paying ? translateText("در حال ثبت سفارش…") : translateText("ثبت سفارش")}
             </button>
 
             {!selected && (
-              <p className="mt-2 text-center text-[11px]" style={{ color: '#c2740a' }}>
-                برای ادامه، یک آدرس تحویل انتخاب کنید.
-              </p>
+              <p className="mt-2 text-center text-[11px]" style={{ color: '#c2740a' }}>{translateText("برای ادامه، یک آدرس تحویل انتخاب کنید. ")}</p>
             )}
 
             <p className="mt-3 flex items-start gap-1.5 text-[10px] leading-5 muted">
-              <Lock size={12} className="mt-0.5 shrink-0" />
-              با زدن «ثبت سفارش»، سفارش ثبت می‌شود و در مرحله‌ی بعد پرداخت را انجام می‌دهید؛ پرداخت
-              از طریق درگاه بانکی امن است.
-            </p>
+              <Lock size={12} className="mt-0.5 shrink-0" />{translateText("با زدن «ثبت سفارش»، سفارش ثبت می‌شود و در مرحله‌ی بعد پرداخت را انجام می‌دهید؛ پرداخت از طریق درگاه بانکی امن است. ")}</p>
           </section>
 
           <section className="card rounded-3xl p-4">
@@ -623,15 +588,15 @@ function CreateOrderPage() {
               <li className="flex items-start gap-2">
                 <ShieldCheck size={14} className="mt-0.5 shrink-0" style={{ color: '#17994f' }} />
                 <span>
-                  <b className="block">تضمین اصالت کالا</b>
-                  <span className="muted">کالاها از فروشندگان تأییدشده‌ی ژئو کالا ارسال می‌شوند.</span>
+                  <b className="block">{translateText("تضمین اصالت کالا")}</b>
+                  <span className="muted">{translateText("کالاها از فروشندگان تأییدشده‌ی ژئو کالا ارسال می‌شوند.")}</span>
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 size={14} className="mt-0.5 shrink-0" style={{ color: '#17994f' }} />
                 <span>
-                  <b className="block">امکان مرجوعی ۷ روزه</b>
-                  <span className="muted">در صورت باز نشدن پلمب و سالم بودن بسته‌بندی.</span>
+                  <b className="block">{translateText("امکان مرجوعی ۷ روزه")}</b>
+                  <span className="muted">{translateText("در صورت باز نشدن پلمب و سالم بودن بسته‌بندی.")}</span>
                 </span>
               </li>
             </ul>
@@ -641,9 +606,7 @@ function CreateOrderPage() {
               className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold"
               style={{ color: 'var(--accent-text)' }}
             >
-              <ArrowLeft size={13} />
-              بازگشت به سبد خرید
-            </Link>
+              <ArrowLeft size={13} />{translateText("بازگشت به سبد خرید ")}</Link>
           </section>
         </aside>
       </div>

@@ -1,3 +1,6 @@
+const formatPrice = amount => formatOrderMoney(amount, 'IRR');
+import { formatMoney as formatOrderMoney } from '../../../i18n/runtime';
+import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
@@ -5,7 +8,7 @@ import { Package, ArrowRight, MapPin } from 'lucide-react';
 import { authHeaders } from '../../../utils/helpers/storage';
 import { Loading } from '../../../components/common/ScroolToTopComponent';
 import {
-  formatPrice,
+  formatPrice as formatCatalogPrice,
   toFa,
   formatDateTime,
   statusFa,
@@ -33,7 +36,7 @@ function SingleOrderPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20">
-        <Loading label="در حال دریافت جزئیات سفارش…" />
+        <Loading label={translateText("در حال دریافت جزئیات سفارش…")} />
       </div>
     );
   }
@@ -41,10 +44,8 @@ function SingleOrderPage() {
   if (!order) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <p className="muted">سفارش مورد نظر یافت نشد.</p>
-        <Link to="/orders" className="btn-yellow inline-block">
-          بازگشت به سفارش‌ها
-        </Link>
+        <p className="muted">{translateText("سفارش مورد نظر یافت نشد.")}</p>
+        <Link to="/orders" className="btn-yellow inline-block">{translateText("بازگشت به سفارش‌ها ")}</Link>
       </div>
     );
   }
@@ -59,18 +60,18 @@ function SingleOrderPage() {
           <ArrowRight size={17} />
         </Link>
         <h1 className="font-black text-xl flex items-center gap-2">
-          <Package size={20} className="text-yellow" /> جزئیات سفارش{' '}
+          <Package size={20} className="text-yellow" />{translateText(" جزئیات سفارش")}{' '}
           <span dir="ltr">#{order.order_number || String(order._id).slice(-8)}</span>
         </h1>
       </div>
 
       <div className="card rounded-3xl p-5 grid sm:grid-cols-2 gap-4 text-sm">
         <div>
-          <div className="text-xs muted">تاریخ ثبت</div>
+          <div className="text-xs muted">{translateText("تاریخ ثبت")}</div>
           <div className="font-bold mt-1">{formatDateTime(order.created_at)}</div>
         </div>
         <div>
-          <div className="text-xs muted">مبلغ کل سفارش</div>
+          <div className="text-xs muted">{translateText("مبلغ کل سفارش")}</div>
           <div className="font-black text-yellow text-lg mt-1">
             {formatPrice(order.final_amount ?? order.total_amount)}
           </div>
@@ -78,10 +79,9 @@ function SingleOrderPage() {
         {addr && (
           <div className="sm:col-span-2 pt-3 border-t border-theme">
             <div className="text-xs muted flex items-center gap-1">
-              <MapPin size={14} className="text-yellow" /> نشانی تحویل
-            </div>
+              <MapPin size={14} className="text-yellow" />{translateText(" نشانی تحویل ")}</div>
             <div className="font-bold mt-1">
-              {addr.full_name} — {addr.province}، {addr.city}، {addr.neighborhood}،{' '}
+              {addr.full_name} — {addr.province}{translateText("، ")}{addr.city}{translateText("، ")}{addr.neighborhood}{translateText("،")}{' '}
               {addr.full_address}
             </div>
           </div>
@@ -89,7 +89,7 @@ function SingleOrderPage() {
       </div>
 
       <div className="space-y-3">
-        <h2 className="font-black text-base">مرسوله‌های سفارش ({toFa(subs.length)})</h2>
+        <h2 className="font-black text-base">{translateText("مرسوله‌های سفارش (")}{toFa(subs.length)})</h2>
         {subs.map((sub) => (
           <div key={sub._id} className="card rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">

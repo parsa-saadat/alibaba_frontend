@@ -1,4 +1,6 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { direction } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
+import React, { useEffect, useLayoutEffect, useId, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronDown, Grid3x3, Search, FolderTree } from 'lucide-react';
@@ -26,6 +28,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
   const [samplesError, setSamplesError] = useState('');
   const [retry, setRetry] = useState(0);
   const boxRef = useRef(null);
+  const panelRef = useRef(null);
   const panelId = useId();
 
   useEffect(() => {
@@ -42,6 +45,25 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
       document.removeEventListener('keydown', onKey);
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const panel = panelRef.current;
+      if (!panel) return;
+      panel.style.transform = 'none';
+      const rect = panel.getBoundingClientRect();
+      const left = Math.max(16, Math.min(rect.left, window.innerWidth - rect.width - 16));
+      panel.style.transform = `translateX(${left - rect.left}px)`;
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open]);
 
   const tree = useMemo(() => buildCategoryTree(categories), [categories]);
   const normalizedQuery = query.trim().toLowerCase();
@@ -92,7 +114,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
           setSamples(getList(response));
         })
         .catch((err) => {
-          if (!axios.isCancel(err)) setSamplesError('دریافت نمونه محصولات ناموفق بود.');
+          if (!axios.isCancel(err)) setSamplesError(translateText('دریافت نمونه محصولات ناموفق بود.'));
         })
         .finally(() => {
           if (!controller.signal.aborted) setSamplesLoading(false);
@@ -122,7 +144,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
     const isActive = selectedId === node._id;
 
     return (
-      <div key={node._id} className={depth > 0 ? 'pr-3 mr-2 border-r border-theme' : ''}>
+      <div key={node._id} className={depth > 0 ? 'ps-3 ms-2 border-s border-theme' : ''}>
         <button
           type="button"
           onClick={() => handleParentClick(node)}
@@ -138,7 +160,10 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
               className={`shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             />
           ) : (
-            <ChevronLeft size={13} className="shrink-0 opacity-60" />
+            <ChevronLeft
+              size={13}
+              className={`shrink-0 opacity-60 ${direction === 'ltr' ? 'rotate-180' : ''}`}
+            />
           )}
         </button>
 
@@ -160,39 +185,46 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
         aria-controls={panelId}
         className={`chip flex items-center gap-2 font-bold ${open ? 'on' : ''}`}
       >
-        <Grid3x3 size={16} /> همه محصولات
-        <ChevronLeft size={14} className={`transition-transform ${open ? '-rotate-90' : ''}`} />
+        <Grid3x3 size={16} />
+        {translateText(' همه محصولات ')}
+        <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div id={panelId} className="mega-menu-panel card" aria-label="دسته‌بندی محصولات">
+        <div
+          id={panelId}
+          ref={panelRef}
+          data-testid="mega-panel"
+          className="mega-menu-panel card"
+          aria-label={translateText('دسته‌بندی محصولات')}
+        >
           {loading ? (
             <div className="mega-menu-message">
-              <Loading label="در حال دریافت دسته‌بندی‌ها…" />
+              <Loading label={translateText('در حال دریافت دسته‌بندی‌ها…')} />
             </div>
           ) : error ? (
             <div className="mega-menu-message">
               <p className="muted text-sm">{error}</p>
               <button type="button" className="btn-ghost mt-3 text-sm" onClick={onRetry}>
-                تلاش دوباره
+                {translateText('تلاش دوباره ')}
               </button>
             </div>
           ) : !categories.length ? (
             <div className="mega-menu-message">
               <FolderTree size={28} className="muted mb-3" />
-              <p className="muted text-sm">هنوز دسته‌بندی‌ای ثبت نشده است.</p>
+              <p className="muted text-sm">{translateText('هنوز دسته‌بندی‌ای ثبت نشده است.')}</p>
             </div>
           ) : (
             <div className="mega-menu-grid">
               <aside className="mega-menu-rail">
                 <div className="p-3 relative">
-                  <Search size={14} className="absolute right-6 top-1/2 -translate-y-1/2 muted" />
+                  <Search size={14} className="absolute end-6 top-1/2 -translate-y-1/2 muted" />
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="جستجوی دسته…"
-                    aria-label="جستجوی دسته‌بندی"
-                    className="input !py-2 !pr-9 text-sm"
+                    placeholder={translateText('جستجوی دسته…')}
+                    aria-label={translateText('جستجوی دسته‌بندی')}
+                    className="input !py-2 !pe-9 text-sm"
                   />
                 </div>
                 <div className="mega-menu-category-list space-y-0.5">
@@ -201,32 +233,37 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                     onClick={() => setOpen(false)}
                     className="mega-category font-bold"
                   >
-                    همه کالاها <ChevronLeft size={13} />
+                    {translateText('همه کالاها ')}
+                    <ChevronLeft size={13} className={direction === 'ltr' ? 'rotate-180' : ''} />
                   </Link>
                   {visibleTree.map((root) => renderBranch(root, 0))}
                   {!visibleTree.length && (
-                    <p className="text-xs muted text-center py-6">دسته‌ای پیدا نشد.</p>
+                    <p className="text-xs muted text-center py-6">{translateText('دسته‌ای پیدا نشد.')}</p>
                   )}
                 </div>
               </aside>
 
               <div className="mega-menu-content">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <h3 className="font-black text-lg">{active?.name || 'دسته‌بندی‌ها'}</h3>
+                  <h3 className="font-black text-lg">{active?.name || translateText('دسته‌بندی‌ها')}</h3>
                   {active && (
                     <Link
                       to={`/products?category_id=${selectedId}`}
                       onClick={() => setOpen(false)}
                       className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1"
                     >
-                      مشاهده دسته <ChevronLeft size={13} />
+                      {translateText('مشاهده دسته ')}
+                      <ChevronLeft size={13} className={direction === 'ltr' ? 'rotate-180' : ''} />
                     </Link>
                   )}
                 </div>
 
                 {activeChildren.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-xs muted font-bold mb-2">زیردسته‌های {active?.name}</p>
+                    <p className="text-xs muted font-bold mb-2">
+                      {translateText('زیردسته‌های ')}
+                      {active?.name}
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {activeChildren.map((child) => (
                         <Link
@@ -242,7 +279,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                   </div>
                 )}
 
-                <p className="text-xs muted font-bold mt-5 mb-3">نمونه محصولات</p>
+                <p className="text-xs muted font-bold mt-5 mb-3">{translateText('نمونه محصولات')}</p>
                 <div className="mega-samples" aria-busy={samplesLoading}>
                   {samplesLoading ? (
                     Array.from({ length: 4 }, (_, index) => (
@@ -256,12 +293,12 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                         onClick={() => setRetry((value) => value + 1)}
                         className="btn-ghost mt-2 text-xs"
                       >
-                        تلاش دوباره
+                        {translateText('تلاش دوباره ')}
                       </button>
                     </div>
                   ) : samples.length === 0 ? (
                     <p className="col-span-full text-xs muted py-6">
-                      محصولی در این دسته‌بندی ثبت نشده است.
+                      {translateText('محصولی در این دسته‌بندی ثبت نشده است. ')}
                     </p>
                   ) : (
                     samples.map((product) => (
@@ -279,8 +316,9 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                             className="w-full h-full object-cover"
                           />
                           {hasDiscount(product) && (
-                            <span className="absolute top-1.5 right-1.5 text-[10px] font-black px-1.5 py-0.5 rounded-full brand-logo">
-                              {toFa(product.discount.percentage)}٪
+                            <span className="absolute top-1.5 end-1.5 text-[10px] font-black px-1.5 py-0.5 rounded-full brand-logo">
+                              {toFa(product.discount.percentage)}
+                              {translateText('٪ ')}
                             </span>
                           )}
                         </div>

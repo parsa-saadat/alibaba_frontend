@@ -1,3 +1,5 @@
+import { direction as i18nDirection } from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -82,7 +84,7 @@ export function ActiveBadge({ active, className = '' }) {
 
   return (
     <span
-      title={active ? 'فروشنده در حال فعالیت است' : 'فروشنده غیرفعال است'}
+      title={active ? translateText("فروشنده در حال فعالیت است") : translateText("فروشنده غیرفعال است")}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${className}`}
       style={{
         background: active ? `rgba(${GREEN_RGB},0.14)` : 'rgba(255,159,67,0.16)',
@@ -93,7 +95,7 @@ export function ActiveBadge({ active, className = '' }) {
         className="h-1.5 w-1.5 shrink-0 rounded-full"
         style={{ background: active ? GREEN : '#ff9f43' }}
       />
-      {active ? 'فعال' : 'غیرفعال'}
+      {active ? translateText("فعال") : translateText("غیرفعال")}
     </span>
   );
 }
@@ -104,7 +106,7 @@ function RatingChip({ rating }) {
     <span
       className="inline-flex shrink-0 items-center gap-1 rounded-full border border-theme px-2.5 py-1 text-[11px] font-black"
       style={{ background: 'var(--card)' }}
-      title="امتیاز فروشگاه"
+      title={translateText("امتیاز فروشگاه")}
     >
       <Star size={12} style={{ color: 'var(--primary-color)' }} fill="currentColor" />
       {toFa(rating.toFixed(1))}
@@ -118,9 +120,7 @@ function LoadingChip() {
       className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold muted"
       style={{ background: 'var(--card2)' }}
     >
-      <LoaderCircle size={12} className="animate-spin" />
-      بررسی اعتماد…
-    </span>
+      <LoaderCircle size={12} className="animate-spin" />{translateText("بررسی اعتماد… ")}</span>
   );
 }
 
@@ -163,7 +163,7 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
 
   return (
     <section
-      aria-label="ارتباط با فروشنده"
+      aria-label={translateText("ارتباط با فروشنده")}
       className={`relative overflow-hidden rounded-2xl border ${className}`}
       style={{ borderColor: c.line, background: `var(--card)` }}
     >
@@ -188,7 +188,7 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="h-3.5 w-1 rounded-full" style={{ background: c.accent }} />
-            <span className="text-[11px] font-black muted">ارتباط با فروشنده</span>
+            <span className="text-[11px] font-black muted">{translateText("ارتباط با فروشنده")}</span>
           </div>
 
           <div className="mt-2 flex items-start gap-3">
@@ -203,7 +203,7 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
               {finalStore?.profile_image_id ? (
                 <StorageImageComponent
                   file={finalStore.profile_image_id}
-                  alt={storeTitle || 'فروشگاه'}
+                  alt={storeTitle || translateText("فروشگاه")}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -215,11 +215,11 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
               <div className="flex flex-wrap items-center gap-1.5">
                 <h2 className="max-w-full truncate text-base font-black">
                   {storeKey ? (
-                    <Link to={`/store/${storeKey}`} className="hover:underline" title="رفتن به صفحه‌ی فروشگاه">
-                      {storeTitle || 'فروشنده'}
+                    <Link to={`/store/${storeKey}`} className="hover:underline" title={translateText("رفتن به صفحه‌ی فروشگاه")}>
+                      {storeTitle || translateText("فروشنده")}
                     </Link>
                   ) : (
-                    storeTitle || 'فروشنده'
+                    storeTitle || translateText("فروشنده")
                   )}
                 </h2>
                 {profile.loading && trust === TRUST.UNKNOWN ? (
@@ -233,11 +233,9 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
 
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
                 <span className="inline-flex items-center gap-1 muted">
-                  <UserRound size={13} className="shrink-0" />
-                  فروشنده
-                </span>
+                  <UserRound size={13} className="shrink-0" />{translateText("فروشنده ")}</span>
                 <span className="font-bold" style={{ color: 'var(--text)' }}>
-                  {sellerName || 'نامشخص'}
+                  {sellerName || translateText("نامشخص")}
                 </span>
               </div>
 
@@ -246,18 +244,14 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
                   className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold"
                   style={{ color: GREEN }}
                 >
-                  <ShieldCheck size={12} />
-                  هویت تأیید شده توسط ژئو کالا
-                </span>
+                  <ShieldCheck size={12} />{translateText("هویت تأیید شده توسط ژئو کالا ")}</span>
               )}
             </div>
           </div>
         </div>
 
         {!hasData && !profile.loading ? (
-          <p className="text-xs muted lg:border-s lg:border-theme lg:ps-4">
-            اطلاعات فروشنده‌ی این کالا در دسترس نیست.
-          </p>
+          <p className="text-xs muted lg:border-s lg:border-theme lg:ps-4">{translateText("اطلاعات فروشنده‌ی این کالا در دسترس نیست. ")}</p>
         ) : (
           <>
             {/* ───── ۲) شماره تماس ───── */}
@@ -270,18 +264,18 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
                   <Phone size={15} />
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold muted">شماره تماس</div>
+                  <div className="text-[10px] font-bold muted">{translateText("شماره تماس")}</div>
                   {info.phone ? (
                     <a
                       href={`tel:${info.phone}`}
                       dir="ltr"
                       className="block truncate text-[15px] font-black tracking-wide hover:opacity-75"
-                      title="تماس تلفنی با فروشنده"
+                      title={translateText("تماس تلفنی با فروشنده")}
                     >
                       {toFa(info.phone)}
                     </a>
                   ) : (
-                    <div className="truncate text-xs font-bold muted">ثبت نشده</div>
+                    <div className="truncate text-xs font-bold muted">{translateText("ثبت نشده")}</div>
                   )}
                 </div>
               </div>
@@ -296,9 +290,7 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
                 className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-black transition hover:opacity-90"
                 style={{ background: c.accent, color: c.onAccent }}
               >
-                <Phone size={15} />
-                اطلاعات تماس
-              </button>
+                <Phone size={15} />{translateText("اطلاعات تماس ")}</button>
 
               {storeKey ? (
                 <Link
@@ -306,13 +298,9 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
                   className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border text-xs font-bold transition hover:opacity-80"
                   style={{ background: 'var(--card2)', borderColor: c.line, color: 'var(--text)' }}
                 >
-                  <StoreIcon size={15} />
-                  صفحه فروشگاه
-                </Link>
+                  <StoreIcon size={15} />{translateText("صفحه فروشگاه ")}</Link>
               ) : (
-                <span className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-theme text-xs font-bold muted">
-                  فروشگاهی ثبت نشده
-                </span>
+                <span className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-theme text-xs font-bold muted">{translateText("فروشگاهی ثبت نشده ")}</span>
               )}
             </div>
           </>
@@ -367,8 +355,8 @@ function ContactRow({ icon: Icon, label, value, href, copyValue, ltr = false, mu
           type="button"
           onClick={() => onCopy(copyValue, label)}
           className="btn-ghost shrink-0 !p-2"
-          aria-label={`کپی ${label}`}
-          title={copied ? 'کپی شد' : `کپی ${label}`}
+          aria-label={translateText("کپی {{v0}}", {v0: (label)})}
+          title={copied ? translateText("کپی شد") : translateText("کپی {{v0}}", {v0: (label)})}
         >
           {copied ? <Check size={15} style={{ color: GREEN }} /> : <Copy size={15} />}
         </button>
@@ -434,7 +422,7 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
   const username = String(finalOwner?.username || '').trim();
   const storeKey = getId(finalStore) || resolvedStoreId;
   const storeTitle =
-    info.storeName || (typeof product?.store_name === 'string' ? product.store_name : '') || 'فروشنده';
+    info.storeName || (typeof product?.store_name === 'string' ? product.store_name : '') || translateText("فروشنده");
 
   const copy = async (value, label) => {
     if (!value) return;
@@ -461,7 +449,7 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
 
   return (
     <div
-      dir="rtl"
+      dir={i18nDirection}
       className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center"
       role="dialog"
       aria-modal="true"
@@ -474,7 +462,7 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
 
       <button
         type="button"
-        aria-label="بستن اطلاعات تماس"
+        aria-label={translateText("بستن اطلاعات تماس")}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         style={{ animation: 'store-contact-fade 0.2s ease-out' }}
@@ -519,7 +507,7 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
                       to={`/store/${storeKey}`}
                       onClick={onClose}
                       className="hover:underline"
-                      title="رفتن به صفحه‌ی فروشگاه"
+                      title={translateText("رفتن به صفحه‌ی فروشگاه")}
                     >
                       {storeTitle}
                     </Link>
@@ -538,7 +526,7 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
               ref={closeRef}
               type="button"
               onClick={onClose}
-              aria-label="بستن"
+              aria-label={translateText("بستن")}
               className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-theme transition hover:opacity-80"
               style={{ background: 'var(--card)' }}
             >
@@ -563,45 +551,43 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
         {/* ردیف‌ها */}
         <div className="relative">
           <div className="max-h-[42vh] overflow-y-auto">
-            <ContactRow icon={Building2} label="نام فروشگاه" value={storeTitle} copyValue={storeTitle} copied={copiedLabel === 'نام فروشگاه'} {...rowProps} />
-            <ContactRow icon={UserRound} label="فروشنده" value={info.sellerName} copyValue={info.sellerName} copied={copiedLabel === 'فروشنده'} {...rowProps} />
+            <ContactRow icon={Building2} label={translateText("نام فروشگاه")} value={storeTitle} copyValue={storeTitle} copied={copiedLabel === translateText("نام فروشگاه")} {...rowProps} />
+            <ContactRow icon={UserRound} label={translateText("فروشنده")} value={info.sellerName} copyValue={info.sellerName} copied={copiedLabel === translateText("فروشنده")} {...rowProps} />
             {username && (
               <ContactRow
                 icon={UserRound}
-                label="نام کاربری فروشنده"
+                label={translateText("نام کاربری فروشنده")}
                 value={`@${username}`}
                 copyValue={username}
                 ltr
-                copied={copiedLabel === 'نام کاربری فروشنده'}
+                copied={copiedLabel === translateText("نام کاربری فروشنده")}
                 {...rowProps}
               />
             )}
             <ContactRow
               icon={Phone}
-              label="شماره تماس"
+              label={translateText("شماره تماس")}
               value={info.phone ? toFa(info.phone) : ''}
               href={info.phone ? `tel:${info.phone}` : undefined}
               copyValue={info.phone}
               ltr
-              copied={copiedLabel === 'شماره تماس'}
+              copied={copiedLabel === translateText("شماره تماس")}
               {...rowProps}
             />
             <ContactRow
               icon={Mail}
-              label="ایمیل"
+              label={translateText("ایمیل")}
               value={info.email}
               href={info.email ? `mailto:${info.email}` : undefined}
               copyValue={info.email}
               ltr
-              copied={copiedLabel === 'ایمیل'}
+              copied={copiedLabel === translateText("ایمیل")}
               {...rowProps}
             />
-            <ContactRow icon={MapPin} label="نشانی فروشگاه" value={info.address} multiline {...rowProps} />
+            <ContactRow icon={MapPin} label={translateText("نشانی فروشگاه")} value={info.address} multiline {...rowProps} />
 
             {!info.phone && !info.email && !info.address && (
-              <p className="px-5 py-6 text-center text-xs muted">
-                فروشنده اطلاعات تماسی ثبت نکرده است؛ از صفحه‌ی فروشگاه پیام بگذارید.
-              </p>
+              <p className="px-5 py-6 text-center text-xs muted">{translateText("فروشنده اطلاعات تماسی ثبت نکرده است؛ از صفحه‌ی فروشگاه پیام بگذارید. ")}</p>
             )}
           </div>
 
@@ -625,18 +611,14 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-black transition hover:opacity-90"
                 style={{ background: c.accent, color: c.onAccent }}
               >
-                <Phone size={16} />
-                تماس با فروشنده
-              </a>
+                <Phone size={16} />{translateText("تماس با فروشنده ")}</a>
             ) : (
               <button
                 type="button"
                 onClick={onClose}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-black transition hover:opacity-90"
                 style={{ background: c.accent, color: c.onAccent }}
-              >
-                متوجه شدم
-              </button>
+              >{translateText("متوجه شدم ")}</button>
             )}
 
             {storeKey && (
@@ -645,9 +627,7 @@ export function StoreContactModal({ open, onClose, store, owner, product }) {
                 onClick={onClose}
                 className="btn-ghost inline-flex h-11 items-center justify-center gap-2 !py-0 text-sm"
               >
-                <StoreIcon size={16} />
-                صفحه فروشگاه
-              </Link>
+                <StoreIcon size={16} />{translateText("صفحه فروشگاه ")}</Link>
             )}
           </div>
         </div>

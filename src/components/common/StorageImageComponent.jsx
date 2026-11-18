@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import { ImageOff, LoaderCircle, ZoomIn } from 'lucide-react';
 import { resolveStorageImage } from '../../utils/helpers/storage-files';
@@ -36,10 +37,10 @@ function StorageImageComponent({
       <span
         className={`storage-image-placeholder ${className}`}
         role="img"
-        aria-label={alt || 'تصویر در دسترس نیست'}
+        aria-label={alt || translateText("تصویر در دسترس نیست")}
       >
         <ImageOff size={compact ? 16 : 22} aria-hidden="true" />
-        {!compact && <span className="storage-image-caption">تصویر در دسترس نیست</span>}
+        {!compact && <span className="storage-image-caption">{translateText("تصویر در دسترس نیست")}</span>}
       </span>
     );
   }
@@ -49,7 +50,7 @@ function StorageImageComponent({
       <span
         className={`storage-image-placeholder ${className}`}
         role="img"
-        aria-label={`در حال بارگذاری ${alt}`}
+        aria-label={translateText("در حال بارگذاری {{v0}}", {v0: (alt)})}
       >
         <LoaderCircle className="animate-spin" size={compact ? 15 : 20} aria-hidden="true" />
       </span>
@@ -62,8 +63,8 @@ function StorageImageComponent({
         type="button"
         onClick={() => onZoom(file, alt)}
         className={`relative group overflow-hidden block ${className}`}
-        title="بزرگ‌نمایی تصویر"
-        aria-label={`بزرگ‌نمایی ${alt || 'تصویر'}`}
+        title={translateText("بزرگ‌نمایی تصویر")}
+        aria-label={translateText("بزرگ‌نمایی {{v0}}", {v0: (alt || 'تصویر')})}
       >
         <img
           src={url}

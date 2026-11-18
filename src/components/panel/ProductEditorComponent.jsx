@@ -1,3 +1,9 @@
+import useLocalizedContent from '../../hooks/useLocalizedContent';
+import MoneyInput, { usePriceEntry } from './PriceInputComponent';
+import { language } from '../../i18n/runtime';
+import { cleanTranslations } from '../../i18n/translation-helpers';
+import ContentLanguage from '../common/locale/ContentLanguageComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -9,12 +15,7 @@ import ImageLightboxComponent from '../common/ImageLightboxComponent';
 import JalaliDateTimePicker from '../common/JalaliDateTimePicker';
 import { getToken, authHeaders } from '../../utils/helpers/storage';
 import { getId } from '../../utils/helpers/response';
-import {
-  measurementValue,
-  measurementUnit,
-  toFa,
-  formatPrice,
-} from '../../utils/helpers/format';
+import { measurementValue, measurementUnit, toFa, formatPrice } from '../../utils/helpers/format';
 import {
   faDigits,
   gregorianYearOfJalali,
@@ -30,10 +31,11 @@ const DEFAULT_FORM = {
   category_id: '',
   brand: '',
   short_description: '',
-  description: '## معرفی محصول\n\n**ویژگی‌های اصلی:**\n- کیفیت ساخت بالا\n- ارسال سریع سراسری',
+  description: '',
   production: new Date().getFullYear(),
   images_id: [],
-  price_amount: 10000000,
+  price_amount: 100,
+  translations: {},
   has_discount: false,
   discount_percentage: 10,
   discount_expiry: '',
@@ -59,17 +61,18 @@ function toDateInputValue(iso) {
 }
 
 /* سال‌های شمسی برای فیلد «سال تولید»؛ بک‌اند سال میلادی می‌خواهد (۱۹۰۰ تا امسال) */
-const currentJalaliYear = jalaliYearOfGregorian(new Date().getFullYear());
+const currentJalaliYear =
+  language === 'fa' ? jalaliYearOfGregorian(new Date().getFullYear()) : new Date().getFullYear();
 const JALALI_YEARS = Array.from({ length: 26 }, (_, i) => currentJalaliYear - i);
 
 /* خلاصه‌ی خوانای تاریخ تخفیف برای زیر فیلد شمسی */
 const expiryHint = (value) => {
   const date = parseLocalInputValue(value);
-  if (!date) return 'بدون تاریخ انقضا (تخفیف همیشه فعال است)';
+  if (!date) return translateText('بدون تاریخ انقضا (تخفیف همیشه فعال است)');
   const days = Math.ceil((date.getTime() - Date.now()) / 86400000);
-  if (days < 0) return 'این تاریخ گذشته است؛ تخفیف روی سایت اعمال نمی‌شود';
-  if (days === 0) return 'امروز منقضی می‌شود';
-  return `${faDigits(days)} روز دیگر منقضی می‌شود`;
+  if (days < 0) return translateText('این تاریخ گذشته است؛ تخفیف روی سایت اعمال نمی‌شود');
+  if (days === 0) return translateText('امروز منقضی می‌شود');
+  return translateText('{{v0}} روز دیگر منقضی می‌شود', { v0: faDigits(days) });
 };
 
 function ProductEditorComponent({
@@ -80,27 +83,16 @@ function ProductEditorComponent({
   onCancel,
   onSaved,
 }) {
-  /* ارتفاع نوار بالای فرم برای چسبیدن پنل جدول دقیقاً زیر آن */
-  const barRef = useRef(null);
-
-  useEffect(() => {
-    const el = barRef.current;
-    if (!el) return undefined;
-    const apply = () => {
-      const height = Math.round(el.getBoundingClientRect().height);
-      document.documentElement.style.setProperty('--editor-bar-h', `${height}px`);
-    };
-    apply();
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', apply);
-      return () => window.removeEventListener('resize', apply);
-    }
-    const observer = new ResizeObserver(apply);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const priceEntry = usePriceEntry(product?.base_price || product?.price, product?._id || 'new');
   const [form, setForm] = useState(DEFAULT_FORM);
+  const content = useLocalizedContent(form, setForm, [
+    'name',
+    'short_description',
+    'description',
+    'tags',
+  ]);
   const [tagInput, setTagInput] = useState('');
+  useEffect(() => setTagInput(''), [content.locale]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [zoomFile, setZoomFile] = useState(null);
@@ -112,7 +104,9 @@ function ProductEditorComponent({
     if (!product) {
       setForm({
         ...DEFAULT_FORM,
-        store_id: (stores.find((s) => !s.status || s.status === 'ENABLE') ? getId(stores.find((s) => !s.status || s.status === 'ENABLE')) : ''),
+        store_id: stores.find((s) => !s.status || s.status === 'ENABLE')
+          ? getId(stores.find((s) => !s.status || s.status === 'ENABLE'))
+          : '',
         category_id: categories[0] ? getId(categories[0]) : '',
       });
       return;
@@ -129,7 +123,8 @@ function ProductEditorComponent({
       images_id: Array.isArray(product.images_id)
         ? product.images_id.map(getId).filter(Boolean)
         : [],
-      price_amount: product.price?.amount ?? 10000000,
+      price_amount: (product.base_price || product.price)?.amount ?? 100,
+      translations: product.translations || {},
       has_discount: pct > 0,
       discount_percentage: pct || 10,
       discount_expiry: toDateInputValue(product.discount?.expirationDate),
@@ -168,10 +163,10 @@ function ProductEditorComponent({
       const ids = await uploadImages(e.target.files);
       if (ids.length) {
         setForm((prev) => ({ ...prev, images_id: [...prev.images_id, ...ids] }));
-        toast.success('تصاویر آپلود شد');
+        toast.success(translateText('تصاویر آپلود شد'));
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در آپلود تصویر');
+      toast.error(err.response?.data?.message || translateText('خطا در آپلود تصویر'));
     }
     e.target.value = '';
   };
@@ -184,7 +179,7 @@ function ProductEditorComponent({
       const [picked] = next.splice(index, 1);
       return { ...prev, images_id: [picked, ...next] };
     });
-    toast.success('تصویر اصلی محصول تغییر کرد');
+    toast.success(translateText('تصویر اصلی محصول تغییر کرد'));
   };
 
   /* افزودن تصویر با آیدی فایل در فضای ذخیره‌سازی (فقط مدیر) */
@@ -195,18 +190,20 @@ function ProductEditorComponent({
       .map((token) => token.split('/').filter(Boolean).pop() || '')
       .filter(Boolean);
 
-    if (!ids.length) return toast.error('آیدی تصویر را وارد کنید');
+    if (!ids.length) return toast.error(translateText('آیدی تصویر را وارد کنید'));
     if (!/^[a-zA-Z0-9_-]{6,64}$/.test(ids[0])) {
-      return toast.error('آیدی تصویر معتبر نیست (حداقل ۶ کاراکتر حرف/رقم)');
+      return toast.error(translateText('آیدی تصویر معتبر نیست (حداقل ۶ کاراکتر حرف/رقم)'));
     }
     const fresh = ids.filter((id) => !form.images_id.includes(id));
-    if (!fresh.length) return toast.error('این تصویر از قبل در گالری هست');
+    if (!fresh.length) return toast.error(translateText('این تصویر از قبل در گالری هست'));
     const room = 20 - form.images_id.length;
-    if (room <= 0) return toast.error('حداکثر ۲۰ تصویر مجاز است');
+    if (room <= 0) return toast.error(translateText('حداکثر ۲۰ تصویر مجاز است'));
 
     setForm((prev) => ({ ...prev, images_id: [...prev.images_id, ...fresh.slice(0, room)] }));
     setImageIdInput('');
-    toast.success(fresh.length > 1 ? 'تصاویر اضافه شدند' : 'تصویر اضافه شد');
+    toast.success(
+      fresh.length > 1 ? translateText('تصاویر اضافه شدند') : translateText('تصویر اضافه شد'),
+    );
   };
 
   const handleMarkdownUpload = async (file) => {
@@ -214,7 +211,7 @@ function ProductEditorComponent({
       const [id] = await uploadImages([file]);
       return id ? `${API}/storage/${id}` : '';
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در آپلود تصویر');
+      toast.error(err.response?.data?.message || translateText('خطا در آپلود تصویر'));
       return '';
     }
   };
@@ -222,36 +219,47 @@ function ProductEditorComponent({
   const addTag = () => {
     const t = tagInput.trim();
     if (!t) return;
-    if (form.tags.length >= 20) return toast.warn('حداکثر ۲۰ برچسب مجاز است');
-    if (!form.tags.includes(t)) {
-      setForm((prev) => ({ ...prev, tags: [...prev.tags, t] }));
+    if (content.value('tags').length >= 20)
+      return toast.warn(translateText('حداکثر ۲۰ برچسب مجاز است'));
+    if (!content.value('tags').includes(t)) {
+      content.update('tags', [...content.value('tags'), t]);
     }
     setTagInput('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) return toast.error('نام محصول الزامی است');
-    if (!product && !form.store_id) return toast.error('انتخاب فروشگاه الزامی است');
-    if (!form.category_id) return toast.error('انتخاب دسته‌بندی الزامی است');
-    if (!form.brand.trim()) return toast.error('نام برند الزامی است');
-    if (!form.short_description.trim()) return toast.error('توضیح کوتاه الزامی است');
+    const form = content.payload();
+    if (!form.name.trim()) return toast.error(translateText('نام محصول الزامی است'));
+    if (!product && !form.store_id) return toast.error(translateText('انتخاب فروشگاه الزامی است'));
+    if (!form.category_id) return toast.error(translateText('انتخاب دسته‌بندی الزامی است'));
+    if (!form.brand.trim()) return toast.error(translateText('نام برند الزامی است'));
+    if (!form.short_description.trim()) return toast.error(translateText('توضیح کوتاه الزامی است'));
     if (!isValidBackendMarkdown(form.description)) {
       return toast.error(
-        'توضیحات محصول باید شامل حداقل یک عنصر Markdown (تیتر ##، لیست - یا متن **ضخیم**) باشد',
+        translateText(
+          'توضیحات محصول باید شامل حداقل یک عنصر Markdown (تیتر ##، لیست - یا متن **ضخیم**) باشد',
+        ),
       );
     }
-    if (!form.images_id.length) return toast.error('حداقل یک تصویر برای محصول آپلود کنید');
-    if (Number(form.price_amount) <= 0) return toast.error('قیمت باید بزرگتر از صفر باشد');
+    if (!form.images_id.length)
+      return toast.error(translateText('حداقل یک تصویر برای محصول آپلود کنید'));
+
+    let submittedPrice;
+    try {
+      submittedPrice = priceEntry.payload();
+    } catch (error) {
+      return toast.error(error.message);
+    }
 
     let discountPayload = null;
     if (form.has_discount) {
       const pct = Number(form.discount_percentage);
       if (!Number.isFinite(pct) || pct <= 0 || pct > 100) {
-        return toast.error('درصد تخفیف باید بین ۱ تا ۱۰۰ باشد');
+        return toast.error(translateText('درصد تخفیف باید بین ۱ تا ۱۰۰ باشد'));
       }
       if (!form.discount_expiry || new Date(form.discount_expiry) <= new Date()) {
-        return toast.error('تاریخ انقضای تخفیف باید در آینده باشد');
+        return toast.error(translateText('تاریخ انقضای تخفیف باید در آینده باشد'));
       }
       discountPayload = {
         percentage: pct,
@@ -267,7 +275,8 @@ function ProductEditorComponent({
       description: form.description,
       production: Number(form.production),
       images_id: form.images_id,
-      price: { currency: 'IRR', amount: Number(form.price_amount) },
+      price: submittedPrice,
+      translations: cleanTranslations(form.translations),
       discount: discountPayload,
       stock: Number(form.stock),
       warranty: Boolean(form.warranty),
@@ -302,10 +311,12 @@ function ProductEditorComponent({
         ? axios.put(`${API}/product/${getId(product)}`, basePayload, authHeaders())
         : axios.post(`${API}/product`, basePayload, authHeaders());
       await req;
-      toast.success(product ? 'محصول با موفقیت ویرایش شد' : 'محصول جدید ثبت شد');
+      toast.success(
+        product ? translateText('محصول با موفقیت ویرایش شد') : translateText('محصول جدید ثبت شد'),
+      );
       onSaved?.();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در ذخیره محصول');
+      toast.error(err.response?.data?.message || translateText('خطا در ذخیره محصول'));
     } finally {
       setSaving(false);
     }
@@ -313,36 +324,40 @@ function ProductEditorComponent({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/*
-        نوار بالای فرم ویرایش: هنگام اسکرول به بالاترین نقطه می‌چسبد و ارتفاعش در
-        متغیر `--editor-bar-h` ذخیره می‌شود تا پنل پیشرفته‌ی جدول دقیقاً زیرش بنشیند.
-      */}
+      <ContentLanguage editor={content} />
+
       <div
-        ref={barRef}
-        className="sticky top-0 z-40 flex items-center justify-between gap-3 flex-wrap card rounded-2xl p-4 backdrop-blur-md top-[var(--header-h,0px)]"
+        className="product-editor-heading flex items-center justify-between gap-3 flex-wrap card rounded-2xl p-4"
         style={{ backgroundColor: 'var(--card)' }}
       >
         <div className="flex items-center gap-3">
           {onCancel && (
-            <button type="button" onClick={onCancel} className="btn-ghost !p-2" aria-label="بازگشت">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn-ghost !p-2"
+              aria-label={translateText('بازگشت')}
+            >
               <ArrowRight size={18} />
             </button>
           )}
           <div>
             <h2 className="font-black text-lg">
-              {product ? `ویرایش محصول: ${product.name}` : 'ایجاد محصول جدید'}
+              {product
+                ? translateText('ویرایش محصول: {{v0}}', { v0: product.name })
+                : translateText('ایجاد محصول جدید')}
             </h2>
             <p className="text-xs muted">
               {isAdmin
-                ? 'ویرایش مستقیم محصول توسط مدیر سیستم'
-                : 'تکمیل مشخصات، تصاویر و توضیحات Markdown'}
+                ? translateText('ویرایش مستقیم محصول توسط مدیر سیستم')
+                : translateText('تکمیل مشخصات، تصاویر و توضیحات Markdown')}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {onCancel && (
             <button type="button" onClick={onCancel} className="btn-ghost !py-2 text-sm">
-              انصراف
+              {translateText('انصراف ')}
             </button>
           )}
           <button
@@ -351,7 +366,11 @@ function ProductEditorComponent({
             className="btn-yellow !py-2 text-sm flex items-center gap-1.5"
           >
             <Save size={15} />{' '}
-            {saving ? 'در حال ذخیره…' : product ? 'ذخیره تغییرات' : 'انتشار محصول'}
+            {saving
+              ? translateText('در حال ذخیره…')
+              : product
+                ? translateText('ذخیره تغییرات')
+                : translateText('انتشار محصول')}
           </button>
         </div>
       </div>
@@ -359,55 +378,67 @@ function ProductEditorComponent({
       <div className="grid lg:grid-cols-[1fr_340px] gap-5 items-start">
         <div className="space-y-5 min-w-0">
           <div className="card rounded-2xl p-5 space-y-4">
-            <h3 className="font-black text-sm">مشخصات اصلی</h3>
+            <h3 className="font-black text-sm">{translateText('مشخصات اصلی')}</h3>
             <label className="block text-xs muted">
-              نام محصول
+              {translateText('نام محصول ')}
               <input
                 className="input mt-1.5"
-                placeholder="مثلاً: لپ‌تاپ ۱۵.۶ اینچی ایسوس مدل VivoBook"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
+                value={content.value('name')}
+                dir={content.dir}
+                aria-label={`${content.locale} name`}
+                lang={content.locale}
+                onChange={(e) => content.update('name', e.target.value)}
+                placeholder={content.placeholder('name')}
               />
             </label>
             <label className="block text-xs muted">
-              معرفی کوتاه (حداکثر ۵۰۰ کاراکتر)
+              {translateText('معرفی کوتاه (حداکثر ۵۰۰ کاراکتر) ')}
               <input
                 className="input mt-1.5"
-                placeholder="یک خلاصه کوتاه که زیر نام محصول نمایش داده می‌شود"
-                value={form.short_description}
-                onChange={(e) => setForm({ ...form, short_description: e.target.value })}
-                required
+                value={content.value('short_description')}
+                dir={content.dir}
+                aria-label={`${content.locale} short_description`}
+                lang={content.locale}
+                onChange={(e) => content.update('short_description', e.target.value)}
+                placeholder={content.placeholder('short_description')}
               />
             </label>
           </div>
 
           <div className="card rounded-2xl p-5 space-y-3">
-            <h3 className="font-black text-sm">توضیحات کامل محصول</h3>
+            <h3 className="font-black text-sm">{translateText('توضیحات کامل محصول')}</h3>
             {/*
               اگر ویرایشگر بصری به هر دلیلی خطا بدهد، فرم نباید از کار بیفتد؛
               یک ناحیه‌ی متن خام Markdown جای آن می‌نشیند.
             */}
             <ErrorBoundaryComponent
-              resetKey={product ? getId(product) : 'new-product'}
+              resetKey={(product ? getId(product) : 'new-product') + content.locale}
               fallback={
                 <div className="space-y-2">
                   <p className="text-[11px] leading-6" style={{ color: '#e0a800' }}>
-                    ویرایشگر بصری باز نشد؛ متن Markdown را همین‌جا ویرایش کنید.
+                    {translateText('ویرایشگر بصری باز نشد؛ متن Markdown را همین‌جا ویرایش کنید. ')}
                   </p>
                   <textarea
-                    dir="ltr"
                     rows={12}
                     className="input font-mono text-xs leading-6"
-                    value={form.description}
-                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                    value={content.value('description')}
+                    dir={content.dir}
+                    aria-label={`${content.locale} description`}
+                    lang={content.locale}
+                    onChange={(e) => content.update('description', e.target.value)}
+                    placeholder={content.placeholder('description')}
                   />
                 </div>
               }
             >
               <MarkdownEditorComponent
-                value={form.description}
-                onChange={(val) => setForm((prev) => ({ ...prev, description: val }))}
+                direction={content.dir}
+                placeholder={content.placeholder('description')}
+                value={content.value('description')}
+                dir={content.dir}
+                aria-label={`${content.locale} description`}
+                lang={content.locale}
+                onChange={(val) => content.update('description', val)}
                 onUploadImage={handleMarkdownUpload}
               />
             </ErrorBoundaryComponent>
@@ -417,11 +448,14 @@ function ProductEditorComponent({
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <h3 className="font-black text-sm">
-                  گالری تصاویر محصول ({toFa(form.images_id.length)} / ۲۰)
+                  {translateText('گالری تصاویر محصول (')}
+                  {toFa(form.images_id.length)}
+                  {translateText(' / ۲۰) ')}
                 </h3>
                 <p className="mt-1 text-[10px] muted">
-                  اولین تصویر، تصویر اصلی محصول است؛ با دکمه‌ی «اصلی کن» هر تصویر دیگری را جلو
-                  بیندازید.
+                  {translateText(
+                    'اولین تصویر، تصویر اصلی محصول است؛ با دکمه‌ی «اصلی کن» هر تصویر دیگری را جلو بیندازید. ',
+                  )}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -432,7 +466,8 @@ function ProductEditorComponent({
                     className="btn-ghost !py-2 text-xs flex items-center gap-1.5"
                     aria-expanded={imageIdOpen}
                   >
-                    <Hash size={14} /> افزودن با آیدی
+                    <Hash size={14} />
+                    {translateText(' افزودن با آیدی ')}
                   </button>
                 )}
                 <button
@@ -441,7 +476,8 @@ function ProductEditorComponent({
                   disabled={uploading}
                   className="btn-ghost !py-2 text-xs flex items-center gap-1.5"
                 >
-                  <Upload size={14} /> {uploading ? 'در حال آپلود…' : 'آپلود تصویر'}
+                  <Upload size={14} />{' '}
+                  {uploading ? translateText('در حال آپلود…') : translateText('آپلود تصویر')}
                 </button>
               </div>
               <input
@@ -458,13 +494,15 @@ function ProductEditorComponent({
             {isAdmin && imageIdOpen && (
               <div className="card2 rounded-xl p-3 space-y-2">
                 <label className="block text-[11px] muted">
-                  آیدی فایل تصویر در فضای ذخیره‌سازی (چند آیدی را با فاصله یا کاما جدا کنید)
+                  {translateText(
+                    'آیدی فایل تصویر در فضای ذخیره‌سازی (چند آیدی را با فاصله یا کاما جدا کنید) ',
+                  )}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   <input
                     className="input flex-1 min-w-[200px] font-mono text-xs"
                     dir="ltr"
-                    placeholder="مثلاً 65f1c0a9b2d3e4f5a6b7c8d9"
+                    placeholder={translateText('مثلاً 65f1c0a9b2d3e4f5a6b7c8d9')}
                     value={imageIdInput}
                     onChange={(e) => setImageIdInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -479,18 +517,21 @@ function ProductEditorComponent({
                     onClick={addImageById}
                     className="btn-yellow !py-2 text-xs flex items-center gap-1.5"
                   >
-                    <KeyRound size={14} /> افزودن
+                    <KeyRound size={14} />
+                    {translateText(' افزودن ')}
                   </button>
                 </div>
                 <p className="text-[10px] muted leading-5">
-                  آدرس کامل تصویر هم پذیرفته می‌شود؛ فقط بخش آخر آدرس به‌عنوان آیدی ذخیره می‌شود.
+                  {translateText(
+                    'آدرس کامل تصویر هم پذیرفته می‌شود؛ فقط بخش آخر آدرس به‌عنوان آیدی ذخیره می‌شود. ',
+                  )}
                 </p>
               </div>
             )}
 
             {form.images_id.length === 0 ? (
               <div className="rounded-xl border border-dashed border-theme p-8 text-center text-xs muted">
-                هنوز تصویری انتخاب نشده است. روی «آپلود تصویر» بزنید.
+                {translateText('هنوز تصویری انتخاب نشده است. روی «آپلود تصویر» بزنید. ')}
               </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -501,7 +542,7 @@ function ProductEditorComponent({
                   >
                     <StorageImageComponent
                       file={id}
-                      alt={`تصویر ${idx + 1}`}
+                      alt={translateText('تصویر {{v0}}', { v0: idx + 1 })}
                       className="w-full h-full object-cover"
                       onZoom={(f, a) => setZoomFile({ file: f, alt: a })}
                     />
@@ -513,28 +554,30 @@ function ProductEditorComponent({
                           images_id: prev.images_id.filter((_, i) => i !== idx),
                         }))
                       }
-                      className="absolute top-1 left-1 bg-black/75 text-white rounded-full p-1 hover:bg-red-600"
-                      aria-label="حذف تصویر"
+                      className="absolute top-1 start-1 bg-black/75 text-white rounded-full p-1 hover:bg-red-600"
+                      aria-label={translateText('حذف تصویر')}
                     >
                       <X size={12} />
                     </button>
 
                     {idx === 0 ? (
                       <span
-                        className="absolute bottom-1 right-1 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        className="absolute bottom-1 end-1 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
                         style={{ background: 'var(--primary-color)', color: '#0a1736' }}
                       >
-                        <Star size={10} /> اصلی
+                        <Star size={10} />
+                        {translateText(' اصلی ')}
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => makeMainImage(idx)}
-                        className="absolute bottom-1 right-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-[#0a1736]"
-                        aria-label="انتخاب به‌عنوان تصویر اصلی"
-                        title="انتخاب به‌عنوان تصویر اصلی"
+                        className="absolute bottom-1 end-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-[#0a1736]"
+                        aria-label={translateText('انتخاب به‌عنوان تصویر اصلی')}
+                        title={translateText('انتخاب به‌عنوان تصویر اصلی')}
                       >
-                        <Star size={10} /> اصلی کن
+                        <Star size={10} />
+                        {translateText(' اصلی کن ')}
                       </button>
                     )}
                   </div>
@@ -546,29 +589,37 @@ function ProductEditorComponent({
 
         <div className="space-y-5 min-w-0">
           <div className="card rounded-2xl p-5 space-y-3">
-            <h3 className="font-black text-sm">انتشار و دسته‌بندی</h3>
+            <h3 className="font-black text-sm">{translateText('انتشار و دسته‌بندی')}</h3>
 
             {!product ? (
               <label className="block text-xs muted">
-                فروشگاه
+                {translateText('فروشگاه ')}
                 <select
                   className="input mt-1"
                   value={form.store_id}
                   onChange={(e) => setForm({ ...form, store_id: e.target.value })}
                   required
                 >
-                  <option value="">انتخاب فروشگاه</option>
+                  <option value="">{translateText('انتخاب فروشگاه')}</option>
                   {stores.map((s) => (
-                    <option key={getId(s)} value={getId(s)} disabled={s.status && s.status !== 'ENABLE'}>
+                    <option
+                      key={getId(s)}
+                      value={getId(s)}
+                      disabled={s.status && s.status !== 'ENABLE'}
+                    >
                       {s.name}
-                      {s.status === 'ROOT_DISABLE' ? ' (مسدود)' : s.status === 'DISABLE' ? ' (غیرفعال)' : ''}
+                      {s.status === 'ROOT_DISABLE'
+                        ? translateText(' (مسدود)')
+                        : s.status === 'DISABLE'
+                          ? translateText(' (غیرفعال)')
+                          : ''}
                     </option>
                   ))}
                 </select>
               </label>
             ) : (
               <div className="card2 rounded-xl p-3 text-xs">
-                <span className="muted block">فروشگاه</span>
+                <span className="muted block">{translateText('فروشگاه')}</span>
                 <b className="mt-0.5 block">
                   {stores.find((s) => getId(s) === form.store_id)?.name ||
                     product.store_name ||
@@ -578,14 +629,14 @@ function ProductEditorComponent({
             )}
 
             <label className="block text-xs muted">
-              دسته‌بندی
+              {translateText('دسته‌بندی ')}
               <select
                 className="input mt-1"
                 value={form.category_id}
                 onChange={(e) => setForm({ ...form, category_id: e.target.value })}
                 required
               >
-                <option value="">انتخاب دسته‌بندی</option>
+                <option value="">{translateText('انتخاب دسته‌بندی')}</option>
                 {categories.map((c) => (
                   <option key={getId(c)} value={getId(c)}>
                     {c.parent_id ? `— ${c.name}` : c.name}
@@ -596,22 +647,34 @@ function ProductEditorComponent({
 
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs muted">
-                برند
+                {translateText('برند ')}
                 <input
                   className="input mt-1"
-                  placeholder="برند"
+                  placeholder={translateText('برند')}
                   value={form.brand}
                   onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   required
                 />
               </label>
               <label className="text-xs muted">
-                سال تولید (شمسی)
+                {language === 'fa'
+                  ? translateText('سال تولید (شمسی) ')
+                  : translateText('سال تولید')}
                 <select
                   className="input mt-1"
-                  value={jalaliYearOfGregorian(Number(form.production) || new Date().getFullYear())}
+                  value={
+                    language === 'fa'
+                      ? jalaliYearOfGregorian(Number(form.production) || new Date().getFullYear())
+                      : Number(form.production)
+                  }
                   onChange={(e) =>
-                    setForm({ ...form, production: gregorianYearOfJalali(Number(e.target.value)) })
+                    setForm({
+                      ...form,
+                      production:
+                        language === 'fa'
+                          ? gregorianYearOfJalali(Number(e.target.value))
+                          : Number(e.target.value),
+                    })
                   }
                 >
                   {JALALI_YEARS.map((jy) => (
@@ -625,26 +688,26 @@ function ProductEditorComponent({
 
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs muted">
-                نمایش
+                {translateText('نمایش ')}
                 <select
                   className="input mt-1"
                   value={String(form.visibility).toUpperCase()}
                   onChange={(e) => setForm({ ...form, visibility: e.target.value })}
                 >
-                  <option value="PUBLIC">عمومی</option>
-                  <option value="PRIVATE">خصوصی</option>
+                  <option value="PUBLIC">{translateText('عمومی')}</option>
+                  <option value="PRIVATE">{translateText('خصوصی')}</option>
                 </select>
               </label>
               {product && (
                 <label className="text-xs muted">
-                  وضعیت انتشار
+                  {translateText('وضعیت انتشار ')}
                   <select
                     className="input mt-1"
                     value={String(form.status).toUpperCase()}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
                   >
-                    <option value="ACTIVE">فعال</option>
-                    <option value="INACTIVE">غیرفعال</option>
+                    <option value="ACTIVE">{translateText('فعال')}</option>
+                    <option value="INACTIVE">{translateText('غیرفعال')}</option>
                   </select>
                 </label>
               )}
@@ -656,28 +719,17 @@ function ProductEditorComponent({
                 checked={form.warranty}
                 onChange={(e) => setForm({ ...form, warranty: e.target.checked })}
               />
-              دارای گارانتی
+              {translateText('دارای گارانتی ')}
             </label>
           </div>
 
           <div className="card rounded-2xl p-5 space-y-3">
-            <h3 className="font-black text-sm">قیمت، تخفیف و موجودی</h3>
-            <label className="block text-xs muted">
-              قیمت (ریال) — نمایش به کاربر:{' '}
-              <b className="text-yellow">{formatPrice(form.price_amount)}</b>
-              <input
-                className="input mt-1"
-                type="number"
-                min={1}
-                value={form.price_amount}
-                onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
-                required
-              />
-            </label>
+            <h3 className="font-black text-sm">{translateText('قیمت، تخفیف و موجودی')}</h3>
+            <MoneyInput price={priceEntry} />
 
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs muted">
-                موجودی انبار
+                {translateText('موجودی انبار ')}
                 <input
                   className="input mt-1"
                   type="number"
@@ -689,14 +741,14 @@ function ProductEditorComponent({
               </label>
               {product && (
                 <label className="text-xs muted">
-                  وضعیت موجودی
+                  {translateText('وضعیت موجودی ')}
                   <select
                     className="input mt-1"
                     value={form.stock_status}
                     onChange={(e) => setForm({ ...form, stock_status: e.target.value })}
                   >
-                    <option value="IN_STOCK">موجود</option>
-                    <option value="OUT_OF_STOCK">ناموجود</option>
+                    <option value="IN_STOCK">{translateText('موجود')}</option>
+                    <option value="OUT_OF_STOCK">{translateText('ناموجود')}</option>
                   </select>
                 </label>
               )}
@@ -708,13 +760,13 @@ function ProductEditorComponent({
                 checked={form.has_discount}
                 onChange={(e) => setForm({ ...form, has_discount: e.target.checked })}
               />
-              اعمال تخفیف زمان‌دار
+              {translateText('اعمال تخفیف زمان‌دار ')}
             </label>
 
             {form.has_discount && (
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <label className="text-xs muted">
-                  درصد تخفیف
+                  {translateText('درصد تخفیف ')}
                   <input
                     className="input mt-1"
                     type="number"
@@ -725,11 +777,11 @@ function ProductEditorComponent({
                   />
                 </label>
                 <div className="text-xs muted">
-                  انقضای تخفیف (شمسی)
+                  {translateText('انقضای تخفیف (شمسی) ')}
                   <JalaliDateTimePicker
                     value={form.discount_expiry}
                     onChange={(next) => setForm({ ...form, discount_expiry: next })}
-                    placeholder="مثلاً ۱۴۰۵/۰۹/۰۱"
+                    placeholder={translateText('مثلاً ۱۴۰۵/۰۹/۰۱')}
                   />
                   <span className="mt-1 block text-[10px] muted leading-5">
                     {expiryHint(form.discount_expiry)}
@@ -740,10 +792,11 @@ function ProductEditorComponent({
           </div>
 
           <div className="card rounded-2xl p-5 space-y-3">
-            <h3 className="font-black text-sm">ابعاد، وزن و برچسب‌ها</h3>
+            <h3 className="font-black text-sm">{translateText('ابعاد، وزن و برچسب‌ها')}</h3>
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs muted">
-                عرض ({form.width_unit})
+                {translateText('عرض (')}
+                {form.width_unit})
                 <input
                   className="input mt-1"
                   type="number"
@@ -753,7 +806,8 @@ function ProductEditorComponent({
                 />
               </label>
               <label className="text-xs muted">
-                ارتفاع ({form.height_unit})
+                {translateText('ارتفاع (')}
+                {form.height_unit})
                 <input
                   className="input mt-1"
                   type="number"
@@ -765,7 +819,7 @@ function ProductEditorComponent({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs muted">
-                وزن
+                {translateText('وزن ')}
                 <input
                   className="input mt-1"
                   type="number"
@@ -775,24 +829,26 @@ function ProductEditorComponent({
                 />
               </label>
               <label className="text-xs muted">
-                واحد وزن
+                {translateText('واحد وزن ')}
                 <select
                   className="input mt-1"
                   value={form.weight_unit}
                   onChange={(e) => setForm({ ...form, weight_unit: e.target.value })}
                 >
-                  <option value="G">گرم (G)</option>
-                  <option value="KG">کیلوگرم (KG)</option>
+                  <option value="G">{translateText('گرم (G)')}</option>
+                  <option value="KG">{translateText('کیلوگرم (KG)')}</option>
                 </select>
               </label>
             </div>
 
             <div>
-              <span className="text-xs muted block mb-1">برچسب‌ها</span>
+              <span className="text-xs muted block mb-1">{translateText('برچسب‌ها')}</span>
               <div className="flex gap-2">
                 <input
                   className="input text-xs"
-                  placeholder="افزودن تگ…"
+                  placeholder={content.placeholder('tags')}
+                  dir={content.dir}
+                  lang={content.locale}
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -806,21 +862,18 @@ function ProductEditorComponent({
                   <Plus size={15} />
                 </button>
               </div>
-              {form.tags.length > 0 && (
+              {content.value('tags').length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {form.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="chip !py-0.5 !px-2 text-xs flex items-center gap-1"
-                    >
+                  {content.value('tags').map((t) => (
+                    <span key={t} className="chip !py-0.5 !px-2 text-xs flex items-center gap-1">
                       {t}
                       <button
                         type="button"
                         onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            tags: prev.tags.filter((x) => x !== t),
-                          }))
+                          content.update(
+                            'tags',
+                            content.value('tags').filter((x) => x !== t),
+                          )
                         }
                       >
                         <X size={11} />

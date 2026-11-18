@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 /*
  * کمک‌تابع‌های مربوط به کاربر
  * بک‌اند فیلدهای firstname / lastname را به کاربر اضافه کرده است؛
@@ -8,10 +9,10 @@
 export const userFullName = (user) =>
   `${user?.firstname || ''} ${user?.lastname || ''}`.trim();
 
-export const userDisplayName = (user, fallback = 'کاربر ژئو کالا') =>
+export const userDisplayName = (user, fallback = translateText("کاربر ژئو کالا")) =>
   userFullName(user) || user?.username || fallback;
 
-export const userInitial = (user, fallback = 'ک') => {
+export const userInitial = (user, fallback = translateText("ک")) => {
   const name = userFullName(user) || user?.username || '';
   return String(name).trim().charAt(0) || fallback;
 };
@@ -48,7 +49,7 @@ export const storeContactInfo = (store, owner) => {
   const address = owner?.address || {};
   const ownerAddress = [address.province, address.city, address.full_address]
     .filter(Boolean)
-    .join('، ');
+    .join(translateText("، "));
 
   return {
     storeName: String(store?.name || '').trim(),

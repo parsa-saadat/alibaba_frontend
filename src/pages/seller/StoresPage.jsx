@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -80,7 +81,7 @@ function StoresPage() {
     setLoadError('');
     try {
       const [storesRes, productsRes] = await Promise.all([
-        axios.get(`${API}/perm/stores?limit=100`, authHeaders()),
+        axios.get(`${API}/perm/stores?lang=all&limit=100`, authHeaders()),
         axios.get(`${API}/perm/products?limit=200`, authHeaders()).catch(() => null),
       ]);
       setStores(storesRes.data.body?.data || storesRes.data.body || []);
@@ -92,7 +93,7 @@ function StoresPage() {
         return load(silent, true);
       }
       setStores([]);
-      setLoadError(error?.response?.data?.message || 'دریافت فهرست فروشگاه‌ها ناموفق بود');
+      setLoadError(error?.response?.data?.message || translateText("دریافت فهرست فروشگاه‌ها ناموفق بود"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -146,10 +147,10 @@ function StoresPage() {
     setBusyId(getId(store));
     try {
       await axios.put(`${API}/store/${getId(store)}`, { status, contact_info: store.contact_info }, authHeaders());
-      toast.success(`وضعیت فروشگاه به «${statusFa(status)}» تغییر کرد`);
+      toast.success(translateText("وضعیت فروشگاه به «{{v0}}» تغییر کرد", {v0: (statusFa(status))}));
       load(true);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'خطا در تغییر وضعیت فروشگاه');
+      toast.error(error.response?.data?.message || translateText("خطا در تغییر وضعیت فروشگاه"));
     } finally {
       setBusyId('');
     }
@@ -158,7 +159,7 @@ function StoresPage() {
   if (loading && stores.length === 0) {
     return (
       <div className="py-16">
-        <Loading label="در حال بارگذاری فروشگاه‌ها…" />
+        <Loading label={translateText("در حال بارگذاری فروشگاه‌ها…")} />
       </div>
     );
   }
@@ -167,18 +168,16 @@ function StoresPage() {
     return (
       <div className="card rounded-2xl p-8 text-center space-y-3">
         <p className="text-sm muted">{loadError}</p>
-        <button type="button" onClick={() => load()} className="btn-yellow !py-2 text-xs">
-          تلاش دوباره
-        </button>
+        <button type="button" onClick={() => load()} className="btn-yellow !py-2 text-xs">{translateText("تلاش دوباره ")}</button>
       </div>
     );
   }
 
   const tabs = [
-    { id: 'all', label: 'همه' },
-    { id: 'ENABLE', label: 'فعال' },
-    { id: 'DISABLE', label: 'غیرفعال' },
-    { id: 'ROOT_DISABLE', label: 'مسدود' },
+    { id: 'all', label: translateText("همه") },
+    { id: 'ENABLE', label: translateText("فعال") },
+    { id: 'DISABLE', label: translateText("غیرفعال") },
+    { id: 'ROOT_DISABLE', label: translateText("مسدود") },
   ];
 
   return (
@@ -186,8 +185,8 @@ function StoresPage() {
       {/* ───── سرصفحه ───── */}
             <PanelPageHeader
         icon={Store}
-        title="فروشگاه‌های من"
-        subtitle={`${toFa(stores.length)} فروشگاه • ${toFa(products.length)} کالا در مجموع`}
+        title={translateText("فروشگاه‌های من")}
+        subtitle={translateText("{{v0}} فروشگاه • {{v1}} کالا در مجموع", {v0: (toFa(stores.length)),v1: (toFa(products.length))})}
         onRefresh={() => {
           capacity.refresh();
           load(true);
@@ -200,10 +199,10 @@ function StoresPage() {
 
       {/* ───── آمار ───── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="کل فروشگاه‌ها" value={toFa(counts.all)} hint={`${toFa(products.length)} کالا`} icon={Store} />
-        <StatTile label="فعال" value={toFa(counts.ENABLE)} hint="در دسترس مشتری" icon={CheckCircle2} tint="#17994f" />
-        <StatTile label="غیرفعال" value={toFa(counts.DISABLE)} hint="موقتاً بسته" icon={PauseCircle} tint="#c2740a" />
-        <StatTile label="مسدود" value={toFa(counts.ROOT_DISABLE)} hint="توسط مدیریت" icon={Ban} tint="#e53935" />
+        <StatTile label={translateText("کل فروشگاه‌ها")} value={toFa(counts.all)} hint={translateText("{{v0}} کالا", {v0: (toFa(products.length))})} icon={Store} />
+        <StatTile label={translateText("فعال")} value={toFa(counts.ENABLE)} hint={translateText("در دسترس مشتری")} icon={CheckCircle2} tint="#17994f" />
+        <StatTile label={translateText("غیرفعال")} value={toFa(counts.DISABLE)} hint={translateText("موقتاً بسته")} icon={PauseCircle} tint="#c2740a" />
+        <StatTile label={translateText("مسدود")} value={toFa(counts.ROOT_DISABLE)} hint={translateText("توسط مدیریت")} icon={Ban} tint="#e53935" />
       </div>
 
       {/* ───── فیلتر و جستجو ───── */}
@@ -229,23 +228,23 @@ function StoresPage() {
               </button>
             );
           })}
-          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)} نتیجه</span>
+          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)}{translateText(" نتیجه")}</span>
         </div>
 
         <div className="relative">
-          <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 muted" />
+          <Search size={15} className="absolute end-3 top-1/2 -translate-y-1/2 muted" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="جستجوی نام فروشگاه، ایمیل، تلفن یا نشانی…"
-            className="input !py-2.5 !pr-9 text-xs w-full"
+            placeholder={translateText("جستجوی نام فروشگاه، ایمیل، تلفن یا نشانی…")}
+            className="input !py-2.5 !pe-9 text-xs w-full"
           />
           {search && (
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="btn-ghost !p-1 absolute left-2 top-1/2 -translate-y-1/2"
-              aria-label="پاک کردن جستجو"
+              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
+              aria-label={translateText("پاک کردن جستجو")}
             >
               <X size={13} />
             </button>
@@ -263,23 +262,19 @@ function StoresPage() {
             <Store size={24} />
           </span>
           <b className="block text-sm">
-            {capacity.reason === 'not-seller' ? 'هنوز فروشنده نیستید' : 'فروشگاهی پیدا نشد'}
+            {capacity.reason === 'not-seller' ? translateText("هنوز فروشنده نیستید") : translateText("فروشگاهی پیدا نشد")}
           </b>
           <p className="text-xs muted">
             {capacity.reason === 'not-seller'
-              ? 'برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید؛ از پنل کاربری درخواست فروشندگی بدهید.'
+              ? translateText("برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید؛ از پنل کاربری درخواست فروشندگی بدهید.")
               : stores.length === 0
-                ? 'هنوز فروشگاهی نساخته‌اید.'
-                : 'فیلتر یا عبارت جستجو را تغییر دهید.'}
+                ? translateText("هنوز فروشگاهی نساخته‌اید.")
+                : translateText("فیلتر یا عبارت جستجو را تغییر دهید.")}
           </p>
           {capacity.reason === 'not-seller' ? (
-            <Link to="/profile" className="btn-ghost !py-2 !px-3 text-xs inline-flex items-center gap-1.5">
-              درخواست فروشندگی
-            </Link>
+            <Link to="/profile" className="btn-ghost !py-2 !px-3 text-xs inline-flex items-center gap-1.5">{translateText("درخواست فروشندگی ")}</Link>
           ) : capacity.canCreate ? (
-            <button type="button" onClick={() => setStoreModal(null)} className="btn-yellow !py-2 !px-3 text-xs">
-              ساخت فروشگاه جدید
-            </button>
+            <button type="button" onClick={() => setStoreModal(null)} className="btn-yellow !py-2 !px-3 text-xs">{translateText("ساخت فروشگاه جدید ")}</button>
           ) : (
             <button
               type="button"
@@ -287,7 +282,7 @@ function StoresPage() {
               title={capacity.blockedText}
               className="btn-ghost !py-2 !px-3 text-xs opacity-60 cursor-not-allowed"
             >
-              {capacity.blockedText || 'ساخت فروشگاه جدید'}
+              {capacity.blockedText || translateText("ساخت فروشگاه جدید")}
             </button>
           )}
         </section>
@@ -317,13 +312,13 @@ function StoresPage() {
                   {store.banner_image_id && (
                     <StorageImageComponent
                       file={store.banner_image_id}
-                      alt={`بنر ${store.name}`}
+                      alt={translateText("بنر {{v0}}", {v0: (store.name)})}
                       className="w-full h-full object-cover"
                       onZoom={zoomable(store.banner_image_id)}
                     />
                   )}
                   <span
-                    className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black backdrop-blur"
+                    className="absolute top-2 start-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black backdrop-blur"
                     style={{ background: meta.bg, color: meta.color }}
                   >
                     <StatusIcon size={11} /> {statusFa(store.status)}
@@ -350,7 +345,7 @@ function StoresPage() {
 
                     <div className="min-w-0 flex-1">
                       <Link to={`/store/${id}`} className="block truncate text-sm font-black hover:underline">
-                        {store.name || 'بدون نام'}
+                        {store.name || translateText("بدون نام")}
                       </Link>
                       {store.description && (
                         <p className="mt-1 line-clamp-2 text-[11px] muted leading-5">{store.description}</p>
@@ -360,13 +355,11 @@ function StoresPage() {
                           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--text)' }}
                         >
-                          <Package size={10} /> {toFa(stats.count)} کالا
-                        </span>
+                          <Package size={10} /> {toFa(stats.count)}{translateText(" کالا ")}</span>
                         <span
                           className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--muted)' }}
-                        >
-                          موجودی: {toFa(stats.stock)}
+                        >{translateText("موجودی: ")}{toFa(stats.stock)}
                         </span>
                       </div>
                     </div>
@@ -393,10 +386,9 @@ function StoresPage() {
                       disabled={busy || rooted}
                       onClick={() => setStoreModal(store)}
                       className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
-                      title={rooted ? 'این فروشگاه مسدود است' : 'ویرایش فروشگاه'}
+                      title={rooted ? translateText("این فروشگاه مسدود است") : translateText("ویرایش فروشگاه")}
                     >
-                      <Pencil size={13} /> ویرایش
-                    </button>
+                      <Pencil size={13} />{translateText(" ویرایش ")}</button>
 
                     {!rooted && (
                       <button
@@ -406,18 +398,16 @@ function StoresPage() {
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                       >
                         {store.status === 'ENABLE' ? <PauseCircle size={13} /> : <CheckCircle2 size={13} />}
-                        {store.status === 'ENABLE' ? 'غیرفعال کن' : 'فعال کن'}
+                        {store.status === 'ENABLE' ? translateText("غیرفعال کن") : translateText("فعال کن")}
                       </button>
                     )}
 
                     <Link to={`/store/${id}`} className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1">
-                      <ExternalLink size={13} /> صفحه‌ی فروشگاه
-                    </Link>
+                      <ExternalLink size={13} />{translateText(" صفحه‌ی فروشگاه ")}</Link>
 
                     {rooted && (
                       <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: '#e53935' }}>
-                        <Ban size={12} /> مسدود توسط مدیریت
-                      </span>
+                        <Ban size={12} />{translateText(" مسدود توسط مدیریت ")}</span>
                     )}
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Loader2, Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
@@ -22,7 +23,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           className="btn-yellow w-full !rounded-xl !py-2 flex items-center justify-center gap-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ShoppingCart size={16} />
-          {soldOut ? 'ناموجود' : 'افزودن به سبد'}
+          {soldOut ? translateText("ناموجود") : translateText("افزودن به سبد")}
         </button>
       );
     }
@@ -35,7 +36,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
         <button
           type="button"
           onClick={onDecrement}
-          aria-label={qty === 1 ? 'حذف از سبد خرید' : 'کاهش تعداد'}
+          aria-label={qty === 1 ? translateText("حذف از سبد خرید") : translateText("کاهش تعداد")}
           className={`flex h-9 w-9 items-center justify-center rounded-lg border border-theme bg-[var(--card)] transition ${
             qty === 1 ? 'hover:border-rose-500/40 hover:text-rose-500' : 'hover:opacity-80'
           }`}
@@ -51,7 +52,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           type="button"
           onClick={onIncrement}
           disabled={cannotIncrement}
-          aria-label="افزایش تعداد"
+          aria-label={translateText("افزایش تعداد")}
           className="flex h-9 w-9 items-center justify-center rounded-lg transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
           style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
         >
@@ -68,7 +69,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           {busy ? (
             <>
               <Loader2 size={14} className="animate-spin muted" />
-              <span className="muted">در حال همگام‌سازی…</span>
+              <span className="muted">{translateText("در حال همگام‌سازی…")}</span>
             </>
           ) : qty > 0 ? (
             <>
@@ -76,19 +77,17 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
                 size={14}
                 className="text-emerald-600 dark:text-emerald-400"
               />
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                موجود در سبد خرید شما
-              </span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400">{translateText("موجود در سبد خرید شما ")}</span>
             </>
           ) : soldOut ? (
-            <span className="font-bold text-rose-500">این محصول ناموجود است</span>
+            <span className="font-bold text-rose-500">{translateText("این محصول ناموجود است")}</span>
           ) : (
-            <span className="muted">تعداد در سبد خرید</span>
+            <span className="muted">{translateText("تعداد در سبد خرید")}</span>
           )}
         </span>
 
         {max !== null && !soldOut && (
-          <span className="text-[11px] muted">حداکثر: {toFa(max)} عدد</span>
+          <span className="text-[11px] muted">{translateText("حداکثر: ")}{toFa(max)}{translateText(" عدد")}</span>
         )}
       </div>
 
@@ -97,7 +96,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           type="button"
           onClick={onDecrement}
           disabled={cannotDecrement}
-          aria-label={qty === 1 ? 'حذف از سبد خرید' : 'کاهش تعداد'}
+          aria-label={qty === 1 ? translateText("حذف از سبد خرید") : translateText("کاهش تعداد")}
           className={`flex h-11 w-11 items-center justify-center rounded-lg border border-theme bg-[var(--card)] transition disabled:cursor-not-allowed disabled:opacity-35 ${
             qty === 1
               ? 'hover:border-rose-500/40 hover:text-rose-500'
@@ -115,7 +114,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           type="button"
           onClick={onIncrement}
           disabled={cannotIncrement}
-          aria-label={qty === 0 ? 'افزودن به سبد خرید' : 'افزایش تعداد'}
+          aria-label={qty === 0 ? translateText("افزودن به سبد خرید") : translateText("افزایش تعداد")}
           className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
           style={{ background: 'var(--primary-color)' }}
         >
@@ -128,9 +127,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           to="/cart"
           className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-500/20 dark:text-emerald-400"
         >
-          <ShoppingCart size={14} />
-          مشاهده سبد خرید
-        </Link>
+          <ShoppingCart size={14} />{translateText("مشاهده سبد خرید ")}</Link>
       )}
     </div>
   );

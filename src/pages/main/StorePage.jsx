@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
@@ -29,11 +30,11 @@ import { sellerDisplayName } from '../../utils/helpers/user';
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const SORTS = [
-  { value: 'newest', label: 'جدیدترین' },
-  { value: 'cheap', label: 'ارزان‌ترین' },
-  { value: 'expensive', label: 'گران‌ترین' },
-  { value: 'discount', label: 'بیشترین تخفیف' },
-  { value: 'sold', label: 'پرفروش‌ترین' },
+  { value: 'newest', label: translateText("جدیدترین") },
+  { value: 'cheap', label: translateText("ارزان‌ترین") },
+  { value: 'expensive', label: translateText("گران‌ترین") },
+  { value: 'discount', label: translateText("بیشترین تخفیف") },
+  { value: 'sold', label: translateText("پرفروش‌ترین") },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -109,7 +110,7 @@ function StorePage() {
     ])
       .then(([storeRes, prodRes]) => {
         const s = getBody(storeRes) || storeRes;
-        if (!s) throw new Error('فروشگاه پیدا نشد.');
+        if (!s) throw new Error(translateText("فروشگاه پیدا نشد."));
         setStore(s);
 
         /*
@@ -137,7 +138,7 @@ function StorePage() {
       })
       .catch((err) => {
         if (!axios.isCancel(err)) {
-          setError(err.response?.data?.message || err.message || 'فروشگاه پیدا نشد.');
+          setError(err.response?.data?.message || err.message || translateText("فروشگاه پیدا نشد."));
         }
       })
       .finally(() => {
@@ -177,7 +178,7 @@ function StorePage() {
         return;
       }
       await navigator.clipboard.writeText(url);
-      setToast('لینک فروشگاه کپی شد');
+      setToast(translateText("لینک فروشگاه کپی شد"));
     } catch {
       // کاربر اشتراک‌گذاری را لغو کرده است
     }
@@ -231,7 +232,7 @@ function StorePage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-6">
-        <Loading label="در حال بارگذاری فروشگاه…" />
+        <Loading label={translateText("در حال بارگذاری فروشگاه…")} />
         <div className="mt-6">
           <HeroSkeleton />
         </div>
@@ -249,15 +250,11 @@ function StorePage() {
           >
             <StoreIcon size={30} />
           </span>
-          <h1 className="mt-4 text-lg font-black">فروشگاه پیدا نشد</h1>
-          <p className="mt-2 text-sm muted">{error || 'این فروشگاه ممکن است حذف شده باشد یا آدرس آن اشتباه است.'}</p>
+          <h1 className="mt-4 text-lg font-black">{translateText("فروشگاه پیدا نشد")}</h1>
+          <p className="mt-2 text-sm muted">{error || translateText("این فروشگاه ممکن است حذف شده باشد یا آدرس آن اشتباه است.")}</p>
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-            <button type="button" onClick={() => setRetry((v) => v + 1)} className="btn-yellow">
-              تلاش دوباره
-            </button>
-            <Link to="/products" className="btn-ghost">
-              مشاهده همه محصولات
-            </Link>
+            <button type="button" onClick={() => setRetry((v) => v + 1)} className="btn-yellow">{translateText("تلاش دوباره ")}</button>
+            <Link to="/products" className="btn-ghost">{translateText("مشاهده همه محصولات ")}</Link>
           </div>
         </div>
       </div>
@@ -290,9 +287,7 @@ function StorePage() {
             <span className="truncate text-sm font-black">{store.name}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={scrollToProducts} className="btn-ghost hidden !py-1.5 text-xs sm:inline-flex">
-              محصولات
-            </button>
+            <button type="button" onClick={scrollToProducts} className="btn-ghost hidden !py-1.5 text-xs sm:inline-flex">{translateText("محصولات ")}</button>
           </div>
         </div>
       </div>
@@ -302,7 +297,7 @@ function StorePage() {
         <div className="relative h-52 w-full bg-navy sm:h-72">
           <StorageImageComponent
             file={store.banner_image_id}
-            alt={`بنر ${store.name}`}
+            alt={translateText("بنر {{v0}}", {v0: (store.name)})}
             eager
             className="h-full w-full object-cover"
             onZoom={store.banner_image_id ? (f, a) => setZoomFile({ file: f, alt: a }) : null}
@@ -318,7 +313,7 @@ function StorePage() {
               style={{ background: isActive ? '#17994f' : '#c2740a' }}
             >
               {isActive ? <CheckCircle2 size={14} /> : <AlertOctagon size={14} />}
-              {isActive ? 'فعال' : 'غیرفعال'}
+              {isActive ? translateText("فعال") : translateText("غیرفعال")}
             </span>
           </div>
         </div>
@@ -345,12 +340,11 @@ function StorePage() {
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs muted">
                   <span className="inline-flex items-center gap-1.5">
                     <StoreIcon size={12} className="shrink-0" />
-                    {sellerName ? `فروشنده: ${sellerName}` : 'فروشگاه رسمی در ژئو کالا'}
+                    {sellerName ? translateText("فروشنده: {{v0}}", {v0: (sellerName)}) : translateText("فروشگاه رسمی در ژئو کالا")}
                   </span>
                   {store.create_at && (
                     <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays size={12} className="shrink-0" />
-                      عضویت از {formatDate(store.create_at)}
+                      <CalendarDays size={12} className="shrink-0" />{translateText("عضویت از ")}{formatDate(store.create_at)}
                     </span>
                   )}
                 </div>
@@ -360,7 +354,7 @@ function StorePage() {
             <div className="flex items-center gap-2">
               <button type="button" onClick={shareStore} className="btn-ghost inline-flex items-center gap-2 !px-3.5 text-sm">
                 <Share2 size={16} />
-                <span className="hidden sm:inline">اشتراک‌گذاری</span>
+                <span className="hidden sm:inline">{translateText("اشتراک‌گذاری")}</span>
               </button>
             </div>
           </div>
@@ -373,12 +367,12 @@ function StorePage() {
           <div className="card2 mt-5 rounded-2xl p-3.5 sm:p-4">
             <div className="flex flex-wrap items-center gap-2">
               <TrustBadge trusted={sellerTrusted} showUntrusted />
-              <span className="text-xs font-bold">وضعیت اعتماد فروشنده</span>
+              <span className="text-xs font-bold">{translateText("وضعیت اعتماد فروشنده")}</span>
             </div>
             <p className="mt-2 text-xs leading-6 muted">
               {sellerTrusted
-                ? 'هویت و سابقه‌ی این فروشنده توسط ژئو کالا بررسی و تأیید شده است؛ خرید از این فروشگاه نشان اعتماد دارد.'
-                : 'این فروشنده هنوز نشان اعتماد ژئو کالا را دریافت نکرده است. پیش از خرید، اطلاعات تماس و شرایط فروش را با او هماهنگ کنید.'}
+                ? translateText("هویت و سابقه‌ی این فروشنده توسط ژئو کالا بررسی و تأیید شده است؛ خرید از این فروشگاه نشان اعتماد دارد.")
+                : translateText("این فروشنده هنوز نشان اعتماد ژئو کالا را دریافت نکرده است. پیش از خرید، اطلاعات تماس و شرایط فروش را با او هماهنگ کنید.")}
             </p>
           </div>
 
@@ -386,12 +380,12 @@ function StorePage() {
           {(contact.email || contact.phone || contact.address) && (
             <div className="mt-5 grid gap-3 border-t border-theme pt-5 sm:grid-cols-2 lg:grid-cols-3">
               {contact.email && (
-                <ContactChip icon={Mail} label="ایمیل" value={contact.email} href={`mailto:${contact.email}`} />
+                <ContactChip icon={Mail} label={translateText("ایمیل")} value={contact.email} href={`mailto:${contact.email}`} />
               )}
               {contact.phone && (
-                <ContactChip icon={Phone} label="تلفن تماس" value={toFa(contact.phone)} href={`tel:${contact.phone}`} />
+                <ContactChip icon={Phone} label={translateText("تلفن تماس")} value={toFa(contact.phone)} href={`tel:${contact.phone}`} />
               )}
-              {contact.address && <ContactChip icon={MapPin} label="نشانی فروشگاه" value={contact.address} />}
+              {contact.address && <ContactChip icon={MapPin} label={translateText("نشانی فروشگاه")} value={contact.address} />}
             </div>
           )}
         </div>
@@ -402,7 +396,7 @@ function StorePage() {
         <div className="card flex flex-col gap-4 rounded-2xl p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2">
             <Package size={19} className="text-yellow" />
-            <h2 className="text-base font-black">محصولات فروشگاه</h2>
+            <h2 className="text-base font-black">{translateText("محصولات فروشگاه")}</h2>
             <span className="rounded-full px-2.5 py-0.5 text-xs font-bold text-yellow" style={{ background: 'rgba(255,214,10,0.12)' }}>
               {toFa(filteredProducts.length)}
             </span>
@@ -414,7 +408,7 @@ function StorePage() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="جستجو در این فروشگاه…"
+                placeholder={translateText("جستجو در این فروشگاه…")}
                 className="input !py-2 !pe-9 text-xs"
               />
             </div>
@@ -424,24 +418,20 @@ function StorePage() {
               onClick={() => setOnlyDiscount((v) => !v)}
               className={`chip inline-flex items-center gap-1 ${onlyDiscount ? 'on' : ''}`}
             >
-              <Sparkles size={13} />
-              تخفیف‌دار
-            </button>
+              <Sparkles size={13} />{translateText("تخفیف‌دار ")}</button>
 
             <button
               type="button"
               onClick={() => setOnlyInStock((v) => !v)}
               className={`chip inline-flex items-center gap-1 ${onlyInStock ? 'on' : ''}`}
             >
-              <ShoppingBag size={13} />
-              فقط موجود
-            </button>
+              <ShoppingBag size={13} />{translateText("فقط موجود ")}</button>
 
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
               className="input !w-auto !py-1.5 text-xs"
-              aria-label="مرتب‌سازی محصولات فروشگاه"
+              aria-label={translateText("مرتب‌سازی محصولات فروشگاه")}
             >
               {SORTS.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -456,9 +446,7 @@ function StorePage() {
                 onClick={resetFilters}
                 className="inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold text-yellow transition hover:bg-white/5"
               >
-                <X size={13} />
-                پاک کردن
-              </button>
+                <X size={13} />{translateText("پاک کردن ")}</button>
             )}
           </div>
         </div>
@@ -467,7 +455,7 @@ function StorePage() {
           products={filteredProducts}
           loading={loading}
           columns={3}
-          emptyTitle="محصولی مطابق فیلتر در این فروشگاه یافت نشد"
+          emptyTitle={translateText("محصولی مطابق فیلتر در این فروشگاه یافت نشد")}
           /* همه‌ی کالاهای این صفحه از همین فروشگاه‌اند؛ پس وضعیت تأیید فروشنده
              مستقیم به کارت‌ها داده می‌شود تا هر کارت دنبال فروشنده نگردد */
           trust={storeTrust}
@@ -481,7 +469,7 @@ function StorePage() {
       <div
         role="status"
         aria-live="polite"
-        className={`pointer-events-none fixed bottom-6 start-1/2 z-50 -translate-x-1/2 rounded-xl bg-navy px-4 py-2.5 text-xs font-bold text-white shadow-2xl transition-all duration-300 ${
+        className={`pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-navy px-4 py-2.5 text-xs font-bold text-white shadow-2xl transition-all duration-300 ${
           toast ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
         }`}
       >

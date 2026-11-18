@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +30,7 @@ function CreateProductPage() {
   if (loading) {
     return (
       <div className="py-16">
-        <Loading label="در حال آماده‌سازی فرم ایجاد محصول…" />
+        <Loading label={translateText("در حال آماده‌سازی فرم ایجاد محصول…")} />
       </div>
     );
   }

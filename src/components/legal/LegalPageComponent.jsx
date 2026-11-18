@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, FileText, ListTree, ShieldQuestion } from 'lucide-react';
@@ -74,7 +75,7 @@ function LegalPageComponent({
   footerNote,
   tabs = [],
   activeTab = '',
-  crumb = 'قوانین و مقررات',
+  crumb = translateText("قوانین و مقررات"),
 }) {
   const [active, setActive] = useState(sections[0]?.id || '');
 
@@ -102,12 +103,10 @@ function LegalPageComponent({
     <div className="mx-auto max-w-6xl px-3 py-5 sm:px-4 sm:py-7">
       {/* مسیر */}
       <nav className="mb-3 flex items-center gap-1 text-[11px] muted">
-        <Link to="/" className="hover-yellow">
-          خانه
-        </Link>
-        <ChevronLeft size={12} />
+        <Link to="/" className="hover-yellow">{translateText("خانه ")}</Link>
+        <ChevronLeft className="logical-icon" size={12} />
         <span>{crumb}</span>
-        <ChevronLeft size={12} />
+        <ChevronLeft className="logical-icon" size={12} />
         <span className="font-bold" style={{ color: 'var(--accent-text)' }}>
           {title}
         </span>
@@ -168,7 +167,7 @@ function LegalPageComponent({
           </div>
 
           <div className="shrink-0 rounded-2xl px-4 py-3 text-center ring-1 ring-white/10">
-            <span className="block text-[10px] text-white/60">آخرین بازنگری</span>
+            <span className="block text-[10px] text-white/60">{translateText("آخرین بازنگری")}</span>
             <b className="mt-0.5 block text-xs text-white">{updated}</b>
           </div>
         </div>
@@ -192,9 +191,7 @@ function LegalPageComponent({
         <aside className="hidden lg:block">
           <div className="card sticky top-[calc(var(--header-h,96px)+12px)] rounded-3xl p-4">
             <b className="flex items-center gap-1.5 text-xs font-black">
-              <ListTree size={14} style={{ color: 'var(--accent-text)' }} />
-              فهرست مطالب
-            </b>
+              <ListTree size={14} style={{ color: 'var(--accent-text)' }} />{translateText("فهرست مطالب ")}</b>
             <nav className="mt-3 space-y-1">
               {numbered.map((section) => {
                 const isActive = active === section.id;
@@ -227,18 +224,14 @@ function LegalPageComponent({
           ))}
 
           <div className="card rounded-3xl p-5 sm:p-6">
-            <b className="text-sm font-black">سؤالی مانده؟</b>
+            <b className="text-sm font-black">{translateText("سؤالی مانده؟")}</b>
             <p className="mt-2 text-xs leading-6 muted">
               {footerNote ||
-                'اگر بخشی از این قوانین برایتان روشن نیست، پیش از خرید یا ثبت‌نام با ما تماس بگیرید تا با هم مرور کنیم.'}
+                translateText("اگر بخشی از این قوانین برایتان روشن نیست، پیش از خرید یا ثبت‌نام با ما تماس بگیرید تا با هم مرور کنیم.")}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link to="/contact" className="btn-yellow !py-2 text-xs">
-                تماس با پشتیبانی
-              </Link>
-              <Link to="/about" className="btn-ghost !py-2 text-xs">
-                درباره ژئو کالا
-              </Link>
+              <Link to="/contact" className="btn-yellow !py-2 text-xs">{translateText("تماس با پشتیبانی ")}</Link>
+              <Link to="/about" className="btn-ghost !py-2 text-xs">{translateText("درباره ژئو کالا ")}</Link>
               {tabs
                 .filter((tab) => tab.key !== activeTab)
                 .map((tab) => (

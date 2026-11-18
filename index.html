@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fa" dir="rtl" data-theme="dark">
+<html lang="en" dir="ltr" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,21 +7,21 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <meta property="og:image" content="/logo.png" />
-    <title>ژئو کالا | بازارگاه تخصصی تجهیزات نقشه‌برداری</title>
+    <title>GeoCala | Surveying Equipment Marketplace</title>
     <meta
       name="description"
       content="ژئو کالا، بازارگاه تخصصی تجهیزات نقشه‌برداری؛ جی‌پی‌اس ایستگاهی و RTK، توتال استیشن، دوربین نقشه‌برداری، کنترولر و متر لیزری از برندهای معتبر، با مشاوره فنی و ضمانت اصالت کالا. زیرمجموعه شرکت بازرگانی فناوری سران ماهان آسیا."
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ژئو کالا" />
-    <meta property="og:title" content="ژئو کالا | بازارگاه تخصصی تجهیزات نقشه‌برداری" />
+    <meta property="og:title" content="GeoCala | Surveying Equipment Marketplace" />
     <meta
       property="og:description"
       content="خرید تجهیزات نقشه‌برداری از برندهای معتبر؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و لوازم جانبی."
     />
     <style>
       html,body{margin:0;background:#0a1736}
-      #boot-splash{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 20% 15%,rgba(255,214,10,.14),transparent 55%),linear-gradient(135deg,#0f2150,#0a1736);font-family:Vazirmatn,Tahoma,sans-serif;direction:rtl;color:#eef2ff;z-index:9999}
+      #boot-splash{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 20% 15%,rgba(255,214,10,.14),transparent 55%),linear-gradient(135deg,#0f2150,#0a1736);font-family:Vazirmatn,Tahoma,sans-serif;direction:inherit;color:#eef2ff;z-index:9999}
       #boot-splash .boot-card{text-align:center;padding:24px;max-width:420px}
       #boot-splash b{display:block;font-size:20px;font-weight:900;margin-top:18px;letter-spacing:.02em}
       #boot-splash p{margin:8px 0 0;font-size:12px;color:#9aa8cc;line-height:2}
@@ -36,8 +36,8 @@
       <div id="boot-splash" role="status" aria-live="polite">
         <div class="boot-card">
           <div class="boot-ring"><span></span></div>
-          <b>ژئو کالا</b>
-          <p id="boot-splash-text">در حال بارگذاری…</p>
+          <b>GeoCala</b>
+          <p id="boot-splash-text">Loading…</p>
         </div>
       </div>
     </div>
@@ -48,6 +48,18 @@
     -->
     <script>
       (function () {
+        var bootLang = 'en';
+        try { bootLang = localStorage.getItem('app.language') || 'en'; } catch (e) {}
+        var bootMessages = {
+          en: ['Loading…','Connection is slow. Please wait…','Loading took too long. Reload the page.'],
+          fa: ['در حال بارگذاری…','اتصال کند است؛ لطفاً صبر کنید…','بارگذاری طول کشید؛ صفحه را دوباره بارگذاری کنید.'],
+          ar: ['جارٍ التحميل…','الاتصال بطيء، يرجى الانتظار…','استغرق التحميل وقتاً طويلاً. أعد تحميل الصفحة.'],
+          tr: ['Yükleniyor…','Bağlantı yavaş. Lütfen bekleyin…','Yükleme uzun sürdü. Sayfayı yenileyin.']
+        };
+        var bootText = bootMessages[bootLang] || bootMessages.en;
+        document.documentElement.lang = bootMessages[bootLang] ? bootLang : 'en';
+        document.documentElement.dir = ['fa','ar'].indexOf(bootLang) >= 0 ? 'rtl' : 'ltr';
+        document.getElementById('boot-splash-text').textContent = bootText[0];
         var lastError = '';
         window.addEventListener(
           'error',
@@ -96,7 +108,7 @@
         /* اگر بارگذاری کند بود، فقط یک پیام دلگرم‌کننده نشان بده (نه خطا) */
         setTimeout(function () {
           var hint = document.getElementById('boot-splash-text');
-          if (hint) hint.textContent = 'اتصال کمی کند است؛ لطفاً چند لحظه صبر کنید…';
+          if (hint) hint.textContent = bootText[1];
         }, 7000);
 
         /* خطای نهایی فقط اگر بعد از ۶۰ ثانیه هنوز اسپلش روی صفحه باشد */
@@ -104,7 +116,7 @@
           var root = document.getElementById('boot-splash');
           if (!root) return;
           var hint = document.getElementById('boot-splash-text');
-          if (hint) hint.innerHTML = 'بارگذاری طول کشید. <a href="" style="color:#ffd60a">تلاش دوباره</a>' + (lastError ? '<br><span dir="ltr" style="font-size:10px">' + lastError + '</span>' : '');
+          if (hint) hint.textContent = bootText[2];
         }, 60000);
       })();
     </script>

@@ -1,3 +1,12 @@
+import useLocalizedContent from '../../hooks/useLocalizedContent';
+import MoneyInput, { usePriceEntry } from '../../components/panel/PriceInputComponent';
+import { dateFormatter } from '../../i18n/date-policy';
+import gregorian_ar from 'react-date-object/locales/gregorian_ar';
+import gregorian_en from 'react-date-object/locales/gregorian_en';
+import { language } from '../../i18n/runtime';
+import { cleanTranslations } from '../../i18n/translation-helpers';
+import ContentLanguage from '../../components/common/locale/ContentLanguageComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -6,16 +15,51 @@ import TimePicker from 'react-multi-date-picker/plugins/time_picker';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
 import { formatDateTime } from '../../utils/helpers/format';
-import { AlertTriangle, CreditCard, Eye, EyeOff, Layers, Loader2, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  CreditCard,
+  Eye,
+  EyeOff,
+  Layers,
+  Loader2,
+  Pencil,
+  Plus,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
-const MIN_TOMAN = 1000;
+const trCalendarLocale = {
+  ...gregorian_en,
+  name: 'gregorian_tr',
+  months: Array.from({ length: 12 }, (_, month) =>
+    ['long', 'short'].map((style) =>
+      new Intl.DateTimeFormat('tr', { month: style }).format(new Date(2026, month, 1)),
+    ),
+  ),
+  weekDays: Array.from({ length: 7 }, (_, day) =>
+    ['long', 'short'].map((style) =>
+      new Intl.DateTimeFormat('tr', { weekday: style }).format(new Date(2026, 0, 3 + day)),
+    ),
+  ),
+};
+const calendarLocale =
+  language === 'fa'
+    ? persian_fa
+    : language === 'ar'
+      ? gregorian_ar
+      : language === 'tr'
+        ? trCalendarLocale
+        : gregorian_en;
+const MIN_TOMAN = 0.01;
 
 const EMPTY_PLAN = {
+  translations: {},
   name: '',
   duration_days: '',
   unlimited: false,
@@ -42,23 +86,24 @@ const toEnDigits = (s) =>
     .replace(/[۰-۹]/g, (d) => PERSIAN_DIGITS.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const groupDigits = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '،');
+const groupDigits = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, translateText('،'));
 const faMoney = (n) => toFaDigits(groupDigits(Math.round(Number(n) || 0)));
 const faNum = (n) =>
   n === null || n === undefined || n === '' ? '—' : toFaDigits(groupDigits(Number(n)));
 
-const planToToman = (price) =>
-  price?.currency === 'IRT' ? Number(price.amount) || 0 : Math.round((Number(price?.amount) || 0) / 10);
+const planToToman = (price) => Number(price?.amount) || 0;
 
 const fmtDate = (d) =>
-  d.toLocaleString('fa-IR-u-ca-persian', { dateStyle: 'medium', timeStyle: 'short' });
+  dateFormatter(language, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
 
 function planToForm(pl) {
   return {
     name: pl.name || '',
+    translations: pl.translations || {},
+    source_currency: (pl.base_price || pl.price)?.currency || 'USD',
     duration_days: pl.duration_days ?? '',
     unlimited: pl.duration_days === null,
-    amount: String(planToToman(pl.price) || ''),
+    amount: String((pl.base_price || pl.price)?.amount || ''),
     max_products: pl.features?.max_products ?? '',
     max_shops: pl.features?.max_shops ?? '',
     max_images_per_product: pl.features?.max_images_per_product ?? '',
@@ -94,8 +139,8 @@ const DP_CSS = `
 function UnitInput({ unit, className = '', ...props }) {
   return (
     <div className="relative min-w-0">
-      <input className={`input !pl-14 ${className}`} {...props} />
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] muted pointer-events-none whitespace-nowrap">
+      <input className={`input !ps-14 ${className}`} {...props} />
+      <span className="absolute start-3 top-1/2 -translate-y-1/2 text-[11px] muted pointer-events-none whitespace-nowrap">
         {unit}
       </span>
     </div>
@@ -124,15 +169,22 @@ function ConfirmDeleteModal({ plan, busy, onCancel, onConfirm }) {
         <div className="w-14 h-14 rounded-2xl grid place-items-center mx-auto mb-4 bg-red-500/15 text-red-400">
           <AlertTriangle size={26} />
         </div>
-        <h3 className="font-black text-lg mb-2">حذف پلن</h3>
+        <h3 className="font-black text-lg mb-2">{translateText('حذف پلن')}</h3>
         <p className="text-sm muted leading-7 mb-5 break-words">
-          آیا از حذف پلن <b className="text-yellow">«{plan.name}»</b> مطمئن هستید؟
+          {translateText('آیا از حذف پلن ')}
+          <b className="text-yellow">«{plan.name}»</b>
+          {translateText(' مطمئن هستید؟ ')}
           <br />
-          این کار قابل بازگشت نیست.
+          {translateText('این کار قابل بازگشت نیست. ')}
         </p>
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={onCancel} disabled={busy} className="btn-ghost !py-2.5 text-sm">
-            انصراف
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={busy}
+            className="btn-ghost !py-2.5 text-sm"
+          >
+            {translateText('انصراف ')}
           </button>
           <button
             type="button"
@@ -142,11 +194,13 @@ function ConfirmDeleteModal({ plan, busy, onCancel, onConfirm }) {
           >
             {busy ? (
               <>
-                <Loader2 size={15} className="animate-spin" /> در حال حذف…
+                <Loader2 size={15} className="animate-spin" />
+                {translateText(' در حال حذف… ')}
               </>
             ) : (
               <>
-                <Trash2 size={15} /> بله، حذف شود
+                <Trash2 size={15} />
+                {translateText(' بله، حذف شود ')}
               </>
             )}
           </button>
@@ -163,7 +217,13 @@ function PlansPage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [planForm, setPlanForm] = useState(EMPTY_PLAN);
+  const content = useLocalizedContent(planForm, setPlanForm, ['name', 'description'], 'plan');
   const [editingId, setEditingId] = useState('');
+  const editingPlan = plans.find((plan) => plan._id === editingId);
+  const priceEntry = usePriceEntry(
+    editingPlan?.base_price || editingPlan?.price,
+    editingId || 'new',
+  );
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -173,7 +233,7 @@ function PlansPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/plan`, {
+      const res = await axios.get(`${API}/plan?lang=all&currency=USD`, {
         ...authHeaders(),
         params: { page: 1, limit: 100 },
       });
@@ -191,6 +251,7 @@ function PlansPage() {
   }, [load]);
 
   const resetForm = () => {
+    priceEntry.retry();
     setPlanForm(EMPTY_PLAN);
     setEditingId('');
   };
@@ -202,19 +263,18 @@ function PlansPage() {
   };
 
   const buildPayload = () => {
+    const planForm = content.payload();
     const name = planForm.name.trim();
-    if (!name) throw new Error('نام پلن الزامی است');
-    if (name.length > 50) throw new Error('نام پلن حداکثر ۵۰ کاراکتر باشد');
+    if (!name) throw new Error(translateText('نام پلن الزامی است'));
+    if (name.length > 50) throw new Error(translateText('نام پلن حداکثر ۵۰ کاراکتر باشد'));
 
-    const toman = Number(planForm.amount);
-    if (!Number.isInteger(toman) || toman < MIN_TOMAN) {
-      throw new Error(`مبلغ باید حداقل ${faMoney(MIN_TOMAN)} تومان باشد`);
-    }
+    const submittedPrice = priceEntry.payload();
 
     let duration = null;
     if (!planForm.unlimited) {
       duration = planForm.duration_days === '' ? 30 : Number(planForm.duration_days);
-      if (!Number.isInteger(duration) || duration < 1) throw new Error('مدت اعتبار معتبر نیست');
+      if (!Number.isInteger(duration) || duration < 1)
+        throw new Error(translateText('مدت اعتبار معتبر نیست'));
     }
 
     const features = {
@@ -224,21 +284,22 @@ function PlansPage() {
         planForm.max_images_per_product === '' ? 5 : Number(planForm.max_images_per_product),
     };
     Object.values(features).forEach((v) => {
-      if (!Number.isInteger(v) || v < 0) throw new Error('سقف‌ها باید عدد صحیح و حداقل ۰ باشند');
+      if (!Number.isInteger(v) || v < 0)
+        throw new Error(translateText('سقف‌ها باید عدد صحیح و حداقل ۰ باشند'));
     });
 
     const sort = planForm.sort_order === '' ? 0 : Number(planForm.sort_order);
-    if (!Number.isInteger(sort) || sort < 0) throw new Error('ترتیب نمایش معتبر نیست');
+    if (!Number.isInteger(sort) || sort < 0) throw new Error(translateText('ترتیب نمایش معتبر نیست'));
 
     let discount = null;
     if (planForm.has_discount) {
       const pct = Number(planForm.discount_percentage);
       if (!Number.isInteger(pct) || pct < 1 || pct > 100) {
-        throw new Error('درصد تخفیف باید عدد صحیح بین ۱ تا ۱۰۰ باشد');
+        throw new Error(translateText('درصد تخفیف باید عدد صحیح بین ۱ تا ۱۰۰ باشد'));
       }
       const exp = planForm.discount_expiry;
       if (!exp || Number.isNaN(exp.getTime()) || exp <= new Date()) {
-        throw new Error('تاریخ انقضای تخفیف باید در آینده باشد');
+        throw new Error(translateText('تاریخ انقضای تخفیف باید در آینده باشد'));
       }
       discount = { percentage: pct, expirationDate: exp.toISOString() };
     }
@@ -246,7 +307,8 @@ function PlansPage() {
     const payload = {
       name,
       duration_days: duration,
-      price: { currency: 'IRR', amount: toman * 10 },
+      price: submittedPrice,
+      translations: cleanTranslations(planForm.translations),
       description: planForm.description.trim(),
       is_featured: Boolean(planForm.is_featured),
       status: planForm.inactive ? 'INACTIVE' : 'ACTIVE',
@@ -270,15 +332,15 @@ function PlansPage() {
     try {
       if (editingId) {
         await axios.put(`${API}/plan/${editingId}`, payload, authHeaders());
-        toast.success('پلن ویرایش شد');
+        toast.success(translateText('پلن ویرایش شد'));
       } else {
         await axios.post(`${API}/plan`, payload, authHeaders());
-        toast.success('پلن جدید ساخته شد');
+        toast.success(translateText('پلن جدید ساخته شد'));
       }
       resetForm();
       load();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در ذخیره پلن');
+      toast.error(err.response?.data?.message || translateText('خطا در ذخیره پلن'));
     } finally {
       setSaving(false);
     }
@@ -289,10 +351,10 @@ function PlansPage() {
     setBusyId(pl._id);
     try {
       await axios.put(`${API}/plan/${pl._id}`, { status: next }, authHeaders());
-      toast.success(next === 'ACTIVE' ? 'پلن فعال شد' : 'پلن غیرفعال شد');
+      toast.success(next === 'ACTIVE' ? translateText('پلن فعال شد') : translateText('پلن غیرفعال شد'));
       load();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در تغییر وضعیت');
+      toast.error(err.response?.data?.message || translateText('خطا در تغییر وضعیت'));
     } finally {
       setBusyId('');
     }
@@ -304,12 +366,12 @@ function PlansPage() {
     setBusyId(pl._id);
     try {
       await axios.delete(`${API}/plan/${pl._id}`, authHeaders());
-      toast.success('پلن حذف شد');
+      toast.success(translateText('پلن حذف شد'));
       if (editingId === pl._id) resetForm();
       setDeleteTarget(null);
       load();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'خطا در حذف');
+      toast.error(err.response?.data?.message || translateText('خطا در حذف'));
     } finally {
       setBusyId('');
     }
@@ -318,7 +380,7 @@ function PlansPage() {
   if (loading && plans.length === 0) {
     return (
       <div className="py-16">
-        <Loading label="در حال بارگذاری پلن‌ها…" />
+        <Loading label={translateText('در حال بارگذاری پلن‌ها…')} />
       </div>
     );
   }
@@ -329,298 +391,318 @@ function PlansPage() {
     <div className="space-y-5">
       <PanelPageHeader
         icon={Layers}
-        title="پلن‌های فروشندگی"
-        subtitle="تعرفه‌ها، سقف محصول و دسترسی‌ها"
+        title={translateText('پلن‌های فروشندگی')}
+        subtitle={translateText('تعرفه‌ها، سقف محصول و دسترسی‌ها')}
         onRefresh={() => load()}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] xl:grid-cols-[450px_minmax(0,1fr)] gap-4 lg:gap-5 items-start">
         <style>{DP_CSS}</style>
 
-      {/* فرم */}
-      <form
-        onSubmit={submit}
-        className="card rounded-2xl p-4 sm:p-5 space-y-3 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto min-w-0"
-      >
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h2 className="font-black flex items-center gap-2 text-sm sm:text-base">
-            <CreditCard size={18} className="text-yellow shrink-0" />
-            <span className="break-words">
-              {editingId ? 'ویرایش پلن اشتراک' : 'ایجاد پلن اشتراک'}
-            </span>
-          </h2>
-          {editingId && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="btn-ghost !py-1 !px-2 text-xs flex items-center gap-1"
-            >
-              <X size={13} /> لغو
-            </button>
-          )}
-        </div>
+        {/* فرم */}
+        <form
+          onSubmit={submit}
+          className="card rounded-2xl p-4 sm:p-5 space-y-3 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto min-w-0"
+        >
+          <ContentLanguage editor={content} />
 
-        <input
-          className="input"
-          placeholder="نام پلن (مثلاً: پلن طلایی)"
-          maxLength={50}
-          value={planForm.name}
-          onChange={(e) => set('name', e.target.value)}
-          required
-        />
-
-        {/* مبلغ */}
-        <div>
-          <div className="relative">
-            <input
-              className="input !pl-16 text-left"
-              dir="ltr"
-              inputMode="numeric"
-              placeholder="مبلغ مثلاً 13،000"
-              value={planForm.amount ? groupDigits(planForm.amount) : ''}
-              onChange={(e) =>
-                set('amount', toEnDigits(e.target.value).replace(/\D/g, '').replace(/^0+/, '').slice(0, 12))
-              }
-              required
-            />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs muted pointer-events-none">
-              تومان
-            </span>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h2 className="font-black flex items-center gap-2 text-sm sm:text-base">
+              <CreditCard size={18} className="text-yellow shrink-0" />
+              <span className="break-words">
+                {editingId ? translateText('ویرایش پلن اشتراک') : translateText('ایجاد پلن اشتراک')}
+              </span>
+            </h2>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="btn-ghost !py-1 !px-2 text-xs flex items-center gap-1"
+              >
+                <X size={13} />
+                {translateText(' لغو ')}
+              </button>
+            )}
           </div>
-          {!tomanValue && (
-            <div className="text-[11px] muted mt-1">حداقل {faMoney(MIN_TOMAN)} تومان</div>
-          )}
-        </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <UnitInput
-            type="number"
-            min={1}
-            unit="روز"
-            placeholder={planForm.unlimited ? 'نامحدود' : 'مدت'}
-            disabled={planForm.unlimited}
-            value={planForm.unlimited ? '' : planForm.duration_days}
-            onChange={(e) => set('duration_days', e.target.value)}
-          />
-          <label className="flex items-center gap-2 text-xs cursor-pointer min-w-0">
-            <input
-              type="checkbox"
-              className="shrink-0"
-              checked={planForm.unlimited}
-              onChange={(e) => set('unlimited', e.target.checked)}
-            />
-            <span className="truncate">مدت نامحدود</span>
-          </label>
-          <UnitInput
-            type="number"
-            min={0}
-            unit="محصول"
-            placeholder="سقف محصولات"
-            value={planForm.max_products}
-            onChange={(e) => set('max_products', e.target.value)}
-          />
-          <UnitInput
-            type="number"
-            min={0}
-            unit="فروشگاه"
-            placeholder="سقف فروشگاه"
-            value={planForm.max_shops}
-            onChange={(e) => set('max_shops', e.target.value)}
-          />
-          <UnitInput
-            type="number"
-            min={0}
-            unit="تصویر"
-            placeholder="هر محصول"
-            value={planForm.max_images_per_product}
-            onChange={(e) => set('max_images_per_product', e.target.value)}
-          />
           <input
             className="input"
-            type="number"
-            min={0}
-            placeholder="ترتیب نمایش"
-            value={planForm.sort_order}
-            onChange={(e) => set('sort_order', e.target.value)}
+            maxLength={50}
+            value={content.value('name')}
+            dir={content.dir}
+            aria-label={`${content.locale} name`}
+            lang={content.locale}
+            onChange={(e) => content.update('name', e.target.value)}
+            placeholder={content.placeholder('name')}
           />
-        </div>
 
-        <textarea
-          className="input"
-          rows={3}
-          placeholder="توضیحات پلن…"
-          value={planForm.description}
-          onChange={(e) => set('description', e.target.value)}
-        />
+          <MoneyInput price={priceEntry} />
 
-        <label className="flex items-center gap-2 text-xs cursor-pointer">
-          <input
-            type="checkbox"
-            className="shrink-0"
-            checked={planForm.is_featured}
-            onChange={(e) => set('is_featured', e.target.checked)}
-          />
-          پلن ویژه (پیشنهادی)
-        </label>
-
-        <label className="flex items-center gap-2 text-xs cursor-pointer">
-          <input
-            type="checkbox"
-            className="shrink-0"
-            checked={planForm.inactive}
-            onChange={(e) => set('inactive', e.target.checked)}
-          />
-          غیرفعال (به‌صورت پیش‌فرض پلن فعال است)
-        </label>
-
-        <label className="flex items-center gap-2 text-xs cursor-pointer">
-          <input
-            type="checkbox"
-            className="shrink-0"
-            checked={planForm.has_discount}
-            onChange={(e) => set('has_discount', e.target.checked)}
-          />
-          تخفیف زمان‌دار
-        </label>
-
-        {planForm.has_discount && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <UnitInput
+              type="number"
+              min={1}
+              unit={translateText('روز')}
+              placeholder={planForm.unlimited ? translateText('نامحدود') : translateText('مدت')}
+              disabled={planForm.unlimited}
+              value={planForm.unlimited ? '' : planForm.duration_days}
+              onChange={(e) => set('duration_days', e.target.value)}
+            />
+            <label className="flex items-center gap-2 text-xs cursor-pointer min-w-0">
+              <input
+                type="checkbox"
+                className="shrink-0"
+                checked={planForm.unlimited}
+                onChange={(e) => set('unlimited', e.target.checked)}
+              />
+              <span className="truncate">{translateText('مدت نامحدود')}</span>
+            </label>
+            <UnitInput
+              type="number"
+              min={0}
+              unit={translateText('محصول')}
+              placeholder={translateText('سقف محصولات')}
+              value={planForm.max_products}
+              onChange={(e) => set('max_products', e.target.value)}
+            />
+            <UnitInput
+              type="number"
+              min={0}
+              unit={translateText('فروشگاه')}
+              placeholder={translateText('سقف فروشگاه')}
+              value={planForm.max_shops}
+              onChange={(e) => set('max_shops', e.target.value)}
+            />
+            <UnitInput
+              type="number"
+              min={0}
+              unit={translateText('تصویر')}
+              placeholder={translateText('هر محصول')}
+              value={planForm.max_images_per_product}
+              onChange={(e) => set('max_images_per_product', e.target.value)}
+            />
             <input
               className="input"
               type="number"
-              min={1}
-              max={100}
-              placeholder="درصد تخفیف"
-              value={planForm.discount_percentage}
-              onChange={(e) => set('discount_percentage', e.target.value)}
-            />
-            <DatePicker
-              value={planForm.discount_expiry}
-              onChange={(val) => set('discount_expiry', val ? val.toDate() : null)}
-              calendar={persian}
-              locale={persian_fa}
-              format="YYYY/MM/DD HH:mm"
-              plugins={[<TimePicker key="tp" position="bottom" hideSeconds />]}
-              minDate={new Date()}
-              calendarPosition="bottom-right"
-              inputClass="input"
-              containerStyle={{ width: '100%' }}
-              className="plan-dp"
-              placeholder="انقضای تخفیف"
-              portal
-              zIndex={9999}
+              min={0}
+              placeholder={translateText('ترتیب نمایش')}
+              value={planForm.sort_order}
+              onChange={(e) => set('sort_order', e.target.value)}
             />
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="btn-yellow w-full flex items-center justify-center gap-1.5"
-        >
-          {editingId ? <Save size={16} /> : <Plus size={16} />}
-          {saving ? 'در حال ذخیره…' : editingId ? 'ذخیره تغییرات' : 'افزودن پلن'}
-        </button>
-      </form>
+          <textarea
+            className="input"
+            rows={3}
+            value={content.value('description')}
+            dir={content.dir}
+            aria-label={`${content.locale} description`}
+            lang={content.locale}
+            onChange={(e) => content.update('description', e.target.value)}
+            placeholder={content.placeholder('description')}
+          />
 
-      {/* لیست کارت‌ها */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
-        {plans.length === 0 && (
-          <div className="sm:col-span-2 rounded-2xl border border-dashed border-theme p-8 sm:p-10 text-center text-sm muted">
-            هنوز پلنی ساخته نشده است.
-          </div>
-        )}
+          <label className="flex items-center gap-2 text-xs cursor-pointer">
+            <input
+              type="checkbox"
+              className="shrink-0"
+              checked={planForm.is_featured}
+              onChange={(e) => set('is_featured', e.target.checked)}
+            />
+            {translateText('پلن ویژه (پیشنهادی) ')}
+          </label>
 
-        {plans.map((pl) => {
-          const inactive = pl.status === 'INACTIVE';
-          const busy = busyId === pl._id;
-          const expDate = pl.discount?.expirationDate ? new Date(pl.discount.expirationDate) : null;
-          const expired = expDate && expDate <= new Date();
-          return (
-            <div
-              key={pl._id}
-              className="card rounded-3xl p-4 sm:p-5 flex flex-col justify-between gap-4 min-w-0 overflow-hidden"
-              style={{
-                borderColor: pl.is_featured ? 'var(--primary-color)' : undefined,
-                opacity: inactive ? 0.65 : 1,
-              }}
-            >
-              <div className="min-w-0">
-                <div className="flex items-start justify-between gap-2 flex-wrap">
-                  <b className="text-base sm:text-lg break-words min-w-0">{pl.name}</b>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {pl.is_featured && <span className="chip on !cursor-default text-[11px]">ویژه</span>}
-                    {inactive && <span className="chip !cursor-default text-[11px]">غیرفعال</span>}
-                  </div>
-                </div>
-                <div className="font-black text-xl sm:text-2xl mt-2 text-yellow break-words">
-                  {faMoney(planToToman(pl.price))}{' '}
-                  <span className="text-xs muted font-normal">تومان</span>
-                </div>
-                <div className="text-xs muted mt-2 space-y-1">
-                  <div>
-                    مدت اعتبار:{' '}
-                    {pl.duration_days === null || pl.duration_days === undefined
-                      ? 'نامحدود'
-                      : `${faNum(pl.duration_days)} روز`}
-                  </div>
-                  <div>حداکثر محصول: {faNum(pl.features?.max_products)} محصول</div>
-                  <div>حداکثر فروشگاه: {faNum(pl.features?.max_shops)} فروشگاه</div>
-                  <div>تصویر هر محصول: {faNum(pl.features?.max_images_per_product)} تصویر</div>
-                  {pl.discount && expDate && (
-                    <div className={expired ? 'text-red-400' : 'text-emerald-400'}>
-                      تخفیف {faNum(pl.discount.percentage)}٪ تا {fmtDate(expDate)}
-                      {expired && ' (منقضی شده)'}
-                    </div>
-                  )}
-                </div>
-                {pl.description && (
-                  <p className="text-xs muted mt-2 break-words">{pl.description}</p>
-                )}
-              </div>
+          <label className="flex items-center gap-2 text-xs cursor-pointer">
+            <input
+              type="checkbox"
+              className="shrink-0"
+              checked={planForm.inactive}
+              onChange={(e) => set('inactive', e.target.checked)}
+            />
+            {translateText('غیرفعال (به‌صورت پیش‌فرض پلن فعال است) ')}
+          </label>
 
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => startEdit(pl)}
-                  className="btn-ghost !py-2 !px-1 text-[11px] sm:text-xs flex items-center justify-center gap-1 min-w-0"
-                >
-                  <Pencil size={13} className="shrink-0" /> <span className="truncate">ویرایش</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => toggleStatus(pl)}
-                  className="btn-ghost !py-2 !px-1 text-[11px] sm:text-xs flex items-center justify-center gap-1 min-w-0"
-                >
-                  {inactive ? (
-                    <Eye size={13} className="shrink-0" />
-                  ) : (
-                    <EyeOff size={13} className="shrink-0" />
-                  )}
-                  <span className="truncate">{inactive ? 'فعال' : 'غیرفعال'}</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setDeleteTarget(pl)}
-                  className="btn-ghost !py-2 !px-1 text-[11px] sm:text-xs text-red-400 flex items-center justify-center gap-1 min-w-0"
-                >
-                  <Trash2 size={13} className="shrink-0" /> <span className="truncate">حذف</span>
-                </button>
-              </div>
+          <label className="flex items-center gap-2 text-xs cursor-pointer">
+            <input
+              type="checkbox"
+              className="shrink-0"
+              checked={planForm.has_discount}
+              onChange={(e) => set('has_discount', e.target.checked)}
+            />
+            {translateText('تخفیف زمان‌دار ')}
+          </label>
+
+          {planForm.has_discount && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input
+                className="input"
+                type="number"
+                min={1}
+                max={100}
+                placeholder={translateText('درصد تخفیف')}
+                value={planForm.discount_percentage}
+                onChange={(e) => set('discount_percentage', e.target.value)}
+              />
+              <DatePicker
+                value={planForm.discount_expiry}
+                onChange={(val) => set('discount_expiry', val ? val.toDate() : null)}
+                calendar={language === 'fa' ? persian : undefined}
+                locale={calendarLocale}
+                format="YYYY/MM/DD HH:mm"
+                plugins={[<TimePicker key="tp" position="bottom" hideSeconds />]}
+                minDate={new Date()}
+                calendarPosition="bottom-right"
+                inputClass="input"
+                containerStyle={{ width: '100%' }}
+                className="plan-dp"
+                placeholder={translateText('انقضای تخفیف')}
+                portal
+                zIndex={9999}
+              />
             </div>
-          );
-        })}
-      </div>
+          )}
 
-      <ConfirmDeleteModal
-        plan={deleteTarget}
-        busy={!!deleteTarget && busyId === deleteTarget._id}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={confirmDelete}
-      />
+          <button
+            type="submit"
+            disabled={saving}
+            className="btn-yellow w-full flex items-center justify-center gap-1.5"
+          >
+            {editingId ? <Save size={16} /> : <Plus size={16} />}
+            {saving
+              ? translateText('در حال ذخیره…')
+              : editingId
+                ? translateText('ذخیره تغییرات')
+                : translateText('افزودن پلن')}
+          </button>
+        </form>
+
+        {/* لیست کارت‌ها */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 min-w-0">
+          {plans.length === 0 && (
+            <div className="sm:col-span-2 rounded-2xl border border-dashed border-theme p-8 sm:p-10 text-center text-sm muted">
+              {translateText('هنوز پلنی ساخته نشده است. ')}
+            </div>
+          )}
+
+          {plans.map((pl) => {
+            const inactive = pl.status === 'INACTIVE';
+            const busy = busyId === pl._id;
+            const expDate = pl.discount?.expirationDate
+              ? new Date(pl.discount.expirationDate)
+              : null;
+            const expired = expDate && expDate <= new Date();
+            return (
+              <div
+                key={pl._id}
+                className="card rounded-3xl p-4 sm:p-5 flex flex-col justify-between gap-4 min-w-0 overflow-hidden"
+                style={{
+                  borderColor: pl.is_featured ? 'var(--primary-color)' : undefined,
+                  opacity: inactive ? 0.65 : 1,
+                }}
+              >
+                <div className="min-w-0">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <b className="text-base sm:text-lg break-words min-w-0">{pl.name}</b>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {pl.is_featured && (
+                        <span className="chip on !cursor-default text-[11px]">
+                          {translateText('ویژه')}
+                        </span>
+                      )}
+                      {inactive && (
+                        <span className="chip !cursor-default text-[11px]">
+                          {translateText('غیرفعال')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="font-black text-xl sm:text-2xl mt-2 text-yellow break-words">
+                    {faMoney(planToToman(pl.price))}{' '}
+                    <span className="text-xs muted font-normal">{'USD'}</span>
+                  </div>
+                  <div className="text-xs muted mt-2 space-y-1">
+                    <div>
+                      {translateText('مدت اعتبار:')}{' '}
+                      {pl.duration_days === null || pl.duration_days === undefined
+                        ? translateText('نامحدود')
+                        : translateText('{{v0}} روز', { v0: faNum(pl.duration_days) })}
+                    </div>
+                    <div>
+                      {translateText('حداکثر محصول: ')}
+                      {faNum(pl.features?.max_products)}
+                      {translateText(' محصول')}
+                    </div>
+                    <div>
+                      {translateText('حداکثر فروشگاه: ')}
+                      {faNum(pl.features?.max_shops)}
+                      {translateText(' فروشگاه')}
+                    </div>
+                    <div>
+                      {translateText('تصویر هر محصول: ')}
+                      {faNum(pl.features?.max_images_per_product)}
+                      {translateText(' تصویر')}
+                    </div>
+                    {pl.discount && expDate && (
+                      <div className={expired ? 'text-red-400' : 'text-emerald-400'}>
+                        {translateText('تخفیف ')}
+                        {faNum(pl.discount.percentage)}
+                        {translateText('٪ تا ')}
+                        {fmtDate(expDate)}
+                        {expired && translateText(' (منقضی شده)')}
+                      </div>
+                    )}
+                  </div>
+                  {pl.description && (
+                    <p className="text-xs muted mt-2 break-words">{pl.description}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => startEdit(pl)}
+                    className="btn-ghost !py-2 !px-1 text-[11px] sm:text-xs flex items-center justify-center gap-1 min-w-0"
+                  >
+                    <Pencil size={13} className="shrink-0" />{' '}
+                    <span className="truncate">{translateText('ویرایش')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => toggleStatus(pl)}
+                    className="btn-ghost !py-2 !px-1 text-[11px] sm:text-xs flex items-center justify-center gap-1 min-w-0"
+                  >
+                    {inactive ? (
+                      <Eye size={13} className="shrink-0" />
+                    ) : (
+                      <EyeOff size={13} className="shrink-0" />
+                    )}
+                    <span className="truncate">
+                      {inactive ? translateText('فعال') : translateText('غیرفعال')}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setDeleteTarget(pl)}
+                    className="btn-ghost !py-2 !px-1 text-[11px] sm:text-xs text-red-400 flex items-center justify-center gap-1 min-w-0"
+                  >
+                    <Trash2 size={13} className="shrink-0" />{' '}
+                    <span className="truncate">{translateText('حذف')}</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <ConfirmDeleteModal
+          plan={deleteTarget}
+          busy={!!deleteTarget && busyId === deleteTarget._id}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={confirmDelete}
+        />
       </div>
     </div>
   );

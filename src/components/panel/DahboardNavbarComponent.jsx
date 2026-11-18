@@ -1,3 +1,5 @@
+import LanguageSelector from '../common/locale/LanguageSelectorComponent';
+import { t as translateText } from '../../i18n/runtime.js';
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import BrandLogoComponent from '../common/BrandLogoComponent';
@@ -24,15 +26,15 @@ import { useShop } from '../../contexts/ShopContext';
 import { userDisplayName } from '../../utils/helpers/user';
 
 const ADMIN_ITEMS = [
-  { path: '/dashboard', label: 'پیشخوان', icon: LayoutDashboard, end: true },
-  { path: '/dashboard/sellers', label: 'فروشندگان', icon: ShieldCheck },
-  { path: '/dashboard/users', label: 'کاربران', icon: Users },
-  { path: '/dashboard/stores', label: 'فروشگاه‌ها', icon: Store },
-  { path: '/dashboard/products', label: 'محصولات', icon: Package },
-  { path: '/dashboard/categories', label: 'دسته‌بندی‌ها', icon: FolderTree },
-  { path: '/dashboard/orders', label: 'سفارش‌ها', icon: ShoppingBag },
-  { path: '/dashboard/plans', label: 'پلن‌ها', icon: CreditCard },
-  { path: '/dashboard/media', label: 'رسانه‌ها', icon: Images },
+  { path: '/dashboard', label: translateText('پیشخوان'), icon: LayoutDashboard, end: true },
+  { path: '/dashboard/sellers', label: translateText('فروشندگان'), icon: ShieldCheck },
+  { path: '/dashboard/users', label: translateText('کاربران'), icon: Users },
+  { path: '/dashboard/stores', label: translateText('فروشگاه‌ها'), icon: Store },
+  { path: '/dashboard/products', label: translateText('محصولات'), icon: Package },
+  { path: '/dashboard/categories', label: translateText('دسته‌بندی‌ها'), icon: FolderTree },
+  { path: '/dashboard/orders', label: translateText('سفارش‌ها'), icon: ShoppingBag },
+  { path: '/dashboard/plans', label: translateText('پلن‌ها'), icon: CreditCard },
+  { path: '/dashboard/media', label: translateText('رسانه‌ها'), icon: Images },
 ];
 
 function DashboardNavbarComponent() {
@@ -54,8 +56,10 @@ function DashboardNavbarComponent() {
             <BrandLogoComponent size="sm" tone="white" />
             {!isCompact && (
               <div className="min-w-0">
-                <div className="font-black text-sm truncate">پنل مدیریت</div>
-                <div className="text-[11px] text-[#9aa8cc] truncate">مدیر کل سیستم</div>
+                <div className="font-black text-sm truncate">{translateText('پنل مدیریت')}</div>
+                <div className="text-[11px] text-[#9aa8cc] truncate">
+                  {translateText('مدیر کل سیستم')}
+                </div>
               </div>
             )}
           </Link>
@@ -64,10 +68,10 @@ function DashboardNavbarComponent() {
               type="button"
               onClick={() => setCollapsed(true)}
               className="p-1.5 rounded-lg hover:bg-white/10 text-[#9aa8cc] shrink-0"
-              title="کوچک‌نمایی منو"
-              aria-label="کوچک‌نمایی منو"
+              title={translateText('کوچک‌نمایی منو')}
+              aria-label={translateText('کوچک‌نمایی منو')}
             >
-              <PanelRightClose size={17} />
+              <PanelRightClose className="logical-icon" size={17} />
             </button>
           )}
           {isMobile && (
@@ -75,7 +79,7 @@ function DashboardNavbarComponent() {
               type="button"
               onClick={() => setMobileOpen(false)}
               className="p-1.5 rounded-lg hover:bg-white/10"
-              aria-label="بستن منو"
+              aria-label={translateText('بستن منو')}
             >
               <X size={18} />
             </button>
@@ -93,14 +97,17 @@ function DashboardNavbarComponent() {
               color: 'var(--primary-color)',
               border: '1px solid rgba(255,214,10,0.35)',
             }}
-            title="باز کردن منو"
-            aria-label="باز کردن منو"
+            title={translateText('باز کردن منو')}
+            aria-label={translateText('باز کردن منو')}
           >
-            <PanelRightOpen size={16} />
+            <PanelRightOpen className="logical-icon" size={16} />
           </button>
         )}
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1" aria-label="ناوبری پنل ادمین">
+        <nav
+          className="flex-1 overflow-y-auto p-3 space-y-1"
+          aria-label={translateText('ناوبری پنل ادمین')}
+        >
           {ADMIN_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -130,6 +137,7 @@ function DashboardNavbarComponent() {
         </nav>
 
         <div className="p-3 border-t border-white/10 space-y-1">
+          <LanguageSelector variant="admin" placement="menu" compact={isCompact} />
           <button
             type="button"
             onClick={toggleTheme}
@@ -138,7 +146,9 @@ function DashboardNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-[#d8e1fa] hover:bg-white/10`}
           >
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-            {!isCompact && <span>{theme === 'dark' ? 'تم روشن' : 'تم تاریک'}</span>}
+            {!isCompact && (
+              <span>{theme === 'dark' ? translateText('تم روشن') : translateText('تم تاریک')}</span>
+            )}
           </button>
           <Link
             to="/seller"
@@ -148,7 +158,7 @@ function DashboardNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-brand-yellow hover:bg-white/10`}
           >
             <Store size={17} className="shrink-0" />
-            {!isCompact && <span>پنل فروشنده</span>}
+            {!isCompact && <span>{translateText('پنل فروشنده')}</span>}
           </Link>
           <Link
             to="/"
@@ -158,7 +168,7 @@ function DashboardNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-[#d8e1fa] hover:bg-white/10`}
           >
             <ExternalLink size={17} className="shrink-0" />
-            {!isCompact && <span>مشاهده فروشگاه</span>}
+            {!isCompact && <span>{translateText('مشاهده فروشگاه')}</span>}
           </Link>
           <button
             type="button"
@@ -171,7 +181,7 @@ function DashboardNavbarComponent() {
             } py-2.5 rounded-xl text-sm text-red-300 hover:bg-red-500/15`}
           >
             <LogOut size={17} className="shrink-0" />
-            {!isCompact && <span>خروج از حساب</span>}
+            {!isCompact && <span>{translateText('خروج از حساب')}</span>}
           </button>
         </div>
       </div>
@@ -186,17 +196,17 @@ function DashboardNavbarComponent() {
             type="button"
             onClick={() => setMobileOpen(true)}
             className="p-2 rounded-lg hover:bg-white/10"
-            aria-label="باز کردن منوی داشبورد"
+            aria-label={translateText('باز کردن منوی داشبورد')}
           >
             <Menu size={19} />
           </button>
-          <span className="font-black text-sm">پنل مدیریت ژئو کالا</span>
+          <span className="font-black text-sm">{translateText('پنل مدیریت ژئو کالا')}</span>
         </div>
-        <span className="text-xs text-brand-yellow font-bold">{userDisplayName(user, user?.username)}</span>
+        <LanguageSelector variant="admin" placement="navbar" compact />
       </div>
 
       <aside
-        className={`hidden lg:block shrink-0 border-l border-white/10 transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
+        className={`hidden lg:block shrink-0 border-e border-white/10 transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >

@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BadgeCheck, ChevronLeft } from 'lucide-react';
@@ -11,7 +12,7 @@ function DealPanel({
   products = [],
   loading = false,
   moreTo = '/products',
-  emptyText = 'محصولی موجود نیست',
+  emptyText = translateText("محصولی موجود نیست"),
 }) {
   return (
     <section
@@ -22,8 +23,7 @@ function DealPanel({
         <Link
           to={moreTo}
           className="hidden sm:flex absolute top-5 start-5 items-center gap-0.5 text-xs text-white/80 hover:text-white"
-        >
-          مشاهده همه <ChevronLeft size={13} />
+        >{translateText("مشاهده همه ")}<ChevronLeft className="logical-icon" size={13} />
         </Link>
 
         <h2 className="text-2xl md:text-[28px] font-extrabold flex items-center justify-center gap-2">
