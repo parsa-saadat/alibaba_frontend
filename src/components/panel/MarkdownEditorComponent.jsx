@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { direction as interfaceDirection } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
@@ -121,7 +123,9 @@ function MediaView({ node, selected, deleteNode }) {
             <img src={media.url} alt={alt || ''} draggable={false} className="md-media-el" />
           ) : (
             <div className="md-media-loading">
-              {media.failed ? translateText('تصویر در دسترس نیست') : translateText('در حال بارگذاری تصویر…')}
+              {media.failed
+                ? translateText('تصویر در دسترس نیست')
+                : translateText('در حال بارگذاری تصویر…')}
             </div>
           ))}
         {type === 'video' && <video src={src} controls playsInline className="md-media-el" />}
@@ -461,7 +465,9 @@ function TableMenu({ editor, onClose }) {
 
       {/* درج جدول جدید */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="w-14 shrink-0 text-[10px] font-black muted">{translateText('جدول تازه')}</span>
+        <span className="w-14 shrink-0 text-[10px] font-black muted">
+          {translateText('جدول تازه')}
+        </span>
         {[
           ['rows', translateText('سطر'), Rows3],
           ['cols', translateText('ستون'), Columns3],
@@ -530,7 +536,9 @@ function TableMenu({ editor, onClose }) {
               {translateText(' پایین ')}
             </TableAction>
             <TableAction
-              title={translateText('همان سطری که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)')}
+              title={translateText(
+                'همان سطری که مکان‌نما در آن است سرتیتر شود (یا سرتیترش برداشته شود)',
+              )}
               active={rowIsHeader}
               onClick={() => toggleHeaderAtCursor(editor, 'row')}
               disabled={!inTable}
@@ -706,6 +714,7 @@ function LinkDialog({ state, onSubmit, onClose }) {
 function MarkdownEditorComponent({
   value = '',
   direction = 'ltr',
+  lang = 'en',
   onChange,
   onUploadImage,
   onUploadMedia,
@@ -718,8 +727,8 @@ function MarkdownEditorComponent({
   const [tableMenu, setTableMenu] = useState(false);
   const [imageMenu, setImageMenu] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
-  /* فاصله‌ی حالت تمام‌صفحه از سمت راست، تا نوار کنار پنل زیر آن نرود */
-  const [fsOffset, setFsOffset] = useState(0);
+  /* فاصله از لبهٔ واقعی نوار کنار پنل، مستقل از RTL/LTR. */
+  const [fsOffset, setFsOffset] = useState({ left: 0, right: 0 });
   /* پاپ‌آپ لینک تصویر/ویدیو: { kind: 'image' | 'video', … } */
   const [linkDialog, setLinkDialog] = useState(null);
   /* وقتی نوار ابزار به بالای صفحه می‌چسبد، گوشه‌های گردش برداشته می‌شود */
@@ -761,7 +770,7 @@ function MarkdownEditorComponent({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     editorProps: {
-      attributes: { dir: direction, class: 'md-visual' },
+      attributes: { dir: direction, lang, class: 'md-visual' },
       handlePaste: (_view, event) => {
         const file = pickMediaFile(event.clipboardData?.files);
         if (file && uploadRef.current) {
@@ -791,10 +800,10 @@ function MarkdownEditorComponent({
       editor.setOptions({
         editorProps: {
           ...editor.options.editorProps,
-          attributes: { ...editor.options.editorProps.attributes, dir: direction },
+          attributes: { ...editor.options.editorProps.attributes, dir: direction, lang },
         },
       });
-  }, [editor, direction]);
+  }, [editor, direction, lang]);
 
   if (typeof window !== 'undefined' && import.meta.env.DEV) window.__editor = editor;
 
@@ -844,23 +853,26 @@ function MarkdownEditorComponent({
     if (!fullscreen) return undefined;
 
     const measure = () => {
-      let offset = 0;
-      const aside = document.querySelector('aside');
+      const offset = { left: 0, right: 0 };
+      const aside = document.querySelector('.admin-wrapper > aside');
       const desktop = window.innerWidth >= 1024;
       if (desktop && aside) {
         const style = window.getComputedStyle(aside);
         const rect = aside.getBoundingClientRect();
         const isDrawer = style.position === 'fixed';
         if (!isDrawer && rect.width > 0 && rect.height > 0) {
-          offset = Math.max(0, Math.round(window.innerWidth - rect.left));
+          if (rect.left < window.innerWidth / 2) offset.left = Math.max(0, Math.round(rect.right));
+          else offset.right = Math.max(0, Math.round(window.innerWidth - rect.left));
         }
       }
-      setFsOffset(offset);
+      setFsOffset((previous) =>
+        previous.left === offset.left && previous.right === offset.right ? previous : offset,
+      );
     };
 
     measure();
     window.addEventListener('resize', measure);
-    const aside = document.querySelector('aside');
+    const aside = document.querySelector('.admin-wrapper > aside');
     const observer =
       aside && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
     observer?.observe(aside);
@@ -956,7 +968,8 @@ function MarkdownEditorComponent({
   const submitLink = (raw) => {
     if (!raw) return translateText('آدرس را وارد کنید.');
     if (linkDialog?.kind === 'image') {
-      if (!/^https?:\/\//i.test(raw)) return translateText('آدرس تصویر باید با http یا https شروع شود.');
+      if (!/^https?:\/\//i.test(raw))
+        return translateText('آدرس تصویر باید با http یا https شروع شود.');
       editor
         .chain()
         .focus()
@@ -976,8 +989,11 @@ function MarkdownEditorComponent({
   const inTable = editor.isActive('table');
   const notVisual = view !== 'visual';
 
-  return (
+  const content = (
     <div
+      data-testid="markdown-editor"
+      data-fullscreen={fullscreen}
+      dir={interfaceDirection}
       /* توجّه: `overflow-hidden` اینجا نوار ابزارِ چسبان را بی‌اثر می‌کرد
          (هر والدِ overflow-hidden یک «جعبه‌ی اسکرول» می‌سازد و sticky به آن می‌چسبد) */
       className={`border border-theme relative ${fullscreen ? 'rounded-none' : 'rounded-2xl'}`}
@@ -987,9 +1003,9 @@ function MarkdownEditorComponent({
               position: 'fixed',
               top: 0,
               bottom: 0,
-              left: 0,
+              left: fsOffset.left,
               /* نوار کنار پنل دیده و قابل استفاده بماند */
-              right: fsOffset,
+              right: fsOffset.right,
               zIndex: 200,
               background: 'var(--bg)',
               display: 'flex',
@@ -1236,7 +1252,11 @@ function MarkdownEditorComponent({
               type="button"
               onClick={() => setFullscreen((v) => !v)}
               className="chip !py-1 !px-2.5 flex items-center gap-1 text-xs"
-              title={fullscreen ? translateText('خروج از تمام‌صفحه (Esc)') : translateText('ویرایش تمام‌صفحه')}
+              title={
+                fullscreen
+                  ? translateText('خروج از تمام‌صفحه (Esc)')
+                  : translateText('ویرایش تمام‌صفحه')
+              }
               aria-pressed={fullscreen}
               style={fullscreen ? ACTIVE_STYLE : undefined}
             >
@@ -1393,6 +1413,7 @@ function MarkdownEditorComponent({
       )}
     </div>
   );
+  return fullscreen ? createPortal(content, document.body) : content;
 }
 
 export default MarkdownEditorComponent;

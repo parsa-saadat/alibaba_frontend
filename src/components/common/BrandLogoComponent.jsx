@@ -2,7 +2,7 @@ import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 
 /*
- * نشان ژئو کالا.
+ * نشان ژئوکالا.
  *
  * دو حالت:
  *  - variant="mark": فقط نشان (پین + دوربین)؛ جای آیکون‌های کوچک، فوتر پنل‌ها و فاوآیکون.
@@ -57,7 +57,7 @@ function BrandLogoComponent({
   size = 'sm',
   tone = 'auto',
   className = '',
-  alt = translateText("ژئو کالا"),
+  alt = translateText("ژئوکالا"),
 }) {
   const darkSrc = variant === 'full' ? '/logo.png' : '/logo-mark.png';
   const lightSrc = variant === 'full' ? '/logo-on-light.png' : '/logo-mark-on-light.png';

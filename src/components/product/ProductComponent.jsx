@@ -153,10 +153,10 @@ function ProductComponent({
       {/* ───── قیمت ───── */}
       <div className="mt-3 flex items-baseline gap-2 flex-wrap">
         <span className="text-lg sm:text-xl font-black leading-none text-yellow">
-          {formatPrice(finalPrice(product))}
+          {formatPrice(finalPrice(product),product.price?.currency)}
         </span>
         {discount && (
-          <span className="text-xs muted line-through">{formatPrice(product.price?.amount)}</span>
+          <span className="text-xs muted line-through">{formatPrice(product.price?.amount,product.price?.currency)}</span>
         )}
       </div>
 

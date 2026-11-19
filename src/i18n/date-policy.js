@@ -10,5 +10,9 @@ export function datePolicy(language) {
 }
 export function dateFormatter(language, options = {}) {
   const policy = datePolicy(language);
-  return new Intl.DateTimeFormat(policy.locale, { ...options, calendar: policy.calendar });
+  return new Intl.DateTimeFormat(policy.locale, {
+    ...options,
+    calendar: policy.calendar,
+    numberingSystem: { fa: 'arabext', ar: 'arab', en: 'latn', tr: 'latn' }[language] || 'latn',
+  });
 }

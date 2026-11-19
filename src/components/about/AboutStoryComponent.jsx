@@ -17,7 +17,7 @@ function AboutStoryComponent() {
       <div className="lg:col-span-2 card rounded-3xl p-6 sm:p-8">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow">
           <Flag size={13} />{translateText("داستان ما ")}</span>
-        <h2 className="font-black text-xl sm:text-2xl mt-2 leading-tight">{translateText("از «سران آسیا» تا ژئو کالا ")}</h2>
+        <h2 className="font-black text-xl sm:text-2xl mt-2 leading-tight">{translateText("از «سران آسیا» تا ژئوکالا ")}</h2>
 
         <p className="text-sm muted leading-8 mt-4">{translateText("شرکت بازرگانی فناوری سران ماهان آسیا فعالیت خود را در سال ۱۳۸۳ با نام «سران آسیا» آغاز کرد و خدمات خود را به شرکت «فناوری سران ماهان آسیا» منتقل نمود. این شرکت در زمینه‌ی واردات و تجارت تجهیزات نقشه‌برداری فعالیت می‌کند و محصولات آن از طریق")}{' '}
           <a
@@ -27,7 +27,7 @@ function AboutStoryComponent() {
             className="font-bold hover-yellow transition-colors"
             style={{ color: 'var(--primary-color)' }}
           >{translateText("پارسی‌ژئو ")}</a>{' '}{translateText("قابل مشاهده و خریداری است. ")}</p>
-        <p className="text-sm muted leading-8 mt-3">{translateText("ژئو کالا بازارگاه تخصصی همین مجموعه در حوزه‌ی تجهیزات نقشه‌برداری است. تجربه‌ی سال‌ها واردات و پشتیبانی فنی را به یک بستر آنلاین آورده‌ایم تا مهندس نقشه‌بردار، پیمانکار و کارگاه عمرانی بتواند مدل‌ها و برندها را یک‌جا ببیند، مشخصات فنی را مقایسه کند و با اطمینان خرید کند. ")}</p>
+        <p className="text-sm muted leading-8 mt-3">{translateText("ژئوکالا فروشگاه تخصصی همین مجموعه در حوزه‌ی تجهیزات نقشه‌برداری است. تجربه‌ی سال‌ها واردات و پشتیبانی فنی را به یک بستر آنلاین آورده‌ایم تا مهندس نقشه‌بردار، پیمانکار و کارگاه عمرانی بتواند مدل‌ها و برندها را یک‌جا ببیند، مشخصات فنی را مقایسه کند و با اطمینان خرید کند. ")}</p>
 
         <ul className="mt-5 space-y-2">
           {COMMITMENTS.map((item) => (
@@ -50,7 +50,7 @@ function AboutStoryComponent() {
         <Link
           to="/contact"
           className="inline-flex items-center gap-1 text-xs font-bold text-yellow mt-4"
-        >{translateText("گفتگو با تیم ژئو کالا ")}<ChevronLeft className="logical-icon" size={14} />
+        >{translateText("گفتگو با تیم ژئوکالا ")}<ChevronLeft className="logical-icon" size={14} />
         </Link>
       </div>
 

@@ -244,7 +244,7 @@ export function SellerStoreCard({ store, owner, product, storeId, sellerId, onOp
                   className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold"
                   style={{ color: GREEN }}
                 >
-                  <ShieldCheck size={12} />{translateText("هویت تأیید شده توسط ژئو کالا ")}</span>
+                  <ShieldCheck size={12} />{translateText("هویت تأیید شده توسط ژئوکالا ")}</span>
               )}
             </div>
           </div>

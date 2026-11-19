@@ -34,7 +34,7 @@ function CreateProductPage() {
   if (capacity.loading) {
     return (
       <div className="py-16">
-        <Loading label={translateText("در حال بررسی پلن فروشندگی…")} />
+        <Loading label={translateText('در حال بررسی پلن فروشندگی…')} />
       </div>
     );
   }
@@ -44,7 +44,9 @@ function CreateProductPage() {
       <PlanRequiredNotice
         text={
           capacity.reason === 'expired'
-            ? translateText("اعتبار پلن فروشندگی شما تمام شده است؛ برای اضافه کردن محصول، پلن را تمدید کنید.")
+            ? translateText(
+                'اعتبار پلن فروشندگی شما تمام شده است؛ برای اضافه کردن محصول، پلن را تمدید کنید.',
+              )
             : undefined
         }
       />
@@ -54,7 +56,7 @@ function CreateProductPage() {
   if (loading) {
     return (
       <div className="py-16">
-        <Loading label={translateText("در حال آماده‌سازی فرم ایجاد محصول…")} />
+        <Loading label={translateText('در حال آماده‌سازی فرم ایجاد محصول…')} />
       </div>
     );
   }

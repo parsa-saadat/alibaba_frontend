@@ -231,7 +231,7 @@ function LegalPageComponent({
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link to="/contact" className="btn-yellow !py-2 text-xs">{translateText("تماس با پشتیبانی ")}</Link>
-              <Link to="/about" className="btn-ghost !py-2 text-xs">{translateText("درباره ژئو کالا ")}</Link>
+              <Link to="/about" className="btn-ghost !py-2 text-xs">{translateText("درباره ژئوکالا ")}</Link>
               {tabs
                 .filter((tab) => tab.key !== activeTab)
                 .map((tab) => (

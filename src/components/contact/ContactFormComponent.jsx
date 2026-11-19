@@ -164,7 +164,7 @@ function ContactFormComponent() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
-        <span className="text-[11px] muted leading-5">{translateText("با ارسال این فرم، قوانین حریم خصوصی ژئو کالا را می‌پذیرید. ")}</span>
+        <span className="text-[11px] muted leading-5">{translateText("با ارسال این فرم، قوانین حریم خصوصی ژئوکالا را می‌پذیرید. ")}</span>
         <button type="submit" className="btn-yellow inline-flex items-center gap-2" disabled={sending}>
           {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           {sending ? translateText("در حال ارسال…") : translateText("ارسال پیام")}

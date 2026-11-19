@@ -1,9 +1,22 @@
+import { formatMoney } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { BadgeCheck, CalendarDays, Check, Clock, Image as ImageIcon, Info, Lock, Package, Settings, Sparkles, Store } from 'lucide-react';
+import {
+  BadgeCheck,
+  CalendarDays,
+  Check,
+  Clock,
+  Image as ImageIcon,
+  Info,
+  Lock,
+  Package,
+  Settings,
+  Sparkles,
+  Store,
+} from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
@@ -110,10 +123,10 @@ function SettingPage() {
     event.preventDefault();
 
     if (!cardNumberValidator(form.card_number)) {
-      return toast.error(translateText("شماره کارت ۱۶ رقمی معتبر نیست"));
+      return toast.error(translateText('شماره کارت ۱۶ رقمی معتبر نیست'));
     }
     if (!shebaNumberValidator(form.sheba_number)) {
-      return toast.error(translateText("شماره شبا معتبر نیست (IR + ۲۴ رقم)"));
+      return toast.error(translateText('شماره شبا معتبر نیست (IR + ۲۴ رقم)'));
     }
 
     const payload = {
@@ -128,7 +141,7 @@ function SettingPage() {
     /* فیلدهای هویتی فقط وقتی ارسال می‌شوند که قفل نباشند */
     if (!identityLocked) {
       if (!nationalIDValidator(form.national_ID)) {
-        return toast.error(translateText("کد ملی معتبر ۱۰ رقمی وارد کنید"));
+        return toast.error(translateText('کد ملی معتبر ۱۰ رقمی وارد کنید'));
       }
       payload.seller_type = form.seller_type;
       payload.national_ID = form.national_ID;
@@ -145,8 +158,8 @@ function SettingPage() {
       .then(() => {
         toast.success(
           identityLocked
-            ? translateText("حساب تسویه به‌روزرسانی شد")
-            : translateText("مشخصات فروشندگی به‌روزرسانی شد و در انتظار تأیید مدیر است"),
+            ? translateText('حساب تسویه به‌روزرسانی شد')
+            : translateText('مشخصات فروشندگی به‌روزرسانی شد و در انتظار تأیید مدیر است'),
         );
         refreshUser();
       })
@@ -154,8 +167,10 @@ function SettingPage() {
         const status = err.response?.status;
         toast.error(
           status === 403
-            ? translateText("اطلاعات هویتی بعد از تأیید فروشنده قابل ویرایش نیست؛ فقط حساب تسویه قابل تغییر است.")
-            : err.response?.data?.message || translateText("خطا در ذخیره تنظیمات"),
+            ? translateText(
+                'اطلاعات هویتی بعد از تأیید فروشنده قابل ویرایش نیست؛ فقط حساب تسویه قابل تغییر است.',
+              )
+            : err.response?.data?.message || translateText('خطا در ذخیره تنظیمات'),
         );
       });
   };
@@ -163,7 +178,7 @@ function SettingPage() {
   if (loading) {
     return (
       <div className="py-16">
-        <Loading label={translateText("در حال دریافت مشخصات فروشنده…")} />
+        <Loading label={translateText('در حال دریافت مشخصات فروشنده…')} />
       </div>
     );
   }
@@ -173,9 +188,15 @@ function SettingPage() {
     return (
       <div className="card rounded-3xl p-8 max-w-2xl text-center">
         <Store size={32} className="mx-auto text-yellow" />
-        <h2 className="font-black text-lg mt-3">{translateText("هنوز فروشنده نیستید")}</h2>
-        <p className="text-xs muted leading-6 mt-2">{translateText("برای دسترسی به تنظیمات فروشندگی، ابتدا درخواست فروشنده ثبت کنید و پس از تأیید مدیر، فروشگاه خود را بسازید. ")}</p>
-        <Link to="/profile" className="btn-yellow inline-flex mt-4">{translateText("ثبت درخواست فروشندگی ")}</Link>
+        <h2 className="font-black text-lg mt-3">{translateText('هنوز فروشنده نیستید')}</h2>
+        <p className="text-xs muted leading-6 mt-2">
+          {translateText(
+            'برای دسترسی به تنظیمات فروشندگی، ابتدا درخواست فروشنده ثبت کنید و پس از تأیید مدیر، فروشگاه خود را بسازید. ',
+          )}
+        </p>
+        <Link to="/profile" className="btn-yellow inline-flex mt-4">
+          {translateText('ثبت درخواست فروشندگی ')}
+        </Link>
       </div>
     );
   }
@@ -187,150 +208,185 @@ function SettingPage() {
     <div className="space-y-4 max-w-3xl">
       <PanelPageHeader
         icon={Settings}
-        title={translateText("تنظیمات فروشندگی")}
-        subtitle={translateText("مشخصات فروشگاه، اطلاعات هویتی و حساب تسویه")}
+        title={translateText('تنظیمات فروشندگی')}
+        subtitle={translateText('مشخصات فروشگاه، اطلاعات هویتی و حساب تسویه')}
       />
 
       <form onSubmit={save} className="card rounded-3xl p-6 space-y-4">
-      {/* وضعیت فروشنده */}
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-black text-lg me-auto">{translateText("تنظیمات فروشندگی")}</h2>
-        <span
-          className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-            isApproved ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
-          }`}
-        >
-          {isApproved ? translateText("تأییدشده") : translateText("در انتظار تأیید")}
-        </span>
-        <span
-          className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-            isActive ? 'bg-blue-500/15 text-blue-400' : 'bg-red-500/15 text-red-400'
-          }`}
-        >
-          {isActive ? translateText("فعال") : translateText("غیرفعال")}
-        </span>
-        {isTrustedSeller(seller) && (
-          <span className="chip !cursor-default !py-1 !px-2.5 text-[11px] flex items-center gap-1">
-            <BadgeCheck size={12} className="text-yellow" />{translateText("فروشنده مورد اعتماد ")}</span>
-        )}
-      </div>
-
-      {/* توضیح قفل هویت */}
-      {identityLocked ? (
-        <div
-          className="rounded-2xl p-3.5 flex items-start gap-2 text-[11px] leading-6"
-          style={{ background: 'rgba(255,214,10,0.1)', border: '1px solid rgba(255,214,10,0.3)' }}
-        >
-          <Lock size={15} className="mt-0.5 shrink-0 text-yellow" />
-          <span>{translateText("حساب شما تأیید شده است؛ بنابراین اطلاعات هویتی (نوع فروشنده، کد ملی، تاریخ تولد و نشانی) قفل شده‌اند. برای تغییر آن‌ها از طریق")}{' '}
-            <Link to="/contact" className="font-bold text-yellow">{translateText("پشتیبانی ")}</Link>{' '}{translateText("درخواست بدهید. فقط حساب تسویه قابل ویرایش است. ")}</span>
-        </div>
-      ) : (
-        <div className="text-[11px] muted leading-6 flex items-start gap-2">
-          <Info size={14} className="mt-0.5 shrink-0 text-yellow" />{translateText("پس از تأیید مدیر، اطلاعات هویتی قفل می‌شود و فقط حساب تسویه قابل ویرایش خواهد بود. ")}</div>
-      )}
-
-      <div className="grid sm:grid-cols-2 gap-3">
-        <label className="text-xs muted">{translateText("نوع فروشنده ")}<select
-            className={lockedInput}
-            value={form.seller_type}
-            onChange={set('seller_type')}
-            disabled={identityLocked}
+        {/* وضعیت فروشنده */}
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-black text-lg me-auto">{translateText('تنظیمات فروشندگی')}</h2>
+          <span
+            className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+              isApproved ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
+            }`}
           >
-            <option value="Individual_seller">{translateText("فروشنده حقیقی")}</option>
-            <option value="institutional_seller">{translateText("فروشنده حقوقی")}</option>
-          </select>
-        </label>
-
-        <label className="text-xs muted">{translateText("کد ملی ")}<input
-            className={lockedInput}
-            dir="ltr"
-            value={form.national_ID}
-            onChange={set('national_ID')}
-            disabled={identityLocked}
-            required={!identityLocked}
-          />
-        </label>
-
-        <div className="text-xs muted">{translateText("تاریخ تولد (شمسی) ")}{identityLocked ? (
-            <div className={`${lockedInput} mt-1`} dir="ltr">
-              {formatStoredBirthDate(form.birth_date)}
-            </div>
-          ) : (
-            <JalaliDateTimePicker
-              value={form.birth_date}
-              onChange={(next) => set('birth_date')({ target: { value: next } })}
-              placeholder={translateText("۱۳۷۲/۰۴/۱۵")}
-              withTime={false}
-              valueFormat="jalali"
-            />
+            {isApproved ? translateText('تأییدشده') : translateText('در انتظار تأیید')}
+          </span>
+          <span
+            className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+              isActive ? 'bg-blue-500/15 text-blue-400' : 'bg-red-500/15 text-red-400'
+            }`}
+          >
+            {isActive ? translateText('فعال') : translateText('غیرفعال')}
+          </span>
+          {isTrustedSeller(seller) && (
+            <span className="chip !cursor-default !py-1 !px-2.5 text-[11px] flex items-center gap-1">
+              <BadgeCheck size={12} className="text-yellow" />
+              {translateText('فروشنده مورد اعتماد ')}
+            </span>
           )}
         </div>
 
-        <label className="text-xs muted">{translateText("استان ")}<input
-            className={lockedInput}
-            value={form.province}
-            onChange={set('province')}
-            disabled={identityLocked}
-          />
-        </label>
+        {/* توضیح قفل هویت */}
+        {identityLocked ? (
+          <div
+            className="rounded-2xl p-3.5 flex items-start gap-2 text-[11px] leading-6"
+            style={{ background: 'rgba(255,214,10,0.1)', border: '1px solid rgba(255,214,10,0.3)' }}
+          >
+            <Lock size={15} className="mt-0.5 shrink-0 text-yellow" />
+            <span>
+              {translateText(
+                'حساب شما تأیید شده است؛ بنابراین اطلاعات هویتی (نوع فروشنده، کد ملی، تاریخ تولد و نشانی) قفل شده‌اند. برای تغییر آن‌ها از طریق',
+              )}{' '}
+              <Link to="/contact" className="font-bold text-yellow">
+                {translateText('پشتیبانی ')}
+              </Link>{' '}
+              {translateText('درخواست بدهید. فقط حساب تسویه قابل ویرایش است. ')}
+            </span>
+          </div>
+        ) : (
+          <div className="text-[11px] muted leading-6 flex items-start gap-2">
+            <Info size={14} className="mt-0.5 shrink-0 text-yellow" />
+            {translateText(
+              'پس از تأیید مدیر، اطلاعات هویتی قفل می‌شود و فقط حساب تسویه قابل ویرایش خواهد بود. ',
+            )}
+          </div>
+        )}
 
-        <label className="text-xs muted">{translateText("شهر ")}<input
-            className={lockedInput}
-            value={form.city}
-            onChange={set('city')}
-            disabled={identityLocked}
-          />
-        </label>
-
-        <label className="text-xs muted sm:col-span-2">{translateText("آدرس کامل ")}<input
-            className={lockedInput}
-            value={form.full_address}
-            onChange={set('full_address')}
-            disabled={identityLocked}
-          />
-        </label>
-      </div>
-
-      {/* حساب تسویه — همیشه قابل ویرایش */}
-      <div className="pt-1">
-        <h3 className="font-black text-sm">{translateText("حساب تسویه")}</h3>
-        <p className="text-[11px] muted mt-1 mb-3">{translateText("واریز مبلغ فروش به این حساب انجام می‌شود؛ همیشه قابل ویرایش است. ")}</p>
         <div className="grid sm:grid-cols-2 gap-3">
-          <label className="text-xs muted">{translateText("صاحب حساب تسویه ")}<input
-              className="input mt-1"
-              value={form.firstname_lastname}
-              onChange={set('firstname_lastname')}
-              required
+          <label className="text-xs muted">
+            {translateText('نوع فروشنده ')}
+            <select
+              className={lockedInput}
+              value={form.seller_type}
+              onChange={set('seller_type')}
+              disabled={identityLocked}
+            >
+              <option value="Individual_seller">{translateText('فروشنده حقیقی')}</option>
+              <option value="institutional_seller">{translateText('فروشنده حقوقی')}</option>
+            </select>
+          </label>
+
+          <label className="text-xs muted">
+            {translateText('کد ملی ')}
+            <input
+              className={lockedInput}
+              dir="ltr"
+              value={form.national_ID}
+              onChange={set('national_ID')}
+              disabled={identityLocked}
+              required={!identityLocked}
             />
           </label>
-          <label className="text-xs muted">{translateText("شماره کارت ۱۶ رقمی ")}<input
-              className="input mt-1"
-              dir="ltr"
-              value={form.card_number}
-              onChange={set('card_number')}
-              required
+
+          <div className="text-xs muted">
+            {translateText('تاریخ تولد (شمسی) ')}
+            {identityLocked ? (
+              <div className={`${lockedInput} mt-1`} dir="ltr">
+                {formatStoredBirthDate(form.birth_date)}
+              </div>
+            ) : (
+              <JalaliDateTimePicker
+                value={form.birth_date}
+                onChange={(next) => set('birth_date')({ target: { value: next } })}
+                placeholder={translateText('۱۳۷۲/۰۴/۱۵')}
+                withTime={false}
+                valueFormat="jalali"
+              />
+            )}
+          </div>
+
+          <label className="text-xs muted">
+            {translateText('استان ')}
+            <input
+              className={lockedInput}
+              value={form.province}
+              onChange={set('province')}
+              disabled={identityLocked}
             />
           </label>
-          <label className="text-xs muted sm:col-span-2">{translateText("شماره شبا (IR...) ")}<input
-              className="input mt-1"
-              dir="ltr"
-              value={form.sheba_number}
-              onChange={set('sheba_number')}
-              required
+
+          <label className="text-xs muted">
+            {translateText('شهر ')}
+            <input
+              className={lockedInput}
+              value={form.city}
+              onChange={set('city')}
+              disabled={identityLocked}
+            />
+          </label>
+
+          <label className="text-xs muted sm:col-span-2">
+            {translateText('آدرس کامل ')}
+            <input
+              className={lockedInput}
+              value={form.full_address}
+              onChange={set('full_address')}
+              disabled={identityLocked}
             />
           </label>
         </div>
-      </div>
 
-      <ActivePlanCard
-        plan={plan}
-        loading={planLoading}
-        startAt={seller?.seller_plan?.start_at}
-        hasPlan={Boolean(seller?.seller_plan?.plan_id)}
-      />
+        {/* حساب تسویه — همیشه قابل ویرایش */}
+        <div className="pt-1">
+          <h3 className="font-black text-sm">{translateText('حساب تسویه')}</h3>
+          <p className="text-[11px] muted mt-1 mb-3">
+            {translateText('واریز مبلغ فروش به این حساب انجام می‌شود؛ همیشه قابل ویرایش است. ')}
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <label className="text-xs muted">
+              {translateText('صاحب حساب تسویه ')}
+              <input
+                className="input mt-1"
+                value={form.firstname_lastname}
+                onChange={set('firstname_lastname')}
+                required
+              />
+            </label>
+            <label className="text-xs muted">
+              {translateText('شماره کارت ۱۶ رقمی ')}
+              <input
+                className="input mt-1"
+                dir="ltr"
+                value={form.card_number}
+                onChange={set('card_number')}
+                required
+              />
+            </label>
+            <label className="text-xs muted sm:col-span-2">
+              {translateText('شماره شبا (IR...) ')}
+              <input
+                className="input mt-1"
+                dir="ltr"
+                value={form.sheba_number}
+                onChange={set('sheba_number')}
+                required
+              />
+            </label>
+          </div>
+        </div>
 
-      <button type="submit" className="btn-yellow">{translateText("ذخیره تنظیمات ")}</button>
+        <ActivePlanCard
+          plan={plan}
+          loading={planLoading}
+          startAt={seller?.seller_plan?.start_at}
+          hasPlan={Boolean(seller?.seller_plan?.plan_id)}
+        />
+
+        <button type="submit" className="btn-yellow">
+          {translateText('ذخیره تنظیمات ')}
+        </button>
       </form>
     </div>
   );
@@ -342,18 +398,15 @@ export default SettingPage;
 /* کارت «پلن فعال» — به جای شناسه‌ی خام، پلن را خوانا نشان می‌دهد        */
 /* ------------------------------------------------------------------ */
 
-const toToman = (amount, currency) =>
-  Math.round(currency === 'IRR' ? Number(amount || 0) / 10 : Number(amount || 0));
-
 const durationLabelOf = (days) => {
-  if (days === null || days === undefined) return translateText("نامحدود");
+  if (days === null || days === undefined) return translateText('نامحدود');
   const n = Number(days);
-  if (!Number.isFinite(n) || n <= 0) return translateText("نامحدود");
-  if (n === 30) return translateText("ماهانه");
-  if (n === 90) return translateText("سه‌ماهه");
-  if (n === 180) return translateText("شش‌ماهه");
-  if (n === 365) return translateText("سالانه");
-  return translateText("{{v0}} روزه", {v0: (toFa(n))});
+  if (!Number.isFinite(n) || n <= 0) return translateText('نامحدود');
+  if (n === 30) return translateText('ماهانه');
+  if (n === 90) return translateText('سه‌ماهه');
+  if (n === 180) return translateText('شش‌ماهه');
+  if (n === 365) return translateText('سالانه');
+  return translateText('{{v0}} روزه', { v0: toFa(n) });
 };
 
 function PlanStat({ icon: Icon, label, value }) {
@@ -373,9 +426,15 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
     return (
       <div className="card rounded-2xl p-4 sm:p-5">
         <div className="flex items-center gap-2 font-black text-sm">
-          <Sparkles size={16} style={{ color: 'var(--primary-color)' }} />{translateText("پلن فعالی ندارید ")}</div>
-        <p className="text-xs muted mt-2 leading-6">{translateText("برای انتشار محصول باید یکی از پلن‌های فروشندگی را فعال کنید. ")}</p>
-        <Link to="/seller/plans" className="btn-yellow !py-2 text-sm mt-3 inline-flex">{translateText("مشاهده و خرید پلن ")}</Link>
+          <Sparkles size={16} style={{ color: 'var(--primary-color)' }} />
+          {translateText('پلن فعالی ندارید ')}
+        </div>
+        <p className="text-xs muted mt-2 leading-6">
+          {translateText('برای انتشار محصول باید یکی از پلن‌های فروشندگی را فعال کنید. ')}
+        </p>
+        <Link to="/seller/plans" className="btn-yellow !py-2 text-sm mt-3 inline-flex">
+          {translateText('مشاهده و خرید پلن ')}
+        </Link>
       </div>
     );
   }
@@ -405,16 +464,19 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
   const expired = daysLeft !== null && daysLeft <= 0;
 
   const f = plan?.features || {};
-  const currency = plan?.price?.currency || 'IRR';
-  const priceToman = plan?.price ? toToman(plan.price.amount, currency) : null;
+  const planAmount = plan?.price?.amount ?? null;
 
   return (
     <div className="card rounded-2xl p-4 sm:p-5" style={{ border: '1px solid var(--border)' }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <span className="flex items-center gap-1.5 text-[11px] muted">
-            <Sparkles size={13} style={{ color: 'var(--primary-color)' }} />{translateText("پلن فعال شما ")}</span>
-          <h3 className="font-black text-lg mt-1 truncate">{plan?.name || translateText("پلن فعال")}</h3>
+            <Sparkles size={13} style={{ color: 'var(--primary-color)' }} />
+            {translateText('پلن فعال شما ')}
+          </span>
+          <h3 className="font-black text-lg mt-1 truncate">
+            {plan?.name || translateText('پلن فعال')}
+          </h3>
           {plan?.description && (
             <p className="text-xs muted mt-1 leading-6 line-clamp-2">{plan.description}</p>
           )}
@@ -429,30 +491,38 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
           }
         >
           <Check size={12} />
-          {expired ? translateText("منقضی شده") : translateText("فعال")}
+          {expired ? translateText('منقضی شده') : translateText('فعال')}
         </span>
       </div>
 
       <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-2">
-        <PlanStat icon={Clock} label={translateText("مدت اعتبار")} value={durationLabelOf(durationDays)} />
+        <PlanStat
+          icon={Clock}
+          label={translateText('مدت اعتبار')}
+          value={durationLabelOf(durationDays)}
+        />
         <PlanStat
           icon={CalendarDays}
-          label={translateText("شروع")}
+          label={translateText('شروع')}
           value={validStart ? formatDate(validStart) : '—'}
         />
         <PlanStat
           icon={CalendarDays}
-          label={translateText("پایان")}
-          value={expires ? formatDate(expires) : translateText("نامحدود")}
+          label={translateText('پایان')}
+          value={expires ? formatDate(expires) : translateText('نامحدود')}
         />
         <PlanStat
           icon={Package}
-          label={daysLeft !== null && !expired ? translateText("روز باقی‌مانده") : translateText("هزینه‌ی پلن")}
+          label={
+            daysLeft !== null && !expired
+              ? translateText('روز باقی‌مانده')
+              : translateText('هزینه‌ی پلن')
+          }
           value={
             daysLeft !== null && !expired
-              ? translateText("{{v0}} روز", {v0: (toFa(daysLeft))})
-              : priceToman !== null
-                ? translateText("{{v0}} تومان", {v0: (toFa(priceToman.toLocaleString('en-US')))})
+              ? translateText('{{v0}} روز', { v0: toFa(daysLeft) })
+              : planAmount !== null
+                ? formatMoney(plan.price.amount, plan.price.currency)
                 : '—'
           }
         />
@@ -462,27 +532,39 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
           {f.max_products ? (
             <span className="chip !cursor-default !py-1 !px-2.5 inline-flex items-center gap-1">
-              <Package size={12} />{translateText("تا ")}{toFa(f.max_products)}{translateText(" محصول ")}</span>
+              <Package size={12} />
+              {translateText('تا ')}
+              {toFa(f.max_products)}
+              {translateText(' محصول ')}
+            </span>
           ) : null}
           {f.max_shops ? (
             <span className="chip !cursor-default !py-1 !px-2.5 inline-flex items-center gap-1">
-              <Store size={12} />{translateText("تا ")}{toFa(f.max_shops)}{translateText(" فروشگاه ")}</span>
+              <Store size={12} />
+              {translateText('تا ')}
+              {toFa(f.max_shops)}
+              {translateText(' فروشگاه ')}
+            </span>
           ) : null}
           {f.max_images_per_product ? (
             <span className="chip !cursor-default !py-1 !px-2.5 inline-flex items-center gap-1">
-              <ImageIcon size={12} />{translateText("تا ")}{toFa(f.max_images_per_product)}{translateText(" تصویر برای هر محصول ")}</span>
+              <ImageIcon size={12} />
+              {translateText('تا ')}
+              {toFa(f.max_images_per_product)}
+              {translateText(' تصویر برای هر محصول ')}
+            </span>
           ) : null}
         </div>
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Link to="/seller/plans" className="btn-yellow !py-2 text-xs sm:text-sm">
-          {expired ? translateText("تمدید پلن") : translateText("ارتقا یا تمدید")}
+          {expired ? translateText('تمدید پلن') : translateText('ارتقا یا تمدید')}
         </Link>
         <span className="text-[11px] muted">
           {expired
-            ? translateText("اعتبار پلن تمام شده است؛ برای انتشار محصول پلن را تمدید کنید.")
-            : translateText("برای تغییر پلن، گزینه‌های موجود را ببینید.")}
+            ? translateText('اعتبار پلن تمام شده است؛ برای انتشار محصول پلن را تمدید کنید.')
+            : translateText('برای تغییر پلن، گزینه‌های موجود را ببینید.')}
         </span>
       </div>
     </div>

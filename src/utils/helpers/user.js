@@ -1,3 +1,4 @@
+import { localizedField } from '../../i18n/content-fields';
 import { t as translateText } from '../../i18n/runtime.js';
 /*
  * کمک‌تابع‌های مربوط به کاربر
@@ -7,12 +8,12 @@ import { t as translateText } from '../../i18n/runtime.js';
  */
 
 export const userFullName = (user) =>
-  `${user?.firstname || ''} ${user?.lastname || ''}`.trim();
+  `${localizedField(user?.firstname) || ''} ${localizedField(user?.lastname) || ''}`.trim();
 
-export const userDisplayName = (user, fallback = translateText("کاربر ژئو کالا")) =>
+export const userDisplayName = (user, fallback = translateText('کاربر ژئوکالا')) =>
   userFullName(user) || user?.username || fallback;
 
-export const userInitial = (user, fallback = translateText("ک")) => {
+export const userInitial = (user, fallback = translateText('ک')) => {
   const name = userFullName(user) || user?.username || '';
   return String(name).trim().charAt(0) || fallback;
 };
@@ -49,7 +50,7 @@ export const storeContactInfo = (store, owner) => {
   const address = owner?.address || {};
   const ownerAddress = [address.province, address.city, address.full_address]
     .filter(Boolean)
-    .join(translateText("، "));
+    .join(translateText('، '));
 
   return {
     storeName: String(store?.name || '').trim(),
@@ -71,8 +72,7 @@ export const isSellerIdentityLocked = (seller) =>
  * نام نمایشی فروشنده از روت عمومی کاربر
  * (بک‌اند فیلدهای firstname/lastname را برمی‌گرداند؛ در نبود آن‌ها username)
  */
-export const sellerDisplayName = (owner) =>
-  (userFullName(owner) || owner?.username || '').trim();
+export const sellerDisplayName = (owner) => (userFullName(owner) || owner?.username || '').trim();
 
 /*
  * فعال یا غیرفعال بودن فروشنده

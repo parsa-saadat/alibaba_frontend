@@ -1,3 +1,5 @@
+import usePanelStats from '../../hooks/usePanelStats';
+import StatsNotice from '../../components/panel/StatsNoticeComponent';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
@@ -62,9 +64,9 @@ function StatTile({ label, value, hint, icon: Icon, tint }) {
 }
 
 function StoresPage() {
+  const { stats: panelStats, error: statsError, refresh: refreshStats } = usePanelStats(['store']);
   const [stores, setStores] = useState([]);
   const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
@@ -74,85 +76,62 @@ function StoresPage() {
   const [zoomFile, setZoomFile] = useState(null);
   const [busyId, setBusyId] = useState('');
 
-  const load = useCallback(async (silent = false) => {
-    if (silent) setRefreshing(true);
-    else setLoading(true);
-    try {
-      const [storesRes, usersRes, productsRes] = await Promise.all([
-        axios.get(`${API}/perm/stores?lang=all&limit=100`, authHeaders()),
-        axios.get(`${API}/user?limit=100`, authHeaders()).catch(() => null),
-        axios.get(`${API}/perm/products?limit=200`, authHeaders()).catch(() => null),
-      ]);
-      setStores(storesRes.data.body?.data || storesRes.data.body || []);
-      setUsers(usersRes?.data?.body?.data || usersRes?.data?.body || []);
-      const list = productsRes?.data?.body?.data || productsRes?.data?.body || [];
-      setProducts(Array.isArray(list) ? list : []);
-    } catch {
-      setStores([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const load = useCallback(
+    async (silent = false) => {
+      refreshStats();
+      if (silent) setRefreshing(true);
+      else setRefreshing(true);
+      try {
+        const [storesRes, usersRes] = await Promise.all([
+          axios.get(`${API}/perm/stores?lang=all&limit=100`, {
+            ...authHeaders(),
+            params: { search, status: statusFilter === 'all' ? undefined : statusFilter },
+          }),
+          axios.get(`${API}/user?limit=100`, authHeaders()).catch(() => null),
+        ]);
+        setStores(storesRes.data.body?.data || storesRes.data.body || []);
+        setUsers(usersRes?.data?.body?.data || usersRes?.data?.body || []);
+      } catch {
+        setStores([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [search, statusFilter],
+  );
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(() => load(true), 300);
+    return () => clearTimeout(timer);
   }, [load]);
 
   const userMap = useMemo(() => Object.fromEntries(users.map((u) => [getId(u), u])), [users]);
 
-  const statsByStore = useMemo(() => {
-    const map = {};
-    products.forEach((product) => {
-      const key = getId(product.store_id);
-      if (!key) return;
-      if (!map[key]) map[key] = { count: 0, stock: 0 };
-      map[key].count += 1;
-      map[key].stock += Number(product.stock ?? 0) || 0;
-    });
-    return map;
-  }, [products]);
+  const statsByStore = panelStats.store?.byStore || {};
 
-  const counts = useMemo(
-    () => ({
-      all: stores.length,
-      ENABLE: stores.filter((store) => store.status === 'ENABLE').length,
-      DISABLE: stores.filter((store) => store.status === 'DISABLE').length,
-      ROOT_DISABLE: stores.filter((store) => store.status === 'ROOT_DISABLE').length,
-    }),
-    [stores],
-  );
+  const counts = panelStats.store?.counts || {
+    all: '—',
+    ENABLE: '—',
+    DISABLE: '—',
+    ROOT_DISABLE: '—',
+  };
 
   const q = search.trim().toLowerCase();
-  const filtered = useMemo(
-    () =>
-      stores.filter((store) => {
-        if (statusFilter !== 'all' && store.status !== statusFilter) return false;
-        if (!q) return true;
-        const owner = userMap[getId(store.user)];
-        return [
-          store.name,
-          store.contact_info?.email,
-          store.contact_info?.phone,
-          owner?.username,
-          userFullName(owner),
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(q);
-      }),
-    [stores, userMap, q, statusFilter],
-  );
+  const filtered = stores;
 
   const setStoreStatus = async (store, status) => {
     setBusyId(getId(store));
     try {
-      await axios.put(`${API}/store/${getId(store)}`, { status, contact_info: store.contact_info }, authHeaders());
-      toast.success(translateText("وضعیت فروشگاه به «{{v0}}» تغییر کرد", {v0: (statusFa(status))}));
+      await axios.put(
+        `${API}/store/${getId(store)}`,
+        { status, contact_info: store.contact_info },
+        authHeaders(),
+      );
+      toast.success(translateText('وضعیت فروشگاه به «{{v0}}» تغییر کرد', { v0: statusFa(status) }));
       load(true);
     } catch (error) {
-      toast.error(error.response?.data?.message || translateText("خطا در تغییر وضعیت فروشگاه"));
+      toast.error(error.response?.data?.message || translateText('خطا در تغییر وضعیت فروشگاه'));
     } finally {
       setBusyId('');
     }
@@ -162,11 +141,11 @@ function StoresPage() {
     setBusyId(getId(store));
     try {
       await axios.delete(`${API}/store/${getId(store)}`, authHeaders());
-      toast.success(translateText("فروشگاه حذف شد"));
+      toast.success(translateText('فروشگاه حذف شد'));
       setDeleteTarget(null);
       load(true);
     } catch {
-      toast.info(translateText("حذف ممکن نبود؛ فروشگاه به‌جای آن مسدود شد"));
+      toast.info(translateText('حذف ممکن نبود؛ فروشگاه به‌جای آن مسدود شد'));
       await setStoreStatus(store, 'ROOT_DISABLE');
       setDeleteTarget(null);
     } finally {
@@ -177,46 +156,81 @@ function StoresPage() {
   if (loading && stores.length === 0) {
     return (
       <div className="py-16">
-        <Loading label={translateText("در حال بارگذاری فروشگاه‌ها…")} />
+        <Loading label={translateText('در حال بارگذاری فروشگاه‌ها…')} />
       </div>
     );
   }
 
   const tabs = [
-    { id: 'all', label: translateText("همه") },
-    { id: 'ENABLE', label: translateText("فعال") },
-    { id: 'DISABLE', label: translateText("غیرفعال") },
-    { id: 'ROOT_DISABLE', label: translateText("مسدود") },
+    { id: 'all', label: translateText('همه') },
+    { id: 'ENABLE', label: translateText('فعال') },
+    { id: 'DISABLE', label: translateText('غیرفعال') },
+    { id: 'ROOT_DISABLE', label: translateText('مسدود') },
   ];
 
   return (
     <div className="space-y-5">
       <PanelPageHeader
         icon={Store}
-        title={translateText("مدیریت فروشگاه‌ها")}
-        subtitle={translateText("{{v0}} فروشگاه • {{v1}} کالا • {{v2}} فعال", {v0: (toFa(stores.length)),v1: (toFa(products.length)),v2: (toFa(counts.ENABLE))})}
+        title={translateText('مدیریت فروشگاه‌ها')}
+        subtitle={translateText('{{v0}} فروشگاه • {{v1}} کالا • {{v2}} فعال', {
+          v0: toFa(counts.all),
+          v1: toFa(panelStats.store?.products ?? '—'),
+          v2: toFa(counts.ENABLE),
+        })}
         onRefresh={() => load(true)}
         refreshing={refreshing}
         actions={
           <>
-            <Link to="/dashboard/sellers" className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5">
-              <UserRound size={14} />{translateText(" فروشندگان ")}</Link>
+            <Link
+              to="/dashboard/sellers"
+              className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
+            >
+              <UserRound size={14} />
+              {translateText(' فروشندگان ')}
+            </Link>
             <button
               type="button"
               onClick={() => setStoreModal(null)}
               className="btn-ghost !py-2 !px-3 text-xs flex items-center gap-1.5"
             >
-              <Plus size={14} />{translateText(" فروشگاه جدید ")}</button>
+              <Plus size={14} />
+              {translateText(' فروشگاه جدید ')}
+            </button>
           </>
         }
       />
+      <StatsNotice error={statsError} stats={panelStats} />
 
       {/* ───── آمار ───── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label={translateText("کل فروشگاه‌ها")} value={toFa(counts.all)} hint={translateText("{{v0}} کالا", {v0: (toFa(products.length))})} icon={Store} />
-        <StatTile label={translateText("فعال")} value={toFa(counts.ENABLE)} hint={translateText("در دسترس مشتری")} icon={CheckCircle2} tint="#17994f" />
-        <StatTile label={translateText("غیرفعال")} value={toFa(counts.DISABLE)} hint={translateText("موقتاً بسته")} icon={PauseCircle} tint="#c2740a" />
-        <StatTile label={translateText("مسدود")} value={toFa(counts.ROOT_DISABLE)} hint={translateText("توسط مدیریت")} icon={Ban} tint="#e53935" />
+        <StatTile
+          label={translateText('کل فروشگاه‌ها')}
+          value={toFa(counts.all)}
+          hint={translateText('{{v0}} کالا', { v0: toFa(panelStats.store?.products ?? '—') })}
+          icon={Store}
+        />
+        <StatTile
+          label={translateText('فعال')}
+          value={toFa(counts.ENABLE)}
+          hint={translateText('در دسترس مشتری')}
+          icon={CheckCircle2}
+          tint="#17994f"
+        />
+        <StatTile
+          label={translateText('غیرفعال')}
+          value={toFa(counts.DISABLE)}
+          hint={translateText('موقتاً بسته')}
+          icon={PauseCircle}
+          tint="#c2740a"
+        />
+        <StatTile
+          label={translateText('مسدود')}
+          value={toFa(counts.ROOT_DISABLE)}
+          hint={translateText('توسط مدیریت')}
+          icon={Ban}
+          tint="#e53935"
+        />
       </div>
 
       {/* ───── فیلتر و جستجو ───── */}
@@ -230,7 +244,15 @@ function StoresPage() {
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
                 className="chip flex items-center gap-1.5"
-                style={active ? { background: 'var(--primary-color)', color: '#0a1736', borderColor: 'transparent' } : undefined}
+                style={
+                  active
+                    ? {
+                        background: 'var(--primary-color)',
+                        color: '#0a1736',
+                        borderColor: 'transparent',
+                      }
+                    : undefined
+                }
               >
                 {tab.label}
                 <span
@@ -242,7 +264,10 @@ function StoresPage() {
               </button>
             );
           })}
-          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)}{translateText(" نتیجه")}</span>
+          <span className="ms-auto text-[11px] muted">
+            {toFa(filtered.length)}
+            {translateText(' نتیجه')}
+          </span>
         </div>
 
         <div className="relative">
@@ -250,7 +275,7 @@ function StoresPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={translateText("جستجوی نام فروشگاه، ایمیل یا مالک…")}
+            placeholder={translateText('جستجوی نام فروشگاه، ایمیل یا مالک…')}
             className="input !py-2.5 !pe-9 text-xs w-full"
           />
           {search && (
@@ -258,7 +283,7 @@ function StoresPage() {
               type="button"
               onClick={() => setSearch('')}
               className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
-              aria-label={translateText("پاک کردن جستجو")}
+              aria-label={translateText('پاک کردن جستجو')}
             >
               <X size={13} />
             </button>
@@ -275,9 +300,11 @@ function StoresPage() {
           >
             <Store size={24} />
           </span>
-          <b className="block text-sm">{translateText("فروشگاهی پیدا نشد")}</b>
+          <b className="block text-sm">{translateText('فروشگاهی پیدا نشد')}</b>
           <p className="text-xs muted">
-            {stores.length === 0 ? translateText("فروشگاهی ثبت نشده است.") : translateText("فیلتر یا عبارت جستجو را تغییر دهید.")}
+            {stores.length === 0
+              ? translateText('فروشگاهی ثبت نشده است.')
+              : translateText('فیلتر یا عبارت جستجو را تغییر دهید.')}
           </p>
         </section>
       ) : (
@@ -289,8 +316,9 @@ function StoresPage() {
             const meta = metaOf(store.status);
             const StatusIcon = meta.icon;
             const rooted = store.status === 'ROOT_DISABLE';
-            const stats = statsByStore[id] || { count: 0, stock: 0 };
-            const zoomable = (file) => (file ? (f, a) => setZoomFile({ file: f, alt: a }) : undefined);
+            const stats = statsByStore[id] || { count: '—', stock: '—' };
+            const zoomable = (file) =>
+              file ? (f, a) => setZoomFile({ file: f, alt: a }) : undefined;
 
             return (
               <article key={id} className="card rounded-2xl overflow-hidden flex flex-col">
@@ -306,7 +334,7 @@ function StoresPage() {
                   {store.banner_image_id && (
                     <StorageImageComponent
                       file={store.banner_image_id}
-                      alt={translateText("بنر {{v0}}", {v0: (store.name)})}
+                      alt={translateText('بنر {{v0}}', { v0: store.name })}
                       className="w-full h-full object-cover"
                       onZoom={zoomable(store.banner_image_id)}
                     />
@@ -323,7 +351,12 @@ function StoresPage() {
                   <div className="flex items-start gap-3">
                     <div
                       className="grid shrink-0 place-items-center overflow-hidden rounded-2xl border border-theme text-lg font-black"
-                      style={{ width: 52, height: 52, background: 'var(--card2)', color: 'var(--primary-color)' }}
+                      style={{
+                        width: 52,
+                        height: 52,
+                        background: 'var(--card2)',
+                        color: 'var(--primary-color)',
+                      }}
                     >
                       {store.profile_image_id ? (
                         <StorageImageComponent
@@ -338,26 +371,35 @@ function StoresPage() {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <Link to={`/store/${id}`} className="block truncate text-sm font-black hover:underline">
-                        {store.name || translateText("بدون نام")}
+                      <Link
+                        to={`/store/${id}`}
+                        className="block truncate text-sm font-black hover:underline"
+                      >
+                        {store.name || translateText('بدون نام')}
                       </Link>
                       <div className="mt-1 flex items-center gap-1 text-[11px] muted min-w-0">
                         <UserRound size={11} className="shrink-0" />
                         <span className="truncate">
-                          {userFullName(owner) || owner?.username || translateText("مالک نامشخص")}
+                          {userFullName(owner) || owner?.username || translateText('مالک نامشخص')}
                         </span>
-                        {owner?.seller_trust === true && <BadgeCheck size={12} style={{ color: '#17994f' }} />}
+                        {owner?.seller_trust === true && (
+                          <BadgeCheck size={12} style={{ color: '#17994f' }} />
+                        )}
                       </div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1">
                         <span
                           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--text)' }}
                         >
-                          <Package size={10} /> {toFa(stats.count)}{translateText(" کالا ")}</span>
+                          <Package size={10} /> {toFa(stats.count)}
+                          {translateText(' کالا ')}
+                        </span>
                         <span
                           className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--muted)' }}
-                        >{translateText("موجودی: ")}{toFa(stats.stock)}
+                        >
+                          {translateText('موجودی: ')}
+                          {toFa(stats.stock)}
                         </span>
                       </div>
                     </div>
@@ -366,11 +408,15 @@ function StoresPage() {
                   <div className="grid gap-1.5 border-y border-theme py-2.5 text-[11px] muted sm:grid-cols-2">
                     <span className="flex min-w-0 items-center gap-1.5">
                       <Mail size={12} className="shrink-0" />
-                      <span dir="ltr" className="truncate">{store.contact_info?.email || '—'}</span>
+                      <span dir="ltr" className="truncate">
+                        {store.contact_info?.email || '—'}
+                      </span>
                     </span>
                     <span className="flex min-w-0 items-center gap-1.5">
                       <Phone size={12} className="shrink-0" />
-                      <span dir="ltr" className="truncate">{store.contact_info?.phone || store.contact_info?.fax || '—'}</span>
+                      <span dir="ltr" className="truncate">
+                        {store.contact_info?.phone || store.contact_info?.fax || '—'}
+                      </span>
                     </span>
                     {store.contact_info?.address && (
                       <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
@@ -387,17 +433,27 @@ function StoresPage() {
                       onClick={() => setStoreModal(store)}
                       className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                     >
-                      <Pencil size={13} />{translateText(" ویرایش ")}</button>
+                      <Pencil size={13} />
+                      {translateText(' ویرایش ')}
+                    </button>
 
                     {!rooted && (
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => setStoreStatus(store, store.status === 'ENABLE' ? 'DISABLE' : 'ENABLE')}
+                        onClick={() =>
+                          setStoreStatus(store, store.status === 'ENABLE' ? 'DISABLE' : 'ENABLE')
+                        }
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                       >
-                        {store.status === 'ENABLE' ? <PauseCircle size={13} /> : <CheckCircle2 size={13} />}
-                        {store.status === 'ENABLE' ? translateText("غیرفعال") : translateText("فعال")}
+                        {store.status === 'ENABLE' ? (
+                          <PauseCircle size={13} />
+                        ) : (
+                          <CheckCircle2 size={13} />
+                        )}
+                        {store.status === 'ENABLE'
+                          ? translateText('غیرفعال')
+                          : translateText('فعال')}
                       </button>
                     )}
 
@@ -408,27 +464,43 @@ function StoresPage() {
                         onClick={() => setStoreStatus(store, 'ENABLE')}
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                         style={{ color: '#17994f' }}
-                        title={translateText("برداشتن مسدودی و فعال‌سازی دوباره‌ی فروشگاه")}
+                        title={translateText('برداشتن مسدودی و فعال‌سازی دوباره‌ی فروشگاه')}
                       >
-                        <CheckCircle2 size={13} />{translateText(" رفع مسدودی ")}</button>
+                        <CheckCircle2 size={13} />
+                        {translateText(' رفع مسدودی ')}
+                      </button>
                     ) : (
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => {
-                          if (window.confirm(translateText("فروشگاه «{{v0}}» مسدود شود؟ فروشنده دیگر نمی‌تواند آن را ویرایش یا فعال کند.", {v0: (store.name)}))) {
+                          if (
+                            window.confirm(
+                              translateText(
+                                'فروشگاه «{{v0}}» مسدود شود؟ فروشنده دیگر نمی‌تواند آن را ویرایش یا فعال کند.',
+                                { v0: store.name },
+                              ),
+                            )
+                          ) {
                             setStoreStatus(store, 'ROOT_DISABLE');
                           }
                         }}
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                         style={{ color: '#e53935' }}
-                        title={translateText("مسدودسازی توسط مدیریت")}
+                        title={translateText('مسدودسازی توسط مدیریت')}
                       >
-                        <Ban size={13} />{translateText(" مسدودسازی ")}</button>
+                        <Ban size={13} />
+                        {translateText(' مسدودسازی ')}
+                      </button>
                     )}
 
-                    <Link to={`/store/${id}`} className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1">
-                      <ExternalLink size={13} />{translateText(" صفحه ")}</Link>
+                    <Link
+                      to={`/store/${id}`}
+                      className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1"
+                    >
+                      <ExternalLink size={13} />
+                      {translateText(' صفحه ')}
+                    </Link>
 
                     <button
                       type="button"
@@ -436,7 +508,7 @@ function StoresPage() {
                       onClick={() => setDeleteTarget(store)}
                       className="btn-ghost !p-2 ms-auto disabled:opacity-50"
                       style={{ color: '#e53935' }}
-                      title={translateText("حذف یا مسدودسازی فروشگاه")}
+                      title={translateText('حذف یا مسدودسازی فروشگاه')}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -464,7 +536,10 @@ function StoresPage() {
           className="fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setDeleteTarget(null)}
         >
-          <div onClick={(e) => e.stopPropagation()} className="card rounded-3xl p-5 w-full max-w-sm space-y-4 text-center">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="card rounded-3xl p-5 w-full max-w-sm space-y-4 text-center"
+          >
             <span
               className="mx-auto grid h-14 w-14 place-items-center rounded-2xl"
               style={{ background: 'rgba(229,57,53,0.14)', color: '#e53935' }}
@@ -472,25 +547,41 @@ function StoresPage() {
               <Trash2 size={24} />
             </span>
             <div className="space-y-1">
-              <b className="block text-sm">{translateText("حذف فروشگاه")}</b>
+              <b className="block text-sm">{translateText('حذف فروشگاه')}</b>
               <p className="text-xs muted leading-6">
-                «{deleteTarget.name}{translateText("» حذف شود؟ اگر حذف ممکن نباشد، فروشگاه مسدود می‌شود و کالاهایش از دسترس خارج می‌شوند. ")}</p>
+                «{deleteTarget.name}
+                {translateText(
+                  '» حذف شود؟ اگر حذف ممکن نباشد، فروشگاه مسدود می‌شود و کالاهایش از دسترس خارج می‌شوند. ',
+                )}
+              </p>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <button type="button" onClick={() => setDeleteTarget(null)} className="btn-ghost !py-2 !px-4 text-xs">{translateText("انصراف ")}</button>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="btn-ghost !py-2 !px-4 text-xs"
+              >
+                {translateText('انصراف ')}
+              </button>
               <button
                 type="button"
                 disabled={busyId === getId(deleteTarget)}
                 onClick={() => deleteStore(deleteTarget)}
                 className="btn-yellow !py-2 !px-4 text-xs disabled:opacity-60"
                 style={{ background: '#e53935', color: '#fff' }}
-              >{translateText("بله، حذف کن ")}</button>
+              >
+                {translateText('بله، حذف کن ')}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      <ImageLightboxComponent file={zoomFile?.file} alt={zoomFile?.alt} onClose={() => setZoomFile(null)} />
+      <ImageLightboxComponent
+        file={zoomFile?.file}
+        alt={zoomFile?.alt}
+        onClose={() => setZoomFile(null)}
+      />
     </div>
   );
 }

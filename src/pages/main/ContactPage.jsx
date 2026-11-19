@@ -49,7 +49,7 @@ function ContactPage() {
       {/* بنر صفحه — همان بنر «درباره ما» */}
       <PageHeroComponent
         breadcrumb={translateText("تماس با ما")}
-        badge={translateText("تیم فنی و پشتیبانی ژئو کالا")}
+        badge={translateText("تیم فنی و پشتیبانی ژئوکالا")}
         title={translateText("مشاوره‌ی خرید تجهیزات نقشه‌برداری")}
         description={translateText("از انتخاب مدل درست جی‌پی‌اس یا توتال استیشن تا پیگیری سفارش و خدمات پس از فروش؛ کارشناسان ما در شعبه‌های تهران و هچیرود پاسخ‌گوی شما هستند.")}
         highlights={STATS.map((stat) => ({ icon: stat.icon, label: stat.title }))}

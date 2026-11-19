@@ -200,7 +200,7 @@ function DashboardNavbarComponent() {
           >
             <Menu size={19} />
           </button>
-          <span className="font-black text-sm">{translateText('پنل مدیریت ژئو کالا')}</span>
+          <span className="font-black text-sm">{translateText('پنل مدیریت ژئوکالا')}</span>
         </div>
         <LanguageSelector variant="admin" placement="navbar" compact />
       </div>

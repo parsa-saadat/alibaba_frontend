@@ -168,7 +168,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
       aria-expanded={open}
       aria-controls={listId}
       aria-autocomplete="list"
-      aria-label={translateText("جستجو در تجهیزات ژئو کالا")}
+      aria-label={translateText("جستجو در تجهیزات ژئوکالا")}
       placeholder={
         placeholder ||
         (hero ? translateText("جستجوی جی‌پی‌اس، توتال استیشن…") : translateText("جستجو در تجهیزات، برند یا دسته‌بندی…"))
@@ -293,7 +293,7 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
                     </div>
                   </div>
                   <div className="text-xs font-black text-yellow shrink-0">
-                    {formatPrice(finalPrice(product))}
+                    {formatPrice(finalPrice(product),product.price?.currency)}
                   </div>
                 </Link>
               ))

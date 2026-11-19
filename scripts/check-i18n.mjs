@@ -17,4 +17,10 @@ for (const [lang, catalog] of Object.entries(catalogs)) {
     assert.deepEqual(tokens(catalog[key]), tokens(key), `Placeholder mismatch ${lang}: ${key}`);
   }
 }
+// Interface copy uses sentence case, not blanket Title Case. Leading-space keys
+// are sentence fragments; acronyms, product names and user content are not rewritten.
+for (const locale of ['en','tr']) for (const key of keys) {
+  if (/^\s/.test(key)) continue;
+  assert.ok(!/^[a-zçğıöşü]/.test(catalogs[locale][key].trimStart()), `Use sentence case in ${locale}: ${key}`);
+}
 console.log(`PASS: ${keys.length} keys in each of 4 languages; interpolation placeholders match.`);

@@ -1,4 +1,4 @@
-import {t as translateText} from '../../i18n/runtime';
+import { t as translateText } from '../../i18n/runtime';
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -12,27 +12,28 @@ import {
   Store,
 } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
-import { formatPrice, finalPrice, hasDiscount, productImages, toFa } from '../../utils/helpers/format';
+import {
+  formatPrice,
+  finalPrice,
+  hasDiscount,
+  productImages,
+  toFa,
+} from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
 import useScrollFade from '../../hooks/useScrollFade';
 import { StoreContactModal } from '../store/StoreInfoComponent';
 
 /* قیمت کوتاه برای نوار پایین عکس کالا (مثل «$850» در علی‌بابا) */
-const shortPrice = (amount) => {
-  const toman = Math.round(Number(amount || 0) / 10);
-  try {
-    return translateText("{{v0}} ت",{v0:(new Intl.NumberFormat('fa-IR', { notation: 'compact', maximumFractionDigits: 1 }).format(toman))});
-  } catch {
-    return translateText("{{v0}} ت",{v0:(toFa(toman))});
-  }
-};
+const shortPrice = (amount, code) => formatPrice(amount, code);
 
 const memberLabel = (since) => {
   if (!since) return '';
   const start = new Date(since).getTime();
   if (!Number.isFinite(start)) return '';
   const years = Math.floor((Date.now() - start) / (365.25 * 86400000));
-  return years >= 1 ? translateText("{{v0}} سال در ژئو کالا",{v0:(toFa(years))}) : translateText("عضو جدید");
+  return years >= 1
+    ? translateText('{{v0}} سال در ژئوکالا', { v0: toFa(years) })
+    : translateText('عضو جدید');
 };
 
 function Badge({ icon: Icon, children, tone = 'soft' }) {
@@ -80,11 +81,15 @@ function ProductTile({ product }) {
         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
       {soldOut && (
-        <span className="absolute start-1.5 top-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-bold text-white">{translateText("ناموجود ")}</span>
+        <span className="absolute start-1.5 top-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-bold text-white">
+          {translateText('ناموجود ')}
+        </span>
       )}
       {hasDiscount(product) && (
         <span className="absolute end-1.5 top-1.5 rounded-full bg-red-600 px-1.5 py-0.5 text-[9px] font-black text-white">
-          {toFa(product.discount.percentage)}{translateText("٪ ")}</span>
+          {toFa(product.discount.percentage)}
+          {translateText('٪ ')}
+        </span>
       )}
       {/* سایه‌ی نرم پایین عکس: گرادیان چندمرحله‌ای (ease) تا بدون لبه‌ی تیز در عکس حل شود */}
       <span
@@ -99,7 +104,7 @@ function ProductTile({ product }) {
         className="absolute inset-x-0 bottom-0 px-2.5 pb-2 text-[12px] font-black leading-none text-white"
         style={{ textShadow: '0 1px 3px rgba(0,0,0,0.55)' }}
       >
-        {shortPrice(finalPrice(product))}
+        {shortPrice(finalPrice(product), product.price?.currency)}
       </span>
     </Link>
   );
@@ -127,8 +132,11 @@ function SupplierCardComponent({ store }) {
     store.min_price == null
       ? '—'
       : store.min_price === store.max_price
-        ? formatPrice(store.min_price)
-        : translateText("{{v0}} تا {{v1}}",{v0:(formatPrice(store.min_price)),v1:(formatPrice(store.max_price))});
+        ? formatPrice(store.min_price,store.display_currency || store.matched_products?.[0]?.price?.currency)
+        : translateText('{{v0}} تا {{v1}}', {
+            v0: formatPrice(store.min_price,store.display_currency || store.matched_products?.[0]?.price?.currency),
+            v1: formatPrice(store.max_price,store.display_currency || store.matched_products?.[0]?.price?.currency),
+          });
 
   return (
     <article className="card rounded-3xl p-4 sm:p-5">
@@ -148,15 +156,20 @@ function SupplierCardComponent({ store }) {
         </Link>
 
         <div className="min-w-0 flex-1">
-          <Link to={`/store/${id}`} className="block truncate text-sm font-black hover:opacity-80 sm:text-base">
+          <Link
+            to={`/store/${id}`}
+            className="block truncate text-sm font-black hover:opacity-80 sm:text-base"
+          >
             {store.name}
           </Link>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {seller.seller_trust && (
-              <Badge icon={BadgeCheck} tone="trust">{translateText("فروشنده‌ی مورد اعتماد ")}</Badge>
+              <Badge icon={BadgeCheck} tone="trust">
+                {translateText('فروشنده‌ی مورد اعتماد ')}
+              </Badge>
             )}
             {member && <Badge icon={CalendarDays}>{member}</Badge>}
-            {store.has_discount && <Badge icon={Percent}>{translateText("دارای تخفیف")}</Badge>}
+            {store.has_discount && <Badge icon={Percent}>{translateText('دارای تخفیف')}</Badge>}
           </div>
         </div>
 
@@ -166,8 +179,15 @@ function SupplierCardComponent({ store }) {
             onClick={() => setContactOpen(true)}
             className="btn-ghost inline-flex items-center gap-1.5 !py-2 text-xs"
           >
-            <MessageCircle size={13} />{translateText("ارتباط با فروشنده ")}</button>
-          <Link to={`/store/${id}`} className="btn-yellow inline-flex items-center gap-1 !py-2 text-xs">{translateText("مشاهده فروشگاه ")}<ChevronLeft className="logical-icon" size={13} />
+            <MessageCircle size={13} />
+            {translateText('ارتباط با فروشنده ')}
+          </button>
+          <Link
+            to={`/store/${id}`}
+            className="btn-yellow inline-flex items-center gap-1 !py-2 text-xs"
+          >
+            {translateText('مشاهده فروشگاه ')}
+            <ChevronLeft className="logical-icon" size={13} />
           </Link>
         </div>
       </div>
@@ -177,10 +197,16 @@ function SupplierCardComponent({ store }) {
         className="mt-3 grid grid-cols-2 gap-3 rounded-2xl p-3 sm:grid-cols-3"
         style={{ background: 'var(--card2)' }}
       >
-        <Stat label={translateText("کالای مطابق")} value={translateText("{{v0}} کالا",{v0:(toFa(store.matched_count || 0))})} />
-        <Stat label={translateText("موجود در انبار")} value={translateText("{{v0}} کالا",{v0:(toFa(store.in_stock_count || 0))})} />
+        <Stat
+          label={translateText('کالای مطابق')}
+          value={translateText('{{v0}} کالا', { v0: toFa(store.matched_count || 0) })}
+        />
+        <Stat
+          label={translateText('موجود در انبار')}
+          value={translateText('{{v0}} کالا', { v0: toFa(store.in_stock_count || 0) })}
+        />
         <div className="col-span-2 sm:col-span-1">
-          <Stat label={translateText("بازه‌ی قیمت")} value={priceRange} />
+          <Stat label={translateText('بازه‌ی قیمت')} value={priceRange} />
         </div>
       </div>
 
@@ -192,7 +218,7 @@ function SupplierCardComponent({ store }) {
               <button
                 type="button"
                 onClick={() => scrollRow(-1)}
-                aria-label={translateText("قبلی")}
+                aria-label={translateText('قبلی')}
                 className="card absolute start-1 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full shadow-md transition-colors hover:text-yellow md:grid"
               >
                 <ChevronRight className="logical-icon" size={16} />
@@ -200,7 +226,7 @@ function SupplierCardComponent({ store }) {
               <button
                 type="button"
                 onClick={() => scrollRow(1)}
-                aria-label={translateText("بعدی")}
+                aria-label={translateText('بعدی')}
                 className="card absolute end-1 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full shadow-md transition-colors hover:text-yellow md:grid"
               >
                 <ChevronLeft className="logical-icon" size={16} />
@@ -228,14 +254,19 @@ function SupplierCardComponent({ store }) {
               >
                 <span className="space-y-1">
                   <Package size={18} className="mx-auto muted" />
-                  <span className="block">+{toFa(rest)}{translateText(" کالای دیگر")}</span>
+                  <span className="block">
+                    +{toFa(rest)}
+                    {translateText(' کالای دیگر')}
+                  </span>
                 </span>
               </Link>
             )}
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-center text-xs muted">{translateText("هنوز کالایی برای نمایش ثبت نشده است.")}</p>
+        <p className="mt-3 text-center text-xs muted">
+          {translateText('هنوز کالایی برای نمایش ثبت نشده است.')}
+        </p>
       )}
 
       {/* پاپ‌آپ ارتباط با فروشنده — همان پاپ‌آپ صفحه‌ی محصول */}
@@ -263,7 +294,11 @@ export function SupplierSkeleton() {
       <div className="mt-4 h-14 rounded-2xl" style={{ background: 'var(--card2)' }} />
       <div className="mt-3 flex gap-2.5">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-[132px] w-[132px] shrink-0 rounded-xl" style={{ background: 'var(--card2)' }} />
+          <div
+            key={i}
+            className="h-[132px] w-[132px] shrink-0 rounded-xl"
+            style={{ background: 'var(--card2)' }}
+          />
         ))}
       </div>
     </div>

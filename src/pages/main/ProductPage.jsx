@@ -26,10 +26,7 @@ import {
 import { useShop } from '../../contexts/ShopContext';
 import useCartQuantity from '../../hooks/useCartQuantity';
 import { readList, writeList } from '../../utils/helpers/storage';
-import {
-  isTrustedProduct,
-  isTrustedStore,
-} from '../../utils/helpers/user';
+import { isTrustedProduct, isTrustedStore } from '../../utils/helpers/user';
 import { getBody, getList, getId } from '../../utils/helpers/response';
 import {
   formatPrice,
@@ -59,10 +56,7 @@ import ErrorBoundaryComponent from '../../components/common/ErrorBoundaryCompone
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { fetchStore, fetchPublicUser, primeSeller } from '../../services/sellerApi';
 
-const API =
-  import.meta.env.VITE_APP_API_URL ||
-  import.meta.env.VITE_API_URL ||
-  '/api';
+const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const accent = { color: 'var(--primary-color)' };
 
@@ -110,14 +104,10 @@ function CopyUrlButton() {
       type="button"
       onClick={handleCopy}
       className="btn-ghost !p-2"
-      aria-label={copied ? translateText("لینک کپی شد") : translateText("کپی لینک محصول")}
-      title={copied ? translateText("لینک کپی شد") : translateText("کپی لینک")}
+      aria-label={copied ? translateText('لینک کپی شد') : translateText('کپی لینک محصول')}
+      title={copied ? translateText('لینک کپی شد') : translateText('کپی لینک')}
     >
-      {copied ? (
-        <Check size={18} className="text-emerald-500" />
-      ) : (
-        <Copy size={18} />
-      )}
+      {copied ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
     </button>
   );
 }
@@ -131,9 +121,7 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
   const touchStartXRef = useRef(null);
 
   useEffect(() => {
-    setActiveImage((current) =>
-      images.length ? Math.min(current, images.length - 1) : 0,
-    );
+    setActiveImage((current) => (images.length ? Math.min(current, images.length - 1) : 0));
   }, [images.length]);
 
   const previous = () => {
@@ -177,14 +165,16 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
             <>
               {discountPercentage != null && (
                 <span className="absolute end-3 top-3 z-20 rounded-full bg-rose-600/90 px-3 py-1 text-xs font-bold text-white">
-                  {toFa(discountPercentage)}{translateText("٪ تخفیف ")}</span>
+                  {toFa(discountPercentage)}
+                  {translateText('٪ تخفیف ')}
+                </span>
               )}
 
               {selectedImage && (
                 <button
                   type="button"
                   onClick={() => onZoom({ file: selectedImage, alt: productName })}
-                  aria-label={translateText("بزرگ‌نمایی تصویر محصول")}
+                  aria-label={translateText('بزرگ‌نمایی تصویر محصول')}
                   className="absolute start-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-theme bg-[var(--card)]/90 text-[var(--text-color)] backdrop-blur-sm transition hover:bg-[var(--card)]"
                 >
                   <ZoomIn size={17} />
@@ -193,8 +183,11 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
 
               <div
                 dir={i18nDirection}
-                data-testid="product-gallery-track" className="flex h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
-                style={{ transform: `translateX(${activeImage * (i18nDirection === 'rtl' ? 100 : -100)}%)` }}
+                data-testid="product-gallery-track"
+                className="flex h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
+                style={{
+                  transform: `translateX(${activeImage * (i18nDirection === 'rtl' ? 100 : -100)}%)`,
+                }}
               >
                 {images.map((image, index) => (
                   <div
@@ -204,7 +197,10 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
                     {/* 🔧 object-cover برای پر کردن کامل کادر */}
                     <StorageImageComponent
                       file={image}
-                      alt={translateText("{{v0}}، تصویر {{v1}}", {v0: (productName),v1: (toFa(index + 1))})}
+                      alt={translateText('{{v0}}، تصویر {{v1}}', {
+                        v0: productName,
+                        v1: toFa(index + 1),
+                      })}
                       eager={index === 0 || index === activeImage}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                       onZoom={(file, alt) => onZoom({ file, alt })}
@@ -218,7 +214,7 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
                   <button
                     type="button"
                     onClick={previous}
-                    aria-label={translateText("تصویر قبلی")}
+                    aria-label={translateText('تصویر قبلی')}
                     className="absolute start-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-theme bg-[var(--card)]/85 backdrop-blur-sm transition hover:bg-[var(--card)]"
                   >
                     <ChevronRight className="logical-icon" size={18} />
@@ -226,13 +222,15 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
                   <button
                     type="button"
                     onClick={next}
-                    aria-label={translateText("تصویر بعدی")}
+                    aria-label={translateText('تصویر بعدی')}
                     className="absolute end-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-theme bg-[var(--card)]/85 backdrop-blur-sm transition hover:bg-[var(--card)]"
                   >
                     <ChevronLeft className="logical-icon" size={18} />
                   </button>
                   <span className="absolute bottom-3 start-3 z-20 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
-                    {toFa(activeImage + 1)}{translateText(" از ")}{toFa(images.length)}
+                    {toFa(activeImage + 1)}
+                    {translateText(' از ')}
+                    {toFa(images.length)}
                   </span>
                 </>
               )}
@@ -240,7 +238,7 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2 muted">
               <Package size={48} className="opacity-30" />
-              <span className="text-sm">{translateText("تصویری برای این محصول ثبت نشده است")}</span>
+              <span className="text-sm">{translateText('تصویری برای این محصول ثبت نشده است')}</span>
             </div>
           )}
         </div>
@@ -255,7 +253,7 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
                 key={getId(image) || index}
                 type="button"
                 onClick={() => setActiveImage(index)}
-                aria-label={translateText("نمایش تصویر {{v0}}", {v0: (toFa(index + 1))})}
+                aria-label={translateText('نمایش تصویر {{v0}}', { v0: toFa(index + 1) })}
                 aria-pressed={active}
                 className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border bg-[var(--card2)] transition sm:h-20 sm:w-20 ${
                   active
@@ -265,7 +263,10 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
               >
                 <StorageImageComponent
                   file={image}
-                  alt={translateText("{{v0}}، تصویر {{v1}}", {v0: (productName),v1: (toFa(index + 1))})}
+                  alt={translateText('{{v0}}، تصویر {{v1}}', {
+                    v0: productName,
+                    v1: toFa(index + 1),
+                  })}
                   compact
                   className="h-full w-full object-cover"
                 />
@@ -305,14 +306,14 @@ function MobileBottomBar({
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 pt-2.5">
         {/* قیمت */}
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] muted">{translateText("قیمت محصول")}</div>
+          <div className="text-[10px] muted">{translateText('قیمت محصول')}</div>
           <div className="flex items-baseline gap-2">
             <span className="truncate text-base font-black" style={accent}>
-              {formatPrice(finalPrice(product))}
+              {formatPrice(finalPrice(product),product.price?.currency)}
             </span>
             {discounted && (
               <span className="text-[10px] line-through muted">
-                {formatPrice(product.price?.amount)}
+                {formatPrice(product.price?.amount,product.price?.currency)}
               </span>
             )}
           </div>
@@ -326,10 +327,10 @@ function MobileBottomBar({
             disabled={soldOut || !loggedIn}
             className="flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: 'var(--primary-color)' }}
-            aria-label={translateText("افزودن به سبد خرید")}
+            aria-label={translateText('افزودن به سبد خرید')}
           >
             <ShoppingCart size={16} />
-            {soldOut ? translateText("ناموجود") : translateText("افزودن به سبد")}
+            {soldOut ? translateText('ناموجود') : translateText('افزودن به سبد')}
           </button>
         ) : (
           <div className="flex shrink-0 items-center gap-1.5 rounded-xl border border-theme bg-[var(--card2)]/60 p-1">
@@ -341,7 +342,7 @@ function MobileBottomBar({
                   ? 'hover:border-rose-500/40 hover:text-rose-500'
                   : 'hover:bg-[var(--card2)]'
               }`}
-              aria-label={cartQty === 1 ? translateText("حذف از سبد") : translateText("کاهش تعداد")}
+              aria-label={cartQty === 1 ? translateText('حذف از سبد') : translateText('کاهش تعداد')}
             >
               {cartQty === 1 ? <Trash2 size={15} /> : <Minus size={15} />}
             </button>
@@ -358,7 +359,7 @@ function MobileBottomBar({
               disabled={cannotIncrement}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
               style={{ background: 'var(--primary-color)' }}
-              aria-label={translateText("افزایش تعداد")}
+              aria-label={translateText('افزایش تعداد')}
             >
               <Plus size={16} />
             </button>
@@ -374,7 +375,6 @@ function MobileBottomBar({
 /* ------------------------------------------------------------------ */
 
 function ProductPage() {
-
   const { id, productId } = useParams();
   const activeProductId = id || productId;
 
@@ -394,7 +394,6 @@ function ProductPage() {
   const [zoomFile, setZoomFile] = useState(null);
   const [contactOpen, setContactOpen] = useState(false);
 
-
   /* ---------- بارگذاری اطلاعات محصول ---------- */
   useEffect(() => {
     const controller = new AbortController();
@@ -412,26 +411,26 @@ function ProductPage() {
     setZoomFile(null);
 
     if (!activeProductId) {
-      setError(translateText("شناسه محصول مشخص نشده است."));
+      setError(translateText('شناسه محصول مشخص نشده است.'));
       setLoading(false);
       return () => controller.abort();
     }
 
     const loadProduct = async () => {
       try {
-        const response = await axios.get(
-          `${API}/product/${activeProductId}`,
-          { signal, timeout: 15000 },
-        );
+        const response = await axios.get(`${API}/product/${activeProductId}`, {
+          signal,
+          timeout: 15000,
+        });
 
         if (signal.aborted) return;
 
         if (response.data?.success === false) {
-          throw new Error(response.data.message || translateText("محصول پیدا نشد."));
+          throw new Error(response.data.message || translateText('محصول پیدا نشد.'));
         }
 
         const current = getBody(response);
-        if (!current) throw new Error(translateText("محصول پیدا نشد."));
+        if (!current) throw new Error(translateText('محصول پیدا نشد.'));
 
         setProduct(current);
 
@@ -541,7 +540,7 @@ function ProductPage() {
         setError(
           err.response?.data?.message ||
             err.message ||
-            translateText("خطا در دریافت اطلاعات محصول."),
+            translateText('خطا در دریافت اطلاعات محصول.'),
         );
       } finally {
         if (!signal.aborted) setLoading(false);
@@ -569,7 +568,7 @@ function ProductPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-8" aria-busy="true">
-        <Loading label={translateText("در حال بارگذاری جزئیات محصول…")} />
+        <Loading label={translateText('در حال بارگذاری جزئیات محصول…')} />
         <div className="mt-6 grid gap-6 lg:grid-cols-12">
           <div className="skeleton aspect-square rounded-2xl lg:col-span-6" />
           <div className="space-y-4 lg:col-span-6">
@@ -587,15 +586,17 @@ function ProductPage() {
       <main className="mx-auto max-w-lg px-4 py-20 text-center">
         <div className="card space-y-4 rounded-2xl p-8">
           <Package size={36} className="mx-auto muted" />
-          <h1 className="text-lg font-black">{translateText("دریافت محصول ناموفق بود")}</h1>
-          <p className="text-sm muted">{error || translateText("محصول موردنظر پیدا نشد.")}</p>
+          <h1 dir="auto" className="text-lg font-black">
+            {translateText('دریافت محصول ناموفق بود')}
+          </h1>
+          <p className="text-sm muted">{error || translateText('محصول موردنظر پیدا نشد.')}</p>
           <div className="flex flex-wrap justify-center gap-2">
-            <button
-              type="button"
-              className="btn-yellow"
-              onClick={() => setRetry((v) => v + 1)}
-            >{translateText("تلاش دوباره ")}</button>
-            <Link to="/products" className="btn-ghost">{translateText("بازگشت به محصولات ")}</Link>
+            <button type="button" className="btn-yellow" onClick={() => setRetry((v) => v + 1)}>
+              {translateText('تلاش دوباره ')}
+            </button>
+            <Link to="/products" className="btn-ghost">
+              {translateText('بازگشت به محصولات ')}
+            </Link>
           </div>
         </div>
       </main>
@@ -616,20 +617,22 @@ function ProductPage() {
   const compared = compare?.includes(activeProductId);
 
   const stockLabel = soldOut
-    ? translateText("ناموجود")
+    ? translateText('ناموجود')
     : stock === null
-      ? statusFa(product.stock_status) || translateText("وضعیت موجودی ثبت نشده")
-      : translateText("{{v0}} عدد موجود در انبار", {v0: (toFa(stock))});
+      ? statusFa(product.stock_status) || translateText('وضعیت موجودی ثبت نشده')
+      : translateText('{{v0}} عدد موجود در انبار', { v0: toFa(stock) });
 
   const specs = [
-    [translateText("برند"), product.brand || translateText("ثبت نشده")],
-    [translateText("سال تولید"), formatProductionYear(product.production)],
-    [translateText("وضعیت موجودی"), stockLabel],
-    [translateText("ابعاد"), formatDimensions(product.dimensions) || translateText("ثبت نشده")],
-    [translateText("وزن"), formatWeight(product.weight) || translateText("ثبت نشده")],
+    [translateText('برند'), product.brand || translateText('ثبت نشده')],
+    [translateText('سال تولید'), formatProductionYear(product.production)],
+    [translateText('وضعیت موجودی'), stockLabel],
+    [translateText('ابعاد'), formatDimensions(product.dimensions) || translateText('ثبت نشده')],
+    [translateText('وزن'), formatWeight(product.weight) || translateText('ثبت نشده')],
     [
-      translateText("گارانتی"),
-      product.warranty ? translateText("دارای گارانتی اصالت و سلامت") : translateText("بدون گارانتی"),
+      translateText('گارانتی'),
+      product.warranty
+        ? translateText('دارای گارانتی اصالت و سلامت')
+        : translateText('بدون گارانتی'),
     ],
   ];
 
@@ -642,12 +645,16 @@ function ProductPage() {
     >
       {/* مسیر صفحه */}
       <nav
-        aria-label={translateText("مسیر صفحه")}
+        aria-label={translateText('مسیر صفحه')}
         className="mb-6 flex flex-wrap items-center gap-1.5 text-xs muted"
       >
-        <Link to="/" className="hover:opacity-70">{translateText("خانه ")}</Link>
+        <Link to="/" className="hover:opacity-70">
+          {translateText('خانه ')}
+        </Link>
         <ChevronLeft className="logical-icon" size={14} />
-        <Link to="/products" className="hover:opacity-70">{translateText("محصولات ")}</Link>
+        <Link to="/products" className="hover:opacity-70">
+          {translateText('محصولات ')}
+        </Link>
         {category && categoryId && (
           <>
             <ChevronLeft className="logical-icon" size={14} />
@@ -695,10 +702,12 @@ function ProductPage() {
                     : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                 }`}
               >
-                {soldOut ? translateText("ناموجود") : translateText("موجود")}
+                {soldOut ? translateText('ناموجود') : translateText('موجود')}
               </span>
               {product.warranty && (
-                <span className="rounded-full border border-theme px-3 py-1 font-medium muted">{translateText("گارانتی اصالت ")}</span>
+                <span className="rounded-full border border-theme px-3 py-1 font-medium muted">
+                  {translateText('گارانتی اصالت ')}
+                </span>
               )}
             </div>
 
@@ -710,7 +719,9 @@ function ProductPage() {
                 onClick={() => toggleFavorite(activeProductId)}
                 className="btn-ghost !p-2"
                 aria-label={
-                  favorite ? translateText("حذف از علاقه‌مندی‌ها") : translateText("افزودن به علاقه‌مندی‌ها")
+                  favorite
+                    ? translateText('حذف از علاقه‌مندی‌ها')
+                    : translateText('افزودن به علاقه‌مندی‌ها')
                 }
                 aria-pressed={favorite}
               >
@@ -724,20 +735,19 @@ function ProductPage() {
                 type="button"
                 onClick={() => toggleCompare(activeProductId)}
                 className="btn-ghost !p-2"
-                aria-label={compared ? translateText("حذف از مقایسه") : translateText("افزودن به مقایسه")}
+                aria-label={
+                  compared ? translateText('حذف از مقایسه') : translateText('افزودن به مقایسه')
+                }
                 aria-pressed={!!compared}
               >
-                <GitCompareArrows
-                  size={18}
-                  style={compared ? accent : undefined}
-                />
+                <GitCompareArrows size={18} style={compared ? accent : undefined} />
               </button>
             </div>
           </div>
 
           {/* عنوان و معرفی کوتاه */}
           <div className="space-y-3">
-            <h1 className="text-xl font-black leading-8 md:text-2xl md:leading-9">
+            <h1 dir="auto" className="text-xl font-black leading-8 md:text-2xl md:leading-9">
               {product.name}
             </h1>
             {product.short_description && (
@@ -751,19 +761,19 @@ function ProductPage() {
           <aside className="card space-y-4 rounded-2xl p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-theme pb-4">
               <div>
-                <div className="text-xs muted">{translateText("قیمت محصول")}</div>
+                <div className="text-xs muted">{translateText('قیمت محصول')}</div>
                 <div className="mt-1 text-2xl font-black" style={accent}>
-                  {formatPrice(finalPrice(product))}
+                  {formatPrice(finalPrice(product),product.price?.currency)}
                 </div>
               </div>
 
               {discounted && (
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="line-through muted">
-                    {formatPrice(product.price?.amount)}
-                  </span>
+                  <span className="line-through muted">{formatPrice(product.price?.amount,product.price?.currency)}</span>
                   <span className="rounded-full bg-rose-500/10 px-2.5 py-1 font-bold text-rose-600 dark:text-rose-400">
-                    {toFa(product.discount?.percentage)}{translateText("٪ تخفیف ")}</span>
+                    {toFa(product.discount?.percentage)}
+                    {translateText('٪ تخفیف ')}
+                  </span>
                 </div>
               )}
             </div>
@@ -776,7 +786,7 @@ function ProductPage() {
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <Store size={15} style={accent} />
-                    <span className="muted">{translateText("فروشنده:")}</span>
+                    <span className="muted">{translateText('فروشنده:')}</span>
                     <span className="truncate font-bold text-[var(--text-color)]">
                       {store.name}
                     </span>
@@ -787,7 +797,7 @@ function ProductPage() {
               ) : (
                 <div className="flex items-center gap-2 muted">
                   <Store size={15} />
-                  <span>{translateText("اطلاعات فروشنده در دسترس نیست.")}</span>
+                  <span>{translateText('اطلاعات فروشنده در دسترس نیست.')}</span>
                 </div>
               )}
 
@@ -795,8 +805,8 @@ function ProductPage() {
                 <ShieldCheck size={15} style={accent} />
                 <span>
                   {product.warranty
-                    ? translateText("گارانتی اصالت و سلامت فیزیکی کالا")
-                    : translateText("بدون گارانتی")}
+                    ? translateText('گارانتی اصالت و سلامت فیزیکی کالا')
+                    : translateText('بدون گارانتی')}
                 </span>
               </div>
 
@@ -804,9 +814,7 @@ function ProductPage() {
                 <ShoppingCart size={15} style={accent} />
                 <span
                   className={`font-bold ${
-                    soldOut
-                      ? 'text-rose-500'
-                      : 'text-emerald-600 dark:text-emerald-400'
+                    soldOut ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'
                   }`}
                 >
                   {stockLabel}
@@ -827,22 +835,20 @@ function ProductPage() {
           </aside>
 
           {/* مشخصات کلیدی */}
-          <section aria-label={translateText("خلاصه مشخصات")}>
+          <section aria-label={translateText('خلاصه مشخصات')}>
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-theme bg-[var(--border-color)]">
               {[
-                [translateText("وزن"), formatWeight(product.weight) || translateText("ثبت نشده")],
-                [translateText("ابعاد"), formatDimensions(product.dimensions) || translateText("ثبت نشده")],
+                [translateText('وزن'), formatWeight(product.weight) || translateText('ثبت نشده')],
                 [
-                  translateText("سال تولید"),
-                  formatProductionYear(product.production),
+                  translateText('ابعاد'),
+                  formatDimensions(product.dimensions) || translateText('ثبت نشده'),
                 ],
-                [translateText("برند"), product.brand || translateText("ثبت نشده")],
+                [translateText('سال تولید'), formatProductionYear(product.production)],
+                [translateText('برند'), product.brand || translateText('ثبت نشده')],
               ].map(([label, value]) => (
                 <div key={label} className="min-w-0 bg-[var(--card)] p-3.5">
                   <div className="text-[11px] muted">{label}</div>
-                  <div className="mt-1 break-words text-sm font-bold">
-                    {value}
-                  </div>
+                  <div className="mt-1 break-words text-sm font-bold">{value}</div>
                 </div>
               ))}
             </div>
@@ -872,12 +878,13 @@ function ProductPage() {
               <span
                 className="h-5 w-1 rounded-full"
                 style={{ background: 'var(--primary-color)' }}
-              />{translateText("معرفی و توضیحات محصول ")}</h2>
-            <p className="mt-1 text-xs muted">{translateText("جزئیات و اطلاعات تکمیلی محصول ")}</p>
+              />
+              {translateText('معرفی و توضیحات محصول ')}
+            </h2>
+            <p className="mt-1 text-xs muted">{translateText('جزئیات و اطلاعات تکمیلی محصول ')}</p>
           </div>
 
-          {typeof product.description === 'string' &&
-          product.description.trim() ? (
+          {typeof product.description === 'string' && product.description.trim() ? (
             <div
               className="
                 min-w-0 break-words text-start leading-8
@@ -926,10 +933,7 @@ function ProductPage() {
               <ErrorBoundaryComponent
                 resetKey={activeProductId}
                 fallback={
-                  <pre
-                    dir="auto"
-                    className="whitespace-pre-wrap font-sans text-sm leading-7"
-                  >
+                  <pre dir="auto" className="whitespace-pre-wrap font-sans text-sm leading-7">
                     {String(product.description || '')}
                   </pre>
                 }
@@ -938,7 +942,9 @@ function ProductPage() {
               </ErrorBoundaryComponent>
             </div>
           ) : (
-            <p className="text-sm muted">{translateText("توضیحاتی برای این محصول ثبت نشده است. ")}</p>
+            <p className="text-sm muted">
+              {translateText('توضیحاتی برای این محصول ثبت نشده است. ')}
+            </p>
           )}
 
           {Array.isArray(product.tags) && product.tags.length > 0 && (
@@ -948,7 +954,7 @@ function ProductPage() {
                   key={`${tag}-${index}`}
                   to={`/products?tags=${encodeURIComponent(tag)}`}
                   className="chip text-xs transition hover:-translate-y-0.5"
-                  title={translateText("همه‌ی کالاهای با برچسب «{{v0}}»", {v0: (tag)})}
+                  title={translateText('همه‌ی کالاهای با برچسب «{{v0}}»', { v0: tag })}
                 >
                   #{tag}
                 </Link>
@@ -967,22 +973,26 @@ function ProductPage() {
           <section className="card rounded-2xl p-4">
             <div className="flex items-baseline justify-between gap-3">
               <div className="min-w-0">
-                <span className="block text-[10px] muted">{translateText("قیمت محصول")}</span>
+                <span className="block text-[10px] muted">{translateText('قیمت محصول')}</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-black" style={accent}>
-                    {formatPrice(finalPrice(product))}
+                    {formatPrice(finalPrice(product),product.price?.currency)}
                   </span>
                   {discounted && (
                     <span className="text-[11px] line-through muted">
-                      {formatPrice(product.price?.amount)}
+                      {formatPrice(product.price?.amount,product.price?.currency)}
                     </span>
                   )}
                 </div>
               </div>
               {stock !== null && (
-                <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
-                  style={{ background: 'var(--card2)' }}>
-                  {soldOut ? translateText("ناموجود") : translateText("{{v0}} عدد", {v0: (toFa(stock))})}
+                <span
+                  className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
+                  style={{ background: 'var(--card2)' }}
+                >
+                  {soldOut
+                    ? translateText('ناموجود')
+                    : translateText('{{v0}} عدد', { v0: toFa(stock) })}
                 </span>
               )}
             </div>
@@ -997,7 +1007,7 @@ function ProductPage() {
                   style={{ background: 'var(--primary-color)' }}
                 >
                   <ShoppingCart size={16} />
-                  {soldOut ? translateText("ناموجود") : translateText("افزودن به سبد خرید")}
+                  {soldOut ? translateText('ناموجود') : translateText('افزودن به سبد خرید')}
                 </button>
               ) : (
                 <div className="flex items-center justify-between gap-1.5 rounded-xl border border-theme bg-[var(--card2)]/60 p-1">
@@ -1005,14 +1015,22 @@ function ProductPage() {
                     type="button"
                     onClick={decrementCart}
                     className={`flex h-9 w-9 items-center justify-center rounded-lg border border-theme bg-[var(--card)] transition ${
-                      cartQty === 1 ? 'hover:border-rose-500/40 hover:text-rose-500' : 'hover:bg-[var(--card2)]'
+                      cartQty === 1
+                        ? 'hover:border-rose-500/40 hover:text-rose-500'
+                        : 'hover:bg-[var(--card2)]'
                     }`}
-                    aria-label={cartQty === 1 ? translateText("حذف از سبد") : translateText("کاهش تعداد")}
+                    aria-label={
+                      cartQty === 1 ? translateText('حذف از سبد') : translateText('کاهش تعداد')
+                    }
                   >
                     {cartQty === 1 ? <Trash2 size={15} /> : <Minus size={15} />}
                   </button>
                   <div className="text-center text-sm font-black tabular-nums">
-                    {syncBusy ? <Loader2 size={14} className="mx-auto animate-spin muted" /> : toFa(cartQty)}
+                    {syncBusy ? (
+                      <Loader2 size={14} className="mx-auto animate-spin muted" />
+                    ) : (
+                      toFa(cartQty)
+                    )}
                   </div>
                   <button
                     type="button"
@@ -1020,7 +1038,7 @@ function ProductPage() {
                     disabled={soldOut || (stock !== null && cartQty >= stock) || !loggedIn}
                     className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
                     style={{ background: 'var(--primary-color)' }}
-                    aria-label={translateText("افزایش تعداد")}
+                    aria-label={translateText('افزایش تعداد')}
                   >
                     <Plus size={16} />
                   </button>
@@ -1032,7 +1050,9 @@ function ProductPage() {
                 onClick={() => setContactOpen(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-theme px-4 py-2.5 text-sm font-bold transition hover:border-[var(--primary-color)]"
               >
-                <Store size={16} />{translateText("ارتباط با فروشنده ")}</button>
+                <Store size={16} />
+                {translateText('ارتباط با فروشنده ')}
+              </button>
             </div>
           </section>
 
@@ -1042,7 +1062,9 @@ function ProductPage() {
               <span
                 className="h-5 w-1 rounded-full"
                 style={{ background: 'var(--primary-color)' }}
-              />{translateText("مشخصات فنی ")}</h2>
+              />
+              {translateText('مشخصات فنی ')}
+            </h2>
 
             <dl className="mt-2">
               {specs.map(([label, value]) => (
@@ -1061,10 +1083,9 @@ function ProductPage() {
         {/* مشخصات فنی (فقط موبایل و تبلت) */}
         <section className="card rounded-2xl p-5 lg:hidden">
           <h2 className="flex items-center gap-2 border-b border-theme pb-4 text-lg font-black">
-            <span
-              className="h-5 w-1 rounded-full"
-              style={{ background: 'var(--primary-color)' }}
-            />{translateText("مشخصات فنی ")}</h2>
+            <span className="h-5 w-1 rounded-full" style={{ background: 'var(--primary-color)' }} />
+            {translateText('مشخصات فنی ')}
+          </h2>
 
           <dl className="mt-2">
             {specs.map(([label, value]) => (
@@ -1084,20 +1105,22 @@ function ProductPage() {
       {(similarLoading || similar.length > 0) && (
         <section className="mt-10">
           <ProductScrollerComponent
-            partone={translateText("محصولات")}
-            parttwo={translateText("مرتبط")}
+            partone={translateText('محصولات')}
+            parttwo={translateText('مرتبط')}
             icon={Layers}
             subtitle={
               category?.name
-                ? translateText("از دسته‌ی «{{v0}}» — با کشیدن به کنار، محصولات بیشتری ببینید", {v0: (category.name)})
-                : translateText("از همین دسته‌بندی — با کشیدن به کنار، محصولات بیشتری ببینید")
+                ? translateText('از دسته‌ی «{{v0}}» — با کشیدن به کنار، محصولات بیشتری ببینید', {
+                    v0: category.name,
+                  })
+                : translateText('از همین دسته‌بندی — با کشیدن به کنار، محصولات بیشتری ببینید')
             }
             products={similar}
             loading={similarLoading}
             moreTo={
               categoryId ? `/products?category_id=${encodeURIComponent(categoryId)}` : '/products'
             }
-            emptyText={translateText("محصول مرتبطی در این دسته‌بندی نیست")}
+            emptyText={translateText('محصول مرتبطی در این دسته‌بندی نیست')}
           />
         </section>
       )}

@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, Headset, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
 import { toFa } from '../../utils/helpers/format';
 
-// مسیر رشد ژئو کالا (بدون برچسب گام/تاریخ؛ فقط شماره‌ی مرحله)
+// مسیر رشد ژئوکالا (بدون برچسب گام/تاریخ؛ فقط شماره‌ی مرحله)
 const MILESTONES = [
   { title: translateText("نقشه‌برداری"), desc: translateText("آغاز فعالیت مجموعه در حوزه‌ی نقشه‌برداری و تجهیزات نقشه‌برداری.") },
   { title: translateText("واردات تجهیزات نقشه‌برداری"), desc: translateText("انتقال خدمات به «فناوری سران ماهان آسیا» و گسترش ساختار واردات و پشتیبانی فنی.") },
   { title: translateText("فروش تجهیزات نقشه‌برداری"), desc: translateText("راه‌اندازی پارسی‌ژئو برای عرضه‌ی جی‌پی‌اس ایستگاهی و تجهیزات نقشه‌برداری.") },
-  { title: translateText("تاسیس سایت ژئوکالا"), desc: translateText("راه‌اندازی بازارگاه تخصصی ژئو کالا برای دیدن، مقایسه و خرید تجهیزات، با پشتیبانی همان تیم فنی.") },
+  { title: translateText("تاسیس سایت ژئوکالا"), desc: translateText("راه‌اندازی فروشگاه تخصصی ژئوکالا برای دیدن، مقایسه و خرید تجهیزات، با پشتیبانی همان تیم فنی.") },
 ];
 
 // سه معیار تصمیم‌گیری در محصول
@@ -27,7 +27,7 @@ function AboutTimelineComponent() {
           <span className="text-[11px] font-bold text-yellow">{translateText("مسیر ما")}</span>
           <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText("مسیری که از ۱۳۸۳ تا امروز آمده‌ایم")}</h2>
         </div>
-        <p className="text-xs muted max-w-md leading-6">{translateText("از واردات تجهیزات نقشه‌برداری تا راه‌اندازی بازارگاهی تخصصی برای خریداران و فروشندگان این حوزه. ")}</p>
+        <p className="text-xs muted max-w-md leading-6">{translateText("از واردات تجهیزات نقشه‌برداری تا راه‌اندازی فروشگاهی تخصصی برای خریداران و فروشندگان این حوزه. ")}</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -73,7 +73,7 @@ function AboutTimelineComponent() {
               style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
             >
               <Sparkles size={12} />{translateText("امروز ")}</span>
-            <b className="block font-black text-lg mt-3 leading-tight">{translateText("تخصص فنی، پشت هر سفارش این بازارگاه است ")}</b>
+            <b className="block font-black text-lg mt-3 leading-tight">{translateText("تخصص فنی، پشت هر سفارش این فروشگاه است ")}</b>
             <p className="text-[11px] text-white/70 leading-6 mt-2">{translateText("تمرکز ما روی سه چیز است: کالای اصل و ضمانت‌دار، مشخصات فنی قابل مقایسه و مشاوره‌ی تخصصی. هر قابلیت جدید با همین سه معیار سنجیده می‌شود. ")}</p>
 
             <ul className="mt-4 space-y-2">

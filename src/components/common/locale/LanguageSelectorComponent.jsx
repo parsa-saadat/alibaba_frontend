@@ -13,7 +13,7 @@ const ui = {
     money: 'Display currency',
     apply: 'Apply preferences',
     cancel: 'Cancel',
-    main: 'A local experience, wherever you are',
+    main: 'Shop in the world’s leading languages',
     admin: 'Workspace preferences',
     seller: 'Your selling workspace',
     auth: 'Choose your language',
@@ -26,7 +26,7 @@ const ui = {
     money: 'ارز نمایش قیمت',
     apply: 'اعمال تنظیمات',
     cancel: 'انصراف',
-    main: 'خرید به زبان شما، با ارز دلخواه',
+    main: 'خرید با زبان‌های روز دنیا',
     admin: 'تنظیمات محیط مدیریت',
     seller: 'تنظیمات محیط فروشندگی',
     auth: 'زبان خودتان را انتخاب کنید',
@@ -39,7 +39,7 @@ const ui = {
     money: 'عملة العرض',
     apply: 'تطبيق التفضيلات',
     cancel: 'إلغاء',
-    main: 'تسوّق بلغتك وعملتك',
+    main: 'تسوّق بلغات العالم',
     admin: 'تفضيلات الإدارة',
     seller: 'تفضيلات مساحة البائع',
     auth: 'اختر لغتك',
@@ -52,7 +52,7 @@ const ui = {
     money: 'Para birimi',
     apply: 'Tercihleri uygula',
     cancel: 'İptal',
-    main: 'Sizin diliniz, sizin para biriminiz',
+    main: 'Dünyanın önde gelen dillerinde alışveriş',
     admin: 'Yönetim tercihleri',
     seller: 'Satıcı alanı tercihleri',
     auth: 'Dilinizi seçin',
@@ -151,59 +151,61 @@ export default function LanguageSelector({ variant = 'main', placement = 'bar', 
             <h2 id={`regional-title-${id}`}>{ui.title}</h2>
             <p>{ui.hint}</p>
           </header>
-          <section>
-            <h3>
-              <Globe2 size={15} />
-              {ui.lang}
-            </h3>
-            <div className="regional-options" role="group" aria-label={ui.lang}>
-              {languages.map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  aria-pressed={draft.language === code}
-                  onClick={() =>
-                    setDraft((previous) => ({
-                      ...previous,
-                      language: code,
-                      currency: { en: 'USD', fa: 'IRT', tr: 'TRY', ar: 'AED' }[code],
-                    }))
-                  }
-                >
-                  <LocaleFlag code={code} />
-                  <span lang={code}>{names[code]}</span>
-                  {draft.language === code && <Check size={15} />}
-                </button>
-              ))}
-            </div>
-          </section>
-          <section>
-            <h3>
-              <ArrowRightLeft size={15} />
-              {ui.money}
-            </h3>
-            <div
-              className="regional-options regional-options--money"
-              role="group"
-              aria-label={ui.money}
-            >
-              {currencies.map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  aria-pressed={draft.currency === code}
-                  onClick={() => setDraft((previous) => ({ ...previous, currency: code }))}
-                >
-                  <span className="currency-symbol">{symbols[code]}</span>
-                  <span>
-                    <b dir="ltr">{code}</b>
-                    <small>{moneyNames[code]}</small>
-                  </span>
-                  {draft.currency === code && <Check size={15} />}
-                </button>
-              ))}
-            </div>
-          </section>
+          <div className="regional-dialog__body">
+            <section>
+              <h3>
+                <Globe2 size={15} />
+                {ui.lang}
+              </h3>
+              <div className="regional-options" role="group" aria-label={ui.lang}>
+                {languages.map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    aria-pressed={draft.language === code}
+                    onClick={() =>
+                      setDraft((previous) => ({
+                        ...previous,
+                        language: code,
+                        currency: { en: 'USD', fa: 'IRT', tr: 'TRY', ar: 'AED' }[code],
+                      }))
+                    }
+                  >
+                    <LocaleFlag code={code} />
+                    <span lang={code}>{names[code]}</span>
+                    {draft.language === code && <Check size={15} />}
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section>
+              <h3>
+                <ArrowRightLeft size={15} />
+                {ui.money}
+              </h3>
+              <div
+                className="regional-options regional-options--money"
+                role="group"
+                aria-label={ui.money}
+              >
+                {currencies.map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    aria-pressed={draft.currency === code}
+                    onClick={() => setDraft((previous) => ({ ...previous, currency: code }))}
+                  >
+                    <span className="currency-symbol">{symbols[code]}</span>
+                    <span>
+                      <b dir="ltr">{code}</b>
+                      <small>{moneyNames[code]}</small>
+                    </span>
+                    {draft.currency === code && <Check size={15} />}
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
           <footer>
             <button className="regional-cancel" type="button" onClick={close}>
               {ui.cancel}

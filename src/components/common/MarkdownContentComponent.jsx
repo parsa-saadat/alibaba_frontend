@@ -93,7 +93,7 @@ const decorate = (html, resolved) => {
     } else {
       img.setAttribute('width', '240');
       img.setAttribute('height', '160');
-      img.setAttribute('alt', img.getAttribute('alt') || translateText("در حال بارگذاری تصویر…"));
+      img.setAttribute('alt', img.getAttribute('alt') || translateText('در حال بارگذاری تصویر…'));
     }
   });
 
@@ -214,7 +214,9 @@ function MarkdownContentComponent({ content, className = '' }) {
 
   if (!html) {
     return (
-      <p className="muted" style={{ margin: 0 }}>{translateText("توضیحاتی برای این محصول ثبت نشده است. ")}</p>
+      <p className="muted" style={{ margin: 0 }}>
+        {translateText('توضیحاتی برای این محصول ثبت نشده است. ')}
+      </p>
     );
   }
 
@@ -222,6 +224,7 @@ function MarkdownContentComponent({ content, className = '' }) {
     <>
       <div
         ref={hostRef}
+        dir="auto"
         className={`markdown-body ${className}`.trim()}
         onClick={onClick}
         dangerouslySetInnerHTML={{ __html: finalHtml }}
@@ -246,7 +249,7 @@ function MarkdownContentComponent({ content, className = '' }) {
           <button
             type="button"
             onClick={closeZoom}
-            aria-label={translateText("بستن")}
+            aria-label={translateText('بستن')}
             style={{
               position: 'absolute',
               top: 18,

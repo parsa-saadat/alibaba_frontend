@@ -56,7 +56,7 @@ function AboutHowItWorksComponent() {
     <section className="max-w-[1200px] mx-auto px-4 pb-10">
       <div className="mb-5">
         <span className="text-[11px] font-bold text-yellow">{translateText("فرایند کار")}</span>
-        <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText("ژئو کالا چطور کار می‌کند؟")}</h2>
+        <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText("ژئوکالا چطور کار می‌کند؟")}</h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

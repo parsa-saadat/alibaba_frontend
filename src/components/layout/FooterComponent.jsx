@@ -1,4 +1,3 @@
-import LanguageSelector from '../common/locale/LanguageSelectorComponent';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -58,7 +57,7 @@ const LINK_COLUMNS = [
     ],
   },
   {
-    title: translateText('فروش در ژئو کالا'),
+    title: translateText('فروش در ژئوکالا'),
     items: [
       { label: translateText('شروع فروش'), to: '/seller' },
       { label: translateText('پنل فروشنده'), to: '/seller' },
@@ -71,7 +70,7 @@ const LINK_COLUMNS = [
     title: translateText('راهنما و پشتیبانی'),
     items: [
       { label: translateText('تماس با ما'), to: '/contact' },
-      { label: translateText('درباره ژئو کالا'), to: '/about' },
+      { label: translateText('درباره ژئوکالا'), to: '/about' },
       { label: translateText('راهنمای خرید'), to: '/guide/buying' },
       { label: translateText('سوالات متداول'), to: '/contact#faq' },
       { label: translateText('قوانین مشتریان'), to: '/terms/customers' },
@@ -89,9 +88,21 @@ const STATS = [
 
 const TRUST_ITEMS = [
   { icon: Truck, title: translateText('ارسال سریع'), desc: translateText('تحویل ۱ تا ۳ روز کاری') },
-  { icon: ShieldCheck, title: translateText('تضمین اصالت کالا'), desc: translateText('ضمانت بازگشت وجه') },
-  { icon: CreditCard, title: translateText('پرداخت امن'), desc: translateText('درگاه بانکی معتبر') },
-  { icon: Headset, title: translateText('پشتیبانی ۲۴ ساعته'), desc: translateText('۷ روز هفته، پاسخگو') },
+  {
+    icon: ShieldCheck,
+    title: translateText('تضمین اصالت کالا'),
+    desc: translateText('ضمانت بازگشت وجه'),
+  },
+  {
+    icon: CreditCard,
+    title: translateText('پرداخت امن'),
+    desc: translateText('درگاه بانکی معتبر'),
+  },
+  {
+    icon: Headset,
+    title: translateText('پشتیبانی ۲۴ ساعته'),
+    desc: translateText('۷ روز هفته، پاسخگو'),
+  },
 ];
 
 const CONTACTS = [
@@ -197,9 +208,6 @@ function FooterComponent() {
       className="site-footer relative mt-16 overflow-x-clip pt-8 text-[#dfe6fb]"
       style={{ background: 'linear-gradient(180deg, #0c1a3d 0%, #060d21 100%)' }}
     >
-      <div className="hidden md:block max-w-7xl mx-auto px-4 mb-6 relative z-10">
-        <LanguageSelector variant="main" placement="footer" />
-      </div>
       {/* درخشش‌های تزئینی */}
       <div
         aria-hidden
@@ -232,7 +240,7 @@ function FooterComponent() {
               <div>
                 <b className="block text-sm">{translateText('کسب‌وکار دارید؟')}</b>
                 <span className="block text-xs opacity-80">
-                  {translateText('تجهیزات نقشه‌برداری خود را در ژئو کالا بفروشید')}
+                  {translateText('تجهیزات نقشه‌برداری خود را در ژئوکالا بفروشید')}
                 </span>
               </div>
             </div>
@@ -280,13 +288,13 @@ function FooterComponent() {
             <Link to="/" className="inline-flex flex-col items-start gap-2">
               <BrandLogoComponent variant="full" size="md" tone="white" />
               <span className="text-[11px] text-[#8fa0c9]">
-                {translateText('بازارگاه تخصصی تجهیزات نقشه‌برداری ')}
+                {translateText('فروشگاه تخصصی تجهیزات نقشه‌برداری ')}
               </span>
             </Link>
 
             <p className="mt-4 max-w-sm text-xs leading-6 text-[#8fa0c9]">
               {translateText(
-                'ژئو کالا بازارگاه تخصصی تجهیزات نقشه‌برداری است؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و کنترولر، با مشاوره‌ی فنی و ضمانت اصالت کالا. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا. ',
+                'ژئوکالا فروشگاه تخصصی تجهیزات نقشه‌برداری است؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و کنترولر، با مشاوره‌ی فنی و ضمانت اصالت کالا. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا. ',
               )}
             </p>
 
@@ -367,7 +375,7 @@ function FooterComponent() {
           <p className="text-center text-[11px] text-[#8fa0c9] lg:text-start">
             © {year}
             {translateText(
-              ' ژئو کالا — تمامی حقوق محفوظ است. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا ',
+              ' ژئوکالا — تمامی حقوق محفوظ است. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا ',
             )}
           </p>
 
@@ -398,14 +406,16 @@ function FooterComponent() {
           </nav>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {[translateText('شتاب'), translateText('زرین‌پال'), translateText('ساماندهی')].map((gateway) => (
-              <span
-                key={gateway}
-                className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#c9d4ef]"
-              >
-                {gateway}
-              </span>
-            ))}
+            {[translateText('شتاب'), translateText('زرین‌پال'), translateText('ساماندهی')].map(
+              (gateway) => (
+                <span
+                  key={gateway}
+                  className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#c9d4ef]"
+                >
+                  {gateway}
+                </span>
+              ),
+            )}
           </div>
         </div>
       </div>

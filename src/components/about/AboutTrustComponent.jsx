@@ -19,7 +19,7 @@ const LINKS = [
   { label: translateText("حریم خصوصی"), to: '/privacy' },
   { label: translateText("شرایط بازگشت کالا"), to: '/terms/buyers#returns' },
   { label: translateText("راهنمای خرید"), to: '/guide/buying' },
-  { label: translateText("راهنمای فروش در ژئو کالا"), to: '/guide/selling' },
+  { label: translateText("راهنمای فروش در ژئوکالا"), to: '/guide/selling' },
   { label: translateText("سوالات متداول"), to: '/contact#faq' },
 ];
 
@@ -29,7 +29,7 @@ function AboutTrustComponent() {
       {/* تضمین‌ها */}
       <div className="lg:col-span-2 card rounded-3xl p-6 sm:p-7 flex flex-col">
         <b className="font-black text-sm">{translateText("تضمین برای فروشنده‌های مورد اعتماد")}</b>
-        <p className="text-xs muted mt-1 leading-6">{translateText("این چهار قول، پایه‌ی اعتماد بازارگاه ما هستند و در همه‌ی سفارش‌ها اجرا می‌شوند. ")}</p>
+        <p className="text-xs muted mt-1 leading-6">{translateText("این چهار قول، پایه‌ی اعتماد فروشگاه ما هستند و در همه‌ی سفارش‌ها اجرا می‌شوند. ")}</p>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-5">
           {GUARANTEES.map((item) => {

@@ -53,7 +53,7 @@ function SellerNavbarComponent() {
               <div className="min-w-0">
                 <div className="font-black text-sm truncate">{translateText('پنل فروشنده')}</div>
                 <div className="text-[11px] text-[#9aa8cc] truncate">
-                  {userDisplayName(user, translateText('فروشنده ژئو کالا'))}
+                  {userDisplayName(user, translateText('فروشنده ژئوکالا'))}
                 </div>
               </div>
             )}
@@ -197,7 +197,7 @@ function SellerNavbarComponent() {
           >
             <Menu size={19} />
           </button>
-          <span className="font-black text-sm">{translateText('پنل فروشندگان ژئو کالا')}</span>
+          <span className="font-black text-sm">{translateText('پنل فروشندگان ژئوکالا')}</span>
         </div>
         <LanguageSelector variant="seller" placement="navbar" compact />
       </div>

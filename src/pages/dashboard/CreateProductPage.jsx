@@ -30,7 +30,7 @@ function CreateProductPage() {
   if (loading) {
     return (
       <div className="py-16">
-        <Loading label={translateText("در حال آماده‌سازی فرم ایجاد محصول…")} />
+        <Loading label={translateText('در حال آماده‌سازی فرم ایجاد محصول…')} />
       </div>
     );
   }

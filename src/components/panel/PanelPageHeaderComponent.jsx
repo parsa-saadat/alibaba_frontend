@@ -12,7 +12,7 @@ import { RefreshCw } from 'lucide-react';
  * <PanelPageHeader
  *   icon={Package}
  *   title="مدیریت محصولات"
- *   subtitle="همه‌ی کالاهای بازارگاه"
+ *   subtitle="همه‌ی کالاهای فروشگاه"
  *   onRefresh={() => load(true)}
  *   refreshing={refreshing}
  * />

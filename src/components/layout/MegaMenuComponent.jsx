@@ -326,7 +326,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                           {product.name}
                         </div>
                         <div className="text-xs font-black text-yellow mt-2">
-                          {formatPrice(finalPrice(product))}
+                          {formatPrice(finalPrice(product),product.price?.currency)}
                         </div>
                       </Link>
                     ))

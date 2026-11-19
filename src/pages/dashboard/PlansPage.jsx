@@ -1,3 +1,9 @@
+import { currency as displayCurrency, formatMoney } from '../../i18n/runtime';
+import StatTile from '../../components/panel/StatTileComponent';
+import { localizeDigits } from '../../i18n/runtime';
+import { toFa } from '../../utils/helpers/format';
+import usePanelStats from '../../hooks/usePanelStats';
+import StatsNotice from '../../components/panel/StatsNoticeComponent';
 import useLocalizedContent from '../../hooks/useLocalizedContent';
 import MoneyInput, { usePriceEntry } from '../../components/panel/PriceInputComponent';
 import { dateFormatter } from '../../i18n/date-policy';
@@ -14,7 +20,7 @@ import DatePicker from 'react-multi-date-picker';
 import TimePicker from 'react-multi-date-picker/plugins/time_picker';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
-import { formatDateTime } from '../../utils/helpers/format';
+import { formatDateTime, finalPrice, hasDiscount } from '../../utils/helpers/format';
 import {
   AlertTriangle,
   CreditCard,
@@ -80,18 +86,15 @@ const EMPTY_PLAN = {
 /* Helpers                                                              */
 /* ------------------------------------------------------------------ */
 const PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
-const toFaDigits = (s) => String(s).replace(/\d/g, (d) => PERSIAN_DIGITS[d]);
+const toFaDigits = localizeDigits;
 const toEnDigits = (s) =>
   String(s ?? '')
     .replace(/[۰-۹]/g, (d) => PERSIAN_DIGITS.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 const groupDigits = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, translateText('،'));
-const faMoney = (n) => toFaDigits(groupDigits(Math.round(Number(n) || 0)));
 const faNum = (n) =>
   n === null || n === undefined || n === '' ? '—' : toFaDigits(groupDigits(Number(n)));
-
-const planToToman = (price) => Number(price?.amount) || 0;
 
 const fmtDate = (d) =>
   dateFormatter(language, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
@@ -214,7 +217,10 @@ function ConfirmDeleteModal({ plan, busy, onCancel, onConfirm }) {
 /* Page                                                                 */
 /* ------------------------------------------------------------------ */
 function PlansPage() {
+  const { stats: panelStats, error: statsError, refresh: refreshStats } = usePanelStats(['plan']);
   const [plans, setPlans] = useState([]);
+  const [displayPlans, setDisplayPlans] = useState({});
+  const [priceDisplayError, setPriceDisplayError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [planForm, setPlanForm] = useState(EMPTY_PLAN);
   const content = useLocalizedContent(planForm, setPlanForm, ['name', 'description'], 'plan');
@@ -231,12 +237,26 @@ function PlansPage() {
   const set = (key, val) => setPlanForm((f) => ({ ...f, [key]: val }));
 
   const load = useCallback(async () => {
+    refreshStats();
     setLoading(true);
     try {
       const res = await axios.get(`${API}/plan?lang=all&currency=USD`, {
         ...authHeaders(),
         params: { page: 1, limit: 100 },
       });
+      const shown = await axios
+        .get(`${API}/plan`, {
+          ...authHeaders(),
+          params: { page: 1, limit: 100, currency: displayCurrency },
+        })
+        .catch(() => null);
+      setPriceDisplayError(!shown);
+      const shownRows = shown?.data?.body?.data || shown?.data?.body || [];
+      setDisplayPlans(
+        Object.fromEntries(
+          (Array.isArray(shownRows) ? shownRows : []).map((plan) => [String(plan._id), plan]),
+        ),
+      );
       const body = res.data?.body;
       setPlans(Array.isArray(body) ? body : body?.data || []);
     } catch {
@@ -289,7 +309,8 @@ function PlansPage() {
     });
 
     const sort = planForm.sort_order === '' ? 0 : Number(planForm.sort_order);
-    if (!Number.isInteger(sort) || sort < 0) throw new Error(translateText('ترتیب نمایش معتبر نیست'));
+    if (!Number.isInteger(sort) || sort < 0)
+      throw new Error(translateText('ترتیب نمایش معتبر نیست'));
 
     let discount = null;
     if (planForm.has_discount) {
@@ -351,7 +372,9 @@ function PlansPage() {
     setBusyId(pl._id);
     try {
       await axios.put(`${API}/plan/${pl._id}`, { status: next }, authHeaders());
-      toast.success(next === 'ACTIVE' ? translateText('پلن فعال شد') : translateText('پلن غیرفعال شد'));
+      toast.success(
+        next === 'ACTIVE' ? translateText('پلن فعال شد') : translateText('پلن غیرفعال شد'),
+      );
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || translateText('خطا در تغییر وضعیت'));
@@ -395,6 +418,21 @@ function PlansPage() {
         subtitle={translateText('تعرفه‌ها، سقف محصول و دسترسی‌ها')}
         onRefresh={() => load()}
       />
+      <StatsNotice error={statsError || priceDisplayError} stats={panelStats} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatTile
+          label={translateText('پلن\u200cها')}
+          value={toFa(panelStats.plan?.counts.all ?? '—')}
+        />
+        <StatTile
+          label={translateText('فعال')}
+          value={toFa(panelStats.plan?.counts.active ?? '—')}
+        />
+        <StatTile
+          label={translateText('غیرفعال')}
+          value={toFa(panelStats.plan?.counts.inactive ?? '—')}
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] xl:grid-cols-[450px_minmax(0,1fr)] gap-4 lg:gap-5 items-start">
         <style>{DP_CSS}</style>
@@ -585,6 +623,8 @@ function PlansPage() {
           )}
 
           {plans.map((pl) => {
+            const shownPlan = displayPlans[String(pl._id)] || pl;
+            const discounted = hasDiscount(shownPlan);
             const inactive = pl.status === 'INACTIVE';
             const busy = busyId === pl._id;
             const expDate = pl.discount?.expirationDate
@@ -616,9 +656,15 @@ function PlansPage() {
                       )}
                     </div>
                   </div>
-                  <div className="font-black text-xl sm:text-2xl mt-2 text-yellow break-words">
-                    {faMoney(planToToman(pl.price))}{' '}
-                    <span className="text-xs muted font-normal">{'USD'}</span>
+                  <div className="mt-2 space-y-1 min-w-0">
+                    {discounted && (
+                      <del className="block text-xs muted break-words">
+                        {formatMoney(shownPlan.price?.amount, shownPlan.price?.currency)}
+                      </del>
+                    )}
+                    <strong className="block font-black text-xl sm:text-2xl text-yellow break-words">
+                      {formatMoney(finalPrice(shownPlan), shownPlan.price?.currency)}
+                    </strong>
                   </div>
                   <div className="text-xs muted mt-2 space-y-1">
                     <div>

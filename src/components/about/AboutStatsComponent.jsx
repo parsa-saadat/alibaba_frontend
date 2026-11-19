@@ -73,7 +73,7 @@ function AboutStatsComponent() {
         })}
       </div>
 
-      <p className="text-center text-[10px] muted mt-2">{translateText("اعداد به‌صورت زنده از داده‌های بازارگاه خوانده می‌شوند. ")}</p>
+      <p className="text-center text-[10px] muted mt-2">{translateText("اعداد به‌صورت زنده از داده‌های فروشگاه خوانده می‌شوند. ")}</p>
     </div>
   );
 }

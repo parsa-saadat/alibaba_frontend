@@ -7,7 +7,7 @@ import LegalPageComponent from '../../components/legal/LegalPageComponent';
 /*
  * راهنما — دو نسخه:
  *   /guide/buying  → راهنمای خرید
- *   /guide/selling → راهنمای فروش در ژئو کالا
+ *   /guide/selling → راهنمای فروش در ژئوکالا
  * با همان قالب صفحه‌های قوانین ساخته شده تا ظاهر یکدست باشد.
  */
 
@@ -115,7 +115,7 @@ const CONTENT = {
   buying: {
     icon: ShoppingBag,
     badge: translateText("برای خریداران"),
-    title: translateText("راهنمای خرید از ژئو کالا"),
+    title: translateText("راهنمای خرید از ژئوکالا"),
     subtitle: translateText("از پیدا کردن کالا تا ثبت سفارش، پرداخت و پیگیری؛ کوتاه و گام‌به‌گام."),
     highlights: [translateText("ثبت سفارش و پرداخت جداست"), translateText("پرداخت بعداً هم ممکن است"), translateText("پیگیری هر مرسوله")],
     sections: BUYING_SECTIONS,
@@ -123,7 +123,7 @@ const CONTENT = {
   selling: {
     icon: Store,
     badge: translateText("برای فروشندگان"),
-    title: translateText("راهنمای فروش در ژئو کالا"),
+    title: translateText("راهنمای فروش در ژئوکالا"),
     subtitle: translateText("از درخواست فروشندگی تا ساخت فروشگاه، محصول و مدیریت سفارش‌ها."),
     highlights: [translateText("تأیید مدیر لازم است"), translateText("برای محصول، پلن فعال لازم است"), translateText("مدیریت سفارش از پنل")],
     sections: SELLING_SECTIONS,

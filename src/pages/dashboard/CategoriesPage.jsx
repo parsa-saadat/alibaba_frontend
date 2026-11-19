@@ -1,3 +1,7 @@
+import useConfirmDialog from '../../hooks/useConfirmDialog';
+import StatTile from '../../components/panel/StatTileComponent';
+import usePanelStats from '../../hooks/usePanelStats';
+import StatsNotice from '../../components/panel/StatsNoticeComponent';
 import useLocalizedContent from '../../hooks/useLocalizedContent';
 import { cleanTranslations } from '../../i18n/translation-helpers';
 import ContentLanguage from '../../components/common/locale/ContentLanguageComponent';
@@ -32,6 +36,12 @@ function makeSlug(text) {
 }
 
 function CategoriesPage() {
+  const { confirm: askConfirmation, dialog: confirmationDialog } = useConfirmDialog();
+  const {
+    stats: panelStats,
+    error: statsError,
+    refresh: refreshStats,
+  } = usePanelStats(['category']);
   const [categories, setCategories] = useState([]);
   const [categoryTree, setCategoryTree] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +51,7 @@ function CategoriesPage() {
   const [expandedCatIds, setExpandedCatIds] = useState({});
 
   const load = useCallback(async () => {
+    refreshStats();
     setLoading(true);
     try {
       const [cRes, tRes] = await Promise.all([
@@ -87,7 +98,9 @@ function CategoriesPage() {
       : axios.post(`${API}/category`, payload, authHeaders());
     req
       .then(() => {
-        toast.success(editingCat ? translateText('دسته‌بندی ویرایش شد') : translateText('دسته‌بندی ساخته شد'));
+        toast.success(
+          editingCat ? translateText('دسته‌بندی ویرایش شد') : translateText('دسته‌بندی ساخته شد'),
+        );
         setEditingCat(null);
         setCatForm(EMPTY_CAT);
         load();
@@ -97,8 +110,16 @@ function CategoriesPage() {
       );
   };
 
-  const deleteCat = (id) => {
-    if (!confirm(translateText('این دسته‌بندی حذف شود؟'))) return;
+  const deleteCat = async (id) => {
+    if (
+      !(await askConfirmation({
+        title: translateText('حذف دسته‌بندی'),
+        message: translateText('این دسته‌بندی حذف می‌شود. ادامه می‌دهید؟'),
+        confirmLabel: translateText('حذف'),
+        danger: true,
+      }))
+    )
+      return;
     axios
       .delete(`${API}/category/${id}`, authHeaders())
       .then(() => {
@@ -206,12 +227,28 @@ function CategoriesPage() {
 
   return (
     <div className="space-y-5">
+      {confirmationDialog}
       <PanelPageHeader
         icon={FolderTree}
         title={translateText('دسته‌بندی‌ها')}
         subtitle={translateText('ساختار درختی دسته‌بندی محصولات')}
         onRefresh={() => load()}
       />
+      <StatsNotice error={statsError} stats={panelStats} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatTile
+          label={translateText('دسته\u200cبندی\u200cها')}
+          value={toFa(panelStats.category?.counts.all ?? '—')}
+        />
+        <StatTile
+          label={translateText('فعال')}
+          value={toFa(panelStats.category?.counts.active ?? '—')}
+        />
+        <StatTile
+          label={translateText('غیرفعال')}
+          value={toFa(panelStats.category?.counts.inactive ?? '—')}
+        />
+      </div>
 
       <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
         <form
@@ -291,7 +328,8 @@ function CategoriesPage() {
             type="submit"
             className="btn-yellow w-full flex items-center justify-center gap-2"
           >
-            <Plus size={16} /> {editingCat ? translateText('ذخیره تغییرات') : translateText('ساخت دسته‌بندی')}
+            <Plus size={16} />{' '}
+            {editingCat ? translateText('ذخیره تغییرات') : translateText('ساخت دسته‌بندی')}
           </button>
           {(editingCat || catForm.parent_id) && (
             <button

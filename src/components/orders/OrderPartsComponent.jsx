@@ -1,9 +1,10 @@
+import { formatOrderPrice as formatPrice, orderItemName } from '../../utils/helpers/order';
 import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpLeft } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
-import { formatPrice, toFa, statusFa, formatDateTime } from '../../utils/helpers/format';
+import { toFa, statusFa, formatDateTime } from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
 
 /*
@@ -13,11 +14,12 @@ import { getId } from '../../utils/helpers/response';
 
 /* ---------- کمک‌تابع‌های مبلغ و تعداد (اقلام سفارش یک عکس لحظه‌ای از کالا هستند) ---------- */
 export const itemQty = (item) => Number(item?.quantity ?? 1) || 1;
-export const itemName = (item) => item?.name || item?.product_name || translateText("کالا");
+export const itemName = orderItemName;
 export const itemUnitPrice = (item) =>
   Number(item?.price?.amount ?? item?.unit_price ?? item?.price ?? 0) || 0;
 export const itemUnitDiscount = (item) => Number(item?.discount?.amount ?? 0) || 0;
-export const itemLineTotal = (item) => (itemUnitPrice(item) - itemUnitDiscount(item)) * itemQty(item);
+export const itemLineTotal = (item) =>
+  (itemUnitPrice(item) - itemUnitDiscount(item)) * itemQty(item);
 
 /* ---------- رنگ وضعیت مرسوله ---------- */
 const SUB_STATUS_COLORS = {
@@ -44,9 +46,13 @@ export function SubStatusChip({ status }) {
 }
 
 const PAY_META = {
-  paid: { label: translateText("پرداخت‌شده"), color: '#17994f', bg: 'rgba(23,153,79,0.14)' },
-  failed: { label: translateText("پرداخت ناموفق"), color: '#e53935', bg: 'rgba(229,57,53,0.14)' },
-  pending: { label: translateText("در انتظار پرداخت"), color: '#c2740a', bg: 'rgba(194,116,10,0.14)' },
+  paid: { label: translateText('پرداخت‌شده'), color: '#17994f', bg: 'rgba(23,153,79,0.14)' },
+  failed: { label: translateText('پرداخت ناموفق'), color: '#e53935', bg: 'rgba(229,57,53,0.14)' },
+  pending: {
+    label: translateText('در انتظار پرداخت'),
+    color: '#c2740a',
+    bg: 'rgba(194,116,10,0.14)',
+  },
 };
 
 export const payMetaOf = (status) => PAY_META[status] || PAY_META.pending;
@@ -70,7 +76,8 @@ export function OrderItemRow({ item }) {
   const qty = itemQty(item);
   const unit = itemUnitPrice(item);
   const discount = itemUnitDiscount(item);
-  const percent = Number(item?.discount?.percentage) || (unit ? Math.round((discount / unit) * 100) : 0);
+  const percent =
+    Number(item?.discount?.percentage) || (unit ? Math.round((discount / unit) * 100) : 0);
   const image = Array.isArray(item?.images_id) ? item.images_id[0] : item?.image;
   const to = productId ? `/product/${productId}` : null;
 
@@ -82,7 +89,12 @@ export function OrderItemRow({ item }) {
   return (
     <div className="flex items-center gap-3 rounded-xl p-2.5" style={{ background: 'var(--card)' }}>
       {to ? (
-        <Link to={to} className={frameClass} aria-label={translateText("مشاهده {{v0}}", {v0: (name)})} title={translateText("مشاهده صفحه محصول")}>
+        <Link
+          to={to}
+          className={frameClass}
+          aria-label={translateText('مشاهده {{v0}}', { v0: name })}
+          title={translateText('مشاهده صفحه محصول')}
+        >
           {picture}
         </Link>
       ) : (
@@ -94,7 +106,7 @@ export function OrderItemRow({ item }) {
           <Link
             to={to}
             className="inline-flex items-start gap-1 text-xs font-black leading-5 hover:underline"
-            title={translateText("مشاهده صفحه محصول")}
+            title={translateText('مشاهده صفحه محصول')}
           >
             <span className="line-clamp-2">{name}</span>
             <ArrowUpLeft size={12} className="mt-1 shrink-0 opacity-60" />
@@ -105,22 +117,32 @@ export function OrderItemRow({ item }) {
 
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] muted">
           {item?.brand && (
-            <span>{translateText("برند: ")}<b style={{ color: 'var(--text)' }}>{String(item.brand)}</b>
+            <span>
+              {translateText('برند: ')}
+              <b style={{ color: 'var(--text)' }}>{String(item.brand)}</b>
             </span>
           )}
-          <span>{translateText("قیمت واحد: ")}{formatPrice(unit)}</span>
+          <span>
+            {translateText('قیمت واحد: ')}
+            {formatPrice(unit)}
+          </span>
           {discount > 0 && (
             <span
               className="rounded-full px-1.5 py-0.5 text-[10px] font-black"
               style={{ background: 'rgba(229,57,53,0.14)', color: '#e53935' }}
             >
-              {toFa(percent)}{translateText("٪ تخفیف ")}</span>
+              {toFa(percent)}
+              {translateText('٪ تخفیف ')}
+            </span>
           )}
         </div>
       </div>
 
       <div className="shrink-0 text-end">
-        <div className="text-[11px] muted">{toFa(qty)}{translateText(" عدد")}</div>
+        <div className="text-[11px] muted">
+          {toFa(qty)}
+          {translateText(' عدد')}
+        </div>
         <b className="text-xs">{formatPrice(itemLineTotal(item))}</b>
       </div>
     </div>
@@ -145,7 +167,10 @@ export function InfoLine({ label, value, ltr = false }) {
   return (
     <div className="flex items-start justify-between gap-3">
       <span className="muted shrink-0">{label}</span>
-      <b className="min-w-0 break-words text-start font-bold" dir={ltr && !empty ? 'ltr' : undefined}>
+      <b
+        className="min-w-0 break-words text-start font-bold"
+        dir={ltr && !empty ? 'ltr' : undefined}
+      >
         {empty ? '—' : value}
       </b>
     </div>
@@ -154,32 +179,42 @@ export function InfoLine({ label, value, ltr = false }) {
 
 /* ---------- نشانی تحویل ---------- */
 export function AddressLines({ address }) {
-  if (!address) return <div className="muted">{translateText("نشانی ثبت نشده است.")}</div>;
+  if (!address) return <div className="muted">{translateText('نشانی ثبت نشده است.')}</div>;
   return (
     <>
-      <InfoLine label={translateText("گیرنده")} value={address.full_name} />
-      <InfoLine label={translateText("استان و شهر")} value={[address.province, address.city].filter(Boolean).join(translateText("، "))} />
-      <InfoLine label={translateText("محله")} value={address.neighborhood} />
-      <InfoLine label={translateText("نشانی کامل")} value={address.full_address} />
-      <InfoLine label={translateText("پلاک")} value={address.building_number ? toFa(address.building_number) : ''} />
-      <InfoLine label={translateText("واحد")} value={address.unit ? toFa(address.unit) : ''} />
-      <InfoLine label={translateText("کد پستی")} value={address.postal_code ? toFa(address.postal_code) : ''} />
+      <InfoLine label={translateText('گیرنده')} value={address.full_name} />
+      <InfoLine
+        label={translateText('استان و شهر')}
+        value={[address.province, address.city].filter(Boolean).join(translateText('، '))}
+      />
+      <InfoLine label={translateText('محله')} value={address.neighborhood} />
+      <InfoLine label={translateText('نشانی کامل')} value={address.full_address} />
+      <InfoLine
+        label={translateText('پلاک')}
+        value={address.building_number ? toFa(address.building_number) : ''}
+      />
+      <InfoLine label={translateText('واحد')} value={address.unit ? toFa(address.unit) : ''} />
+      <InfoLine
+        label={translateText('کد پستی')}
+        value={address.postal_code ? toFa(address.postal_code) : ''}
+      />
     </>
   );
 }
 
 /* ---------- تاریخچه‌ی وضعیت ---------- */
 const ACTORS = {
-  system: translateText("سیستم"),
-  seller: translateText("فروشنده"),
-  admin: translateText("مدیر سایت"),
-  customer: translateText("مشتری"),
-  user: translateText("مشتری"),
+  system: translateText('سیستم'),
+  seller: translateText('فروشنده'),
+  admin: translateText('مدیر سایت'),
+  customer: translateText('مشتری'),
+  user: translateText('مشتری'),
 };
 const hasPersian = (text) => /[\u0600-\u06FF]/.test(String(text || ''));
 
 export function OrderTimeline({ history = [] }) {
-  if (!history.length) return <p className="text-[11px] muted">{translateText("تاریخچه‌ای ثبت نشده است.")}</p>;
+  if (!history.length)
+    return <p className="text-[11px] muted">{translateText('تاریخچه‌ای ثبت نشده است.')}</p>;
   return (
     <ol className="space-y-2.5">
       {[...history].reverse().map((entry, index) => (
@@ -192,7 +227,7 @@ export function OrderTimeline({ history = [] }) {
             <b>{statusFa(entry.status)}</b>
             <span className="muted">
               {' · '}
-              {ACTORS[entry.by] || entry.by || translateText("سیستم")}
+              {ACTORS[entry.by] || entry.by || translateText('سیستم')}
               {' · '}
               {formatDateTime(entry.timestamp)}
             </span>
@@ -218,15 +253,39 @@ export function CancellationInfo({ sub }) {
     >
       {cancel?.cancelled && (
         <>
-          <div className="font-black" style={{ color: '#e53935' }}>{translateText("این مرسوله لغو شده است ")}</div>
-          {cancel.reason && <div>{translateText("دلیل: ")}{cancel.reason}</div>}
-          {cancel.cancelled_at && <div className="muted">{translateText("زمان لغو: ")}{formatDateTime(cancel.cancelled_at)}</div>}
+          <div className="font-black" style={{ color: '#e53935' }}>
+            {translateText('این مرسوله لغو شده است ')}
+          </div>
+          {cancel.reason && (
+            <div>
+              {translateText('دلیل: ')}
+              {cancel.reason}
+            </div>
+          )}
+          {cancel.cancelled_at && (
+            <div className="muted">
+              {translateText('زمان لغو: ')}
+              {formatDateTime(cancel.cancelled_at)}
+            </div>
+          )}
         </>
       )}
       {hasRefund && (
-        <div>{translateText("بازپرداخت: ")}<b>{statusFa(refund.status)}</b>
-          {refund.amount ? <>{translateText(" — مبلغ ")}{formatPrice(refund.amount)}</> : null}
-          {refund.penalty_amount ? <>{translateText(" — جریمه ")}{formatPrice(refund.penalty_amount)}</> : null}
+        <div>
+          {translateText('بازپرداخت: ')}
+          <b>{statusFa(refund.status)}</b>
+          {refund.amount ? (
+            <>
+              {translateText(' — مبلغ ')}
+              {formatPrice(refund.amount)}
+            </>
+          ) : null}
+          {refund.penalty_amount ? (
+            <>
+              {translateText(' — جریمه ')}
+              {formatPrice(refund.penalty_amount)}
+            </>
+          ) : null}
         </div>
       )}
     </div>

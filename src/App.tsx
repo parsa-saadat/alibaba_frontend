@@ -93,7 +93,7 @@ const MainApp = () => {
             style={{ border: '3px solid rgba(255,255,255,.14)', borderTopColor: '#ffd60a' }}
           />
           <p className="text-sm font-bold" style={{ color: '#eef2ff' }}>
-            {translateText('در حال بارگذاری ژئو کالا… ')}
+            {translateText('در حال بارگذاری ژئوکالا… ')}
           </p>
         </div>
       </div>

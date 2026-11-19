@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { API } from '../../config/api';
-import { language, formatMoney } from '../../i18n/runtime';
-export const preferredCurrency = { fa: 'IRT', en: 'USD', tr: 'TRY', ar: 'AED' }[language];
+import {
+  language,
+  formatMoney,
+  currencyLabel,
+  currency as selectedCurrency,
+} from '../../i18n/runtime';
+export const preferredCurrency = selectedCurrency;
 const phrases = {
   en: {
     label: 'Price',
@@ -196,7 +201,7 @@ export default function MoneyInput({ price }) {
           >
             {['IRT', 'USD', 'TRY', 'AED', 'EUR', 'IRR'].map((code) => (
               <option key={code} value={code}>
-                {code === 'IRT' ? 'تومان (IRT)' : code}
+                {code === 'IRT' ? `${currencyLabel(code)} (IRT)` : code}
               </option>
             ))}
           </select>

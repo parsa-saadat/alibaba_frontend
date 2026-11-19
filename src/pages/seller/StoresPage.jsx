@@ -1,3 +1,5 @@
+import usePanelStats from '../../hooks/usePanelStats';
+import StatsNotice from '../../components/panel/StatsNoticeComponent';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
@@ -61,8 +63,8 @@ function StatTile({ label, value, hint, icon: Icon, tint }) {
 }
 
 function StoresPage() {
+  const { stats: panelStats, error: statsError, refresh: refreshStats } = usePanelStats(['store']);
   const [stores, setStores] = useState([]);
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -75,82 +77,67 @@ function StoresPage() {
   /* ظرفیت ساخت فروشگاه بر اساس پلن فروشندگی */
   const capacity = useStoreCapacity();
 
-  const load = useCallback(async (silent = false, retried = false) => {
-    if (silent) setRefreshing(true);
-    else setLoading(true);
-    setLoadError('');
-    try {
-      const [storesRes, productsRes] = await Promise.all([
-        axios.get(`${API}/perm/stores?lang=all&limit=100`, authHeaders()),
-        axios.get(`${API}/perm/products?limit=200`, authHeaders()).catch(() => null),
-      ]);
-      setStores(storesRes.data.body?.data || storesRes.data.body || []);
-      const list = productsRes?.data?.body?.data || productsRes?.data?.body || [];
-      setProducts(Array.isArray(list) ? list : []);
-    } catch (error) {
-      /* توکن قدیمی (نقش هنوز «کاربر» است) → توکن را از سرور تازه کن و یک‌بار دوباره بخوان */
-      if (!retried && [401, 403].includes(error?.response?.status) && (await syncSession?.())) {
-        return load(silent, true);
+  const load = useCallback(
+    async (silent = false, retried = false) => {
+      refreshStats();
+      if (silent) setRefreshing(true);
+      else setRefreshing(true);
+      setLoadError('');
+      try {
+        const [storesRes] = await Promise.all([
+          axios.get(`${API}/perm/stores?lang=all&limit=100`, {
+            ...authHeaders(),
+            params: { search, status: statusFilter === 'all' ? undefined : statusFilter },
+          }),
+        ]);
+        setStores(storesRes.data.body?.data || storesRes.data.body || []);
+      } catch (error) {
+        /* توکن قدیمی (نقش هنوز «کاربر» است) → توکن را از سرور تازه کن و یک‌بار دوباره بخوان */
+        if (!retried && [401, 403].includes(error?.response?.status) && (await syncSession?.())) {
+          return load(silent, true);
+        }
+        setStores([]);
+        setLoadError(
+          error?.response?.data?.message || translateText('دریافت فهرست فروشگاه‌ها ناموفق بود'),
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-      setStores([]);
-      setLoadError(error?.response?.data?.message || translateText("دریافت فهرست فروشگاه‌ها ناموفق بود"));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [syncSession]);
+    },
+    [syncSession, search, statusFilter],
+  );
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(() => load(true), 300);
+    return () => clearTimeout(timer);
   }, [load]);
 
   /* آمار هر فروشگاه: تعداد کالا و ارزش موجودی */
-  const statsByStore = useMemo(() => {
-    const map = {};
-    products.forEach((product) => {
-      const key = getId(product.store_id);
-      if (!key) return;
-      if (!map[key]) map[key] = { count: 0, stock: 0, value: 0 };
-      map[key].count += 1;
-      map[key].stock += Number(product.stock ?? 0) || 0;
-      map[key].value += Number(product.price?.amount ?? product.price ?? 0) || 0;
-    });
-    return map;
-  }, [products]);
+  const statsByStore = panelStats.store?.byStore || {};
 
-  const counts = useMemo(
-    () => ({
-      all: stores.length,
-      ENABLE: stores.filter((store) => store.status === 'ENABLE').length,
-      DISABLE: stores.filter((store) => store.status === 'DISABLE').length,
-      ROOT_DISABLE: stores.filter((store) => store.status === 'ROOT_DISABLE').length,
-    }),
-    [stores],
-  );
+  const counts = panelStats.store?.counts || {
+    all: '—',
+    ENABLE: '—',
+    DISABLE: '—',
+    ROOT_DISABLE: '—',
+  };
 
   const q = search.trim().toLowerCase();
-  const filtered = useMemo(
-    () =>
-      stores.filter((store) => {
-        if (statusFilter !== 'all' && store.status !== statusFilter) return false;
-        if (!q) return true;
-        return [store.name, store.contact_info?.email, store.contact_info?.phone, store.contact_info?.address]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(q);
-      }),
-    [stores, q, statusFilter],
-  );
+  const filtered = stores;
 
   const setStoreStatus = async (store, status) => {
     setBusyId(getId(store));
     try {
-      await axios.put(`${API}/store/${getId(store)}`, { status, contact_info: store.contact_info }, authHeaders());
-      toast.success(translateText("وضعیت فروشگاه به «{{v0}}» تغییر کرد", {v0: (statusFa(status))}));
+      await axios.put(
+        `${API}/store/${getId(store)}`,
+        { status, contact_info: store.contact_info },
+        authHeaders(),
+      );
+      toast.success(translateText('وضعیت فروشگاه به «{{v0}}» تغییر کرد', { v0: statusFa(status) }));
       load(true);
     } catch (error) {
-      toast.error(error.response?.data?.message || translateText("خطا در تغییر وضعیت فروشگاه"));
+      toast.error(error.response?.data?.message || translateText('خطا در تغییر وضعیت فروشگاه'));
     } finally {
       setBusyId('');
     }
@@ -159,7 +146,7 @@ function StoresPage() {
   if (loading && stores.length === 0) {
     return (
       <div className="py-16">
-        <Loading label={translateText("در حال بارگذاری فروشگاه‌ها…")} />
+        <Loading label={translateText('در حال بارگذاری فروشگاه‌ها…')} />
       </div>
     );
   }
@@ -168,41 +155,70 @@ function StoresPage() {
     return (
       <div className="card rounded-2xl p-8 text-center space-y-3">
         <p className="text-sm muted">{loadError}</p>
-        <button type="button" onClick={() => load()} className="btn-yellow !py-2 text-xs">{translateText("تلاش دوباره ")}</button>
+        <button type="button" onClick={() => load()} className="btn-yellow !py-2 text-xs">
+          {translateText('تلاش دوباره ')}
+        </button>
       </div>
     );
   }
 
   const tabs = [
-    { id: 'all', label: translateText("همه") },
-    { id: 'ENABLE', label: translateText("فعال") },
-    { id: 'DISABLE', label: translateText("غیرفعال") },
-    { id: 'ROOT_DISABLE', label: translateText("مسدود") },
+    { id: 'all', label: translateText('همه') },
+    { id: 'ENABLE', label: translateText('فعال') },
+    { id: 'DISABLE', label: translateText('غیرفعال') },
+    { id: 'ROOT_DISABLE', label: translateText('مسدود') },
   ];
 
   return (
     <div className="space-y-5">
-      {/* ───── سرصفحه ───── */}
-            <PanelPageHeader
+      <PanelPageHeader
         icon={Store}
-        title={translateText("فروشگاه‌های من")}
-        subtitle={translateText("{{v0}} فروشگاه • {{v1}} کالا در مجموع", {v0: (toFa(stores.length)),v1: (toFa(products.length))})}
+        title={translateText('فروشگاه‌های من')}
+        subtitle={translateText('{{v0}} فروشگاه • {{v1}} کالا در مجموع', {
+          v0: toFa(counts.all),
+          v1: toFa(panelStats.store?.products ?? '—'),
+        })}
         onRefresh={() => {
           capacity.refresh();
           load(true);
         }}
         refreshing={refreshing}
       />
+      <StatsNotice error={statsError} stats={panelStats} />
+      {/* ───── سرصفحه ───── */}
 
       {/* ───── ظرفیت پلن و دکمه‌ی ساخت فروشگاه ───── */}
       <StoreCapacityComponent capacity={capacity} onCreate={() => setStoreModal(null)} />
 
       {/* ───── آمار ───── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label={translateText("کل فروشگاه‌ها")} value={toFa(counts.all)} hint={translateText("{{v0}} کالا", {v0: (toFa(products.length))})} icon={Store} />
-        <StatTile label={translateText("فعال")} value={toFa(counts.ENABLE)} hint={translateText("در دسترس مشتری")} icon={CheckCircle2} tint="#17994f" />
-        <StatTile label={translateText("غیرفعال")} value={toFa(counts.DISABLE)} hint={translateText("موقتاً بسته")} icon={PauseCircle} tint="#c2740a" />
-        <StatTile label={translateText("مسدود")} value={toFa(counts.ROOT_DISABLE)} hint={translateText("توسط مدیریت")} icon={Ban} tint="#e53935" />
+        <StatTile
+          label={translateText('کل فروشگاه‌ها')}
+          value={toFa(counts.all)}
+          hint={translateText('{{v0}} کالا', { v0: toFa(panelStats.store?.products ?? '—') })}
+          icon={Store}
+        />
+        <StatTile
+          label={translateText('فعال')}
+          value={toFa(counts.ENABLE)}
+          hint={translateText('در دسترس مشتری')}
+          icon={CheckCircle2}
+          tint="#17994f"
+        />
+        <StatTile
+          label={translateText('غیرفعال')}
+          value={toFa(counts.DISABLE)}
+          hint={translateText('موقتاً بسته')}
+          icon={PauseCircle}
+          tint="#c2740a"
+        />
+        <StatTile
+          label={translateText('مسدود')}
+          value={toFa(counts.ROOT_DISABLE)}
+          hint={translateText('توسط مدیریت')}
+          icon={Ban}
+          tint="#e53935"
+        />
       </div>
 
       {/* ───── فیلتر و جستجو ───── */}
@@ -216,7 +232,15 @@ function StoresPage() {
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
                 className="chip flex items-center gap-1.5"
-                style={active ? { background: 'var(--primary-color)', color: '#0a1736', borderColor: 'transparent' } : undefined}
+                style={
+                  active
+                    ? {
+                        background: 'var(--primary-color)',
+                        color: '#0a1736',
+                        borderColor: 'transparent',
+                      }
+                    : undefined
+                }
               >
                 {tab.label}
                 <span
@@ -228,7 +252,10 @@ function StoresPage() {
               </button>
             );
           })}
-          <span className="ms-auto text-[11px] muted">{toFa(filtered.length)}{translateText(" نتیجه")}</span>
+          <span className="ms-auto text-[11px] muted">
+            {toFa(filtered.length)}
+            {translateText(' نتیجه')}
+          </span>
         </div>
 
         <div className="relative">
@@ -236,7 +263,7 @@ function StoresPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={translateText("جستجوی نام فروشگاه، ایمیل، تلفن یا نشانی…")}
+            placeholder={translateText('جستجوی نام فروشگاه، ایمیل، تلفن یا نشانی…')}
             className="input !py-2.5 !pe-9 text-xs w-full"
           />
           {search && (
@@ -244,7 +271,7 @@ function StoresPage() {
               type="button"
               onClick={() => setSearch('')}
               className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
-              aria-label={translateText("پاک کردن جستجو")}
+              aria-label={translateText('پاک کردن جستجو')}
             >
               <X size={13} />
             </button>
@@ -262,19 +289,34 @@ function StoresPage() {
             <Store size={24} />
           </span>
           <b className="block text-sm">
-            {capacity.reason === 'not-seller' ? translateText("هنوز فروشنده نیستید") : translateText("فروشگاهی پیدا نشد")}
+            {capacity.reason === 'not-seller'
+              ? translateText('هنوز فروشنده نیستید')
+              : translateText('فروشگاهی پیدا نشد')}
           </b>
           <p className="text-xs muted">
             {capacity.reason === 'not-seller'
-              ? translateText("برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید؛ از پنل کاربری درخواست فروشندگی بدهید.")
+              ? translateText(
+                  'برای ساخت فروشگاه باید حساب فروشندگی تأییدشده داشته باشید؛ از پنل کاربری درخواست فروشندگی بدهید.',
+                )
               : stores.length === 0
-                ? translateText("هنوز فروشگاهی نساخته‌اید.")
-                : translateText("فیلتر یا عبارت جستجو را تغییر دهید.")}
+                ? translateText('هنوز فروشگاهی نساخته‌اید.')
+                : translateText('فیلتر یا عبارت جستجو را تغییر دهید.')}
           </p>
           {capacity.reason === 'not-seller' ? (
-            <Link to="/profile" className="btn-ghost !py-2 !px-3 text-xs inline-flex items-center gap-1.5">{translateText("درخواست فروشندگی ")}</Link>
+            <Link
+              to="/profile"
+              className="btn-ghost !py-2 !px-3 text-xs inline-flex items-center gap-1.5"
+            >
+              {translateText('درخواست فروشندگی ')}
+            </Link>
           ) : capacity.canCreate ? (
-            <button type="button" onClick={() => setStoreModal(null)} className="btn-yellow !py-2 !px-3 text-xs">{translateText("ساخت فروشگاه جدید ")}</button>
+            <button
+              type="button"
+              onClick={() => setStoreModal(null)}
+              className="btn-yellow !py-2 !px-3 text-xs"
+            >
+              {translateText('ساخت فروشگاه جدید ')}
+            </button>
           ) : (
             <button
               type="button"
@@ -282,7 +324,7 @@ function StoresPage() {
               title={capacity.blockedText}
               className="btn-ghost !py-2 !px-3 text-xs opacity-60 cursor-not-allowed"
             >
-              {capacity.blockedText || translateText("ساخت فروشگاه جدید")}
+              {capacity.blockedText || translateText('ساخت فروشگاه جدید')}
             </button>
           )}
         </section>
@@ -294,8 +336,9 @@ function StoresPage() {
             const meta = metaOf(store.status);
             const StatusIcon = meta.icon;
             const rooted = store.status === 'ROOT_DISABLE';
-            const stats = statsByStore[id] || { count: 0, stock: 0, value: 0 };
-            const zoomable = (file) => (file ? (f, a) => setZoomFile({ file: f, alt: a }) : undefined);
+            const stats = statsByStore[id] || { count: '—', stock: '—', value: null };
+            const zoomable = (file) =>
+              file ? (f, a) => setZoomFile({ file: f, alt: a }) : undefined;
 
             return (
               <article key={id} className="card rounded-2xl overflow-hidden flex flex-col">
@@ -312,7 +355,7 @@ function StoresPage() {
                   {store.banner_image_id && (
                     <StorageImageComponent
                       file={store.banner_image_id}
-                      alt={translateText("بنر {{v0}}", {v0: (store.name)})}
+                      alt={translateText('بنر {{v0}}', { v0: store.name })}
                       className="w-full h-full object-cover"
                       onZoom={zoomable(store.banner_image_id)}
                     />
@@ -329,7 +372,12 @@ function StoresPage() {
                   <div className="flex items-start gap-3">
                     <div
                       className="grid shrink-0 place-items-center overflow-hidden rounded-2xl border border-theme text-lg font-black"
-                      style={{ width: 52, height: 52, background: 'var(--card2)', color: 'var(--primary-color)' }}
+                      style={{
+                        width: 52,
+                        height: 52,
+                        background: 'var(--card2)',
+                        color: 'var(--primary-color)',
+                      }}
                     >
                       {store.profile_image_id ? (
                         <StorageImageComponent
@@ -344,22 +392,31 @@ function StoresPage() {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <Link to={`/store/${id}`} className="block truncate text-sm font-black hover:underline">
-                        {store.name || translateText("بدون نام")}
+                      <Link
+                        to={`/store/${id}`}
+                        className="block truncate text-sm font-black hover:underline"
+                      >
+                        {store.name || translateText('بدون نام')}
                       </Link>
                       {store.description && (
-                        <p className="mt-1 line-clamp-2 text-[11px] muted leading-5">{store.description}</p>
+                        <p className="mt-1 line-clamp-2 text-[11px] muted leading-5">
+                          {store.description}
+                        </p>
                       )}
                       <div className="mt-1.5 flex flex-wrap items-center gap-1">
                         <span
                           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--text)' }}
                         >
-                          <Package size={10} /> {toFa(stats.count)}{translateText(" کالا ")}</span>
+                          <Package size={10} /> {toFa(stats.count)}
+                          {translateText(' کالا ')}
+                        </span>
                         <span
                           className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                           style={{ background: 'var(--card2)', color: 'var(--muted)' }}
-                        >{translateText("موجودی: ")}{toFa(stats.stock)}
+                        >
+                          {translateText('موجودی: ')}
+                          {toFa(stats.stock)}
                         </span>
                       </div>
                     </div>
@@ -367,10 +424,16 @@ function StoresPage() {
 
                   <div className="grid gap-1.5 border-y border-theme py-2.5 text-[11px] muted sm:grid-cols-2">
                     <span className="flex min-w-0 items-center gap-1.5">
-                      <Mail size={12} className="shrink-0" /> <span dir="ltr" className="truncate">{store.contact_info?.email || '—'}</span>
+                      <Mail size={12} className="shrink-0" />{' '}
+                      <span dir="ltr" className="truncate">
+                        {store.contact_info?.email || '—'}
+                      </span>
                     </span>
                     <span className="flex min-w-0 items-center gap-1.5">
-                      <Phone size={12} className="shrink-0" /> <span dir="ltr" className="truncate">{store.contact_info?.phone || store.contact_info?.fax || '—'}</span>
+                      <Phone size={12} className="shrink-0" />{' '}
+                      <span dir="ltr" className="truncate">
+                        {store.contact_info?.phone || store.contact_info?.fax || '—'}
+                      </span>
                     </span>
                     {store.contact_info?.address && (
                       <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
@@ -386,28 +449,52 @@ function StoresPage() {
                       disabled={busy || rooted}
                       onClick={() => setStoreModal(store)}
                       className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
-                      title={rooted ? translateText("این فروشگاه مسدود است") : translateText("ویرایش فروشگاه")}
+                      title={
+                        rooted
+                          ? translateText('این فروشگاه مسدود است')
+                          : translateText('ویرایش فروشگاه')
+                      }
                     >
-                      <Pencil size={13} />{translateText(" ویرایش ")}</button>
+                      <Pencil size={13} />
+                      {translateText(' ویرایش ')}
+                    </button>
 
                     {!rooted && (
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => setStoreStatus(store, store.status === 'ENABLE' ? 'DISABLE' : 'ENABLE')}
+                        onClick={() =>
+                          setStoreStatus(store, store.status === 'ENABLE' ? 'DISABLE' : 'ENABLE')
+                        }
                         className="btn-ghost !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                       >
-                        {store.status === 'ENABLE' ? <PauseCircle size={13} /> : <CheckCircle2 size={13} />}
-                        {store.status === 'ENABLE' ? translateText("غیرفعال کن") : translateText("فعال کن")}
+                        {store.status === 'ENABLE' ? (
+                          <PauseCircle size={13} />
+                        ) : (
+                          <CheckCircle2 size={13} />
+                        )}
+                        {store.status === 'ENABLE'
+                          ? translateText('غیرفعال کن')
+                          : translateText('فعال کن')}
                       </button>
                     )}
 
-                    <Link to={`/store/${id}`} className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1">
-                      <ExternalLink size={13} />{translateText(" صفحه‌ی فروشگاه ")}</Link>
+                    <Link
+                      to={`/store/${id}`}
+                      className="btn-ghost !py-1.5 !px-2.5 text-xs flex items-center gap-1"
+                    >
+                      <ExternalLink size={13} />
+                      {translateText(' صفحه‌ی فروشگاه ')}
+                    </Link>
 
                     {rooted && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: '#e53935' }}>
-                        <Ban size={12} />{translateText(" مسدود توسط مدیریت ")}</span>
+                      <span
+                        className="flex items-center gap-1 text-[11px] font-bold"
+                        style={{ color: '#e53935' }}
+                      >
+                        <Ban size={12} />
+                        {translateText(' مسدود توسط مدیریت ')}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -428,7 +515,11 @@ function StoresPage() {
         />
       )}
 
-      <ImageLightboxComponent file={zoomFile?.file} alt={zoomFile?.alt} onClose={() => setZoomFile(null)} />
+      <ImageLightboxComponent
+        file={zoomFile?.file}
+        alt={zoomFile?.alt}
+        onClose={() => setZoomFile(null)}
+      />
     </div>
   );
 }

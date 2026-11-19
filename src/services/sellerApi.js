@@ -306,19 +306,6 @@ export const resolveSeller = async ({
   let ownerKey = '';
   let source = knownOwner ? 'page' : '';
 
-  if (!owner && directSellerId) {
-    const found = await fetchPublicUser(directSellerId, { force }).catch((error) => {
-      steps.push({ step: 'user', id: directSellerId, error: statusOfError(error) });
-      return null;
-    });
-    if (found) {
-      owner = found;
-      ownerKey = directSellerId;
-      source = 'public-user';
-      steps.push({ step: 'user', id: directSellerId, ok: true, seller_trust: asBool(found.seller_trust) });
-    }
-  }
-
   /* ---------- ۲) فروشگاه (و فروشنده‌ی داخل آن) ---------- */
   if (!store && storeKey && (!owner || typeof asBool(owner?.seller_trust) !== 'boolean')) {
     store = await fetchStore(storeKey, { force }).catch((error) => {
@@ -345,7 +332,9 @@ export const resolveSeller = async ({
     source = 'store-embedded-user';
   }
 
-  const candidates = uniq([ownerKey, directSellerId, sellerIdOfStore(store, '')]);
+  const candidates = store?.seller_profile_resolved
+    ? []
+    : uniq([sellerIdOfStore(store, ''), ...(storeKey ? [] : [directSellerId])]);
 
   if (!owner || typeof asBool(owner?.seller_trust) !== 'boolean') {
     for (const key of candidates) {
@@ -365,7 +354,7 @@ export const resolveSeller = async ({
 
   /* ---------- ۳) پشتیبان: روت ادمین /seller/:id ---------- */
   const publicHasSignal = typeof asBool(owner?.seller_trust) === 'boolean';
-  if (!publicHasSignal) {
+  if (!publicHasSignal && !store?.seller_profile_resolved) {
     for (const key of uniq([ownerKey, ...candidates]).slice(0, 2)) {
       const adminRecord = await fetchAdminSeller(key, { force }).catch((error) => {
         steps.push({ step: 'admin-seller', id: key, error: statusOfError(error) });

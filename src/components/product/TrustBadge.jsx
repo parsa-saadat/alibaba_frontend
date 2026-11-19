@@ -50,7 +50,7 @@ function TrustBadge({
         <span
           className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${className}`}
           style={{ background: 'color-mix(in srgb, #17994f 16%, transparent)', color: 'var(--success-text, #17994f)' }}
-          title={translateText("فروشنده‌ی این کالا از سوی ژئو کالا بررسی و تأیید شده است")}
+          title={translateText("فروشنده‌ی این کالا از سوی ژئوکالا بررسی و تأیید شده است")}
         >
           <BadgeCheck size={size} />{translateText("مورد اعتماد ")}</span>
       )}
@@ -58,7 +58,7 @@ function TrustBadge({
         <span
           className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${className}`}
           style={{ background: 'var(--card2)', color: 'var(--muted)' }}
-          title={translateText("فروشنده‌ی این کالا هنوز از سوی ژئو کالا تأیید نشده است")}
+          title={translateText("فروشنده‌ی این کالا هنوز از سوی ژئوکالا تأیید نشده است")}
         >
           <ShieldOff size={size} />{translateText("بدون تأیید ")}</span>
       )}

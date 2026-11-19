@@ -1,3 +1,4 @@
+import { currency, currencies } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
 import { getId } from './response.js';
 
@@ -17,12 +18,7 @@ export const getCartRows = (cart) => {
 export const productIdOfCartRow = (row) => {
   if (!row) return '';
   const value =
-    row.product_id ??
-    row.productId ??
-    row.product?._id ??
-    row.product?.id ??
-    row.product ??
-    '';
+    row.product_id ?? row.productId ?? row.product?._id ?? row.product?.id ?? row.product ?? '';
   return getId(value);
 };
 
@@ -40,8 +36,7 @@ export const findInCart = (cart, productId) => {
   return getCartRows(cart).find((row) => productIdOfCartRow(row) === target) || null;
 };
 
-export const getCartQuantity = (cart, productId) =>
-  getItemQuantity(findInCart(cart, productId));
+export const getCartQuantity = (cart, productId) => getItemQuantity(findInCart(cart, productId));
 
 export const cartCountOf = (cart) =>
   getCartRows(cart).reduce((sum, row) => sum + getItemQuantity(row), 0);
@@ -63,16 +58,21 @@ export const removeCartRow = (cart, productId) => {
 };
 
 /* پیام خطای فارسی برای خطاهای سبد خرید (پیام بک‌اند اولویت دارد) */
-export const cartErrorMessage = (error, fallback = translateText("خطا در ارتباط با سبد خرید")) => {
-  const message =
-    error?.response?.data?.message || error?.message || fallback;
+export const cartErrorMessage = (error, fallback = translateText('خطا در ارتباط با سبد خرید')) => {
+  const message = error?.response?.data?.message || error?.message || fallback;
   const map = {
-    'Product already exists in cart': translateText("این محصول از قبل در سبد خرید شما است"),
-    'Cart not found': translateText("این محصول در سبد خرید شما نیست"),
-    'Product not found': translateText("محصول یافت نشد"),
-    'Quantity is not in stock': translateText("موجودی کافی نیست"),
-    'Quantity is not available': translateText("موجودی کافی نیست"),
-    'Product is not available': translateText("این محصول قابل خرید نیست"),
+    'Product already exists in cart': translateText('این محصول از قبل در سبد خرید شما است'),
+    'Cart not found': translateText('این محصول در سبد خرید شما نیست'),
+    'Product not found': translateText('محصول یافت نشد'),
+    'Quantity is not in stock': translateText('موجودی کافی نیست'),
+    'Quantity is not available': translateText('موجودی کافی نیست'),
+    'Product is not available': translateText('این محصول قابل خرید نیست'),
   };
   return map[message] || message;
+};
+
+export const getCartCurrency = (rows) => {
+  if (!rows.length) return currency;
+  const codes = [...new Set(rows.map((row) => row.product?.price?.currency))];
+  return codes.length === 1 && currencies.includes(codes[0]) ? codes[0] : null;
 };

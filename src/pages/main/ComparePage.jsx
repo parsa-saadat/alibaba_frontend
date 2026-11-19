@@ -1,3 +1,4 @@
+import { localizedField, readContent } from '../../i18n/content-fields';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
@@ -50,60 +51,82 @@ const stockOf = (product) => {
 /* ردیف‌های جدول: هر گروه عنوان دارد و مقدار هر ستون با یک تابع ساخته می‌شود */
 const GROUPS = [
   {
-    title: translateText("قیمت و موجودی"),
+    title: translateText('قیمت و موجودی'),
     rows: [
-      { label: translateText("قیمت نهایی"), render: (p) => formatPrice(finalPrice(p)), strong: true, highlight: 'price' },
       {
-        label: translateText("قیمت اصلی"),
-        render: (p) => (hasDiscount(p) ? <s className="muted">{formatPrice(p.price?.amount)}</s> : '—'),
+        label: translateText('قیمت نهایی'),
+        render: (p) => formatPrice(finalPrice(p), p.price?.currency),
+        strong: true,
+        highlight: 'price',
       },
       {
-        label: translateText("تخفیف"),
+        label: translateText('قیمت اصلی'),
+        render: (p) =>
+          hasDiscount(p) ? (
+            <s className="muted">{formatPrice(p.price?.amount, p.price?.currency)}</s>
+          ) : (
+            '—'
+          ),
+      },
+      {
+        label: translateText('تخفیف'),
         render: (p) =>
           hasDiscount(p) ? (
             <span
               className="rounded-md px-1.5 py-0.5 text-[11px] font-black"
               style={{ background: 'rgba(229,57,53,0.14)', color: '#ff6b6b' }}
             >
-              {toFa(p.discount.percentage)}{translateText("٪ ")}</span>
+              {toFa(p.discount.percentage)}
+              {translateText('٪ ')}
+            </span>
           ) : (
             '—'
           ),
       },
       {
-        label: translateText("موجودی"),
+        label: translateText('موجودی'),
         render: (p) => {
           const stock = stockOf(p);
-          if (stock === 0) return <span style={{ color: '#e53935' }}>{translateText("ناموجود")}</span>;
-          if (stock === null) return <span className="muted">{translateText("موجود")}</span>;
-          return translateText("{{v0}} عدد", {v0: (toFa(stock))});
+          if (stock === 0)
+            return <span style={{ color: '#e53935' }}>{translateText('ناموجود')}</span>;
+          if (stock === null) return <span className="muted">{translateText('موجود')}</span>;
+          return translateText('{{v0}} عدد', { v0: toFa(stock) });
         },
       },
     ],
   },
   {
-    title: translateText("مشخصات فنی"),
+    title: translateText('مشخصات فنی'),
     rows: [
-      { label: translateText("برند"), render: (p) => p.brand || '—' },
-      { label: translateText("سال تولید"), render: (p) => (p.production ? formatProductionYear(p.production) : '—') },
-      { label: translateText("گارانتی"), render: (p) => (p.warranty ? translateText("دارد") : translateText("ندارد")) },
-      { label: translateText("ابعاد"), render: (p) => formatDimensions(p.dimensions) || '—' },
-      { label: translateText("وزن"), render: (p) => formatWeight(p.weight) || '—' },
+      { label: translateText('برند'), render: (p) => localizedField(p.brand) || '—' },
+      {
+        label: translateText('سال تولید'),
+        render: (p) => (p.production ? formatProductionYear(p.production) : '—'),
+      },
+      {
+        label: translateText('گارانتی'),
+        render: (p) => (p.warranty ? translateText('دارد') : translateText('ندارد')),
+      },
+      { label: translateText('ابعاد'), render: (p) => formatDimensions(p.dimensions) || '—' },
+      { label: translateText('وزن'), render: (p) => formatWeight(p.weight) || '—' },
     ],
   },
   {
-    title: translateText("فروشنده"),
+    title: translateText('فروشنده'),
     rows: [
       {
-        label: translateText("فروشگاه"),
+        label: translateText('فروشگاه'),
         render: (p, seller) => {
-          const name = seller?.store?.name || p.store_name || '';
+          const name = localizedField(seller?.store?.name) || localizedField(p.store_name) || '';
           const storeId = seller?.store?._id || seller?.store?.id || p.store_id;
           if (!name && !storeId) return <span className="muted">—</span>;
           return storeId ? (
-            <Link to={`/store/${storeId}`} className="inline-flex items-center gap-1 hover:underline">
+            <Link
+              to={`/store/${storeId}`}
+              className="inline-flex items-center gap-1 hover:underline"
+            >
               <Store size={13} className="muted" />
-              {name || translateText("صفحه فروشگاه")}
+              {name || translateText('صفحه فروشگاه')}
             </Link>
           ) : (
             name
@@ -111,16 +134,27 @@ const GROUPS = [
         },
       },
       {
-        label: translateText("نشان اعتماد"),
+        label: translateText('نشان اعتماد'),
         render: (p, seller) => {
           const trust =
-            seller?.trust || (p.seller_trust === true ? TRUST.TRUSTED : p.seller_trust === false ? TRUST.UNTRUSTED : TRUST.UNKNOWN);
+            seller?.trust ||
+            (p.seller_trust === true
+              ? TRUST.TRUSTED
+              : p.seller_trust === false
+                ? TRUST.UNTRUSTED
+                : TRUST.UNKNOWN);
           if (trust === TRUST.TRUSTED)
             return (
-              <span className="inline-flex items-center gap-1 font-black" style={{ color: '#17994f' }}>
-                <BadgeCheck size={14} />{translateText("تأییدشده ")}</span>
+              <span
+                className="inline-flex items-center gap-1 font-black"
+                style={{ color: '#17994f' }}
+              >
+                <BadgeCheck size={14} />
+                {translateText('تأییدشده ')}
+              </span>
             );
-          if (trust === TRUST.UNTRUSTED) return <span className="muted">{translateText("تأییدنشده")}</span>;
+          if (trust === TRUST.UNTRUSTED)
+            return <span className="muted">{translateText('تأییدنشده')}</span>;
           return <span className="muted">—</span>;
         },
       },
@@ -129,7 +163,6 @@ const GROUPS = [
 ];
 
 function ComparePage() {
-
   const { compare, toggleCompare, clearCompare } = useShop();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,7 +218,7 @@ function ComparePage() {
       ),
     )
       .then((list) => {
-        if (!cancelled) setProducts(list.filter(Boolean));
+        if (!cancelled) setProducts(list.filter(Boolean).map(readContent));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -224,14 +257,22 @@ function ComparePage() {
             <GitCompareArrows size={20} style={{ color: 'var(--accent-text)' }} />
           </span>
           <div className="min-w-0">
-            <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">{translateText("مقایسه‌ی محصولات ")}<span
+            <h1 className="flex items-center gap-2 text-lg font-black sm:text-xl">
+              {translateText('مقایسه‌ی محصولات ')}
+              <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-black"
                 style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
               >
-                {toFa(products.length)}{translateText(" از ")}{toFa(MAX)}
+                {toFa(products.length)}
+                {translateText(' از ')}
+                {toFa(MAX)}
               </span>
             </h1>
-            <p className="mt-0.5 text-[11px] muted">{translateText("حداکثر ۴ کالا را کنار هم بگذارید و ارزان‌ترین قیمت و مشخصات کامل را ببینید. ")}</p>
+            <p className="mt-0.5 text-[11px] muted">
+              {translateText(
+                'حداکثر ۴ کالا را کنار هم بگذارید و ارزان‌ترین قیمت و مشخصات کامل را ببینید. ',
+              )}
+            </p>
           </div>
         </div>
 
@@ -241,7 +282,9 @@ function ComparePage() {
             onClick={clearCompare}
             className="btn-ghost inline-flex h-10 items-center gap-1.5 !py-0 text-xs text-red-400 hover:!border-red-400"
           >
-            <Trash2 size={14} />{translateText("پاک کردن لیست ")}</button>
+            <Trash2 size={14} />
+            {translateText('پاک کردن لیست ')}
+          </button>
         )}
       </header>
 
@@ -253,10 +296,16 @@ function ComparePage() {
           >
             <GitCompareArrows size={28} style={{ color: 'var(--accent-text)' }} />
           </span>
-          <h2 className="mt-4 text-base font-black">{translateText("هنوز محصولی برای مقایسه انتخاب نکرده‌اید")}</h2>
-          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">{translateText("روی آیکن مقایسه در کارت هر کالا بزنید تا اینجا کنار هم بررسی شوند. ")}</p>
+          <h2 className="mt-4 text-base font-black">
+            {translateText('هنوز محصولی برای مقایسه انتخاب نکرده‌اید')}
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
+            {translateText('روی آیکن مقایسه در کارت هر کالا بزنید تا اینجا کنار هم بررسی شوند. ')}
+          </p>
           <Link to="/products" className="btn-yellow mt-5 inline-flex items-center gap-2">
-            <Sparkles size={16} />{translateText("انتخاب محصول ")}</Link>
+            <Sparkles size={16} />
+            {translateText('انتخاب محصول ')}
+          </Link>
         </div>
       ) : (
         <div className="card rounded-3xl">
@@ -270,7 +319,9 @@ function ComparePage() {
                   <th
                     className="w-24 border-b border-theme p-2 text-start text-[11px] font-bold muted sm:w-36 sm:p-3 lg:sticky lg:top-[var(--header-h,96px)] lg:z-30"
                     style={{ background: 'var(--card)' }}
-                  >{translateText("مشخصه ")}</th>
+                  >
+                    {translateText('مشخصه ')}
+                  </th>
 
                   {loading && !products.length
                     ? Array.from({ length: compare.length }).map((_, index) => (
@@ -292,7 +343,9 @@ function ComparePage() {
                                 onClick={() => toggleCompare(product._id)}
                                 className="absolute -top-1 start-0 grid h-7 w-7 place-items-center rounded-full border border-theme transition hover:opacity-80"
                                 style={{ background: 'var(--card2)' }}
-                                aria-label={translateText("حذف {{v0}} از مقایسه", {v0: (product.name)})}
+                                aria-label={translateText('حذف {{v0}} از مقایسه', {
+                                  v0: product.name,
+                                })}
                               >
                                 <X size={13} />
                               </button>
@@ -315,8 +368,11 @@ function ComparePage() {
                                 {product.name}
                               </Link>
 
-                              <div className="text-sm font-black" style={{ color: 'var(--accent-text)' }}>
-                                {formatPrice(finalPrice(product))}
+                              <div
+                                className="text-sm font-black"
+                                style={{ color: 'var(--accent-text)' }}
+                              >
+                                {formatPrice(finalPrice(product), product.price?.currency)}
                               </div>
                             </div>
                           </th>
@@ -375,7 +431,9 @@ function ComparePage() {
                                     className="rounded-full px-1.5 py-0.5 text-[10px] font-black"
                                     style={{ background: 'rgba(23,153,79,0.16)', color: '#17994f' }}
                                   >
-                                    {row.highlight === 'price' ? translateText("کمترین قیمت") : translateText("بهترین امتیاز")}
+                                    {row.highlight === 'price'
+                                      ? translateText('کمترین قیمت')
+                                      : translateText('بهترین امتیاز')}
                                   </span>
                                 )}
                               </div>
@@ -392,16 +450,22 @@ function ComparePage() {
 
           {/* راهنمای موبایل */}
           <div className="flex items-center gap-1.5 border-t border-theme px-3 py-2.5 text-[11px] muted sm:hidden">
-            <Minus size={13} className="rotate-90" />{translateText("برای دیدن همه‌ی ستون‌ها جدول را افقی بکشید. ")}</div>
+            <Minus size={13} className="rotate-90" />
+            {translateText('برای دیدن همه‌ی ستون‌ها جدول را افقی بکشید. ')}
+          </div>
         </div>
       )}
 
       {products.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-theme px-3 py-2.5 text-[11px] muted">
           <span className="inline-flex items-center gap-1.5">
-            <Check size={13} style={{ color: '#17994f' }} />{translateText("ستون سبز یعنی بهترین مقدار در همان ردیف ")}</span>
+            <Check size={13} style={{ color: '#17994f' }} />
+            {translateText('ستون سبز یعنی بهترین مقدار در همان ردیف ')}
+          </span>
           <span className="inline-flex items-center gap-1.5">
-            <GitCompareArrows size={13} />{translateText("با ضربدر گوشه‌ی هر ستون، آن کالا از مقایسه حذف می‌شود ")}</span>
+            <GitCompareArrows size={13} />
+            {translateText('با ضربدر گوشه‌ی هر ستون، آن کالا از مقایسه حذف می‌شود ')}
+          </span>
         </div>
       )}
     </div>

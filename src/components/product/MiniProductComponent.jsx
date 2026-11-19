@@ -31,7 +31,7 @@ function MiniProductComponent({ product }) {
   let sub = null;
   if (discount) {
     sub = (
-      <span className="text-[#999] line-through">{formatPrice(product.price?.amount)}</span>
+      <span className="text-[#999] line-through">{formatPrice(product.price?.amount,product.price?.currency)}</span>
     );
   } else if (!soldOut) {
     sub = <span className="text-[#1f8f3a]">{translateText("موجود در انبار")}</span>;
@@ -60,7 +60,7 @@ function MiniProductComponent({ product }) {
           className="text-[13px] font-bold leading-5 mb-1"
         />
         <div className="text-lg font-extrabold leading-6 truncate">
-          {formatPrice(finalPrice(product))}
+          {formatPrice(finalPrice(product),product.price?.currency)}
         </div>
         <div className="text-[13px] mt-0.5 h-5 truncate">{sub}</div>
         {/* نشان اعتماد فروشنده — کارت‌های کوچک پیشنهاد ویژه هم مثل بقیه */}

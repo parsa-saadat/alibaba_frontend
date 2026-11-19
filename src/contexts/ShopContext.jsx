@@ -53,7 +53,6 @@ const storeSet = (key, value) => {
   }
 };
 
-
 /* بررسی دوره‌ای توکن با سرور: هر ۶ ساعت */
 const SESSION_CHECK_MS = 6 * 60 * 60 * 1000;
 const LAST_CHECK_KEY = 'session_checked_at';
@@ -88,7 +87,9 @@ export const ShopProvider = ({ children }) => {
       clearAuth();
       return null;
     }
-    return getUser();
+    const stored = getUser();
+    const claims = decodeJwt(token);
+    return claims?._id && String(claims._id) === String(stored?._id) ? stored : null;
   });
   /* سبد خرید: منبع واحد حقیقت، همیشه آینه‌ی بک‌اند */
   const [cart, setCart] = useState([]);
@@ -132,6 +133,8 @@ export const ShopProvider = ({ children }) => {
 
   const currentUser = useCallback(() => {
     const stored = getUser();
+    const claims = decodeJwt(getToken());
+    if (claims?._id && String(stored?._id) !== String(claims._id)) return { _id: claims._id };
     return stored?._id ? stored : userRef.current;
   }, []);
 
@@ -171,10 +174,7 @@ export const ShopProvider = ({ children }) => {
       const u = currentUser();
       if (!getToken() || !u?._id || !productId) return null;
       try {
-        const res = await axios.get(
-          `${API}/user/${u._id}/cart/${productId}`,
-          authHeaders(),
-        );
+        const res = await axios.get(`${API}/user/${u._id}/cart/${productId}`, authHeaders());
         if (res.data?.success === false) return null;
         const body = res.data?.body;
         return body && typeof body === 'object' ? body : null;
@@ -200,12 +200,12 @@ export const ShopProvider = ({ children }) => {
     (productId, quantity = 1) => {
       const u = currentUser();
       if (!getToken() || !u?._id) {
-        const error = new Error(translateText("برای افزودن به سبد خرید ابتدا وارد شوید"));
+        const error = new Error(translateText('برای افزودن به سبد خرید ابتدا وارد شوید'));
         error.cause = { code: 401 };
         return Promise.reject(error);
       }
       const id = String(productId || '');
-      if (!id) return Promise.reject(new Error(translateText("شناسه محصول نامعتبر است")));
+      if (!id) return Promise.reject(new Error(translateText('شناسه محصول نامعتبر است')));
 
       const running = pendingRef.current.get(id);
       if (running) return running;
@@ -226,7 +226,9 @@ export const ShopProvider = ({ children }) => {
             authHeaders(),
           );
           if (res.data?.success === false) throw new Error(res.data?.message);
-          applyCart(upsertCartRow(cartRef.current, { ...current, product_id: id, quantity: nextQty }));
+          applyCart(
+            upsertCartRow(cartRef.current, { ...current, product_id: id, quantity: nextQty }),
+          );
           refreshCart();
           return { status: 'updated', quantity: nextQty };
         }
@@ -288,7 +290,8 @@ export const ShopProvider = ({ children }) => {
     async (productId) => {
       const u = currentUser();
       const id = String(productId || '');
-      if (!getToken() || !u?._id) throw new Error(translateText("برای حذف از سبد خرید ابتدا وارد شوید"));
+      if (!getToken() || !u?._id)
+        throw new Error(translateText('برای حذف از سبد خرید ابتدا وارد شوید'));
 
       /* اگر از قبل در سبد نیست، خطا نده و فقط استیت را تمیز کن */
       if (!isInCart(id)) {
@@ -297,10 +300,7 @@ export const ShopProvider = ({ children }) => {
       }
 
       try {
-        const res = await axios.delete(
-          `${API}/user/${u._id}/cart/${id}`,
-          authHeaders(),
-        );
+        const res = await axios.delete(`${API}/user/${u._id}/cart/${id}`, authHeaders());
         if (res.data?.success === false && res.data?.status !== 404) {
           throw new Error(res.data?.message);
         }
@@ -322,7 +322,8 @@ export const ShopProvider = ({ children }) => {
   const setCartItemQuantity = useCallback(
     async (productId, quantity) => {
       const u = currentUser();
-      if (!getToken() || !u?._id) throw new Error(translateText("برای ویرایش سبد خرید ابتدا وارد شوید"));
+      if (!getToken() || !u?._id)
+        throw new Error(translateText('برای ویرایش سبد خرید ابتدا وارد شوید'));
 
       const id = String(productId || '');
       const next = Math.floor(Number(quantity) || 0);
@@ -372,7 +373,7 @@ export const ShopProvider = ({ children }) => {
         setUser(null);
         cartRef.current = [];
         setCart([]);
-        toast.info(translateText("نشست شما منقضی شده است؛ دوباره وارد شوید"));
+        toast.info(translateText('نشست شما منقضی شده است؛ دوباره وارد شوید'));
       }
       /* خطای شبکه: نشست دست‌نخورده می‌ماند و بار بعد دوباره امتحان می‌شود */
       return false;
@@ -381,49 +382,15 @@ export const ShopProvider = ({ children }) => {
 
   /* ---------- پروفایل ---------- */
   const refreshUser = useCallback(async () => {
-    const u = getUser();
-    if (!getToken() || !u?._id) {
-      setAuthReady(true);
-      return;
-    }
     try {
-      const res = await axios.get(`${API}/user/${u._id}`, {
-        ...authHeaders(),
-        timeout: 12000,
-      });
-      if (res.data?.success) {
-        const merged = { ...u, ...res.data.body };
-        storeSet('user', JSON.stringify(merged));
-        setUser(merged);
-        /* اگر نقش/فروشنده بودن داخل توکن با دیتابیس فرق دارد، توکن را تازه کن */
-        const claims = decodeJwt(getToken());
-        if (
-          claims &&
-          (String(claims.role || '') !== String(merged.role || '') ||
-            Boolean(claims.is_seller) !== Boolean(merged.is_seller))
-        ) {
-          syncSession();
-        }
-      }
-    } catch (err) {
-      /* توکن منقضی یا نامعتبر: نشست پاک می‌شود تا کاربر دوباره وارد شود */
-      const code = err?.response?.status;
-      if (code === 401 || code === 403) {
-        clearAuth();
-        setUser(null);
-        cartRef.current = [];
-        setCart([]);
-      } else {
-        console.error('Error fetching profile:', err);
-      }
+      if (getToken()) await syncSession();
     } finally {
       setAuthReady(true);
     }
   }, [syncSession]);
 
   useEffect(() => {
-    refreshCart();
-    refreshUser();
+    refreshUser().then(() => refreshCart());
   }, [refreshCart, refreshUser]);
 
   /* چک ۶ ساعته‌ی توکن: با تایمر، و هنگام برگشت به تب اگر ۶ ساعت گذشته باشد */
@@ -464,12 +431,14 @@ export const ShopProvider = ({ children }) => {
 
   /* ---------- علاقه‌مندی و مقایسه ---------- */
   const toggleFavorite = (id) => {
-    const next = favorites.includes(id)
-      ? favorites.filter((x) => x !== id)
-      : [...favorites, id];
+    const next = favorites.includes(id) ? favorites.filter((x) => x !== id) : [...favorites, id];
     setFavorites(next);
     writeList('favorites', next);
-    toast.success(next.includes(id) ? translateText("به علاقه‌مندی‌ها اضافه شد") : translateText("از علاقه‌مندی‌ها حذف شد"));
+    toast.success(
+      next.includes(id)
+        ? translateText('به علاقه‌مندی‌ها اضافه شد')
+        : translateText('از علاقه‌مندی‌ها حذف شد'),
+    );
   };
 
   const isFavorite = (id) => favorites.includes(id);
@@ -479,7 +448,7 @@ export const ShopProvider = ({ children }) => {
     if (!favorites.length) return;
     setFavorites([]);
     writeList('favorites', []);
-    toast.success(translateText("لیست علاقه‌مندی‌ها پاک شد"));
+    toast.success(translateText('لیست علاقه‌مندی‌ها پاک شد'));
   };
 
   const toggleCompare = (id) => {
@@ -490,13 +459,13 @@ export const ShopProvider = ({ children }) => {
       return;
     }
     if (compare.length >= 4) {
-      toast.error(translateText("حداکثر ۴ محصول برای مقایسه"));
+      toast.error(translateText('حداکثر ۴ محصول برای مقایسه'));
       return;
     }
     const next = [...compare, id];
     setCompare(next);
     writeList('compare', next);
-    toast.success(translateText("به مقایسه اضافه شد"));
+    toast.success(translateText('به مقایسه اضافه شد'));
   };
 
   const clearCompare = () => {

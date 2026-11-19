@@ -83,6 +83,9 @@ function StoreEditorModalComponent({
       setCreatedStatus('ENABLE');
       return;
     }
+    setOwnerId(getId(store.user) || getId(store.seller_id) || '');
+    setOwnerMode('other');
+    setOwner(null);
     setForm({
       name: store.name || '',
       translations: store.translations || {},
@@ -92,7 +95,7 @@ function StoreEditorModalComponent({
       banner_image_id: getId(store.banner_image_id) || '',
       email: store.contact_info?.email || '',
       phone: store.contact_info?.phone || store.contact_info?.fax || '',
-      address: store.contact_info?.address || '',
+      address: store.contact_info?.address ?? store.address ?? '',
     });
   }, [store]);
 
@@ -213,7 +216,7 @@ function StoreEditorModalComponent({
 
     const contact_info = { email: form.email.trim() };
     if (form.phone.trim()) contact_info.phone = form.phone.trim();
-    if (form.address.trim()) contact_info.address = form.address.trim();
+    contact_info.address = form.address.trim();
 
     if (isAdmin && !store && ownerMode === 'other' && !ownerId) {
       return toast.error(translateText('مالک فروشگاه را انتخاب کنید'));
@@ -243,7 +246,9 @@ function StoreEditorModalComponent({
         ? axios.put(`${API}/store/${getId(store)}`, payload, authHeaders())
         : axios.post(`${API}/store`, payload, authHeaders());
       await req;
-      toast.success(store ? translateText('فروشگاه ویرایش شد') : translateText('فروشگاه جدید ایجاد شد'));
+      toast.success(
+        store ? translateText('فروشگاه ویرایش شد') : translateText('فروشگاه جدید ایجاد شد'),
+      );
       onSaved?.();
       onClose?.();
     } catch (err) {
@@ -350,7 +355,9 @@ function StoreEditorModalComponent({
                     style={{ background: 'var(--card2)' }}
                   >
                     {ownerSearching ? (
-                      <div className="px-3 py-2 text-[11px] muted">{translateText('در حال جستجو…')}</div>
+                      <div className="px-3 py-2 text-[11px] muted">
+                        {translateText('در حال جستجو…')}
+                      </div>
                     ) : ownerResults.length === 0 ? (
                       <div className="px-3 py-2 text-[11px] muted">
                         {translateText('کاربری پیدا نشد.')}
@@ -451,7 +458,9 @@ function StoreEditorModalComponent({
               className="absolute bottom-2 start-2 btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 shadow"
             >
               <Upload size={13} />
-              {uploading === 'banner_image_id' ? translateText('در حال آپلود…') : translateText('آپلود بنر')}
+              {uploading === 'banner_image_id'
+                ? translateText('در حال آپلود…')
+                : translateText('آپلود بنر')}
             </button>
             <input
               ref={bannerRef}
@@ -544,6 +553,8 @@ function StoreEditorModalComponent({
             <input
               className="input mt-1"
               value={form.address}
+              dir="auto"
+              maxLength={2000}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
           </label>

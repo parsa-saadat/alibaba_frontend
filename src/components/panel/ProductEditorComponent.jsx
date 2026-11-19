@@ -86,6 +86,7 @@ function ProductEditorComponent({
   const priceEntry = usePriceEntry(product?.base_price || product?.price, product?._id || 'new');
   const [form, setForm] = useState(DEFAULT_FORM);
   const content = useLocalizedContent(form, setForm, [
+    'brand',
     'name',
     'short_description',
     'description',
@@ -231,7 +232,7 @@ function ProductEditorComponent({
     e.preventDefault();
     const form = content.payload();
     if (!form.name.trim()) return toast.error(translateText('نام محصول الزامی است'));
-    if (!product && !form.store_id) return toast.error(translateText('انتخاب فروشگاه الزامی است'));
+    if (!form.store_id) return toast.error(translateText('انتخاب فروشگاه الزامی است'));
     if (!form.category_id) return toast.error(translateText('انتخاب دسته‌بندی الزامی است'));
     if (!form.brand.trim()) return toast.error(translateText('نام برند الزامی است'));
     if (!form.short_description.trim()) return toast.error(translateText('توضیح کوتاه الزامی است'));
@@ -650,10 +651,13 @@ function ProductEditorComponent({
                 {translateText('برند ')}
                 <input
                   className="input mt-1"
-                  placeholder={translateText('برند')}
-                  value={form.brand}
-                  onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                  required
+                  placeholder={content.placeholder('brand')}
+                  value={content.value('brand')}
+                  dir={content.dir}
+                  lang={content.locale}
+                  aria-label={`${content.locale} brand`}
+                  maxLength={100}
+                  onChange={(e) => content.update('brand', e.target.value)}
                 />
               </label>
               <label className="text-xs muted">

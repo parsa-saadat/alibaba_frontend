@@ -14,9 +14,9 @@ function AboutHeroComponent() {
   return (
     <PageHeroComponent
       breadcrumb={translateText("درباره ما")}
-      badge={translateText("درباره ژئو کالا")}
-      title={translateText("بازارگاه تخصصی تجهیزات نقشه‌برداری")}
-      description={translateText("ژئو کالا زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا است؛ مجموعه‌ای با بیش از دو دهه تجربه در واردات و تجارت تجهیزات نقشه‌برداری. این‌جا جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین نقشه‌برداری، کنترولر و لوازم جانبی را با مشاوره‌ی فنی و ضمانت اصالت کالا پیدا می‌کنید.")}
+      badge={translateText("درباره ژئوکالا")}
+      title={translateText("فروشگاه تخصصی تجهیزات نقشه‌برداری")}
+      description={translateText("ژئوکالا زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا است؛ مجموعه‌ای با بیش از دو دهه تجربه در واردات و تجارت تجهیزات نقشه‌برداری. این‌جا جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین نقشه‌برداری، کنترولر و لوازم جانبی را با مشاوره‌ی فنی و ضمانت اصالت کالا پیدا می‌کنید.")}
       highlights={HERO_HIGHLIGHTS}
       actions={
         <>
@@ -26,7 +26,7 @@ function AboutHeroComponent() {
             to="/seller"
             className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
             style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
-          >{translateText("فروش در ژئو کالا ")}</Link>
+          >{translateText("فروش در ژئوکالا ")}</Link>
         </>
       }
     />

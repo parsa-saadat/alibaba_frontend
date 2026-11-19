@@ -10,7 +10,7 @@ import {
   Users,
 } from 'lucide-react';
 
-// مزیت‌های ژئو کالا
+// مزیت‌های ژئوکالا
 const FEATURES = [
   {
     icon: BadgeCheck,
@@ -50,10 +50,10 @@ function WhyChoseUsComponent() {
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow">
-            <ShieldCheck size={13} />{translateText("چرا ژئو کالا ")}</span>
+            <ShieldCheck size={13} />{translateText("چرا ژئوکالا ")}</span>
           <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText("چیزی که ما را متفاوت می‌کند")}</h2>
         </div>
-        <p className="text-xs muted max-w-md leading-6">{translateText("ما یک لیست آگهی نیستیم؛ بازارگاه تخصصی یک مجموعه‌ی قدیمی در حوزه‌ی نقشه‌برداری، با دانش فنی و پشتیبانی مسئول. ")}</p>
+        <p className="text-xs muted max-w-md leading-6">{translateText("ما یک لیست آگهی نیستیم؛ فروشگاه تخصصی یک مجموعه‌ی قدیمی در حوزه‌ی نقشه‌برداری، با دانش فنی و پشتیبانی مسئول. ")}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
