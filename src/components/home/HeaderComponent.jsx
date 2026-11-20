@@ -326,7 +326,7 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
           className="card mt-3 flex items-center justify-between rounded-xl px-5 sm:px-6 h-16 hover:-translate-y-0.5 transition-transform"
         >
           <span className="text-sm sm:text-[15px]">
-            <b className="text-yellow">{translateText("ارسال سریع")}</b>{translateText(" به سراسر کشور و ضمانت اصالت کالا ")}</span>
+            <b className="text-yellow">{translateText("b2b.sellers")}</b>{translateText("b2b.sellersDesc")}</span>
           <span className="flex items-center gap-1 text-sm font-bold text-yellow shrink-0">{translateText("شروع خرید ")}<ChevronLeft className="logical-icon" size={16} />
           </span>
         </Link>

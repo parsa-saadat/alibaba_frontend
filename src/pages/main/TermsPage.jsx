@@ -22,8 +22,8 @@ const CUSTOMER_SECTIONS = [
     id: 'cust-welcome',
     title: translateText("مشتری ژئوکالا کیست؟"),
     paragraphs: [
-      translateText("هر کسی که با ثبت‌نام در ژئوکالا از امکانات سایت استفاده می‌کند — از دیدن و مقایسه‌ی محصولات تا ثبت سفارش و دریافت خدمات پس از فروش — مشتری ژئوکالا است."),
-      translateText("این صفحه چارچوب کلی استفاده از فروشگاه را توضیح می‌دهد؛ جزئیات مربوط به خرید در صفحه‌ی «قوانین خریداران» و جزئیات فروش در «قوانین فروشندگان» آمده است."),
+      translateText("b2b.intro"),
+      translateText("b2b.legalIntro"),
     ],
     items: [
       translateText("استفاده از سایت به معنی پذیرش همین قوانین است."),
@@ -58,27 +58,27 @@ const CUSTOMER_SECTIONS = [
     items: [
       translateText("نظر و امتیاز باید تجربه‌ی واقعی خودتان از همان کالا باشد."),
       translateText("نوشتن نظر توهین‌آمیز، تهدید، اطلاعات شخصی دیگران یا تبلیغ رقبا حذف می‌شود."),
-      translateText("در گفت‌وگو با فروشنده، چانه‌زنی یا توافق خارج از سایت انجام نشود؛ پشتیبانی فقط برای سفارش‌هایی پاسخ‌گو است که در سایت ثبت شده‌اند."),
+      translateText("b2b.buyerRules"),
       translateText("ژئوکالا می‌تواند نظرهای مشکوک را برای بررسی موقتاً نمایش ندهد."),
     ],
   },
   {
     id: 'cust-support',
-    title: translateText("تعهد پشتیبانی ما"),
+    title: translateText("b2b.webSupport"),
     paragraphs: [
-      translateText("پشتیبانی ژئوکالا در ساعات کاری (شنبه تا چهارشنبه ۹ تا ۱۸، پنجشنبه ۹ تا ۱۴) پاسخ‌گوی تلفن، ایمیل و پیام‌های فرم تماس است."),
+      translateText("b2b.webSupportDesc"),
     ],
     items: [
-      translateText("هر پیام یک شماره پیگیری می‌گیرد و تا رسیدن به پاسخ، باز می‌ماند."),
-      translateText("برای مسائل فنی تجهیزات، کارشناس نقشه‌برداری راهنمایی می‌دهد."),
-      translateText("شماره‌های تماس رسمی: ۰۹۱۲۹۳۲۷۵۱۵ (تهران) و ۰۹۱۰۲۴۰۱۰۰۷ (هچیرود)؛ هر شماره‌ی دیگری به نام ژئوکالا معتبر نیست."),
+      translateText("v20.formIntro"),
+      translateText("b2b.noServices"),
+      translateText("b2b.emailDesc"),
     ],
   },
   {
     id: 'cust-privacy',
     title: translateText("حریم خصوصی و داده‌های شما"),
     paragraphs: [
-      translateText("اطلاعات شما فقط برای انجام سفارش، پشتیبانی و بهبود تجربه‌ی خرید استفاده می‌شود و در اختیار شخص ثالثی قرار نمی‌گیرد."),
+      translateText("b2b.privacyShare"),
     ],
     items: [
       translateText("برای جزئیات کامل، صفحه‌ی «حریم خصوصی» را ببینید."),
@@ -89,10 +89,10 @@ const CUSTOMER_SECTIONS = [
     id: 'cust-limits',
     title: translateText("محدودیت مسئولیت و تغییر قوانین"),
     paragraphs: [
-      translateText("ژئوکالا فروشگاه است؛ مسئولیت اصالت و مشخصات کالا با فروشنده‌ی همان کالاست و ژئوکالا در نقش واسطه‌ی مطمئن، فرایند خرید و پیگیری را مدیریت می‌کند. با این حال در صورت اثبات تخلف فروشنده، تا حل کامل موضوع در کنار خریدار می‌ماند."),
+      translateText("b2b.responsibilityDesc"),
       translateText("این قوانین ممکن است برای شفافیت بیشتر به‌روزرسانی شود؛ نسخه‌ی معتبر همین صفحه است."),
     ],
-    note: translateText("اگر بندی برایتان مبهم است، پیش از ثبت سفارش یا ثبت‌نام با پشتیبانی تماس بگیرید؛ ترجیح می‌دهیم ابهام پیش از خرید حل شود."),
+    note: translateText("b2b.contactIntro"),
   },
 ];
 
@@ -116,8 +116,8 @@ const BUYER_SECTIONS = [
       translateText("مشخصات فنی، تصاویر و قیمت هر کالا توسط فروشنده ثبت می‌شود و ژئوکالا آن را در ساختار یکسان نمایش می‌دهد تا مقایسه آسان شود."),
     ],
     items: [
-      translateText("قیمت‌ها به ریال نمایش داده می‌شود و در لحظه‌ی ثبت سفارش معتبر است."),
-      translateText("در صورت اختلاف فاحش قیمت یا مشخصات، سفارش پیش از ارسال بررسی و در صورت نیاز لغو و مبلغ بازگردانده می‌شود."),
+      translateText("v20.priceTerms"),
+      translateText("b2b.buyerRules"),
       translateText("تصاویر ممکن است جنبه‌ی نمایشی داشته باشند؛ ملاک، مشخصات فنی درج‌شده در صفحه‌ی محصول است."),
     ],
   },
@@ -128,18 +128,18 @@ const BUYER_SECTIONS = [
       translateText("سفارش پس از پرداخت اینترنتی نهایی می‌شود؛ پرداخت فقط از طریق درگاه بانکی معتبر انجام می‌شود."),
       translateText("ژئوکالا هرگز شماره‌ی کارت یا رمز دوم شما را درخواست نمی‌کند؛ هیچ پرداختی را خارج از درگاه سایت انجام ندهید."),
       translateText("شماره‌ی پیگیری سفارش در بخش «سفارش‌های من» قابل مشاهده است."),
-      translateText("در صورت ناموفق بودن پرداخت، مبلغ طی فرآیند بانکی (معمولاً تا ۷۲ ساعت کاری) به حساب شما برمی‌گردد."),
+      translateText("v20.failedPayment"),
     ],
   },
   {
     id: 'shipping',
     title: translateText("ارسال و تحویل"),
     paragraphs: [
-      translateText("ارسال به سراسر کشور انجام می‌شود. زمان تحویل به شهر مقصد و نوع تجهیزات بستگی دارد و در صفحه‌ی محصول یا هنگام هماهنگی اعلام می‌شود."),
+      translateText("b2b.noReturn"),
     ],
     items: [
       translateText("هنگام تحویل، بسته را از نظر سالم بودن ظاهر و مطابقت با سفارش بررسی کنید."),
-      translateText("اگر بسته آسیب‌دیده بود، آن را تحویل نگیرید یا با ذکر مورد در صورتی که تحویل گرفتید، همان روز به پشتیبانی اطلاع دهید."),
+      translateText("b2b.productTerms"),
       translateText("برای تجهیزات حساس (جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین) توصیه می‌شود تحویل در محل و تست اولیه انجام شود."),
     ],
   },
@@ -147,21 +147,21 @@ const BUYER_SECTIONS = [
     id: 'returns',
     title: translateText("بازگشت کالا و انصراف"),
     items: [
-      translateText("کالای سالم و باز نشده تا ۷ روز پس از تحویل، با هماهنگی پشتیبانی قابل بازگشت است."),
-      translateText("کالا باید با بسته‌بندی و لوازم جانبی کامل بازگردانده شود."),
-      translateText("تجهیزاتی که به سفارش و با تنظیمات خاص شما تهیه می‌شوند یا مهر گارانتی آن‌ها باز شده باشد، مشمول بازگشت نیستند."),
-      translateText("هزینه‌ی ارسال برگشتی در صورت ایراد کالا یا اشتباه در ارسال، با فروشنده است."),
+      translateText("b2b.noReturn"),
+      translateText("b2b.check"),
+      translateText("b2b.productTerms"),
+      translateText("b2b.responsibilityDesc"),
     ],
   },
   {
     id: 'warranty',
     title: translateText("گارانتی و خدمات پس از فروش"),
     paragraphs: [
-      translateText("مدت و شرایط گارانتی هر کالا در صفحه‌ی محصول نوشته شده است. خدمات پس از فروش توسط فروشنده و با هماهنگی تیم فنی ژئوکالا انجام می‌شود."),
+      translateText("b2b.productTerms"),
     ],
     items: [
-      translateText("خرابی ناشی از استفاده‌ی نادرست، ضربه، نفوذ آب یا تعمیر توسط افراد غیرمجاز، مشمول گارانتی نیست."),
-      translateText("برای کالیبراسیون و آموزش تجهیزات، می‌توانید از تیم فنی ما راهنمایی بگیرید."),
+      translateText("b2b.check"),
+      translateText("b2b.noServices"),
     ],
   },
   {
@@ -178,7 +178,7 @@ const BUYER_SECTIONS = [
     paragraphs: [
       translateText("این قوانین ممکن است برای شفافیت بیشتر به‌روزرسانی شود. نسخه‌ی معتبر، همین صفحه است و تاریخ آخرین بازنگری در بالای صفحه درج می‌شود."),
     ],
-    note: translateText("برای خرید تجهیزات تخصصی، در صورت ابهام در مشخصات فنی پیش از پرداخت با پشتیبانی یا فروشنده مشورت کنید."),
+    note: translateText("b2b.check"),
   },
 ];
 
@@ -189,7 +189,7 @@ const SELLER_SECTIONS = [
     items: [
       translateText("ثبت‌نام فروشنده با ارسال مدارک هویتی و صنفی انجام می‌شود و پس از بررسی تیم ژئوکالا فعال می‌گردد."),
       translateText("اطلاعات مدارک باید با صاحب فروشگاه یکی باشد؛ در غیر این صورت درخواست رد می‌شود."),
-      translateText("هر فروشنده یک فروشگاه دارد؛ برای فروشگاه‌های متعدد با پشتیبانی هماهنگ کنید."),
+      translateText("v20.planLimits"),
     ],
   },
   {
@@ -199,8 +199,8 @@ const SELLER_SECTIONS = [
       translateText("فروش در ژئوکالا بر اساس پلن انتخابی شما انجام می‌شود. تعرفه‌ی هر پلن و سقف تعداد محصول در صفحه‌ی پلن‌ها آمده است."),
     ],
     items: [
-      translateText("کمیسیون فروش از مبلغ سفارش کسر می‌شود؛ نرخ آن پیش از فعال‌سازی فروشگاه به شما اعلام می‌شود."),
-      translateText("تغییر پلن از پنل فروشنده انجام می‌شود و از دوره‌ی بعدی اعمال می‌گردد."),
+      translateText("v20.planTerms"),
+      translateText("v20.planChange"),
       translateText("مبالغ تسویه به شماره‌ی شبای ثبت‌شده در پنل واریز می‌شود؛ مسئولیت صحت شبا با فروشنده است."),
     ],
   },
@@ -221,7 +221,7 @@ const SELLER_SECTIONS = [
     items: [
       translateText("موجودی را به‌روز نگه دارید؛ اگر کالایی ناموجود شد، وضعیت آن را تغییر دهید."),
       translateText("سفارش‌ها باید در بازه‌ی اعلام‌شده آماده‌سازی و تحویل شرکت حمل شوند."),
-      translateText("در صورت عدم موجودی پس از ثبت سفارش، موظفید سریع به پشتیبانی اطلاع دهید تا مبلغ به خریدار برگردد."),
+      translateText("b2b.sellerRules"),
     ],
   },
   {
@@ -238,8 +238,8 @@ const SELLER_SECTIONS = [
     title: translateText("گارانتی و بازگشت کالا"),
     items: [
       translateText("شرایط گارانتی باید در صفحه‌ی محصول شفاف ذکر شود."),
-      translateText("درخواست بازگشت کالای سالم و باز نشده تا ۷ روز پذیرفته می‌شود."),
-      translateText("در صورت اثبات ایراد کالا یا ارسال اشتباه، هزینه‌ی رفت و برگشت با فروشنده است."),
+      translateText("b2b.noReturn"),
+      translateText("b2b.responsibilityDesc"),
     ],
   },
   {
@@ -256,7 +256,7 @@ const SELLER_SECTIONS = [
     id: 'changes-seller',
     title: translateText("تغییر شرایط و تعلیق"),
     paragraphs: [
-      translateText("ژئوکالا می‌تواند در صورت تخلف یا ریسک برای خریداران، فروشگاه را موقتاً تعلیق کند. در این حالت سفارش‌های باز تعیین تکلیف و مبالغ به خریداران بازگردانده می‌شود."),
+      translateText("b2b.sellerRules"),
       translateText("این قوانین ممکن است به‌روزرسانی شود؛ نسخه‌ی معتبر همین صفحه است."),
     ],
   },
@@ -274,12 +274,12 @@ const CONTENT = {
     badge: translateText("برای مشتریان"),
     title: translateText("قوانین و مقررات مشتریان"),
     subtitle:
-      translateText("چارچوب کلی استفاده از فروشگاه ژئوکالا: حساب کاربری، محتوای سایت، نظرات، حریم خصوصی و تعهد پشتیبانی. این صفحه برای همه‌ی کاربران سایت است."),
+      translateText("b2b.legalIntro"),
     highlights: [
       translateText("استفاده از سایت = پذیرش قوانین"),
       translateText("حساب کاربری امن و شخصی"),
       translateText("نظرات واقعی و محترمانه"),
-      translateText("پشتیبانی پاسخ‌گو در ساعات کاری"),
+      translateText("b2b.webSupport"),
     ],
     sections: CUSTOMER_SECTIONS,
   },
@@ -291,9 +291,9 @@ const CONTENT = {
       translateText("این صفحه شرایط ثبت سفارش، پرداخت، ارسال و بازگشت کالا را برای خریداران ژئوکالا توضیح می‌دهد؛ کوتاه و روشن، بدون بندهای پیچیده."),
     highlights: [
       translateText("پرداخت فقط از درگاه بانکی سایت"),
-      translateText("ارسال به سراسر کشور"),
-      translateText("بازگشت کالای سالم تا ۷ روز"),
-      translateText("مشاوره‌ی فنی پیش از خرید"),
+      translateText("v20.conditions"),
+      translateText("b2b.noGuarantee"),
+      translateText("v20.siteHelp"),
     ],
     sections: BUYER_SECTIONS,
   },
@@ -302,10 +302,10 @@ const CONTENT = {
     badge: translateText("برای فروشندگان"),
     title: translateText("قوانین و مقررات فروشندگان"),
     subtitle:
-      translateText("شرایط ثبت‌نام، ثبت محصول، ارسال، تسویه و رفتار حرفه‌ای فروشندگان در فروشگاه ژئوکالا. رعایت این موارد باعث می‌شود فروشگاه شما در بخش «فروشنده‌های مورد اعتماد» دیده شود."),
+      translateText("b2b.sellerRules"),
     highlights: [
       translateText("احراز هویت و تأیید مدارک"),
-      translateText("تعرفه و کمیسیون شفاف"),
+      translateText("پلن‌ها و تعرفه"),
       translateText("تسویه به شبای ثبت‌شده"),
       translateText("امکان تعلیق در صورت تخلف"),
     ],

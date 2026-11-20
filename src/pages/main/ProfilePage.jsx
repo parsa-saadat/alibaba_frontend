@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   User,
+  Phone,
+  LogOut,
   Store,
   MapPin,
   Plus,
@@ -465,64 +467,100 @@ function ProfilePage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
       {/* ---------- هدر ---------- */}
-      <div className="card rounded-3xl p-6 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <div
-            className="w-16 h-16 rounded-2xl grid place-items-center font-black text-2xl"
-            style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
-          >
-            {userInitial(user)}
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              {isSeller && (
-                <Link
-                  to="/seller"
-                  className="btn-yellow !py-1 !px-2 !text-[11px] inline-flex items-center gap-1"
-                >
-                  <Store size={13} />
-                  {translateText(' پنل فروشنده ')}
-                </Link>
-              )}
-              {user.role === 'admin' && (
-                <Link
-                  to="/dashboard"
-                  className="btn-ghost !p-1.5 inline-flex items-center justify-center"
-                  aria-label={translateText(' پنل مدیر ')}
-                  title={translateText(' پنل مدیر ')}
-                >
-                  <ShieldCheck size={16} />
-                </Link>
-              )}
+      <section data-testid="profile-header" className="card rounded-3xl overflow-hidden min-w-0">
+        <div
+          className="p-4 sm:p-6 space-y-5"
+          style={{ background: 'linear-gradient(120deg, rgba(255,214,10,0.08), transparent 65%)' }}
+        >
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+            <div
+              className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-2xl grid place-items-center font-black text-xl sm:text-2xl"
+              style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
+              aria-hidden="true"
+            >
+              {userInitial(user)}
             </div>
-            <h1 className="font-black text-xl flex items-center gap-2 flex-wrap">
-              {userDisplayName(user)}
-              {isSeller && isTrustedSeller(user) && (
-                <span className="chip !cursor-default !py-0.5 !px-2 text-[11px] flex items-center gap-1">
-                  <BadgeCheck size={12} className="text-yellow" />
-                  {translateText('فروشنده مورد اعتماد ')}
+            <div className="min-w-0 flex-1">
+              <h1 className="font-black text-lg sm:text-2xl leading-8 break-words">
+                {userDisplayName(user)}
+              </h1>
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-bold"
+                  style={{ background: 'var(--card2)' }}
+                >
+                  <User size={12} />
+                  {ROLE_LABELS[user.role] || user.role}
                 </span>
-              )}
-            </h1>
-            <div className="text-xs muted mt-1">
-              {user.username ? <span dir="ltr">@{user.username}</span> : null}
-              {user.username ? ' • ' : ''}
-              {translateText('موبایل: ')}
-              <span dir="ltr">{toFa(user.phone)}</span>
-              {translateText(' • نقش:')} {ROLE_LABELS[user.role] || user.role}
+                {isSeller && isTrustedSeller(user) && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-theme px-2.5 py-1 text-[10px] sm:text-xs">
+                    <BadgeCheck size={13} className="text-yellow shrink-0" />
+                    {translateText('فروشنده مورد اعتماد ')}
+                  </span>
+                )}
+              </div>
             </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 min-w-0">
+            <div className="rounded-2xl border border-theme px-3 py-2.5 min-w-0">
+              <span className="flex items-center gap-1.5 text-[10px] muted mb-1">
+                <Phone size={12} />
+                {translateText('شماره موبایل')}
+              </span>
+              <bdi dir="ltr" className="block text-sm font-bold break-all">
+                {toFa(user.phone)}
+              </bdi>
+            </div>
+            {user.username && (
+              <div className="rounded-2xl border border-theme px-3 py-2.5 min-w-0">
+                <span className="flex items-center gap-1.5 text-[10px] muted mb-1">
+                  <User size={12} />
+                  {translateText('نام کاربری')}
+                </span>
+                <bdi dir="ltr" className="block text-sm font-bold break-all">
+                  @{user.username}
+                </bdi>
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Link to="/address" className="btn-ghost text-sm flex items-center gap-1">
-            <MapPin size={16} />
+        <div className="border-t border-theme p-3 sm:px-6 flex flex-wrap items-center gap-2">
+          {isSeller && (
+            <Link
+              to="/seller"
+              className="btn-yellow !py-2 !px-3 !text-xs inline-flex items-center gap-1.5"
+            >
+              <Store size={14} />
+              {translateText(' پنل فروشنده ')}
+            </Link>
+          )}
+          {user.role === 'admin' && (
+            <Link
+              to="/dashboard"
+              className="btn-ghost !p-2 inline-flex items-center justify-center shrink-0"
+              aria-label={translateText(' پنل مدیر ')}
+              title={translateText(' پنل مدیر ')}
+            >
+              <ShieldCheck size={17} />
+            </Link>
+          )}
+          <Link
+            to="/address"
+            className="btn-ghost !py-2 !px-3 !text-xs inline-flex items-center gap-1.5"
+          >
+            <MapPin size={14} />
             {translateText(' مدیریت نشانی‌ها ')}
           </Link>
-          <button type="button" onClick={logout} className="btn-ghost text-sm text-red-400">
+          <button
+            type="button"
+            onClick={logout}
+            className="btn-ghost !py-2 !px-3 !text-xs inline-flex items-center gap-1.5 text-red-400 ms-auto"
+          >
+            <LogOut size={14} />
             {translateText('خروج ')}
           </button>
         </div>
-      </div>
+      </section>
 
       {/* ---------- ویرایش مشخصات ---------- */}
       <div className="card rounded-3xl p-6">

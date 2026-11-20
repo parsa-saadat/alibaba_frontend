@@ -70,20 +70,20 @@ if (typeof document !== 'undefined') {
   document.documentElement.lang = language;
   document.documentElement.dir = direction;
   const titles = {
-    en: 'GeoCala | Surveying Equipment',
-    fa: 'ژئوکالا | تجهیزات نقشه‌برداری',
-    ar: 'GeoCala | معدات المساحة',
-    tr: 'GeoCala | Harita Ölçüm Ekipmanları',
+    en: 'GeoCala | B2B Surveying Platform',
+    fa: 'ژئوکالا | پلتفرم B2B تجهیزات نقشه‌برداری',
+    ar: 'GeoCala | منصة B2B لمعدات المساحة',
+    tr: 'GeoCala | B2B Ölçüm Platformu',
   };
   document.title = titles[language];
   document
     .querySelector('meta[property="og:site_name"]')
     ?.setAttribute('content', language === 'fa' ? 'ژئوکالا' : 'GeoCala');
   const descriptions = {
-    en: 'Surveying equipment store: total stations, GNSS and accessories.',
-    fa: 'فروشگاه تجهیزات نقشه‌برداری، توتال استیشن، جی‌ان‌اس‌اس و لوازم جانبی.',
-    ar: 'سوق معدات المساحة والمحطات الشاملة وأجهزة الملاحة وملحقاتها.',
-    tr: 'Harita ölçüm ekipmanları, total station, GNSS ve aksesuar mağazası.',
+    en: 'GeoCala connects businesses with sellers and their products. It is a B2B platform, not a retailer, supplier or sales agency.',
+    fa: 'ژئوکالا یک پلتفرم B2B برای معرفی فروشندگان و محصولات است؛ بستری برای ارتباط تجاری میان کسب‌وکارهاست؛ فروشگاه، تأمین‌کننده یا نمایندهٔ فروش کالا نیست.',
+    ar: 'تربط GeoCala الشركات بالبائعين ومنتجاتهم. هي منصة B2B وليست متجراً أو مورّداً أو وكيلاً للمبيعات.',
+    tr: 'GeoCala, işletmeleri satıcılar ve ürünleriyle buluşturur. Bir B2B platformudur; mağaza, tedarikçi veya satış temsilcisi değildir.',
   };
   for (const selector of ['meta[name="description"]', 'meta[property="og:description"]'])
     document.querySelector(selector)?.setAttribute('content', descriptions[language]);

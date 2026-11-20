@@ -704,19 +704,15 @@ function CreateOrderPage() {
               <li className="flex items-start gap-2">
                 <ShieldCheck size={14} className="mt-0.5 shrink-0" style={{ color: '#17994f' }} />
                 <span>
-                  <b className="block">{translateText('تضمین اصالت کالا')}</b>
-                  <span className="muted">
-                    {translateText('کالاها از فروشندگان تأییدشده‌ی ژئوکالا ارسال می‌شوند.')}
-                  </span>
+                  <b className="block">{translateText('b2b.noGuarantee')}</b>
+                  <span className="muted">{translateText('b2b.productTerms')}</span>
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 size={14} className="mt-0.5 shrink-0" style={{ color: '#17994f' }} />
                 <span>
-                  <b className="block">{translateText('امکان مرجوعی ۷ روزه')}</b>
-                  <span className="muted">
-                    {translateText('در صورت باز نشدن پلمب و سالم بودن بسته‌بندی.')}
-                  </span>
+                  <b className="block">{translateText('b2b.noReturn')}</b>
+                  <span className="muted">{translateText('b2b.responsibilityDesc')}</span>
                 </span>
               </li>
             </ul>

@@ -309,11 +309,11 @@ function MobileBottomBar({
           <div className="text-[10px] muted">{translateText('قیمت محصول')}</div>
           <div className="flex items-baseline gap-2">
             <span className="truncate text-base font-black" style={accent}>
-              {formatPrice(finalPrice(product),product.price?.currency)}
+              {formatPrice(finalPrice(product), product.price?.currency)}
             </span>
             {discounted && (
               <span className="text-[10px] line-through muted">
-                {formatPrice(product.price?.amount,product.price?.currency)}
+                {formatPrice(product.price?.amount, product.price?.currency)}
               </span>
             )}
           </div>
@@ -631,8 +631,8 @@ function ProductPage() {
     [
       translateText('گارانتی'),
       product.warranty
-        ? translateText('دارای گارانتی اصالت و سلامت')
-        : translateText('بدون گارانتی'),
+        ? translateText('b2b.warrantySeller')
+        : translateText('b2b.noWarrantySeller'),
     ],
   ];
 
@@ -706,7 +706,7 @@ function ProductPage() {
               </span>
               {product.warranty && (
                 <span className="rounded-full border border-theme px-3 py-1 font-medium muted">
-                  {translateText('گارانتی اصالت ')}
+                  {translateText('b2b.warrantySeller')}
                 </span>
               )}
             </div>
@@ -763,13 +763,15 @@ function ProductPage() {
               <div>
                 <div className="text-xs muted">{translateText('قیمت محصول')}</div>
                 <div className="mt-1 text-2xl font-black" style={accent}>
-                  {formatPrice(finalPrice(product),product.price?.currency)}
+                  {formatPrice(finalPrice(product), product.price?.currency)}
                 </div>
               </div>
 
               {discounted && (
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="line-through muted">{formatPrice(product.price?.amount,product.price?.currency)}</span>
+                  <span className="line-through muted">
+                    {formatPrice(product.price?.amount, product.price?.currency)}
+                  </span>
                   <span className="rounded-full bg-rose-500/10 px-2.5 py-1 font-bold text-rose-600 dark:text-rose-400">
                     {toFa(product.discount?.percentage)}
                     {translateText('٪ تخفیف ')}
@@ -805,8 +807,8 @@ function ProductPage() {
                 <ShieldCheck size={15} style={accent} />
                 <span>
                   {product.warranty
-                    ? translateText('گارانتی اصالت و سلامت فیزیکی کالا')
-                    : translateText('بدون گارانتی')}
+                    ? translateText('b2b.warrantySeller')
+                    : translateText('b2b.noWarrantySeller')}
                 </span>
               </div>
 
@@ -976,11 +978,11 @@ function ProductPage() {
                 <span className="block text-[10px] muted">{translateText('قیمت محصول')}</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-black" style={accent}>
-                    {formatPrice(finalPrice(product),product.price?.currency)}
+                    {formatPrice(finalPrice(product), product.price?.currency)}
                   </span>
                   {discounted && (
                     <span className="text-[11px] line-through muted">
-                      {formatPrice(product.price?.amount,product.price?.currency)}
+                      {formatPrice(product.price?.amount, product.price?.currency)}
                     </span>
                   )}
                 </div>

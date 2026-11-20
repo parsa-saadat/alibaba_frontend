@@ -22,8 +22,8 @@ const SECTIONS = [
     id: 'why',
     title: translateText("چرا این اطلاعات را لازم داریم"),
     items: [
-      translateText("برای ثبت و ارسال سفارش و تماس درباره‌ی همان سفارش."),
-      translateText("برای هماهنگی گارانتی و خدمات پس از فروش."),
+      translateText("b2b.privacyIntro"),
+      translateText("b2b.privacyShare"),
       translateText("برای بهبود جستجو و نمایش محصولات مرتبط."),
     ],
   },
@@ -31,7 +31,7 @@ const SECTIONS = [
     id: 'protect',
     title: translateText("تعهد ما درباره‌ی اطلاعات شما"),
     paragraphs: [
-      translateText("اطلاعات شخصی شما در اختیار شخص یا شرکت دیگری قرار نمی‌گیرد و به فروش نمی‌رسد."),
+      translateText("b2b.privacyShare"),
     ],
     items: [
       translateText("اطلاعات تماس شما فقط برای همان سفارش در اختیار فروشنده‌ی مربوطه قرار می‌گیرد."),
@@ -55,14 +55,14 @@ const SECTIONS = [
     items: [
       translateText("می‌توانید اطلاعات حساب خود را در بخش «پروفایل» ببینید و اصلاح کنید."),
       translateText("می‌توانید درخواست حذف حساب را از طریق پشتیبانی ثبت کنید."),
-      translateText("برای هر پرسشی درباره‌ی اطلاعاتتان، از طریق ایمیل یا تلفن با ما در تماس باشید."),
+      translateText("b2b.privacyHelp"),
     ],
   },
   {
     id: 'scope',
     title: translateText("محدوده‌ی مسئولیت"),
     paragraphs: [
-      translateText("این متن برای شفاف‌سازی است و تعهدی بیش از آنچه در آن آمده ایجاد نمی‌کند. محتوای صفحات فروشندگان و لینک‌های بیرونی (مانند پارسی‌ژئو) در کنترل ما نیست و مسئولیت آن‌ها بر عهده‌ی همان سایت‌هاست."),
+      translateText("b2b.responsibilityDesc"),
     ],
     note: translateText("در صورت تغییر مهم در این صفحه، نسخه‌ی جدید با تاریخ بازنگری در همین آدرس منتشر می‌شود."),
   },
@@ -74,10 +74,10 @@ function PrivacyPage() {
       icon={Lock}
       badge={translateText("حریم خصوصی")}
       title={translateText("حریم خصوصی")}
-      subtitle={translateText("خلاصه و روشن: چه اطلاعاتی از شما نگه می‌داریم، چرا لازم است و تعهد ما این است که آن را در اختیار کسی قرار ندهیم.")}
+      subtitle={translateText("b2b.privacyIntro")}
       updated={translateText("۱۴۰۵/۰۸/۲۰")}
       highlights={[
-        translateText("اطلاعات شما در اختیار کسی قرار نمی‌گیرد"),
+        translateText("b2b.privacyUse"),
         translateText("اطلاعات کارت در سایت ذخیره نمی‌شود"),
         translateText("حذف حساب از طریق پشتیبانی"),
       ]}

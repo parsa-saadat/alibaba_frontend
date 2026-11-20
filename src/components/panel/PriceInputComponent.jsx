@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import GroupedMoneyInput from './GroupedMoneyInput';
 import axios from 'axios';
 import { API } from '../../config/api';
 import {
@@ -176,17 +177,12 @@ export default function MoneyInput({ price }) {
       <div className="money-input__controls">
         <label>
           <span>{ui.label}</span>
-          <input
+          <GroupedMoneyInput
             className="input"
-            type="number"
-            dir="ltr"
-            inputMode="decimal"
             aria-label="Price amount"
             value={entry.amount}
-            min={['IRT', 'IRR'].includes(entry.currency) ? 1 : 0.01}
-            step={['IRT', 'IRR'].includes(entry.currency) ? 1 : 0.01}
             disabled={!entry.ready}
-            onChange={(e) => price.setAmount(e.target.value)}
+            onValueChange={price.setAmount}
             required
           />
         </label>

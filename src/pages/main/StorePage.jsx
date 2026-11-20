@@ -3,9 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import {
-  AlertOctagon,
   CalendarDays,
-  CheckCircle2,
   Mail,
   MapPin,
   Package,
@@ -18,7 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import ProductGridComponent from '../../components/product/ProductGridComponent';
-import { ActiveBadge, TrustBadge } from '../../components/store/StoreInfoComponent';
+import { TrustBadge } from '../../components/store/StoreInfoComponent';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
@@ -28,7 +26,6 @@ import {
   fetchStore,
   fetchPublicUser,
   trustState,
-  activeState,
   sellerIdOfStore,
   TRUST,
 } from '../../services/sellerApi';
@@ -279,7 +276,6 @@ function StorePage() {
   }
 
   /* فعال/غیرفعال از وضعیت فروشنده (روت عمومی کاربر) و در نبود آن از وضعیت فروشگاه */
-  const isActive = activeState(store, owner) ?? false;
   const contact = store.contact_info || {};
 
   return (
@@ -333,15 +329,6 @@ function StorePage() {
                 'linear-gradient(to top, var(--card) 0%, color-mix(in srgb, var(--card) 0%, transparent) 70%)',
             }}
           />
-          <div className="absolute start-4 top-4">
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black text-white shadow-lg"
-              style={{ background: isActive ? '#17994f' : '#c2740a' }}
-            >
-              {isActive ? <CheckCircle2 size={14} /> : <AlertOctagon size={14} />}
-              {isActive ? translateText('فعال') : translateText('غیرفعال')}
-            </span>
-          </div>
         </div>
 
         <div className="relative px-5 pb-6 sm:px-8">
@@ -362,7 +349,6 @@ function StorePage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="truncate text-xl font-black sm:text-3xl">{store.name}</h1>
                   <TrustBadge trusted={sellerTrusted} showUntrusted />
-                  <ActiveBadge active={isActive} />
                 </div>
 
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs muted">
@@ -370,7 +356,7 @@ function StorePage() {
                     <StoreIcon size={12} className="shrink-0" />
                     {sellerName
                       ? translateText('فروشنده: {{v0}}', { v0: sellerName })
-                      : translateText('فروشگاه رسمی در ژئوکالا')}
+                      : translateText('b2b.sellerStore')}
                   </span>
                   {store.create_at && (
                     <span className="inline-flex items-center gap-1.5">
@@ -407,9 +393,7 @@ function StorePage() {
             </div>
             <p className="mt-2 text-xs leading-6 muted">
               {sellerTrusted
-                ? translateText(
-                    'هویت و سابقه‌ی این فروشنده توسط ژئوکالا بررسی و تأیید شده است؛ خرید از این فروشگاه نشان اعتماد دارد.',
-                  )
+                ? translateText('b2b.approvalNote')
                 : translateText(
                     'این فروشنده هنوز نشان اعتماد ژئوکالا را دریافت نکرده است. پیش از خرید، اطلاعات تماس و شرایط فروش را با او هماهنگ کنید.',
                   )}

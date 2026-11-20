@@ -116,11 +116,11 @@ function CartSummaryComponent({
         </li>
         <li className="flex items-center gap-2">
           <Undo2 size={14} style={{ color: '#17994f' }} />
-          {translateText('۷ روز ضمانت بازگشت کالا ')}
+          {translateText('b2b.noReturn')}
         </li>
         <li className="flex items-center gap-2">
           <Truck size={14} style={{ color: '#17994f' }} />
-          {translateText('ارسال سریع به سراسر ایران ')}
+          {translateText('b2b.productTerms')}
         </li>
       </ul>
     </aside>

@@ -14,6 +14,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import PageHeroComponent from '../../components/common/PageHeroComponent';
+import ContactEmailScopeComponent from '../../components/contact/ContactEmailScopeComponent';
+import { SUPPORT_EMAIL, INFO_EMAIL } from '../../config/contact';
 import ContactPhoneComponent from '../../components/contact/ContactPhoneComponent';
 import ContactFormComponent from '../../components/contact/ContactFormComponent';
 import ContactOfficeComponent from '../../components/contact/ContactOfficeComponent';
@@ -21,22 +23,44 @@ import ContactDepartmentsComponent from '../../components/contact/ContactDepartm
 import ContactFaqComponent from '../../components/contact/ContactFaqComponent';
 
 const STATS = [
-  { icon: Clock3, title: translateText("پاسخ زیر ۲۴ ساعت"), desc: translateText("به همه پیام‌ها") },
-  { icon: Headset, title: translateText("مشاوره‌ی تخصصی"), desc: translateText("کارشناس نقشه‌برداری") },
-  { icon: MessageSquare, title: translateText("دو شعبه‌ی فعال"), desc: translateText("تهران و مازندران") },
-];
-
-const HOURS = [
-  { day: translateText("شنبه تا چهارشنبه"), time: translateText("۹:۰۰ تا ۱۸:۰۰") },
-  { day: translateText("پنجشنبه"), time: translateText("۹:۰۰ تا ۱۴:۰۰") },
-  { day: translateText("جمعه"), time: translateText("تعطیل — فرم و ایمیل فعال است") },
+  {
+    icon: Clock3,
+    title: translateText('b2b.webSupport'),
+    desc: translateText('b2b.webSupportDesc'),
+  },
+  { icon: Headset, title: translateText('v20.siteHelp'), desc: translateText('v20.website') },
+  {
+    icon: MessageSquare,
+    title: translateText('v20.communication'),
+    desc: translateText('v20.platform'),
+  },
 ];
 
 const DIRECT = [
-  { icon: Phone, label: translateText("شعبه تهران"), value: translateText("۰۹۱۲۹۳۲۷۵۱۵"), href: 'tel:+989129327515' },
-  { icon: Phone, label: translateText("شعبه مازندران (هچیرود)"), value: translateText("۰۹۱۰۲۴۰۱۰۰۷"), href: 'tel:+989102401007' },
-  { icon: Mail, label: translateText("پشتیبانی"), value: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
-  { icon: Mail, label: translateText("همکاری و نمایندگی"), value: 'partner@geokala.ir', href: 'mailto:partner@geokala.ir' },
+  {
+    icon: Mail,
+    label: translateText('v20.login'),
+    value: SUPPORT_EMAIL,
+    href: `mailto:${SUPPORT_EMAIL}`,
+  },
+  {
+    icon: Mail,
+    label: translateText('v20.errors'),
+    value: SUPPORT_EMAIL,
+    href: `mailto:${SUPPORT_EMAIL}`,
+  },
+  {
+    icon: Mail,
+    label: translateText('v21.infoTitle'),
+    value: INFO_EMAIL,
+    href: `mailto:${INFO_EMAIL}`,
+  },
+  {
+    icon: Mail,
+    label: translateText('v20.privacy'),
+    value: SUPPORT_EMAIL,
+    href: `mailto:${SUPPORT_EMAIL}`,
+  },
 ];
 
 /*
@@ -48,21 +72,31 @@ function ContactPage() {
     <div className="pb-4">
       {/* بنر صفحه — همان بنر «درباره ما» */}
       <PageHeroComponent
-        breadcrumb={translateText("تماس با ما")}
-        badge={translateText("تیم فنی و پشتیبانی ژئوکالا")}
-        title={translateText("مشاوره‌ی خرید تجهیزات نقشه‌برداری")}
-        description={translateText("از انتخاب مدل درست جی‌پی‌اس یا توتال استیشن تا پیگیری سفارش و خدمات پس از فروش؛ کارشناسان ما در شعبه‌های تهران و هچیرود پاسخ‌گوی شما هستند.")}
+        breadcrumb={translateText('تماس با ما')}
+        badge={translateText('v20.team')}
+        title={translateText('b2b.contactTitle')}
+        description={translateText('b2b.contactIntro')}
         highlights={STATS.map((stat) => ({ icon: stat.icon, label: stat.title }))}
         actions={
           <>
-            <a href="tel:+989129327515" className="btn-yellow inline-flex items-center gap-2">
-              <Phone size={16} />{translateText("تماس با شعبه تهران ")}</a>
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="btn-yellow inline-flex items-center gap-2"
+            >
+              <Mail size={16} />
+              {translateText('v20.siteHelp')}
+            </a>
             <a
               href="#contact-form"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
-              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.18)',
+              }}
             >
-              <MessageSquare size={16} />{translateText("ارسال پیام ")}</a>
+              <MessageSquare size={16} />
+              {translateText('ارسال پیام ')}
+            </a>
           </>
         }
       />
@@ -76,10 +110,10 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 py-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <span className="text-[11px] font-bold text-yellow">{translateText("ارسال پیام")}</span>
-            <h2 className="mt-1.5 font-black text-lg">{translateText("فرم تماس و پاسخ کارشناس")}</h2>
+            <span className="text-[11px] font-bold text-yellow">{translateText('ارسال پیام')}</span>
+            <h2 className="mt-1.5 font-black text-lg">{translateText('v20.formTitle')}</h2>
           </div>
-          <p className="max-w-md text-xs muted leading-6">{translateText("دقیق‌ترین راه برای پیگیری مکتوب؛ پیام شما با شماره پیگیری در ایمیل ثبت می‌شود. ")}</p>
+          <p className="max-w-md text-xs muted leading-6">{translateText('v20.formIntro')}</p>
         </div>
 
         <div
@@ -92,9 +126,11 @@ function ContactPage() {
 
           <aside className="space-y-4 lg:sticky lg:top-24">
             {/* تماس مستقیم */}
-            <div className="card rounded-3xl p-5">
+            <div data-testid="direct-contact" className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <Phone size={16} className="text-yellow" />{translateText("تماس مستقیم ")}</h3>
+                <Mail size={16} className="text-yellow" />
+                {translateText('تماس مستقیم ')}
+              </h3>
               <ul className="mt-3 space-y-2.5">
                 {DIRECT.map((item) => {
                   const Icon = item.icon;
@@ -112,7 +148,7 @@ function ContactPage() {
                         </span>
                         <span className="min-w-0">
                           <span className="block text-[10px] muted">{item.label}</span>
-                          <b className="block truncate text-xs tabular-nums" dir="auto">
+                          <b className="block break-all text-xs tabular-nums" dir="ltr">
                             {item.value}
                           </b>
                         </span>
@@ -123,32 +159,23 @@ function ContactPage() {
               </ul>
             </div>
 
-            {/* ساعات کاری */}
-            <div className="card rounded-3xl p-5">
-              <h3 className="flex items-center gap-2 text-sm font-black">
-                <Clock3 size={16} className="text-yellow" />{translateText("ساعات پاسخ‌دهی ")}</h3>
-              <ul className="mt-3 space-y-2 text-xs">
-                {HOURS.map((row) => (
-                  <li key={row.day} className="flex items-center justify-between gap-2">
-                    <span className="muted">{row.day}</span>
-                    <b className="tabular-nums">{row.time}</b>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 rounded-xl px-3 py-2 text-[11px] leading-6" style={{ background: 'var(--card2)' }}>{translateText("فرم تماس و ایمیل شبانه‌روزی ثبت می‌شود؛ پاسخ‌دهی در ساعات کاری انجام می‌گیرد. ")}</p>
-            </div>
+            <ContactEmailScopeComponent />
 
             {/* میان‌بُرها */}
             <div className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <ShieldCheck size={16} className="text-yellow" />{translateText("قبل از تماس بخوانید ")}</h3>
+                <ShieldCheck size={16} className="text-yellow" />
+                {translateText('قبل از تماس بخوانید ')}
+              </h3>
               <div className="mt-3 space-y-2">
                 <Link
                   to="/terms/customers"
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={14} className="text-yellow" />{translateText("قوانین و مقررات مشتریان ")}</span>
+                    <FileText size={14} className="text-yellow" />
+                    {translateText('قوانین و مقررات مشتریان ')}
+                  </span>
                   <ChevronLeft size={14} className="logical-icon muted" />
                 </Link>
                 <Link
@@ -156,7 +183,9 @@ function ContactPage() {
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={14} className="text-yellow" />{translateText("قوانین خریداران ")}</span>
+                    <FileText size={14} className="text-yellow" />
+                    {translateText('قوانین خریداران ')}
+                  </span>
                   <ChevronLeft size={14} className="logical-icon muted" />
                 </Link>
                 <Link
@@ -164,7 +193,9 @@ function ContactPage() {
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <MapPin size={14} className="text-yellow" />{translateText("پیگیری سفارش‌های من ")}</span>
+                    <MapPin size={14} className="text-yellow" />
+                    {translateText('پیگیری سفارش‌های من ')}
+                  </span>
                   <ChevronLeft size={14} className="logical-icon muted" />
                 </Link>
               </div>
@@ -177,10 +208,12 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <span className="text-[11px] font-bold text-yellow">{translateText("شعبه‌های ما")}</span>
-            <h2 className="mt-1.5 font-black text-lg">{translateText("حضوری هم می‌توانید سر بزنید")}</h2>
+            <span className="text-[11px] font-bold text-yellow">
+              {translateText('v20.helpTitle')}
+            </span>
+            <h2 className="mt-1.5 font-black text-lg">{translateText('v20.noVisit')}</h2>
           </div>
-          <p className="max-w-md text-xs muted leading-6">{translateText("هر شعبه شماره‌ی مستقیم و دکمه‌ی مسیریابی دارد؛ پیش از مراجعه تماس بگیرید تا هماهنگی انجام شود. ")}</p>
+          <p className="max-w-md text-xs muted leading-6">{translateText('v20.responsible')}</p>
         </div>
         <ContactOfficeComponent />
       </section>
@@ -189,11 +222,18 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="flex items-end justify-between gap-3 mb-4">
           <div>
-            <span className="text-[11px] font-bold text-yellow">{translateText("دپارتمان‌ها")}</span>
-            <h2 className="mt-1.5 font-black text-lg">{translateText("با دپارتمان درست حرف بزنید")}</h2>
-            <p className="text-xs muted mt-1">{translateText("هر درخواست را مستقیم به تیم تخصصی خودش بفرستید")}</p>
+            <span className="text-[11px] font-bold text-yellow">
+              {translateText('v20.subjects')}
+            </span>
+            <h2 className="mt-1.5 font-black text-lg">{translateText('v20.helpTitle')}</h2>
+            <p className="text-xs muted mt-1">{translateText('v20.subjectIntro')}</p>
           </div>
-          <Link to="/about" className="text-xs font-bold text-yellow inline-flex items-center gap-1">{translateText("درباره تیم ما ")}<ChevronLeft className="logical-icon" size={14} />
+          <Link
+            to="/about"
+            className="text-xs font-bold text-yellow inline-flex items-center gap-1"
+          >
+            {translateText('درباره تیم ما ')}
+            <ChevronLeft className="logical-icon" size={14} />
           </Link>
         </div>
         <ContactDepartmentsComponent />
@@ -215,17 +255,26 @@ function ContactPage() {
           }}
         >
           <div>
-            <h2 className="font-black text-lg">{translateText("هنوز جواب سوالتان را پیدا نکردید؟")}</h2>
-            <p className="text-xs muted mt-1.5 leading-6">{translateText("کارشناسان ما شنبه تا پنجشنبه از ۹ صبح تا ۶ عصر پاسخ‌گو هستند؛ فرم همین صفحه هم شبانه‌روزی ثبت می‌شود. ")}</p>
+            <h2 className="font-black text-lg">
+              {translateText('هنوز جواب سوالتان را پیدا نکردید؟')}
+            </h2>
+            <p className="text-xs muted mt-1.5 leading-6">{translateText('b2b.contactIntro')}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <a href="tel:+989129327515" className="btn-yellow inline-flex items-center gap-2">
-              <Phone size={16} />{translateText("۰۹۱۲۹۳۲۷۵۱۵ ")}</a>
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="btn-yellow inline-flex items-center gap-2"
+            >
+              <Mail size={16} />
+              {translateText('v20.siteHelp')}
+            </a>
             <a
               href="mailto:info@geokala.ir"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold"
               style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
-            >{translateText("ایمیل به پشتیبانی ")}</a>
+            >
+              {translateText('b2b.emailAction')}
+            </a>
           </div>
         </div>
       </section>

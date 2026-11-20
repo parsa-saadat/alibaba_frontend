@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, INFO_EMAIL } from '../../config/contact';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -13,9 +14,9 @@ import {
   CreditCard,
   Headset,
   Mail,
-  MapPin,
+  Globe as MapPin,
   Package,
-  Phone,
+  Monitor as Phone,
   Ruler,
   Satellite,
   Send,
@@ -81,35 +82,34 @@ const LINK_COLUMNS = [
 ];
 
 const STATS = [
-  { value: translateText('۱۳۸۳'), label: translateText('سال آغاز فعالیت') },
-  { value: translateText('۲'), label: translateText('شعبه فعال') },
-  { value: translateText('۲۴/۷'), label: translateText('پشتیبانی') },
+  { value: 'B2B', label: translateText('v20.platform') },
+  { value: translateText('v20.four'), label: translateText('v20.languages') },
+  { value: translateText('v20.website'), label: translateText('b2b.webSupport') },
 ];
 
 const TRUST_ITEMS = [
-  { icon: Truck, title: translateText('ارسال سریع'), desc: translateText('تحویل ۱ تا ۳ روز کاری') },
+  { icon: Truck, title: translateText('b2b.sellers'), desc: translateText('b2b.sellersDesc') },
   {
     icon: ShieldCheck,
-    title: translateText('تضمین اصالت کالا'),
-    desc: translateText('ضمانت بازگشت وجه'),
+    title: translateText('b2b.compare'),
+    desc: translateText('b2b.compareDesc'),
   },
   {
     icon: CreditCard,
-    title: translateText('پرداخت امن'),
-    desc: translateText('درگاه بانکی معتبر'),
+    title: translateText('b2b.multilingual'),
+    desc: translateText('b2b.multilingualDesc'),
   },
   {
     icon: Headset,
-    title: translateText('پشتیبانی ۲۴ ساعته'),
-    desc: translateText('۷ روز هفته، پاسخگو'),
+    title: translateText('b2b.webSupport'),
+    desc: translateText('v20.supportShort'),
   },
 ];
 
 const CONTACTS = [
-  { icon: Phone, text: translateText('۰۹۱۲۹۳۲۷۵۱۵ — شعبه تهران'), href: 'tel:+989129327515' },
-  { icon: Phone, text: translateText('۰۹۱۰۲۴۰۱۰۰۷ — شعبه مازندران'), href: 'tel:+989102401007' },
-  { icon: Mail, text: 'info@geokala.ir', href: 'mailto:info@geokala.ir' },
-  { icon: MapPin, text: translateText('تهران · مازندران، هچیرود') },
+  { icon: Mail, text: SUPPORT_EMAIL, href: `mailto:${SUPPORT_EMAIL}` },
+  { icon: Mail, text: INFO_EMAIL, href: `mailto:${INFO_EMAIL}` },
+  { icon: Mail, text: translateText('v20.siteHelp'), href: '/contact' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -287,15 +287,11 @@ function FooterComponent() {
           <div className="md:col-span-2 lg:col-span-4">
             <Link to="/" className="inline-flex flex-col items-start gap-2">
               <BrandLogoComponent variant="full" size="md" tone="white" />
-              <span className="text-[11px] text-[#8fa0c9]">
-                {translateText('فروشگاه تخصصی تجهیزات نقشه‌برداری ')}
-              </span>
+              <span className="text-[11px] text-[#8fa0c9]">{translateText('b2b.identity')}</span>
             </Link>
 
             <p className="mt-4 max-w-sm text-xs leading-6 text-[#8fa0c9]">
-              {translateText(
-                'ژئوکالا فروشگاه تخصصی تجهیزات نقشه‌برداری است؛ جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین و کنترولر، با مشاوره‌ی فنی و ضمانت اصالت کالا. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا. ',
-              )}
+              {translateText('b2b.intro')}
             </p>
 
             {/* آمار */}
@@ -364,7 +360,7 @@ function FooterComponent() {
 
           <span className="inline-flex w-max items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[11px] text-[#c9d4ef]">
             <BadgeCheck size={14} style={{ color: 'var(--primary-color)' }} />
-            {translateText('نماد اعتماد الکترونیکی ')}
+            {translateText('v20.platform')}
           </span>
         </div>
       </div>
@@ -374,9 +370,7 @@ function FooterComponent() {
         <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
           <p className="text-center text-[11px] text-[#8fa0c9] lg:text-start">
             © {year}
-            {translateText(
-              ' ژئوکالا — تمامی حقوق محفوظ است. زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا ',
-            )}
+            {translateText('v20.rights')}
           </p>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#8fa0c9]">
@@ -406,16 +400,18 @@ function FooterComponent() {
           </nav>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {[translateText('شتاب'), translateText('زرین‌پال'), translateText('ساماندهی')].map(
-              (gateway) => (
-                <span
-                  key={gateway}
-                  className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#c9d4ef]"
-                >
-                  {gateway}
-                </span>
-              ),
-            )}
+            {[
+              translateText('v20.profiles'),
+              translateText('b2b.compare'),
+              translateText('v20.website'),
+            ].map((gateway) => (
+              <span
+                key={gateway}
+                className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#c9d4ef]"
+              >
+                {gateway}
+              </span>
+            ))}
           </div>
         </div>
       </div>

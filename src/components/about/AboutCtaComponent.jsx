@@ -16,7 +16,7 @@ function AboutCtaComponent() {
       >
         <div className="max-w-xl">
           <h2 className="font-black text-lg sm:text-2xl text-white leading-tight">{translateText("ژئوکالا برای کار شما ساخته شده ")}</h2>
-          <p className="text-xs sm:text-sm text-white/70 leading-7 mt-2">{translateText("اگر فروشنده‌ی تجهیزات نقشه‌برداری هستی، فروشگاهت را در ژئوکالا بساز و به نقشه‌برداران سراسر کشور دسترسی پیدا کن. اگر خریدار هستی، مدل‌ها را مقایسه کن و با مشورت کارشناس خرید کن. ")}</p>
+          <p className="text-xs sm:text-sm text-white/70 leading-7 mt-2">{translateText("b2b.sellStep")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">

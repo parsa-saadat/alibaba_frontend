@@ -5,9 +5,9 @@ import { ChevronLeft, Headset, ShieldCheck, Truck } from 'lucide-react';
 import PageHeroComponent from '../common/PageHeroComponent';
 
 const HERO_HIGHLIGHTS = [
-  { icon: ShieldCheck, label: translateText("کالای اصل با گارانتی") },
-  { icon: Truck, label: translateText("ارسال به سراسر کشور") },
-  { icon: Headset, label: translateText("مشاوره فنی تخصصی") },
+  { icon: ShieldCheck, label: translateText("b2b.sellers") },
+  { icon: Truck, label: translateText("b2b.multilingual") },
+  { icon: Headset, label: translateText("b2b.webSupport") },
 ];
 
 function AboutHeroComponent() {
@@ -15,8 +15,8 @@ function AboutHeroComponent() {
     <PageHeroComponent
       breadcrumb={translateText("درباره ما")}
       badge={translateText("درباره ژئوکالا")}
-      title={translateText("فروشگاه تخصصی تجهیزات نقشه‌برداری")}
-      description={translateText("ژئوکالا زیرمجموعه‌ی شرکت بازرگانی فناوری سران ماهان آسیا است؛ مجموعه‌ای با بیش از دو دهه تجربه در واردات و تجارت تجهیزات نقشه‌برداری. این‌جا جی‌پی‌اس ایستگاهی، توتال استیشن، دوربین نقشه‌برداری، کنترولر و لوازم جانبی را با مشاوره‌ی فنی و ضمانت اصالت کالا پیدا می‌کنید.")}
+      title={translateText("b2b.identity")}
+      description={translateText("b2b.intro")}
       highlights={HERO_HIGHLIGHTS}
       actions={
         <>

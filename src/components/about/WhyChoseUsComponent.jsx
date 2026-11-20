@@ -1,46 +1,40 @@
 import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
-import {
-  BadgeCheck,
-  CreditCard,
-  Headset,
-  Scale,
-  ShieldCheck,
-  Truck,
-  Users,
-} from 'lucide-react';
+import { BadgeCheck, CreditCard, Headset, Scale, ShieldCheck, Truck, Users } from 'lucide-react';
 
 // مزیت‌های ژئوکالا
 const FEATURES = [
   {
     icon: BadgeCheck,
-    title: translateText("کالای اصل با گارانتی"),
-    desc: translateText("تجهیزات از مسیر واردات رسمی مجموعه تأمین می‌شوند؛ اصالت، سریال و مدارک گارانتی بررسی می‌شود."),
+    title: translateText('b2b.sellers'),
+    desc: translateText('b2b.sellersDesc'),
   },
   {
     icon: Scale,
-    title: translateText("مقایسه‌ی مشخصات فنی"),
-    desc: translateText("مدل‌ها را کنار هم می‌گذارید و دقت، تعداد کانال، فرکانس، ایمو و باطری را مقایسه می‌کنید؛ نه فقط قیمت."),
+    title: translateText('مقایسه‌ی مشخصات فنی'),
+    desc: translateText(
+      'مدل‌ها را کنار هم می‌گذارید و دقت، تعداد کانال، فرکانس، ایمو و باطری را مقایسه می‌کنید؛ نه فقط قیمت.',
+    ),
   },
   {
     icon: Headset,
-    title: translateText("مشاوره‌ی تخصصی پیش از خرید"),
-    desc: translateText("کارشناس نقشه‌برداری کمک می‌کند دستگاه مناسب پروژه‌تان را انتخاب کنید، نه گران‌ترین را."),
+    title: translateText('b2b.compare'),
+    desc: translateText('b2b.compareDesc'),
   },
   {
     icon: ShieldCheck,
-    title: translateText("پشتیبانی و کالیبراسیون"),
-    desc: translateText("آموزش راه‌اندازی، به‌روزرسانی نرم‌افزار و خدمات پس از فروش، زیر نظر همان تیم فنی."),
+    title: translateText('b2b.webSupport'),
+    desc: translateText('b2b.webSupportDesc'),
   },
   {
     icon: Truck,
-    title: translateText("ارسال به سراسر کشور"),
-    desc: translateText("بسته‌بندی مخصوص تجهیزات دقیق و ارسال به سراسر کشور، از شعبه‌ی تهران و مازندران."),
+    title: translateText('b2b.multilingual'),
+    desc: translateText('v21.languageDesc'),
   },
   {
     icon: CreditCard,
-    title: translateText("پرداخت امن"),
-    desc: translateText("پرداخت از طریق درگاه بانکی معتبر انجام می‌شود و اطلاعات کارت شما ذخیره نمی‌شود."),
+    title: translateText('b2b.account'),
+    desc: translateText('v20.profileHelp'),
   },
 ];
 
@@ -50,10 +44,14 @@ function WhyChoseUsComponent() {
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow">
-            <ShieldCheck size={13} />{translateText("چرا ژئوکالا ")}</span>
-          <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText("چیزی که ما را متفاوت می‌کند")}</h2>
+            <ShieldCheck size={13} />
+            {translateText('چرا ژئوکالا ')}
+          </span>
+          <h2 className="font-black text-xl sm:text-2xl mt-1.5">
+            {translateText('چیزی که ما را متفاوت می‌کند')}
+          </h2>
         </div>
-        <p className="text-xs muted max-w-md leading-6">{translateText("ما یک لیست آگهی نیستیم؛ فروشگاه تخصصی یک مجموعه‌ی قدیمی در حوزه‌ی نقشه‌برداری، با دانش فنی و پشتیبانی مسئول. ")}</p>
+        <p className="text-xs muted max-w-md leading-6">{translateText('b2b.intro')}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

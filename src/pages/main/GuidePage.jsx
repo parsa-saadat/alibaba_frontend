@@ -46,14 +46,14 @@ const BUYING_SECTIONS = [
     title: translateText("پیگیری سفارش"),
     items: [
       translateText("وضعیت هر مرسوله (در انتظار تأیید، آماده‌سازی، ارسال، تحویل) در «سفارش‌های من» دیده می‌شود."),
-      translateText("تا پیش از ارسال می‌توانید مرسوله را لغو کنید؛ شرایط بازپرداخت در قوانین خریداران آمده است."),
+      translateText("b2b.noReturn"),
     ],
   },
   {
     id: 'help',
     title: translateText("نیاز به کمک دارید؟"),
     paragraphs: [
-      translateText("پاسخ سوال‌های رایج در بخش سوالات متداول صفحه‌ی «تماس با ما» هست؛ اگر پیدا نکردید با پشتیبانی تماس بگیرید."),
+      translateText("b2b.contactIntro"),
     ],
   },
 ];

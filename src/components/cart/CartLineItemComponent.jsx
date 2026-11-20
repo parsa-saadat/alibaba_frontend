@@ -93,7 +93,7 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
                 style={{ background: 'var(--card2)' }}
               >
                 <ShieldCheck size={11} />
-                {translateText('گارانتی ')}
+                {translateText('b2b.warrantySeller')}
               </span>
             )}
             {product.seller_trust === true && (

@@ -227,10 +227,10 @@ function LegalPageComponent({
             <b className="text-sm font-black">{translateText("سؤالی مانده؟")}</b>
             <p className="mt-2 text-xs leading-6 muted">
               {footerNote ||
-                translateText("اگر بخشی از این قوانین برایتان روشن نیست، پیش از خرید یا ثبت‌نام با ما تماس بگیرید تا با هم مرور کنیم.")}
+                translateText("b2b.webSupportDesc")}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link to="/contact" className="btn-yellow !py-2 text-xs">{translateText("تماس با پشتیبانی ")}</Link>
+              <Link to="/contact" className="btn-yellow !py-2 text-xs">{translateText("b2b.webSupport")}</Link>
               <Link to="/about" className="btn-ghost !py-2 text-xs">{translateText("درباره ژئوکالا ")}</Link>
               {tabs
                 .filter((tab) => tab.key !== activeTab)

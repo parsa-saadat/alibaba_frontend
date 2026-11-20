@@ -99,7 +99,9 @@ function ProductComponent({
 
         {soldOut && (
           <div className="absolute inset-0 bg-black/45 grid place-items-center">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/70 text-white">{translateText("ناموجود ")}</span>
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/70 text-white">
+              {translateText('ناموجود ')}
+            </span>
           </div>
         )}
 
@@ -109,7 +111,7 @@ function ProductComponent({
             onClick={() => toggleFavorite(id)}
             className={circle}
             style={{ color: fav ? '#ff4d6d' : 'var(--text-color)' }}
-            aria-label={translateText("افزودن به علاقه‌مندی")}
+            aria-label={translateText('افزودن به علاقه‌مندی')}
             aria-pressed={fav}
           >
             <Heart size={16} fill={fav ? '#ff4d6d' : 'none'} />
@@ -119,7 +121,7 @@ function ProductComponent({
             onClick={() => toggleCompare(id)}
             className={circle}
             style={{ color: inCompare ? 'var(--primary-color)' : 'var(--text-color)' }}
-            aria-label={translateText("مقایسه محصول")}
+            aria-label={translateText('مقایسه محصول')}
             aria-pressed={inCompare}
           >
             <GitCompareArrows size={16} />
@@ -134,47 +136,62 @@ function ProductComponent({
             className="px-1.5 py-px rounded-sm font-black whitespace-nowrap"
             style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
           >
-            {toFa(product.discount.percentage)}{translateText("٪ تخفیف ")}</span>
+            {toFa(product.discount.percentage)}
+            {translateText('٪ تخفیف ')}
+          </span>
         )}
         {product.brand && <span className="muted font-semibold truncate">{product.brand}</span>}
       </div>
 
       {/* ───── عنوان (دو خط تا نام محصول کامل‌تر دیده شود) ───── */}
-      <h3 className="mt-1 text-sm font-bold leading-6 line-clamp-2 min-h-[3rem]" title={product.name}>
+      <h3
+        className="mt-1 text-sm font-bold leading-6 line-clamp-2 min-h-[3rem]"
+        title={product.name}
+      >
         {product.name}
       </h3>
 
       {/* ───── امتیاز ───── */}
       <div className="mt-1 h-[18px] flex items-center gap-1 text-xs muted">
         <Check size={12} strokeWidth={3} />
-        {rating > 0 ? translateText("امتیاز {{v0}}", {v0: (toFa(rating.toFixed(1)))}) : translateText("ضمانت اصالت")}
+        {rating > 0
+          ? translateText('امتیاز {{v0}}', { v0: toFa(rating.toFixed(1)) })
+          : translateText('b2b.productTerms')}
       </div>
 
       {/* ───── قیمت ───── */}
       <div className="mt-3 flex items-baseline gap-2 flex-wrap">
         <span className="text-lg sm:text-xl font-black leading-none text-yellow">
-          {formatPrice(finalPrice(product),product.price?.currency)}
+          {formatPrice(finalPrice(product), product.price?.currency)}
         </span>
         {discount && (
-          <span className="text-xs muted line-through">{formatPrice(product.price?.amount,product.price?.currency)}</span>
+          <span className="text-xs muted line-through">
+            {formatPrice(product.price?.amount, product.price?.currency)}
+          </span>
         )}
       </div>
 
       {/* ───── موجودی ───── */}
       <div className="mt-1.5 text-sm">
         {soldOut ? (
-          <span className="text-rose-500 font-bold">{translateText("ناموجود")}</span>
+          <span className="text-rose-500 font-bold">{translateText('ناموجود')}</span>
         ) : stock !== null ? (
-          <span>{translateText("موجودی: ")}{toFa(stock)}</span>
+          <span>
+            {translateText('موجودی: ')}
+            {toFa(stock)}
+          </span>
         ) : (
-          <span>{translateText("موجود")}</span>
+          <span>{translateText('موجود')}</span>
         )}
       </div>
 
       {/* ───── فروشگاه ───── */}
       <div className="flex items-center gap-1 text-xs muted min-w-0">
         {product.store_id && product.store_name ? (
-          <Link to={`/store/${product.store_id}`} className="relative z-20 truncate hover:underline">
+          <Link
+            to={`/store/${product.store_id}`}
+            className="relative z-20 truncate hover:underline"
+          >
             {product.store_name}
           </Link>
         ) : product.store_name ? (

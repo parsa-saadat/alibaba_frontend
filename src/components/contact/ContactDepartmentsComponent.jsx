@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, INFO_EMAIL } from '../../config/contact';
 import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { ChevronLeft, Handshake, ShieldAlert, ShoppingBag, Store } from 'lucide-react';
@@ -6,31 +7,31 @@ import { ChevronLeft, Handshake, ShieldAlert, ShoppingBag, Store } from 'lucide-
 const DEPARTMENTS = [
   {
     icon: ShoppingBag,
-    title: translateText("فروش و سفارش"),
-    desc: translateText("استعلام قیمت، ثبت سفارش و پیگیری ارسال"),
-    email: 'sales@geokala.ir',
-    response: translateText("پاسخ تا ۴ ساعت کاری"),
+    title: translateText('v20.login'),
+    desc: translateText('b2b.webSupportDesc'),
+    email: SUPPORT_EMAIL,
+    response: translateText('v20.noTime'),
   },
   {
     icon: Store,
-    title: translateText("پشتیبانی فنی"),
-    desc: translateText("راه‌اندازی، کالیبراسیون و خدمات پس از فروش"),
-    email: 'support@geokala.ir',
-    response: translateText("پاسخ تا ۸ ساعت کاری"),
+    title: translateText('v20.errors'),
+    desc: translateText('v20.issueHelp'),
+    email: SUPPORT_EMAIL,
+    response: translateText('v20.noTime'),
   },
   {
     icon: Handshake,
-    title: translateText("همکاری و نمایندگی"),
-    desc: translateText("نمایندگی فروش، تأمین و همکاری تجاری"),
-    email: 'partner@geokala.ir',
-    response: translateText("پاسخ تا ۲ روز کاری"),
+    title: translateText('v20.privacy'),
+    desc: translateText('v20.profileHelp'),
+    email: SUPPORT_EMAIL,
+    response: translateText('v20.noTime'),
   },
   {
     icon: ShieldAlert,
-    title: translateText("رسیدگی به شکایات"),
-    desc: translateText("گزارش تخلف، اصالت کالا و اختلاف سفارش"),
-    email: 'trust@geokala.ir',
-    response: translateText("بررسی حداکثر ۴۸ ساعت"),
+    title: translateText('v20.suggestions'),
+    desc: translateText('v20.siteHelp'),
+    email: INFO_EMAIL,
+    response: translateText('v20.noTime'),
   },
 ];
 

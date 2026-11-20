@@ -1,199 +1,119 @@
-import { t as translateText } from '../../i18n/runtime.js';
 import React, { useState } from 'react';
-import {
-  Building2,
-  Check,
-  Clock3,
-  Copy,
-  MapPin,
-  Navigation,
-  Phone,
-  Warehouse,
-} from 'lucide-react';
+import { Mail, Copy, Check, Send, Monitor, MessageSquareText } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { t } from '../../i18n/runtime.js';
+import { SUPPORT_EMAIL, INFO_EMAIL, emailHref } from '../../config/contact';
+import ContactEmailScopeComponent from './ContactEmailScopeComponent';
 
-/*
- * شعبه‌های ژئوکالا.
- * هر شعبه: تماس مستقیم، کپی شماره، و دکمه‌ی «مسیریابی» که نشانی را در نقشه باز می‌کند.
- */
-
-const BRANCHES = [
+const channels = [
   {
-    id: 'tehran',
-    icon: Building2,
-    city: translateText("شعبه تهران"),
-    tag: translateText("دفتر مرکزی · فروش و مشاوره"),
-    person: translateText("آقای علیزاده"),
-    phone: translateText("۰۹۱۲۹۳۲۷۵۱۵"),
-    tel: '+989129327515',
-    address: translateText("تهران"),
-    note: translateText("بازدید حضوری با هماهنگی تلفنی قبلی"),
-    mapQuery: translateText("تهران"),
-    accent: 'rgba(255,214,10,0.16)',
+    id: 'support',
+    title: 'v21.supportTitle',
+    desc: 'v21.supportDesc',
+    email: SUPPORT_EMAIL,
+    icon: Monitor,
   },
   {
-    id: 'mazandaran',
-    icon: Warehouse,
-    city: translateText("شعبه مازندران"),
-    tag: translateText("انبار و دفتر فروش شرق مازندران"),
-    person: translateText("آقای علیزاده"),
-    phone: translateText("۰۹۱۰۲۴۰۱۰۰۷"),
-    tel: '+989102401007',
-    address: translateText("مازندران، هچیرود"),
-    note: translateText("تحویل حضوری و هماهنگی ارسال"),
-    mapQuery: translateText("هچیرود، مازندران"),
-    accent: 'rgba(23,153,79,0.16)',
+    id: 'info',
+    title: 'v21.infoTitle',
+    desc: 'v21.infoDesc',
+    email: INFO_EMAIL,
+    icon: MessageSquareText,
   },
 ];
 
-const mapUrl = (query) =>
-  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-
-const HOURS = [
-  { day: translateText("شنبه تا چهارشنبه"), time: translateText("۹:۰۰ – ۱۸:۰۰") },
-  { day: translateText("پنجشنبه"), time: translateText("۹:۰۰ – ۱۴:۰۰") },
-  { day: translateText("جمعه"), time: translateText("تعطیل (فرم سایت فعال)") },
-];
-
-function BranchCard({ branch }) {
-  const Icon = branch.icon;
+function EmailCard({ channel }) {
   const [copied, setCopied] = useState(false);
-
-  const copyPhone = async () => {
+  const Icon = channel.icon;
+  const copy = async () => {
     try {
-      await navigator.clipboard.writeText(branch.tel.replace('+98', '0'));
+      await navigator.clipboard.writeText(channel.email);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
+      setTimeout(() => setCopied(false), 1800);
     } catch {
-      setCopied(false);
+      toast.error(t('امکان کپی خودکار نیست، مقدار را دستی انتخاب کنید.'));
     }
   };
-
   return (
-    <article className="card flex flex-col overflow-hidden rounded-3xl">
-      {/* سربرگ شعبه */}
-      <div
-        className="relative px-4 py-4"
-        style={{
-          background: `radial-gradient(circle at 15% 0%, ${branch.accent} 0%, transparent 60%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))`,
-        }}
-      >
-        {/* شبکه‌ی نقشه */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
-            backgroundSize: '34px 34px',
-          }}
-        />
-        <div className="relative flex items-start gap-3">
-          <span
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl"
-            style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
-          >
-            <Icon size={18} />
-          </span>
-          <div className="min-w-0">
-            <b className="block text-sm font-black text-white">{branch.city}</b>
-            <span className="mt-0.5 block text-[10px] leading-5 text-white/65">{branch.tag}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex items-start gap-2 text-xs leading-6">
-          <MapPin size={14} className="mt-1 shrink-0 text-yellow" />
-          <div className="min-w-0">
-            <b className="block">{branch.address}</b>
-            <span className="muted">{branch.note}</span>
-          </div>
-        </div>
-
-        <div
-          className="flex items-center justify-between gap-2 rounded-xl px-3 py-2"
-          style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
+    <article
+      data-testid={`email-card-${channel.id}`}
+      className="flex flex-col min-w-0 rounded-3xl border border-theme p-4 sm:p-5 gap-4"
+      style={{ background: 'var(--card)' }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span
+          className="grid h-11 w-11 place-items-center rounded-2xl shrink-0"
+          style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--accent-text)' }}
         >
-          <div className="min-w-0">
-            <span className="block text-[10px] muted">{translateText("تماس مستقیم · ")}{branch.person}</span>
-            <a href={`tel:${branch.tel}`} className="font-black text-sm hover-yellow" dir="ltr">
-              {branch.phone}
-            </a>
-          </div>
-          <button
-            type="button"
-            onClick={copyPhone}
-            className="btn-ghost !p-2 shrink-0"
-            aria-label={translateText("کپی شماره")}
-            title={translateText("کپی شماره")}
-          >
-            {copied ? <Check size={14} style={{ color: '#17994f' }} /> : <Copy size={14} />}
-          </button>
-        </div>
-
-        <div className="mt-auto grid grid-cols-2 gap-2">
-          <a
-            href={`tel:${branch.tel}`}
-            className="btn-yellow inline-flex items-center justify-center gap-1.5 !py-2 text-[11px]"
-          >
-            <Phone size={13} />{translateText("تماس ")}</a>
-          <a
-            href={mapUrl(branch.mapQuery)}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="btn-ghost inline-flex items-center justify-center gap-1.5 !py-2 text-[11px]"
-          >
-            <Navigation size={13} />{translateText("مسیریابی ")}</a>
-        </div>
+          <Icon size={21} />
+        </span>
+        <span className="text-[10px] font-black tracking-widest uppercase muted" dir="ltr">
+          {channel.id}
+        </span>
       </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-black text-sm leading-7">{t(channel.title)}</h3>
+        <p className="text-xs muted leading-7 mt-2">{t(channel.desc)}</p>
+      </div>
+      <div
+        className="flex items-center justify-between gap-2 rounded-2xl px-3 py-3"
+        style={{ background: 'var(--card2)' }}
+      >
+        <a
+          href={emailHref(channel.email)}
+          className="text-sm font-black break-all hover-yellow"
+          dir="ltr"
+        >
+          {channel.email}
+        </a>
+        <button
+          type="button"
+          onClick={copy}
+          className="btn-ghost !p-2 shrink-0"
+          title={t(copied ? 'v21.emailCopied' : 'v20.copyEmail')}
+          aria-label={`${t('v20.copyEmail')} ${channel.email}`}
+        >
+          {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+        </button>
+        <span role="status" className="sr-only">
+          {copied ? t('v21.emailCopied') : ''}
+        </span>
+      </div>
+      <a
+        href={emailHref(channel.email, t(channel.title))}
+        className="btn-yellow w-full inline-flex items-center justify-center gap-2 text-xs !py-3"
+      >
+        <Send size={15} />
+        {t('v21.writeEmail')}
+      </a>
     </article>
   );
 }
 
-function ContactOfficeComponent() {
+export default function ContactOfficeComponent() {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      {/* شعبه‌ها */}
-      <div className="card rounded-3xl p-4 sm:p-5 lg:col-span-2">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <b className="text-sm font-black">{translateText("شعبه‌های ما")}</b>
-            <span className="ms-2 text-[11px] muted">{translateText("تهران · مازندران (هچیرود)")}</span>
+    <div data-testid="contact-email-hub" className="grid items-start gap-4 lg:grid-cols-3">
+      <section className="card rounded-3xl p-4 sm:p-6 min-w-0 lg:col-span-2">
+        <header className="flex items-start gap-3 mb-5">
+          <span
+            className="grid h-11 w-11 place-items-center rounded-2xl shrink-0"
+            style={{ background: 'var(--navy-deep)', color: 'var(--primary-color)' }}
+          >
+            <Mail size={21} />
+          </span>
+          <div className="min-w-0">
+            <h2 className="font-black text-base leading-7">{t('v21.emailGuide')}</h2>
+            <p className="text-xs muted leading-7 mt-1">{t('v21.emailGuideDesc')}</p>
           </div>
-          <span className="inline-flex items-center gap-1 text-[10px] muted">
-            <MapPin size={12} />{translateText("برای هر شعبه دکمه‌ی مسیریابی فعال است ")}</span>
-        </div>
-
+        </header>
         <div className="grid gap-3 sm:grid-cols-2">
-          {BRANCHES.map((branch) => (
-            <BranchCard key={branch.id} branch={branch} />
+          {channels.map((channel) => (
+            <EmailCard key={channel.id} channel={channel} />
           ))}
         </div>
-
-        <p className="mt-3 text-[11px] leading-6 muted">{translateText("برای بازدید حضوری یا تحویل دستگاه، قبل از مراجعه تماس بگیرید تا هماهنگی انجام شود. ")}</p>
-      </div>
-
-      {/* ساعات کاری */}
-      <div className="card rounded-3xl p-5">
-        <b className="flex items-center gap-2 text-sm font-black">
-          <Clock3 size={15} className="text-yellow" />{translateText("ساعات پاسخ‌دهی ")}</b>
-        <div className="mt-2">
-          {HOURS.map((row, index) => (
-            <div
-              key={row.day}
-              className="flex items-center justify-between gap-2 py-2 text-xs"
-              style={{ borderTop: index === 0 ? 'none' : '1px solid var(--border)' }}
-            >
-              <span className="muted">{row.day}</span>
-              <span className="font-bold" dir="ltr">
-                {row.time}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="mt-2 text-[11px] leading-5 muted">{translateText("پاسخ‌دهی به ایمیل‌ها و فرم سایت در روزهای کاری: کمتر از ۲۴ ساعت. ")}</p>
-      </div>
+        <p className="mt-4 text-[11px] muted leading-6">{t('b2b.emailNote')}</p>
+      </section>
+      <ContactEmailScopeComponent />
     </div>
   );
 }
-
-export default ContactOfficeComponent;

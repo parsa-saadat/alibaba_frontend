@@ -7,10 +7,9 @@ import { toFa } from '../../utils/helpers/format';
 import { API } from '../../config/api';
 
 // عدد پشتیبان در صورت در دسترس نبودن بک‌اند
-const FALLBACK = { products: 1200, stores: 85, categories: 12 };
+const FALLBACK = { products: null, stores: null, categories: null };
 /* سال تجربه: فعالیت از ۱۳۸۳ تا امروز */
-const EXPERIENCE_YEARS = 22;
-const SATISFACTION = translateText("۹۸٪");
+
 
 function AboutStatsComponent() {
   const [stats, setStats] = useState(null);
@@ -18,7 +17,7 @@ function AboutStatsComponent() {
   useEffect(() => {
     const controller = new AbortController();
     const pick = (result) => {
-      if (result.status !== 'fulfilled') return 0;
+      if (result.status !== 'fulfilled') return null;
       const body = getBody(result.value);
       if (Array.isArray(body)) return body.length;
       return Number(body?.total ?? body?.totalDocs ?? body?.data?.length ?? 0) || 0;
@@ -31,9 +30,9 @@ function AboutStatsComponent() {
     ]).then((results) => {
       if (controller.signal.aborted) return;
       setStats({
-        products: pick(results[0]) || FALLBACK.products,
-        stores: pick(results[1]) || FALLBACK.stores,
-        categories: pick(results[2]) || FALLBACK.categories,
+        products: pick(results[0]),
+        stores: pick(results[1]),
+        categories: pick(results[2]),
       });
     });
 
@@ -41,10 +40,10 @@ function AboutStatsComponent() {
   }, []);
 
   const items = [
-    { icon: Package, value: translateText("{{v0}} سال", {v0: (toFa(EXPERIENCE_YEARS))}), label: translateText("تجربه‌ی سران آسیا") },
-    { icon: Store, value: stats ? toFa(stats.stores) : '…', label: translateText("فروشنده و برند") },
-    { icon: FolderTree, value: stats ? toFa(stats.categories) : '…', label: translateText("دسته‌بندی نقشه‌برداری") },
-    { icon: Heart, value: SATISFACTION, label: translateText("رضایت خریداران") },
+    { icon: Package, value: stats?.products == null ? '—' : toFa(stats.products), label: translateText('v20.products') },
+    { icon: Store, value: stats?.stores == null ? '—' : toFa(stats.stores), label: translateText("فروشنده و برند") },
+    { icon: FolderTree, value: stats?.categories == null ? '—' : toFa(stats.categories), label: translateText("دسته‌بندی") },
+    { icon: Heart, value: toFa(4), label: translateText('v20.languages') },
   ];
 
   return (
@@ -73,7 +72,7 @@ function AboutStatsComponent() {
         })}
       </div>
 
-      <p className="text-center text-[10px] muted mt-2">{translateText("اعداد به‌صورت زنده از داده‌های فروشگاه خوانده می‌شوند. ")}</p>
+      <p className="text-center text-[10px] muted mt-2">{translateText('v20.live')}</p>
     </div>
   );
 }

@@ -1,43 +1,12 @@
 import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BadgePercent, Truck, ShieldCheck, Undo2, Headset } from 'lucide-react';
-
-const perks = [
-  { icon: Truck, title: translateText('ارسال سریع'), desc: translateText('به سراسر کشور') },
-  {
-    icon: ShieldCheck,
-    title: translateText('ضمانت اصالت'),
-    desc: translateText('کالای اصل و سالم'),
-  },
-  { icon: Undo2, title: translateText('بازگشت آسان'), desc: translateText('مرجوعی تا ۷ روز') },
-  { icon: Headset, title: translateText('پشتیبانی'), desc: translateText('همیشه در کنار شما') },
-];
+import { BadgePercent } from 'lucide-react';
 
 function OurPolicyComponent() {
   return (
-    <section data-testid="store-benefits" className="pb-10">
+    <section data-testid="seller-invitation" className="pb-10">
       <div className="max-w-[1440px] mx-auto px-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {perks.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              data-testid="benefit-card"
-              className="card rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 h-full min-w-0 text-center sm:text-start"
-            >
-              <Icon size={28} className="text-yellow shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="font-black text-xs sm:text-sm leading-5 min-h-10 break-words">
-                  {title}
-                </div>
-                <div className="text-[11px] sm:text-xs muted leading-5 min-h-10 break-words">
-                  {desc}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
         <div
           className="mt-4 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-4 justify-between text-white"
           style={{

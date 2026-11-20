@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL, INFO_EMAIL } from '../../config/contact';
 import { t as translateText } from '../../i18n/runtime.js';
 import React from 'react';
 import { toast } from 'react-toastify';
@@ -8,37 +9,37 @@ import { Clock3, Copy, Handshake, Headset, Mail, PackageSearch } from 'lucide-re
 const CHANNELS = [
   {
     icon: Headset,
-    title: translateText("مشاوره‌ی فنی خرید"),
-    value: translateText("انتخاب دستگاه و استعلام قیمت"),
-    hint: translateText("راهنمایی برای انتخاب مدل مناسب پروژه"),
-    action: translateText("درخواست مشاوره"),
+    title: translateText('v20.siteHelp'),
+    value: translateText('v20.login'),
+    hint: translateText('b2b.webSupportDesc'),
+    action: translateText('v20.formAction'),
     anchor: '#contact-form',
   },
   {
     icon: PackageSearch,
-    title: translateText("پیگیری سفارش"),
-    value: translateText("با کد سفارش، در بخش سفارش‌های من"),
-    hint: translateText("وضعیت پردازش و ارسال، لحظه‌ای"),
-    action: translateText("پیگیری سفارش"),
+    title: translateText('پیگیری سفارش'),
+    value: translateText('با کد سفارش، در بخش سفارش‌های من'),
+    hint: translateText('v20.termsShort'),
+    action: translateText('پیگیری سفارش'),
     to: '/orders',
   },
   {
     icon: Mail,
-    title: translateText("ایمیل"),
+    title: translateText('ایمیل'),
     value: 'info@geokala.ir',
     copy: 'info@geokala.ir',
     href: 'mailto:info@geokala.ir',
-    hint: translateText("پاسخ‌دهی حداکثر تا ۲۴ ساعت کاری"),
-    action: translateText("ارسال ایمیل"),
+    hint: translateText('v20.noTime'),
+    action: translateText('ارسال ایمیل'),
   },
   {
     icon: Handshake,
-    title: translateText("همکاری و نمایندگی"),
-    value: 'partner@geokala.ir',
-    copy: 'partner@geokala.ir',
-    href: 'mailto:partner@geokala.ir',
-    hint: translateText("فروشندگان، نمایندگان و تأمین‌کنندگان"),
-    action: translateText("ارسال درخواست"),
+    title: translateText('v20.privacy'),
+    value: SUPPORT_EMAIL,
+    copy: SUPPORT_EMAIL,
+    href: `mailto:${SUPPORT_EMAIL}`,
+    hint: translateText('v20.profileHelp'),
+    action: translateText('ارسال درخواست'),
   },
 ];
 
@@ -47,9 +48,9 @@ function ContactPhoneComponent() {
   const copyValue = async (value) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success(translateText("در حافظه کپی شد"));
+      toast.success(translateText('در حافظه کپی شد'));
     } catch {
-      toast.error(translateText("امکان کپی خودکار نیست، مقدار را دستی انتخاب کنید."));
+      toast.error(translateText('امکان کپی خودکار نیست، مقدار را دستی انتخاب کنید.'));
     }
   };
 
@@ -74,8 +75,8 @@ function ContactPhoneComponent() {
                   type="button"
                   onClick={() => copyValue(channel.copy)}
                   className="muted hover-yellow transition-colors"
-                  aria-label={translateText("کپی")}
-                  title={translateText("کپی")}
+                  aria-label={translateText('کپی')}
+                  title={translateText('کپی')}
                 >
                   <Copy size={15} />
                 </button>
