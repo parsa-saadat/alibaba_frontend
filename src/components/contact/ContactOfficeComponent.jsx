@@ -43,7 +43,7 @@ function EmailCard({ channel }) {
       <div className="flex items-center justify-between gap-3">
         <span
           className="grid h-11 w-11 place-items-center rounded-2xl shrink-0"
-          style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--accent-text)' }}
+          style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--accent-text)' }}
         >
           <Icon size={21} />
         </span>

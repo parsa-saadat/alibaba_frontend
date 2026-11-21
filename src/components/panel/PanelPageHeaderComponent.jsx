@@ -32,14 +32,14 @@ function PanelPageHeader({
       <div
         className="p-5 flex flex-wrap items-center justify-between gap-4"
         style={{
-          background: 'linear-gradient(115deg, rgba(255,214,10,0.16), rgba(255,214,10,0) 58%)',
+          background: 'linear-gradient(115deg, rgba(255,106,0,0.16), rgba(255,106,0,0) 58%)',
         }}
       >
         <div className="flex items-center gap-3 min-w-0">
           {Icon ? (
             <span
               className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl"
-              style={{ background: 'var(--primary-color)', color: '#0a1736' }}
+              style={{ background: 'var(--primary-color)', color: '#ffffff' }}
             >
               <Icon size={22} />
             </span>

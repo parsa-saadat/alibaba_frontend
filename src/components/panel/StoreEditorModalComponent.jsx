@@ -53,7 +53,13 @@ function StoreEditorModalComponent({
   }, [onClose]);
   const currentUser = getUser();
   const [form, setForm] = useState(EMPTY);
-  const content = useLocalizedContent(form, setForm, ['name', 'description'], 'store');
+  /* آدرس فروشگاه هم مثل نام و توضیحات چندزبانه است */
+  const content = useLocalizedContent(
+    form,
+    setForm,
+    ['name', 'description', 'address'],
+    'store',
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [zoomFile, setZoomFile] = useState(null);
@@ -95,7 +101,7 @@ function StoreEditorModalComponent({
       banner_image_id: getId(store.banner_image_id) || '',
       email: store.contact_info?.email || '',
       phone: store.contact_info?.phone || store.contact_info?.fax || '',
-      address: store.contact_info?.address ?? store.address ?? '',
+      address: store.address ?? store.contact_info?.address ?? '',
     });
   }, [store]);
 
@@ -550,12 +556,16 @@ function StoreEditorModalComponent({
 
           <label className="text-xs muted sm:col-span-2">
             {translateText('آدرس فروشگاه ')}
-            <input
+            <textarea
               className="input mt-1"
-              value={form.address}
-              dir="auto"
+              rows={2}
+              value={content.value('address')}
+              dir={content.dir}
+              aria-label={`${content.locale} address`}
+              lang={content.locale}
               maxLength={2000}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              onChange={(e) => content.update('address', e.target.value)}
+              placeholder={content.placeholder('address')}
             />
           </label>
 

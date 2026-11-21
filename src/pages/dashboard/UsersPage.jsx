@@ -40,7 +40,7 @@ const initialOf = (user) => (fullNameOf(user)[0] || translateText('ک')).toUpper
 const roleMeta = (user) => {
   const role = String(user.role || 'user').toLowerCase();
   if (role === 'admin' || role === 'root')
-    return { label: translateText('مدیر'), color: '#ffd60a', bg: 'rgba(255,214,10,0.14)' };
+    return { label: translateText('مدیر'), color: '#ff6a00', bg: 'rgba(255,106,0,0.14)' };
   if (user.is_seller || role === 'seller')
     return { label: translateText('فروشنده'), color: '#2563eb', bg: 'rgba(37,99,235,0.14)' };
   return { label: translateText('کاربر'), color: '#17994f', bg: 'rgba(23,153,79,0.14)' };
@@ -248,7 +248,7 @@ function UsersPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#0a1736',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined

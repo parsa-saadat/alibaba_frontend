@@ -69,7 +69,7 @@ export function isValidBackendMarkdown(text) {
   return MD_PATTERNS.some((re) => re.test(text));
 }
 
-const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#0a1736' };
+const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#ffffff' };
 
 /* ------------------------------------------------------------------ */
 /* ابزارهای کمکی رسانه                                                 */

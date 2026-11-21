@@ -5,7 +5,8 @@ import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
 import { Smartphone, KeyRound, User, ArrowLeft } from 'lucide-react';
 import {
-  validateIRPhoneSyntax,
+  normalizePhoneNumber,
+  validateAuthPhone,
   validateOtpSyntax,
 } from '../../../utils/validators/phone.validator';
 import { useShop } from '../../../contexts/ShopContext';
@@ -28,9 +29,12 @@ function RegisterPage() {
 
   const sendCode = (e) => {
     e.preventDefault();
-    if (!validateIRPhoneSyntax(phone)) return toast.error(translateText("شماره موبایل معتبر نیست"));
+    /* پذیرش هم ۰۹۱۲... و هم +98912... و ارسال شکل استاندارد +98 */
+    const normalized = normalizePhoneNumber(phone);
+    if (!validateAuthPhone(phone)) return toast.error(translateText("شماره موبایل معتبر نیست"));
+    setPhone(normalized);
     axios
-      .post(`${API}/auth/pre`, { phone })
+      .post(`${API}/auth/pre`, { phone: normalized })
       .then((res) => {
         if (res.data.success) {
           setDevCode(res.data.body || '');

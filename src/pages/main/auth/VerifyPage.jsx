@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
 import {
-  validateIRPhoneSyntax,
+  validateAuthPhone,
   validateOtpSyntax,
 } from '../../../utils/validators/phone.validator';
 import { useShop } from '../../../contexts/ShopContext';
@@ -24,7 +24,7 @@ function VerifyPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!validateIRPhoneSyntax(phone)) {
+    if (!validateAuthPhone(phone)) {
       toast.error(translateText("شماره موبایل نامعتبر است"));
       navigate('/auth/pre');
       return;

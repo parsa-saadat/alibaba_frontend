@@ -254,7 +254,7 @@ function StorePage() {
         <div className="card rounded-3xl p-8 text-center">
           <span
             className="mx-auto grid h-16 w-16 place-items-center rounded-2xl text-yellow"
-            style={{ background: 'rgba(255,214,10,0.12)' }}
+            style={{ background: 'rgba(255,106,0,0.12)' }}
           >
             <StoreIcon size={30} />
           </span>
@@ -276,7 +276,7 @@ function StorePage() {
   }
 
   /* فعال/غیرفعال از وضعیت فروشنده (روت عمومی کاربر) و در نبود آن از وضعیت فروشگاه */
-  const contact = store.contact_info || {};
+  const contact = { ...(store.contact_info || {}), address: store.address || store.contact_info?.address };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">

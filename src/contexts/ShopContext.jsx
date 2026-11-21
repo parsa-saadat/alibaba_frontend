@@ -99,7 +99,7 @@ export const ShopProvider = ({ children }) => {
   const [authReady, setAuthReady] = useState(() => !getToken());
   const [favorites, setFavorites] = useState(readList('favorites'));
   const [compare, setCompare] = useState(readList('compare'));
-  const [theme, setTheme] = useState(() => storeGet('theme') || 'dark');
+  const [theme, setTheme] = useState(() => storeGet('theme') || 'light');
 
   const cartRef = useRef([]);
   const userRef = useRef(user);

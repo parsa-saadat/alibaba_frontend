@@ -66,7 +66,7 @@ function ContactPhoneComponent() {
             <div className="flex items-start justify-between gap-2">
               <span
                 className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
-                style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+                style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
               >
                 <Icon size={21} />
               </span>

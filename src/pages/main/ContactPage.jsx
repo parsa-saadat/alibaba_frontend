@@ -250,7 +250,7 @@ function ContactPage() {
           className="rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-5"
           style={{
             background:
-              'linear-gradient(135deg, rgba(255,214,10,0.14), rgba(255,214,10,0.02)), var(--card)',
+              'linear-gradient(135deg, rgba(255,106,0,0.14), rgba(255,106,0,0.02)), var(--card)',
             border: '1px solid color-mix(in srgb, var(--primary-color) 32%, transparent)',
           }}
         >

@@ -31,9 +31,9 @@ function DayCell({ day, selected, today, onClick }) {
   const base =
     'h-8 w-8 rounded-lg text-xs font-bold grid place-items-center transition-colors';
   const style = selected
-    ? { background: 'var(--primary-color)', color: '#0a1736' }
+    ? { background: 'var(--primary-color)', color: '#ffffff' }
     : today
-      ? { background: 'rgba(255,214,10,0.16)', color: 'var(--text)' }
+      ? { background: 'rgba(255,106,0,0.16)', color: 'var(--text)' }
       : undefined;
   return (
     <button

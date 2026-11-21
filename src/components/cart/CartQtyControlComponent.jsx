@@ -54,7 +54,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           disabled={cannotIncrement}
           aria-label={translateText("افزایش تعداد")}
           className="flex h-9 w-9 items-center justify-center rounded-lg transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
-          style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
+          style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
         >
           <Plus size={16} />
         </button>

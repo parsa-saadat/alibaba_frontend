@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Smartphone, ArrowLeft } from 'lucide-react';
-import { validateIRPhoneSyntax } from '../../../utils/validators/phone.validator';
+import { normalizePhoneNumber, validateAuthPhone } from '../../../utils/validators/phone.validator';
 import AuthShellComponent from '../../../components/auth/AuthShellComponent';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
@@ -15,17 +15,19 @@ function PrePage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validateIRPhoneSyntax(phone)) {
+    /* هم ۰۹۱۲... و هم +98912... پذیرفته می‌شود و به شکل استاندارد +98 فرستاده می‌شود */
+    const normalized = normalizePhoneNumber(phone);
+    if (!validateAuthPhone(phone)) {
       toast.error(translateText("شماره موبایل معتبر نیست"));
       return;
     }
     axios
-      .post(`${API}/auth/pre`, { phone })
+      .post(`${API}/auth/pre`, { phone: normalized })
       .then((res) => {
         if (res.data.success) {
           toast.success(translateText("کد تایید ارسال شد"));
           const dev = res.data.body ? `&code=${res.data.body}` : '';
-          navigate(`/auth/verify?phone=${phone}${dev}`);
+          navigate(`/auth/verify?phone=${encodeURIComponent(normalized)}${dev}`);
         } else {
           toast.error(res.data.message || translateText("خطا در ارسال کد"));
         }

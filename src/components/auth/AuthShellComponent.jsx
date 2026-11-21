@@ -19,7 +19,7 @@ function AuthShellComponent({ title, subtitle, children, footer }) {
         display: 'grid',
         alignItems: 'center',
         background:
-          'radial-gradient(circle at 15% 10%, rgba(255,214,10,0.16) 0%, rgba(255,214,10,0) 45%), radial-gradient(circle at 90% 90%, rgba(80,120,255,0.18) 0%, rgba(80,120,255,0) 50%), linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-deep) 100%)',
+          'radial-gradient(circle at 15% 10%, rgba(255,106,0,0.16) 0%, rgba(255,106,0,0) 45%), radial-gradient(circle at 90% 90%, rgba(255,106,0,0.16) 0%, rgba(255,106,0,0) 50%), linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-deep) 100%)',
       }}
     >
       <div

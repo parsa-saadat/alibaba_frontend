@@ -139,7 +139,7 @@ function SectionCard({ icon: Icon, title, desc, children }) {
       <header className="mb-3 flex items-start gap-2">
         <span
           className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-yellow"
-          style={{ background: 'rgba(255,214,10,0.12)' }}
+          style={{ background: 'rgba(255,106,0,0.12)' }}
         >
           <Icon size={16} />
         </span>
@@ -459,7 +459,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             <h2 className="flex items-center gap-2 text-base font-black sm:text-lg">{translateText("ویرایش فروشنده ")}{dirtyKeys.length > 0 && (
                 <span
                   className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                  style={{ background: 'rgba(255,214,10,0.16)', color: 'var(--primary-color)' }}
+                  style={{ background: 'rgba(255,106,0,0.16)', color: 'var(--primary-color)' }}
                 >
                   {toFa(dirtyKeys.length)}{translateText(" تغییر ")}</span>
               )}

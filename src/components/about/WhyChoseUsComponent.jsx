@@ -64,7 +64,7 @@ function WhyChoseUsComponent() {
             >
               <span
                 className="w-11 h-11 rounded-xl grid place-items-center"
-                style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+                style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
               >
                 <Icon size={20} />
               </span>

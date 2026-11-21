@@ -10,7 +10,7 @@ function PageHeroComponent({ breadcrumb, badge, title, description, highlights =
       className="relative overflow-hidden"
       style={{
         background:
-          'radial-gradient(circle at 14% 16%, rgba(255,214,10,0.16) 0%, rgba(255,214,10,0) 52%), linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-deep) 100%)',
+          'radial-gradient(circle at 14% 16%, rgba(255,106,0,0.16) 0%, rgba(255,106,0,0) 52%), linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-deep) 100%)',
       }}
     >
       <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-20">
@@ -24,7 +24,7 @@ function PageHeroComponent({ breadcrumb, badge, title, description, highlights =
           {badge && (
             <span
               className="inline-flex items-center gap-1.5 text-[11px] font-bold rounded-full px-3 py-1"
-              style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+              style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
             >
               <Sparkles size={12} />
               {badge}

@@ -942,7 +942,7 @@ textarea[dir='rtl'] {
 
 /* The public language strip shares the header's navy in both themes. */
 .locale-selector.regional-bar--main.regional-placement--bar {
-  background:#0a1736;color:#f3f6ff;border-color:rgba(255,255,255,.13);
+  background:#1a1b1e;color:#f3f6ff;border-color:rgba(255,255,255,.13);
 }
 .regional-bar--main.regional-placement--bar .regional-bar__caption {color:#e6ecfa;min-width:0;}
 .regional-bar--main.regional-placement--bar .regional-trigger {color:#f3f6ff;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);}
@@ -955,7 +955,7 @@ textarea[dir='rtl'] {
  .btn-yellow,.btn-ghost{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
 }
 /* Public header strip and mobile menu use the same navy surface. */
-.site-regional-strip{background:#0a1736;border-color:rgba(255,255,255,.13);}
-.site-regional-strip .regional-placement--header,.regional-bar--main.regional-placement--menu{background:#0a1736;color:#f3f6ff;}
-.site-regional-strip .regional-bar__caption,.site-regional-strip .regional-trigger{color:#eef2ff;}
+.site-regional-strip{background:#1a1b1e;border-color:rgba(255,255,255,.13);}
+.site-regional-strip .regional-placement--header,.regional-bar--main.regional-placement--menu{background:#1a1b1e;color:#f3f6ff;}
+.site-regional-strip .regional-bar__caption,.site-regional-strip .regional-trigger{color:#f2f2f3;}
 .site-regional-strip .regional-trigger{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);}

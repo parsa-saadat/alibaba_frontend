@@ -41,7 +41,7 @@ function ProductScrollerComponent({
     'hidden md:grid w-9 h-9 rounded-full card place-items-center hover:text-yellow transition-colors';
 
   return (
-    <section className="card rounded-3xl p-4 sm:p-5">
+    <section className="rounded-3xl p-4 sm:p-5 sm:card section-flat-mobile">
       <div className="flex items-end justify-between flex-wrap gap-3 mb-3">
         <div>
           <TitleComponent partone={partone} parttwo={parttwo} icon={icon} />

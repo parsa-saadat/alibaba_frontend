@@ -318,7 +318,7 @@ function OrdersPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#0a1736',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -646,7 +646,7 @@ function OrdersPage() {
                       cancelPreset === reason
                         ? {
                             background: 'var(--primary-color)',
-                            color: '#0a1736',
+                            color: '#1a1b1e',
                             borderColor: 'transparent',
                           }
                         : undefined

@@ -276,7 +276,7 @@ function CounterPage() {
         className="card rounded-3xl overflow-hidden"
         style={{
           background:
-            'linear-gradient(120deg, rgba(255,214,10,0.20), rgba(255,214,10,0.04) 45%, rgba(37,99,235,0.10))',
+            'linear-gradient(120deg, rgba(255,106,0,0.20), rgba(255,106,0,0.04) 45%, rgba(37,99,235,0.10))',
         }}
       >
         <div className="p-5 flex flex-wrap items-center justify-between gap-4">
@@ -409,7 +409,7 @@ function CounterPage() {
                       height: `${height}%`,
                       background:
                         day.value > 0
-                          ? 'linear-gradient(180deg, var(--primary-color), rgba(255,214,10,0.35))'
+                          ? 'linear-gradient(180deg, var(--primary-color), rgba(255,106,0,0.35))'
                           : 'var(--card2)',
                     }}
                     title={`${day.label}: ${compactMoney(day.value)}`}

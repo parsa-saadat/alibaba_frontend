@@ -25,12 +25,15 @@ import {
   X,
 } from 'lucide-react';
 import ProductComponent, { ProductSkeleton } from '../../components/product/ProductComponent';
+import ProductViewSwitcher from '../../components/product/ProductViewSwitcher';
 import SupplierCardComponent, {
   SupplierSkeleton,
 } from '../../components/shop/SupplierCardComponent';
 import { fetchCategories, buildCategoryTree } from '../../utils/helpers/categories';
 import { getBody, getList } from '../../utils/helpers/response';
 import { toFa, productionYearForApi } from '../../utils/helpers/format';
+import useProductViewMode from '../../hooks/useProductViewMode';
+import useIsDesktop from '../../hooks/useIsDesktop';
 
 /* ------------------------------------------------------------------ */
 /* ثابت‌ها                                                              */
@@ -109,8 +112,7 @@ const STOCK_OPTIONS = [
  *   ۱۰۲۴px (با سایدبار ۲۷۲px) → ۳ ستون (~۲۲۷px) · ۱۲۸۰px+ → ۴ ستون (~۲۳۰px)
  */
 /* سه ستون در دسکتاپ — هم‌اندازه با گرید صفحه‌ی فروشگاه (درخواست کاربر) */
-/* موبایل دو ستونه است تا کارت‌ها غول‌آسا و خالی نشوند؛ تبلت سه‌ستونه */
-const GRID_CLASS = 'grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3';
+/* موبایل دو ستونه تا کارت‌ها غول‌آسا و خالی نشوند؛ تبلت سه‌ستونه */
 
 /* ------------------------------------------------------------------ */
 /* رنگ‌های تم — همه از متغیرهای پروژه (بدون رنگ ثابت)                    */
@@ -125,7 +127,7 @@ const ACCENT_SOFT = {
 /* دکمه/چیپ انتخاب‌شده */
 const ACCENT = {
   background: 'var(--primary-color)',
-  color: 'var(--navy)',
+  color: 'var(--on-primary)',
 };
 /* ریلی که انتخاب‌شده نیست (اسلایدر و سوییچ) */
 const TRACK_BG = {
@@ -1102,17 +1104,27 @@ function Pagination({ page, totalPages, onChange }) {
 /* شبکه‌ی محصولات (با اسکلتون و حالت خالی)                              */
 /* ------------------------------------------------------------------ */
 
-function ProductsGrid({ products, loading, onClear }) {
+function ProductsGrid({ products, loading, onClear, viewMode = 'double' }) {
   const showSkeletons = loading && products.length === 0;
+  /* حالت‌های نمایش: دوتایی / تکی افقی / تکی عمودی (تکی عمودی فقط موبایل — دسکتاپ → دوتایی) */
+  const variant =
+    viewMode === 'single' ? 'wide' : viewMode === 'single-vertical' ? 'tall' : 'grid';
+  /* دوتایی: دسکتاپ ۴ کنار هم، تبلت ۳، گوشی ۲ — تکی عمودی: از ۳ تا ۱ ستون */
+  const gridClass =
+    viewMode === 'single'
+      ? 'grid grid-cols-1 gap-2.5 sm:gap-3'
+      : viewMode === 'single-vertical'
+        ? 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3'
+        : 'grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4';
 
   if (showSkeletons) {
     return (
       <div
-        className={GRID_CLASS}
+        className={gridClass}
         aria-busy="true"
         aria-label={translateText('در حال بارگذاری محصولات')}
       >
-        {Array.from({ length: 12 }, (_, index) => (
+        {Array.from({ length: viewMode === 'double' ? 12 : 5 }, (_, index) => (
           <ProductSkeleton key={index} />
         ))}
       </div>
@@ -1138,13 +1150,17 @@ function ProductsGrid({ products, loading, onClear }) {
 
   return (
     <div
-      className={`${GRID_CLASS} transition-opacity duration-150 ${
+      className={`${gridClass} transition-opacity duration-150 ${
         loading ? 'pointer-events-none opacity-40' : ''
       }`}
       aria-busy={loading}
     >
       {products.map((product) => (
-        <ProductComponent key={product._id || product.id} product={product} />
+        <ProductComponent
+          key={product._id || product.id}
+          product={product}
+          variant={variant}
+        />
       ))}
     </div>
   );
@@ -1222,6 +1238,11 @@ function ShopPage() {
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  /* حالت نمایش محصولات: دوتایی / تکی / تکی عمودی (تکی عمودی فقط موبایل) */
+  const [viewMode, setViewMode] = useProductViewMode('double');
+  const isDesktop = useIsDesktop();
+  /* در دسکتاپ حالت «تکی عمودی» وجود ندارد → دوتایی نمایش داده می‌شود */
+  const effectiveViewMode = isDesktop && viewMode === 'single-vertical' ? 'double' : viewMode;
 
   const updateParams = (patch) => {
     setSearchParams((previous) => {
@@ -1471,43 +1492,50 @@ function ShopPage() {
         </div>
       </header>
 
-      {/* تب‌ها: محصولات | تأمین‌کنندگان (مثل علی‌بابا) */}
-      <div
-        role="tablist"
-        aria-label={translateText('نوع نتایج')}
-        className="flex items-center gap-6 px-1"
-        style={{ borderBottom: '1px solid var(--border)' }}
-      >
-        {[
-          { key: 'products', label: translateText('محصولات'), icon: Boxes },
-          { key: 'suppliers', label: translateText('تأمین‌کنندگان'), icon: StoreIcon },
-        ].map((item) => {
-          const active = (item.key === 'suppliers') === isSuppliers;
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => !active && switchTab(item.key)}
-              className="relative flex shrink-0 items-center gap-1.5 whitespace-nowrap px-1 pb-2.5 pt-1 text-sm transition"
-              style={{
-                fontWeight: active ? 900 : 600,
-                color: active ? 'var(--text)' : 'var(--muted)',
-                boxShadow: active ? 'inset 0 -3px 0 var(--primary-color)' : 'none',
-              }}
-            >
-              <Icon size={15} />
-              {item.label}
-              {item.key === 'suppliers' && isSuppliers && supplierTotal !== null && (
-                <span className="rounded-full px-1.5 text-[10px] font-black" style={ACCENT_SOFT}>
-                  {toFa(supplierTotal)}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* تب‌ها: محصولات | تأمین‌کنندگان (مثل علی‌بابا) + انتخابگر حالت نمایش */}
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div
+          role="tablist"
+          aria-label={translateText('نوع نتایج')}
+          className="flex items-center gap-6 px-1"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          {[
+            { key: 'products', label: translateText('محصولات'), icon: Boxes },
+            { key: 'suppliers', label: translateText('تأمین‌کنندگان'), icon: StoreIcon },
+          ].map((item) => {
+            const active = (item.key === 'suppliers') === isSuppliers;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => !active && switchTab(item.key)}
+                className="relative flex shrink-0 items-center gap-1.5 whitespace-nowrap px-1 pb-2.5 pt-1 text-sm transition"
+                style={{
+                  fontWeight: active ? 900 : 600,
+                  color: active ? 'var(--text)' : 'var(--muted)',
+                  boxShadow: active ? 'inset 0 -3px 0 var(--primary-color)' : 'none',
+                }}
+              >
+                <Icon size={15} />
+                {item.label}
+                {item.key === 'suppliers' && isSuppliers && supplierTotal !== null && (
+                  <span className="rounded-full px-1.5 text-[10px] font-black" style={ACCENT_SOFT}>
+                    {toFa(supplierTotal)}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* انتخابگر حالت نمایش — فقط در تب محصولات */}
+        {!isSuppliers && (
+          <ProductViewSwitcher value={effectiveViewMode} onChange={setViewMode} />
+        )}
       </div>
 
       {/* چیپ‌های فعال */}
@@ -1581,7 +1609,12 @@ function ShopPage() {
           ) : isSuppliers ? (
             <SuppliersList suppliers={suppliers} loading={loading} onClear={resetFilters} />
           ) : (
-            <ProductsGrid products={products} loading={loading} onClear={resetFilters} />
+            <ProductsGrid
+              products={products}
+              loading={loading}
+              onClear={resetFilters}
+              viewMode={effectiveViewMode}
+            />
           )}
 
           <Pagination page={page} totalPages={totalPages} onChange={goToPage} />

@@ -14,6 +14,7 @@ export function contentPlaceholder(locale, entity, field) {
       short_description: 'Write a short introduction in English',
       description: 'Write the description in English…',
       tags: 'Add a tag in English…',
+      address: 'Enter the store address in English…',
     },
     fa: {
       brand: 'نام برند به فارسی؛ املای رسمی برند را حفظ کنید',
@@ -21,6 +22,7 @@ export function contentPlaceholder(locale, entity, field) {
       short_description: 'معرفی کوتاه را به فارسی بنویسید',
       description: 'توضیحات را به فارسی بنویسید…',
       tags: 'افزودن برچسب فارسی…',
+      address: 'آدرس فروشگاه را به فارسی وارد کنید…',
     },
     ar: {
       brand: 'اسم العلامة بالعربية؛ حافظ على التهجئة الرسمية',
@@ -28,6 +30,7 @@ export function contentPlaceholder(locale, entity, field) {
       short_description: 'اكتب مقدمة قصيرة بالعربية',
       description: 'اكتب الوصف بالعربية…',
       tags: 'أضف وسماً بالعربية…',
+      address: 'أدخل عنوان المتجر بالعربية…',
     },
     tr: {
       brand: 'Türkçe marka adı; resmî yazımı koruyun',
@@ -35,6 +38,7 @@ export function contentPlaceholder(locale, entity, field) {
       short_description: 'Kısa tanıtımı Türkçe yazın',
       description: 'Açıklamayı Türkçe yazın…',
       tags: 'Türkçe etiket ekleyin…',
+      address: 'Mağaza adresini Türkçe girin…',
     },
   };
 

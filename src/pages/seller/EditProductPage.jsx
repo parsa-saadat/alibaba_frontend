@@ -20,7 +20,8 @@ function EditProductPage() {
   useEffect(() => {
     Promise.all([
       axios
-        .get(`${API}/product/${productId}?lang=all&currency=USD`, authHeaders())
+        /* /perm/product تا کپی‌های غیرفعال/خصوصی (تکثیرشده) هم قابل ویرایش باشند */
+        .get(`${API}/perm/product/${productId}?lang=all&currency=USD`, authHeaders())
         .catch(() => null),
       axios.get(`${API}/perm/stores?limit=50`, authHeaders()).catch(() => null),
       axios.get(`${API}/category?limit=100`, authHeaders()).catch(() => null),

@@ -41,7 +41,7 @@ function SellerNavbarComponent() {
   const SidebarInner = ({ isMobile = false }) => {
     const isCompact = !isMobile && collapsed;
     return (
-      <div className="flex flex-col h-full bg-[#0a1736] text-white select-none">
+      <div className="flex flex-col h-full bg-[#1a1b1e] text-white select-none">
         <div
           className={`border-b border-white/10 flex items-center ${
             isCompact ? 'justify-center p-3' : 'justify-between gap-2 p-4'
@@ -88,9 +88,9 @@ function SellerNavbarComponent() {
             onClick={() => setCollapsed(false)}
             className="mx-auto my-2 grid h-8 w-8 place-items-center rounded-full"
             style={{
-              background: 'rgba(255,214,10,0.14)',
+              background: 'rgba(255,106,0,0.14)',
               color: 'var(--primary-color)',
-              border: '1px solid rgba(255,214,10,0.35)',
+              border: '1px solid rgba(255,106,0,0.35)',
             }}
             title={translateText('باز کردن منو')}
             aria-label={translateText('باز کردن منو')}
@@ -117,7 +117,7 @@ function SellerNavbarComponent() {
                     isCompact ? 'justify-center px-2' : 'justify-between px-3'
                   } py-2.5 rounded-xl text-sm transition-all ${
                     isActive
-                      ? 'bg-[#ffd60a] text-[#0a1736] font-black shadow-md'
+                      ? 'bg-[#ff6a00] text-white font-black shadow-md'
                       : 'text-[#d8e1fa] hover:bg-white/10'
                   }`
                 }
@@ -187,7 +187,7 @@ function SellerNavbarComponent() {
 
   return (
     <>
-      <div className="lg:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-theme bg-[#0a1736] text-white">
+      <div className="lg:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-theme bg-[#1a1b1e] text-white">
         <div className="flex items-center gap-2">
           <button
             type="button"

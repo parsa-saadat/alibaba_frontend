@@ -73,7 +73,7 @@ function ContactFaqComponent() {
                     className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-black transition-colors duration-300"
                     style={
                       open
-                        ? { background: 'var(--primary-color)', color: 'var(--navy)' }
+                        ? { background: 'var(--primary-color)', color: 'var(--on-primary' }
                         : { background: 'var(--card)', color: 'var(--muted)' }
                     }
                   >

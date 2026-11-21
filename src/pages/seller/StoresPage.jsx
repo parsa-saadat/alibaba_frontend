@@ -236,7 +236,7 @@ function StoresPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#0a1736',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -349,7 +349,7 @@ function StoresPage() {
                     height: 84,
                     background: store.banner_image_id
                       ? 'var(--card2)'
-                      : 'linear-gradient(135deg, var(--card2), rgba(255,214,10,0.35))',
+                      : 'linear-gradient(135deg, var(--card2), rgba(255,106,0,0.35))',
                   }}
                 >
                   {store.banner_image_id && (

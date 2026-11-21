@@ -65,7 +65,7 @@ function AboutStoryComponent() {
         >
           <span
             className="w-10 h-10 rounded-xl grid place-items-center"
-            style={{ background: 'rgba(255,214,10,0.16)', color: 'var(--primary-color)' }}
+            style={{ background: 'rgba(255,106,0,0.16)', color: 'var(--primary-color)' }}
           >
             <Target size={18} />
           </span>
@@ -76,7 +76,7 @@ function AboutStoryComponent() {
         <div className="card rounded-3xl p-6 flex-1">
           <span
             className="w-10 h-10 rounded-xl grid place-items-center"
-            style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+            style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
           >
             <Users size={18} />
           </span>

@@ -273,18 +273,14 @@ function NavbarComponent() {
               className="header-brand-link flex items-center min-w-0"
               aria-label={translateText('ژئوکالا — صفحه اصلی')}
             >
-              <BrandLogoComponent
-                variant="full"
-                size="sm"
-                tone="white"
-                className="md:hidden header-mobile-logo"
-              />
-              <BrandLogoComponent
-                variant="full"
-                size="md"
-                tone="white"
-                className="hidden md:block"
-              />
+              {/* wrapper جدا برای موبایل؛ display لوگو با کلاس تم کنترل می‌شود */}
+              <span className="md:hidden header-mobile-logo">
+                <BrandLogoComponent variant="full" size="sm" tone="auto" />
+              </span>
+              {/* wrapper جدا تا display تی‌لویند با toggle تم لوگو تداخل نکند */}
+              <span className="hidden md:block">
+                <BrandLogoComponent variant="full" size="md" tone="auto" />
+              </span>
             </Link>
           </div>
 
@@ -572,7 +568,7 @@ function NavbarComponent() {
                       <span>{translateText('مقایسه')}</span>
                     </span>
                     {compare.length > 0 && (
-                      <span className="rounded-full bg-[#ffd60a] px-1.5 py-0.5 text-[10px] font-black text-[#0a1736]">
+                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-white">
                         {compare.length}
                       </span>
                     )}
@@ -588,7 +584,7 @@ function NavbarComponent() {
                       <span>{translateText('علاقه‌مندی')}</span>
                     </span>
                     {favorites.length > 0 && (
-                      <span className="rounded-full bg-[#ffd60a] px-1.5 py-0.5 text-[10px] font-black text-[#0a1736]">
+                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-white">
                         {favorites.length}
                       </span>
                     )}
@@ -604,7 +600,7 @@ function NavbarComponent() {
                       <span>{translateText('سبد خرید')}</span>
                     </span>
                     {cartCount > 0 && (
-                      <span className="rounded-full bg-[#ffd60a] px-1.5 py-0.5 text-[10px] font-black text-[#0a1736]">
+                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-white">
                         {cartCount}
                       </span>
                     )}

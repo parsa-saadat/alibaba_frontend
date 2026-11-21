@@ -470,12 +470,12 @@ function ProfilePage() {
       <section data-testid="profile-header" className="card rounded-3xl overflow-hidden min-w-0">
         <div
           className="p-4 sm:p-6 space-y-5"
-          style={{ background: 'linear-gradient(120deg, rgba(255,214,10,0.08), transparent 65%)' }}
+          style={{ background: 'linear-gradient(120deg, rgba(255,106,0,0.08), transparent 65%)' }}
         >
           <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             <div
               className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-2xl grid place-items-center font-black text-xl sm:text-2xl"
-              style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
+              style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
               aria-hidden="true"
             >
               {userInitial(user)}

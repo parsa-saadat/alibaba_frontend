@@ -39,7 +39,7 @@ function AboutTimelineComponent() {
                 <div className="flex flex-col items-center shrink-0">
                   <span
                     className="grid h-8 w-8 place-items-center rounded-lg text-[11px] font-black tabular-nums"
-                    style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+                    style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
                   >
                     {toFa(index + 1)}
                   </span>
@@ -62,14 +62,14 @@ function AboutTimelineComponent() {
           className="rounded-3xl p-6 sm:p-7 text-white flex flex-col justify-between"
           style={{
             background:
-              'radial-gradient(circle at 80% 15%, rgba(255,214,10,0.18) 0%, rgba(255,214,10,0) 50%), linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
+              'radial-gradient(circle at 80% 15%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 50%), linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >
           <div>
             <span
               className="inline-flex items-center gap-1.5 text-[11px] font-bold rounded-full px-3 py-1"
-              style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+              style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
             >
               <Sparkles size={12} />
               {translateText('امروز ')}

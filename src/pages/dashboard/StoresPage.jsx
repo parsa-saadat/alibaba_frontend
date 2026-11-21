@@ -248,7 +248,7 @@ function StoresPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#0a1736',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -328,7 +328,7 @@ function StoresPage() {
                     height: 84,
                     background: store.banner_image_id
                       ? 'var(--card2)'
-                      : 'linear-gradient(135deg, var(--card2), rgba(255,214,10,0.35))',
+                      : 'linear-gradient(135deg, var(--card2), rgba(255,106,0,0.35))',
                   }}
                 >
                   {store.banner_image_id && (
@@ -418,10 +418,10 @@ function StoresPage() {
                         {store.contact_info?.phone || store.contact_info?.fax || '—'}
                       </span>
                     </span>
-                    {store.contact_info?.address && (
+                    {(store.address || store.contact_info?.address) && (
                       <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
                         <MapPin size={12} className="shrink-0" />
-                        <span className="truncate">{store.contact_info.address}</span>
+                        <span className="truncate">{store.address || store.contact_info?.address}</span>
                       </span>
                     )}
                   </div>

@@ -3,56 +3,104 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
+  LayoutGrid,
   Tag,
   ClipboardList,
   Medal,
   Sparkles,
   Flame,
   TrendingUp,
+  Store,
 } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
 import TrustBadge from '../product/TrustBadge';
 import ThemeToggleComponent from '../common/ThemeToggleComponent';
 import MarqueeText from '../common/MarqueeText';
 import ProductSearchBox from '../common/ProductSearchBox';
+import HotPicksBannerComponent from './HotPicksBannerComponent';
 import { useShop } from '../../contexts/ShopContext';
-import { hasDiscount, productImages } from '../../utils/helpers/format';
+import { hasDiscount, productImages, toFa } from '../../utils/helpers/format';
 import useScrollFade from '../../hooks/useScrollFade';
 
-const NAVY = 'linear-gradient(135deg,#0a1736 0%,#162e66 55%,#0f2150 100%)';
-
-/* ───────── هیرو: تب‌ها + باکس جستجو ───────── */
+/* ───────── هیرو: تب‌ها + باکس جستجو ─────────
+   موبایل: جستجوی فشرده‌ی قرصی‌شکل + ردیف سرویس‌های آیکنی (مثل اپ علی‌بابا)
+   دسکتاپ: جعبه‌ی جستجوی بزرگ وسط‌چین با حاشیه‌ی رنگ برند                    */
 function HeroSearch() {
   const tab = 'relative pb-2 whitespace-nowrap';
 
   return (
-    <section className="px-3 pt-5 pb-6 sm:px-4 sm:pt-8 sm:pb-10" style={{ background: NAVY }}>
-      <div className="flex items-center justify-center gap-4 text-base min-[400px]:text-lg sm:gap-12 sm:text-2xl md:text-[28px] font-black">
-        <Link to="/products" className={tab} style={{ color: 'var(--primary-color)' }}>{translateText("محصولات ")}<span
-            className="absolute inset-x-0 bottom-0 h-1 rounded-full"
+    <section
+      className="px-3 pt-3 pb-4 sm:px-4 sm:pt-6 sm:pb-8 md:pt-4 md:pb-6"
+      style={{ background: 'var(--card)' }}
+    >
+      {/* تب‌ها — پخش‌شده در کل عرض مثل اپ علی‌بابا؛ فعال با زیرخط نارنجی */}
+      <div className="flex items-center justify-between gap-2 px-1 text-sm min-[400px]:text-base sm:justify-center sm:gap-12 sm:text-xl md:text-2xl font-black">
+        <Link to="/products" className={`${tab} flex-1 text-center sm:flex-none`} style={{ color: 'var(--accent-text)' }}>
+          {translateText('محصولات ')}
+          <span
+            className="absolute inset-x-2 bottom-0 h-[3px] rounded-full sm:inset-x-0"
             style={{ background: 'var(--primary-color)' }}
           />
         </Link>
-        <a href="#stores" className={`${tab} text-white`}>{translateText("فروشگاه‌ها ")}</a>
-        <Link to="/products?discount=true" className={`${tab} text-white`}>{translateText("تخفیف‌ها ")}</Link>
+        <Link to="/products?tab=suppliers" className={`${tab} muted flex-1 text-center transition hover:opacity-80 sm:flex-none`}>
+          {translateText('فروشگاه‌ها ')}
+        </Link>
+        <Link
+          to="/products?discount=true"
+          className={`${tab} muted flex-1 text-center transition hover:opacity-80 sm:flex-none`}
+        >
+          {translateText('تخفیف‌ها ')}
+        </Link>
       </div>
 
+      {/* ───── موبایل: قرص جستجو + کارت‌های سرویس ───── */}
+      <div className="mt-3 lg:hidden">
+        <ProductSearchBox variant="hero" compact />
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {[
+            { to: '/products', icon: LayoutGrid, label: translateText(' همه محصولات '), tone: '#2563eb' },
+            { to: '/products?discount=true', icon: Flame, label: translateText(' پیشنهاد ویژه '), tone: '#e2352c' },
+            { to: '/products', icon: TrendingUp, label: translateText(' پرفروش‌ها '), tone: '#0d9488' },
+            { to: '/products?tab=suppliers', icon: Store, label: translateText(' فروشندگان '), tone: '#7c3aed' },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.label + item.to}
+                to={item.to}
+                className="card flex flex-col items-center gap-1.5 rounded-xl px-1 py-2.5 text-[10px] font-bold transition hover:-translate-y-0.5"
+              >
+                <span
+                  className="grid h-10 w-10 place-items-center rounded-full"
+                  style={{ background: 'color-mix(in srgb, ' + item.tone + ' 14%, transparent)', color: item.tone }}
+                >
+                  <Icon size={18} />
+                </span>
+                <span className="w-full truncate text-center leading-4">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ───── دسکتاپ: جعبه‌ی جستجوی بزرگ ───── */}
       <div
-        className="card mt-4 max-w-[960px] mx-auto rounded-2xl p-2.5 sm:mt-6 sm:rounded-[20px] sm:p-4"
+        className="card mt-5 hidden max-w-[960px] mx-auto rounded-2xl p-4 lg:block"
         style={{ border: '2px solid var(--primary-color)' }}
       >
-        {/* همان جستجوی زنده‌ی هدر: با تایپ کردن، محصولات پیشنهاد می‌شوند */}
         <ProductSearchBox variant="hero" />
-
         <div
           className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-2.5 text-[11px] sm:mt-3 sm:gap-y-2 sm:pt-3 sm:text-sm muted"
           style={{ borderTop: '1px solid var(--border)' }}
         >
           <Link to="/products?discount=true" className="flex items-center gap-1.5 hover:text-yellow">
-            <Flame size={16} />{translateText(" پیشنهادهای ویژه ")}</Link>
+            <Flame size={16} />{translateText(' پیشنهادهای ویژه ')}</Link>
           <span className="hidden sm:block h-4 w-px" style={{ background: 'var(--border)' }} />
           <Link to="/products" className="flex items-center gap-1.5 hover:text-yellow">
-            <TrendingUp size={16} />{translateText(" پرفروش‌ترین‌ها ")}</Link>
+            <TrendingUp size={16} />{translateText(' پرفروش‌ترین‌ها ')}</Link>
+          <span className="hidden sm:block h-4 w-px" style={{ background: 'var(--border)' }} />
+          <Link to="/products?tab=suppliers" className="flex items-center gap-1.5 hover:text-yellow">
+            <Store size={16} />{translateText(' کشف فروشندگان ')}</Link>
         </div>
       </div>
     </section>
@@ -66,7 +114,7 @@ function WelcomeStrip() {
   const link = 'flex items-center gap-2 text-[15px] font-semibold hover:text-yellow';
 
   return (
-    <div style={{ background: 'var(--card2)' }}>
+    <div style={{ background: 'var(--card2)' }} className="hidden md:block">
       <div className="max-w-[1440px] mx-auto px-4 h-[72px] flex items-center justify-between">
         <h2 className="text-lg sm:text-xl font-black">
           {user ? translateText("سلام{{v0}}", {v0: (name ? `، ${name}` : '')}) : translateText("به فروشگاه خوش آمدید")}
@@ -130,7 +178,7 @@ function CategoryCard({ categories, loading, activeCategoryId, onHoverCategory }
 /* ───────── نمایش نمونه محصولاتِ دسته‌بندی انتخاب‌شده ───────── */
 function CategoryShowcase({ category, products, loading }) {
   if (loading) {
-    return <div className="hidden xl:block skeleton h-[304px] rounded-xl" />;
+    return <div className="hidden xl:block skeleton h-[304px] w-full rounded-xl" />;
   }
 
   const categoryProducts = category
@@ -138,55 +186,61 @@ function CategoryShowcase({ category, products, loading }) {
     : [];
 
   return (
-    <div className="hidden xl:flex flex-col h-[304px] card rounded-xl p-4">
+    <div className="hidden xl:flex w-full flex-col h-[304px] card rounded-xl p-4">
       <div
-        className="flex items-center justify-between pb-3 mb-3"
+        className="flex items-center justify-between pb-3 mb-3 shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-base font-black truncate">
-            {category ? category.name : translateText("محصولات دسته‌بندی")}
+            {category ? category.name : translateText('محصولات دسته‌بندی')}
           </span>
         </div>
         {category && (
           <Link
             to={`/products?category_id=${category._id}`}
-            className="text-xs font-semibold flex items-center gap-1 text-yellow shrink-0"
-          >{translateText("مشاهده همه ")}<ChevronLeft className="logical-icon" size={14} />
+            className="text-xs font-semibold flex items-center gap-1 shrink-0 transition hover:opacity-80"
+            style={{ color: 'var(--accent-text)' }}
+          >{translateText('مشاهده همه ')}<ChevronLeft className="logical-icon" size={14} />
           </Link>
         )}
       </div>
 
       {categoryProducts.length === 0 ? (
-        <div className="flex-1 grid place-items-center text-sm muted">{translateText("محصولی در این دسته‌بندی وجود ندارد ")}</div>
+        <div className="flex-1 grid place-items-center text-sm muted">{translateText('محصولی در این دسته‌بندی وجود ندارد ')}</div>
       ) : (
         <div
           className="flex-1 grid gap-3 min-h-0"
-          /* اگر دسته کمتر از ۳ محصول داشت، همان تعداد ستون ساخته می‌شود
-             تا جای خالی نماند */
           style={{ gridTemplateColumns: `repeat(${categoryProducts.length}, minmax(0, 1fr))` }}
         >
           {categoryProducts.map((p) => (
             <Link
               key={p._id}
               to={`/product/${p._id}`}
-              className="group flex flex-col rounded-lg p-2.5 transition-transform hover:-translate-y-1 overflow-hidden"
+              className="group flex flex-col rounded-xl p-2 transition-transform hover:-translate-y-1 overflow-hidden"
               style={{ background: 'var(--card2)' }}
             >
-              <div className="flex-1 min-h-0 rounded-md overflow-hidden">
+              <div className="aspect-square min-h-0 rounded-lg overflow-hidden">
                 <StorageImageComponent
                   file={productImages(p)[0]}
                   alt={p.name}
+                  compact
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <MarqueeText
-                text={p.name}
-                className="mt-2 text-xs sm:text-sm font-semibold group-hover:text-yellow"
-              />
-              {/* نشان اعتماد فروشنده — روی کارت‌های دسته‌بندی صفحه‌ی اصلی */}
-              <span className="mt-1 flex min-h-[16px] items-center gap-1">
+              <span className="mt-2 text-xs font-bold leading-5 line-clamp-2 break-words">
+                {p.name}
+              </span>
+              <span className="mt-auto pt-1.5 flex items-center justify-between gap-1">
                 <TrustBadge product={p} size={11} />
+                {hasDiscount(p) && (
+                  <span
+                    className="rounded-md px-1.5 py-0.5 text-[10px] font-black shrink-0"
+                    style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
+                  >
+                    {toFa(p.discount.percentage)}٪
+                  </span>
+                )}
               </span>
             </Link>
           ))}
@@ -203,7 +257,7 @@ function LatestProducts({ products, loading }) {
   const latest = products.slice(0, 10);
 
   return (
-    <div className="flex flex-col h-[304px] card rounded-xl p-4 overflow-hidden">
+    <div className="flex w-full flex-col h-[304px] card rounded-xl p-4 overflow-hidden">
       <div
         className="flex items-center justify-between pb-3 mb-2 shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
@@ -304,7 +358,8 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
               ))}
         </div>
 
-        <div className="grid gap-3 grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] xl:grid-cols-[285px_minmax(0,1fr)_380px]">
+        {/* دسکتاپ: [سایدبار دسته‌ها | کارت‌های محتوا | بنر پیشنهادهای داغ] — مثل Alibaba.com */}
+        <div className="hidden lg:grid gap-3 grid-cols-1 lg:grid-cols-[285px_minmax(0,1fr)] xl:grid-cols-[285px_minmax(0,1fr)_340px]">
           <CategoryCard
             categories={categories}
             loading={loading}
@@ -312,22 +367,35 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
             onHoverCategory={setHoveredCatId}
           />
 
-          <CategoryShowcase
-            category={activeCategory}
-            products={products}
-            loading={loading}
-          />
+          <div className="flex min-w-0 flex-col gap-3 xl:flex-row">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <LatestProducts products={products} loading={loading} />
+            </div>
+            <div className="hidden min-w-0 flex-1 xl:flex">
+              <CategoryShowcase
+                category={activeCategory}
+                products={products}
+                loading={loading}
+              />
+            </div>
+          </div>
 
-          <LatestProducts products={products} loading={loading} />
+          <div className="hidden xl:block">
+            <HotPicksBannerComponent products={products} />
+          </div>
         </div>
 
+        {/* کشف فروشندگان — لینک به تب «تأمین‌کنندگان» صفحه فروشگاه */}
         <Link
-          to="/products"
+          to="/products?tab=suppliers"
           className="card mt-3 flex items-center justify-between rounded-xl px-5 sm:px-6 h-16 hover:-translate-y-0.5 transition-transform"
         >
           <span className="text-sm sm:text-[15px]">
-            <b className="text-yellow">{translateText("b2b.sellers")}</b>{translateText("b2b.sellersDesc")}</span>
-          <span className="flex items-center gap-1 text-sm font-bold text-yellow shrink-0">{translateText("شروع خرید ")}<ChevronLeft className="logical-icon" size={16} />
+            <b className="text-yellow">{translateText("b2b.sellers")}</b>
+            {' '}
+            {translateText("b2b.sellersDesc")}
+          </span>
+          <span className="flex items-center gap-1 text-sm font-bold text-yellow shrink-0">{translateText("مشاهده فروشندگان ")}<ChevronLeft className="logical-icon" size={16} />
           </span>
         </Link>
       </div>

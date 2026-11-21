@@ -129,7 +129,7 @@ const DP_CSS = `
 .plan-dp .rmdp-day.rmdp-disabled,.plan-dp .rmdp-day.rmdp-disabled span{opacity:.3}
 .plan-dp .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover{background:var(--card2)!important;color:inherit!important}
 .plan-dp .rmdp-day.rmdp-today span{background:var(--card2)!important;color:var(--primary-color)!important;font-weight:800}
-.plan-dp .rmdp-day.rmdp-selected span:not(.highlight){background:var(--primary-color)!important;color:#0a1736!important;box-shadow:none!important;font-weight:800}
+.plan-dp .rmdp-day.rmdp-selected span:not(.highlight){background:var(--primary-color)!important;color:#1a1b1e!important;box-shadow:none!important;font-weight:800}
 .plan-dp .rmdp-arrow{border-color:currentColor!important}
 .plan-dp .rmdp-arrow-container:hover{background:var(--card2)!important;box-shadow:none!important}
 .plan-dp .rmdp-border-top{border-color:rgba(128,128,128,.25)!important}

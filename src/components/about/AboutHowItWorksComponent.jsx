@@ -58,7 +58,7 @@ function StepRow({ step, index, last }) {
       <div className="flex flex-col items-center shrink-0">
         <span
           className="w-9 h-9 rounded-xl grid place-items-center text-xs font-black"
-          style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+          style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
         >
           <Icon size={17} />
         </span>

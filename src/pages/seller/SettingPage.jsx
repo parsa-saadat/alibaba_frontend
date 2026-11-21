@@ -242,7 +242,7 @@ function SettingPage() {
         {identityLocked ? (
           <div
             className="rounded-2xl p-3.5 flex items-start gap-2 text-[11px] leading-6"
-            style={{ background: 'rgba(255,214,10,0.1)', border: '1px solid rgba(255,214,10,0.3)' }}
+            style={{ background: 'rgba(255,106,0,0.1)', border: '1px solid rgba(255,106,0,0.3)' }}
           >
             <Lock size={15} className="mt-0.5 shrink-0 text-yellow" />
             <span>

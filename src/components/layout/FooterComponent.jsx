@@ -212,7 +212,7 @@ function FooterComponent() {
       <div
         aria-hidden
         className="pointer-events-none absolute -start-32 -top-32 h-72 w-72 rounded-full blur-3xl"
-        style={{ background: 'rgba(255,214,10,0.10)' }}
+        style={{ background: 'rgba(255,106,0,0.10)' }}
       />
       <div
         aria-hidden
@@ -266,7 +266,7 @@ function FooterComponent() {
               >
                 <span
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
-                  style={{ background: 'rgba(255,214,10,0.12)', color: 'var(--primary-color)' }}
+                  style={{ background: 'rgba(255,106,0,0.12)', color: 'var(--primary-color)' }}
                 >
                   <Icon size={20} />
                 </span>

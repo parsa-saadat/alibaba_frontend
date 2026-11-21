@@ -10,8 +10,8 @@ function AboutCtaComponent() {
         className="rounded-3xl p-6 sm:p-9 flex flex-col md:flex-row items-center justify-between gap-6"
         style={{
           background:
-            'radial-gradient(circle at 85% 20%, rgba(255,214,10,0.18) 0%, rgba(255,214,10,0) 45%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))',
-          border: '1px solid rgba(255,214,10,0.28)',
+            'radial-gradient(circle at 85% 20%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 45%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))',
+          border: '1px solid rgba(255,106,0,0.28)',
         }}
       >
         <div className="max-w-xl">

@@ -50,7 +50,7 @@ const STEPS = [
 ];
 
 /* رنگ‌ها فقط از متغیرهای تم می‌آیند تا در تم روشن و تاریک یکسان باشد */
-const ACCENT = { background: 'var(--primary-color)', color: 'var(--navy)' };
+const ACCENT = { background: 'var(--primary-color)', color: 'var(--on-primary' };
 const ACCENT_SOFT = {
   background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)',
   color: 'var(--accent-text)',
@@ -502,7 +502,7 @@ function CreateOrderPage() {
                         style={{
                           border: `1.5px solid ${active ? 'var(--primary-color)' : 'var(--muted)'}`,
                           background: active ? 'var(--primary-color)' : 'transparent',
-                          color: 'var(--navy, #0a1736)',
+                          color: 'var(--navy, #1a1b1e)',
                         }}
                       >
                         {active && <Check size={11} strokeWidth={3.5} />}

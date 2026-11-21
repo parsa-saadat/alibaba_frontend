@@ -54,7 +54,7 @@ function Chip({ children, tone = 'neutral', icon: Icon }) {
     success: 'bg-emerald-500/15 text-emerald-400',
     warning: 'bg-amber-500/15 text-amber-400',
     danger: 'bg-red-500/15 text-red-400',
-    brand: 'text-[#0a1736]',
+    brand: 'text-white',
     info: 'bg-blue-500/15 text-blue-400',
   };
 
@@ -277,7 +277,7 @@ function SellersPage() {
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-lg font-black"
                     style={{
                       background: approved ? 'var(--primary-color)' : 'rgba(130,140,170,0.25)',
-                      color: approved ? '#0a1736' : 'var(--text)',
+                      color: approved ? '#1a1b1e' : 'var(--text)',
                     }}
                     aria-hidden
                   >

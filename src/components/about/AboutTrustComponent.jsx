@@ -50,7 +50,7 @@ function AboutTrustComponent() {
               <div key={item.title} className="flex items-start gap-2.5">
                 <span
                   className="w-9 h-9 rounded-xl grid place-items-center shrink-0"
-                  style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+                  style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
                 >
                   <Icon size={16} />
                 </span>

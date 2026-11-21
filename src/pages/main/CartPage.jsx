@@ -218,7 +218,11 @@ function CartPage() {
   );
 
   const changeQuantity = (productId, nextQuantity) => {
-    if (nextQuantity < 1) return;
+    /* کاهش به صفر = حذف از سبد (دکمه‌ی سطل زباله وقتی فقط ۱ عدد مانده) */
+    if (nextQuantity < 1) {
+      remove(productId);
+      return;
+    }
 
     const product = products[productId];
     const stock = product?.stock == null || product?.stock === '' ? null : Number(product.stock);

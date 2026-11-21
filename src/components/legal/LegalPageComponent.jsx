@@ -20,7 +20,7 @@ function SectionCard({ section, index }) {
       <div className="flex items-start gap-3">
         <span
           className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-[11px] font-black tabular-nums"
-          style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--accent-text)' }}
+          style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--accent-text)' }}
         >
           {index}
         </span>
@@ -141,7 +141,7 @@ function LegalPageComponent({
         className="relative overflow-hidden rounded-3xl p-6 sm:p-8"
         style={{
           background:
-            'radial-gradient(circle at 85% 10%, rgba(255,214,10,0.20) 0%, rgba(255,214,10,0) 55%), linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
+            'radial-gradient(circle at 85% 10%, rgba(255,106,0,0.20) 0%, rgba(255,106,0,0) 55%), linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
@@ -149,14 +149,14 @@ function LegalPageComponent({
           <div className="flex items-start gap-4">
             <span
               className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl shadow-lg"
-              style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
+              style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
             >
               <Icon size={22} />
             </span>
             <div className="min-w-0">
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold"
-                style={{ background: 'rgba(255,214,10,0.14)', color: 'var(--primary-color)' }}
+                style={{ background: 'rgba(255,106,0,0.14)', color: 'var(--primary-color)' }}
               >
                 <ShieldQuestion size={12} />
                 {badge}

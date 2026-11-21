@@ -564,7 +564,7 @@ function ProductEditorComponent({
                     {idx === 0 ? (
                       <span
                         className="absolute bottom-1 end-1 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--primary-color)', color: '#0a1736' }}
+                        style={{ background: 'var(--primary-color)', color: '#ffffff' }}
                       >
                         <Star size={10} />
                         {translateText(' اصلی ')}
@@ -573,7 +573,7 @@ function ProductEditorComponent({
                       <button
                         type="button"
                         onClick={() => makeMainImage(idx)}
-                        className="absolute bottom-1 end-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-[#0a1736]"
+                        className="absolute bottom-1 end-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-white"
                         aria-label={translateText('انتخاب به‌عنوان تصویر اصلی')}
                         title={translateText('انتخاب به‌عنوان تصویر اصلی')}
                       >
