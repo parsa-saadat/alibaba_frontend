@@ -57,7 +57,8 @@ export const storeContactInfo = (store, owner) => {
     sellerName: (userFullName(owner) || owner?.username || '').trim(),
     phone: String(info.phone || owner?.phone || '').trim(),
     email: String(info.email || owner?.email || '').trim(),
-    address: String(info.address || ownerAddress || '').trim(),
+    /* آدرس چندزبانه‌ی فروشگاه (store.address بومی‌شده) در اولویت است */
+    address: String(store?.address || info.address || ownerAddress || '').trim(),
   };
 };
 

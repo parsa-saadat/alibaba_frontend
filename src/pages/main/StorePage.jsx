@@ -276,7 +276,7 @@ function StorePage() {
   }
 
   /* فعال/غیرفعال از وضعیت فروشنده (روت عمومی کاربر) و در نبود آن از وضعیت فروشگاه */
-  const contact = store.contact_info || {};
+  const contact = { ...(store.contact_info || {}), address: store.address || store.contact_info?.address };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">

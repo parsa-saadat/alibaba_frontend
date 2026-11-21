@@ -273,18 +273,14 @@ function NavbarComponent() {
               className="header-brand-link flex items-center min-w-0"
               aria-label={translateText('ژئوکالا — صفحه اصلی')}
             >
-              <BrandLogoComponent
-                variant="full"
-                size="sm"
-                tone="white"
-                className="md:hidden header-mobile-logo"
-              />
-              <BrandLogoComponent
-                variant="full"
-                size="md"
-                tone="white"
-                className="hidden md:block"
-              />
+              {/* wrapper جدا برای موبایل؛ display لوگو با کلاس تم کنترل می‌شود */}
+              <span className="md:hidden header-mobile-logo">
+                <BrandLogoComponent variant="full" size="sm" tone="auto" />
+              </span>
+              {/* wrapper جدا تا display تی‌لویند با toggle تم لوگو تداخل نکند */}
+              <span className="hidden md:block">
+                <BrandLogoComponent variant="full" size="md" tone="auto" />
+              </span>
             </Link>
           </div>
 

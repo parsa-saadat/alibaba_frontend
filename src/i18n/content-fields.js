@@ -6,6 +6,7 @@ const fields = [
   'description',
   'short_description',
   'tags',
+  'address',
   'firstname',
   'lastname',
   'store_name',

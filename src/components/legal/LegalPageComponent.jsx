@@ -149,7 +149,7 @@ function LegalPageComponent({
           <div className="flex items-start gap-4">
             <span
               className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl shadow-lg"
-              style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
+              style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
             >
               <Icon size={22} />
             </span>

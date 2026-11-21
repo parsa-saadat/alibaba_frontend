@@ -418,10 +418,10 @@ function StoresPage() {
                         {store.contact_info?.phone || store.contact_info?.fax || '—'}
                       </span>
                     </span>
-                    {store.contact_info?.address && (
+                    {(store.address || store.contact_info?.address) && (
                       <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
                         <MapPin size={12} className="shrink-0" />
-                        <span className="truncate">{store.contact_info.address}</span>
+                        <span className="truncate">{store.address || store.contact_info?.address}</span>
                       </span>
                     )}
                   </div>

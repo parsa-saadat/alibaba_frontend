@@ -475,7 +475,7 @@ function ProfilePage() {
           <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             <div
               className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-2xl grid place-items-center font-black text-xl sm:text-2xl"
-              style={{ background: 'var(--primary-color)', color: 'var(--navy)' }}
+              style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
               aria-hidden="true"
             >
               {userInitial(user)}

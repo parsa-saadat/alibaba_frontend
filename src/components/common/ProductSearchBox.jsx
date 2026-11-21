@@ -27,10 +27,12 @@ const normalizeText = (value) =>
  *   compact → باکس کوچک هدر
  *   hero    → باکس بزرگ وسط هیروی صفحه اول (نتایج دو ستونی)
  */
-function ProductSearchBox({ variant = 'compact', placeholder }) {
+function ProductSearchBox({ variant = 'compact', placeholder, compact = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const hero = variant === 'hero';
+  /* pill = نسخه‌ی قرصی فشرده برای موبایل (hero + compact) */
+  const pill = hero && compact;
 
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -202,8 +204,8 @@ function ProductSearchBox({ variant = 'compact', placeholder }) {
         <form
           onSubmit={submitSearch}
           role="search"
-          className="flex items-center gap-2 sm:gap-3 rounded-xl py-1.5 ps-3 pe-1.5 sm:px-3 sm:py-2"
-          style={{ background: 'rgba(255,255,255,.07)', border: '1px solid var(--border)' }}
+          className={`flex items-center gap-2 sm:gap-3 ${pill ? '!rounded-full py-1 ps-3 pe-1' : 'rounded-xl py-1.5 ps-3 pe-1.5 sm:px-3 sm:py-2'}`}
+          style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
         >
           <Search size={18} className="hidden shrink-0 muted sm:block" aria-hidden="true" />
           {input}

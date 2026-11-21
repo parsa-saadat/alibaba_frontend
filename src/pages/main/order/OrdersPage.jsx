@@ -255,7 +255,7 @@ function OrdersPage() {
                   className="rounded-full px-3 py-1.5 text-[11px] font-bold transition"
                   style={
                     active
-                      ? { background: 'var(--primary-color)', color: 'var(--navy)' }
+                      ? { background: 'var(--primary-color)', color: 'var(--on-primary' }
                       : { background: 'var(--card2)', border: '1px solid var(--border)' }
                   }
                 >

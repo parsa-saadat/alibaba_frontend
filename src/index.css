@@ -20,17 +20,19 @@
 
 :root {
   --app-font: "Vazirmatn", Tahoma, Arial, sans-serif;
-  --primary-color: #ffd60a;
-  --primary-hover: #f5c400;
+  /* پالت علی‌بابا: نارنجی برند؛ متن روی نارنجی همیشه سفید */
+  --primary-color: #ff6a00;
+  --primary-hover: #e85f00;
+  --on-primary: #ffffff;
   --navy: #0a1736;
   --navy-deep: #060d24;
   --navy-mid: #0f2150;
   --navy-soft: #162e66;
 
   /* models-frontend compatible variables */
-  --color-main: #ffd60a;
-  --color-main-dark: #f5c400;
-  --color-main-light: rgba(255, 214, 10, 0.14);
+  --color-main: #ff6a00;
+  --color-main-dark: #e85f00;
+  --color-main-light: rgba(255, 106, 0, 0.14);
   --color-white: #ffffff;
   --color-light-gray: #162e66;
   --color-gray: #9aa8cc;
@@ -61,22 +63,22 @@ html[data-theme="dark"] {
 
 html[data-theme="light"] {
   /*
-   * تم روشن: خاکستری‌ها کاملاً خنثی‌اند (بدون مایل به آبی).
-   * فقط رنگ برند (سرمه‌ای/زرد) رنگی می‌ماند؛ بقیه‌ی سطح‌ها neutral است.
+   * تم روشن — پالت علی‌بابا: سطح‌های سفید/خاکستری روشن، متن تیره،
+   * تاکید نارنجی (قیمت‌ها و لینک‌ها) و هدر سفید.
    */
-  --bg: #f3f3f5;
+  --bg: #f7f8fa;
   --bg2: #ffffff;
   --card: #ffffff;
-  --card2: #ececee;
-  --border: rgba(17, 18, 20, 0.14);
-  --text: #17181c;
-  --muted: #5c5e66;
-  --accent-text: #0a1736;
-  --header-bg: #0a1736;
-  --header-text: #ffffff;
-  --header-muted: #b8c5e6;
-  --header-surface: #162e66;
-  --header-border: rgba(255, 255, 255, 0.14);
+  --card2: #f2f3f5;
+  --border: rgba(17, 18, 20, 0.12);
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --accent-text: #ff6a00;
+  --header-bg: #ffffff;
+  --header-text: #1a1a1a;
+  --header-muted: #6b6b6b;
+  --header-surface: #f5f5f5;
+  --header-border: rgba(17, 18, 20, 0.1);
   color-scheme: light;
 }
 
@@ -142,7 +144,7 @@ body {
 .btn-yellow,
 .btn-primary {
   background: var(--primary-color);
-  color: var(--navy);
+  color: var(--on-primary);
   font-weight: 800;
   border-radius: 0.75rem;
   padding: 0.65rem 1.4rem;
@@ -195,7 +197,7 @@ body {
 .chip.on {
   border-color: var(--primary-color);
   background: var(--primary-color);
-  color: var(--navy);
+  color: var(--on-primary);
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -235,7 +237,7 @@ button:disabled {
 .site-header {
   background: var(--header-bg);
   color: var(--header-text);
-  border-bottom: 2px solid rgba(255, 214, 10, 0.35);
+  border-bottom: 1px solid var(--header-border);
 }
 .site-header .muted {
   color: var(--header-muted);
@@ -263,13 +265,13 @@ button:disabled {
 .site-header .chip:hover,
 .site-header .chip.on {
   background: var(--primary-color);
-  color: var(--navy);
+  color: var(--on-primary);
   border-color: var(--primary-color);
 }
 .site-footer {
   background: var(--navy);
   color: #eef2ff;
-  border-top: 2px solid rgba(255, 214, 10, 0.35);
+  border-top: 2px solid rgba(255, 106, 0, 0.4);
 }
 .site-footer .muted {
   color: #9aa8cc;
@@ -1087,3 +1089,13 @@ input[lang],textarea[lang],.md-visual { font-family: var(--content-font,var(--ap
 @keyframes storage-image-shimmer{to{transform:translateX(110%);}}
 @media(prefers-reduced-motion:reduce){.storage-image-shimmer,.storage-image-loading .animate-spin{animation:none}.storage-image-content{transition:none;transform:none}}
 .storage-image-content{max-width:inherit;max-height:inherit;}
+
+/* بخش‌های صفحه اول در موبایل: سطح صاف بدون کارت (مثل اپ علی‌بابا)؛ از sm به بالا کارت */
+@media (max-width: 639px) {
+  .section-flat-mobile {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding-inline: 0;
+  }
+}

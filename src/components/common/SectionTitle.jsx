@@ -1,11 +1,15 @@
 import React from 'react';
+import { ChevronLeft } from 'lucide-react';
 
+/*
+ * عنوان بخش به سبک Alibaba.com: متن بولد در ابتدای سطر و فلش در انتهای آن
+ * (در RTL فلش سمت چپ است). در دسکتاپ هم همان چیدمان با متن بزرگ‌تر.
+ */
 function SectionTitle({ children, id }) {
   return (
-    <div id={id} className="flex items-center justify-center gap-4 py-6">
-      <span className="h-px w-12 sm:w-32" style={{ background: 'var(--border)' }} />
-      <h2 className="text-base sm:text-lg font-semibold muted">{children}</h2>
-      <span className="h-px w-12 sm:w-32" style={{ background: 'var(--border)' }} />
+    <div id={id} className="flex items-center justify-between gap-3 py-4 sm:py-5">
+      <h2 className="text-[15px] sm:text-lg font-black">{children}</h2>
+      <ChevronLeft className="logical-icon shrink-0" size={18} style={{ color: 'var(--accent-text)' }} />
     </div>
   );
 }
