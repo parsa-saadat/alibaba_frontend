@@ -51,8 +51,8 @@ const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 
 /* رنگ و آیکن هر وضعیت */
 const STATUS_META = {
   awaiting_approval: {
-    color: '#c2740a',
-    bg: 'rgba(194,116,10,0.14)',
+    color: '#ff6a00',
+    bg: 'rgba(255,106,0,0.14)',
     icon: Clock3,
   },
   preparing: { color: '#2563eb', bg: 'rgba(37,99,235,0.14)', icon: Package },
@@ -277,7 +277,7 @@ function OrdersPage() {
           value={toFa(totals.waiting)}
           hint={translateText('نیازمند اقدام شما')}
           icon={Clock3}
-          tint="#c2740a"
+          tint="#ff6a00"
         />
         <StatTile
           label={translateText('در حال پردازش')}
@@ -318,7 +318,7 @@ function OrdersPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: 'var(--on-primary)',
+                        color: '#242424',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -328,7 +328,7 @@ function OrdersPage() {
                 <span
                   className="rounded-full px-1.5 text-[10px] font-black"
                   style={{
-                    background: active ? 'rgba(10,23,54,0.16)' : 'var(--card2)',
+                    background: active ? 'rgba(36,36,36,0.16)' : 'var(--card2)',
                   }}
                 >
                   {toFa(count)}
@@ -533,7 +533,7 @@ function OrdersPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => approveSubOrder(sub._id)}
-                        className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
                       >
                         <Check size={13} />
                         {translateText(' تأیید سفارش ')}
@@ -544,7 +544,7 @@ function OrdersPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => updateSubOrderStatus(sub._id, 'ready_to_ship')}
-                        className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
                       >
                         <ClipboardList size={13} />
                         {translateText(' آماده ارسال ')}
@@ -555,7 +555,7 @@ function OrdersPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => updateSubOrderStatus(sub._id, 'shipped')}
-                        className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
                       >
                         <Truck size={13} />
                         {translateText(' ثبت ارسال ')}
@@ -566,7 +566,7 @@ function OrdersPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => updateSubOrderStatus(sub._id, 'delivered')}
-                        className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
                       >
                         <CheckCircle2 size={13} />
                         {translateText(' ثبت تحویل ')}
@@ -646,7 +646,7 @@ function OrdersPage() {
                       cancelPreset === reason
                         ? {
                             background: 'var(--primary-color)',
-                            color: '#1a1b1e',
+                            color: '#242424',
                             borderColor: 'transparent',
                           }
                         : undefined
@@ -685,7 +685,7 @@ function OrdersPage() {
               </button>
               <button
                 type="submit"
-                className="btn-yellow !py-2 !px-4 text-xs"
+                className="btn-primary !py-2 !px-4 text-xs"
                 style={{ background: '#e53935', color: '#fff' }}
               >
                 {translateText('تأیید لغو سفارش ')}

@@ -187,14 +187,14 @@ function SettingPage() {
   if (!seller?.is_seller) {
     return (
       <div className="card rounded-3xl p-8 max-w-2xl text-center">
-        <Store size={32} className="mx-auto text-yellow" />
+        <Store size={32} className="mx-auto text-accent" />
         <h2 className="font-black text-lg mt-3">{translateText('هنوز فروشنده نیستید')}</h2>
         <p className="text-xs muted leading-6 mt-2">
           {translateText(
             'برای دسترسی به تنظیمات فروشندگی، ابتدا درخواست فروشنده ثبت کنید و پس از تأیید مدیر، فروشگاه خود را بسازید. ',
           )}
         </p>
-        <Link to="/profile" className="btn-yellow inline-flex mt-4">
+        <Link to="/profile" className="btn-primary inline-flex mt-4">
           {translateText('ثبت درخواست فروشندگی ')}
         </Link>
       </div>
@@ -218,7 +218,7 @@ function SettingPage() {
           <h2 className="font-black text-lg me-auto">{translateText('تنظیمات فروشندگی')}</h2>
           <span
             className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-              isApproved ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
+              isApproved ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'
             }`}
           >
             {isApproved ? translateText('تأییدشده') : translateText('در انتظار تأیید')}
@@ -232,7 +232,7 @@ function SettingPage() {
           </span>
           {isTrustedSeller(seller) && (
             <span className="chip !cursor-default !py-1 !px-2.5 text-[11px] flex items-center gap-1">
-              <BadgeCheck size={12} className="text-yellow" />
+              <BadgeCheck size={12} className="text-accent" />
               {translateText('فروشنده مورد اعتماد ')}
             </span>
           )}
@@ -244,12 +244,12 @@ function SettingPage() {
             className="rounded-2xl p-3.5 flex items-start gap-2 text-[11px] leading-6"
             style={{ background: 'rgba(255,106,0,0.1)', border: '1px solid rgba(255,106,0,0.3)' }}
           >
-            <Lock size={15} className="mt-0.5 shrink-0 text-yellow" />
+            <Lock size={15} className="mt-0.5 shrink-0 text-accent" />
             <span>
               {translateText(
                 'حساب شما تأیید شده است؛ بنابراین اطلاعات هویتی (نوع فروشنده، کد ملی، تاریخ تولد و نشانی) قفل شده‌اند. برای تغییر آن‌ها از طریق',
               )}{' '}
-              <Link to="/contact" className="font-bold text-yellow">
+              <Link to="/contact" className="font-bold text-accent">
                 {translateText('پشتیبانی ')}
               </Link>{' '}
               {translateText('درخواست بدهید. فقط حساب تسویه قابل ویرایش است. ')}
@@ -257,7 +257,7 @@ function SettingPage() {
           </div>
         ) : (
           <div className="text-[11px] muted leading-6 flex items-start gap-2">
-            <Info size={14} className="mt-0.5 shrink-0 text-yellow" />
+            <Info size={14} className="mt-0.5 shrink-0 text-accent" />
             {translateText(
               'پس از تأیید مدیر، اطلاعات هویتی قفل می‌شود و فقط حساب تسویه قابل ویرایش خواهد بود. ',
             )}
@@ -384,7 +384,7 @@ function SettingPage() {
           hasPlan={Boolean(seller?.seller_plan?.plan_id)}
         />
 
-        <button type="submit" className="btn-yellow">
+        <button type="submit" className="btn-primary">
           {translateText('ذخیره تنظیمات ')}
         </button>
       </form>
@@ -432,7 +432,7 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
         <p className="text-xs muted mt-2 leading-6">
           {translateText('برای انتشار محصول باید یکی از پلن‌های فروشندگی را فعال کنید. ')}
         </p>
-        <Link to="/seller/plans" className="btn-yellow !py-2 text-sm mt-3 inline-flex">
+        <Link to="/seller/plans" className="btn-primary !py-2 text-sm mt-3 inline-flex">
           {translateText('مشاهده و خرید پلن ')}
         </Link>
       </div>
@@ -486,7 +486,7 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
           className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black shrink-0"
           style={
             expired
-              ? { background: 'rgba(194,116,10,0.15)', color: '#c2740a' }
+              ? { background: 'rgba(255,106,0,0.15)', color: '#ff6a00' }
               : { background: 'rgba(23,153,79,0.14)', color: '#17994f' }
           }
         >
@@ -558,7 +558,7 @@ function ActivePlanCard({ plan, loading, startAt, hasPlan }) {
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Link to="/seller/plans" className="btn-yellow !py-2 text-xs sm:text-sm">
+        <Link to="/seller/plans" className="btn-primary !py-2 text-xs sm:text-sm">
           {expired ? translateText('تمدید پلن') : translateText('ارتقا یا تمدید')}
         </Link>
         <span className="text-[11px] muted">

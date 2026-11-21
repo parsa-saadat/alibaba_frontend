@@ -81,7 +81,7 @@ function EditAddressPage() {
           <ArrowRight size={17} />
         </button>
         <h1 className="font-black text-xl flex items-center gap-2">
-          <MapPin size={20} className="text-yellow" />{translateText(" ویرایش نشانی ")}</h1>
+          <MapPin size={20} className="text-accent" />{translateText(" ویرایش نشانی ")}</h1>
       </div>
 
       <form onSubmit={handleSave} className="card rounded-3xl p-6 grid sm:grid-cols-2 gap-3">
@@ -144,7 +144,7 @@ function EditAddressPage() {
           onChange={(e) => setForm({ ...form, unit: e.target.value })}
           required
         />
-        <button type="submit" className="btn-yellow sm:col-span-2 mt-2">{translateText("ذخیره تغییرات ")}</button>
+        <button type="submit" className="btn-primary sm:col-span-2 mt-2">{translateText("ذخیره تغییرات ")}</button>
       </form>
     </div>
   );

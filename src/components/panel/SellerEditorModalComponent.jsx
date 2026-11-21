@@ -125,7 +125,7 @@ function Field({ id, label, hint, error, className = '', legacy = false, childre
       {error ? (
         <span className="mt-1 block text-[11px] font-bold text-red-400">{error}</span>
       ) : legacy ? (
-        <span className="mt-1 block text-[10px] text-amber-400">{translateText("مقدار فعلی معتبر نیست؛ چون تغییرش ندادی ذخیره را بلاک نمی‌کند. ")}</span>
+        <span className="mt-1 block text-[10px] text-orange-400">{translateText("مقدار فعلی معتبر نیست؛ چون تغییرش ندادی ذخیره را بلاک نمی‌کند. ")}</span>
       ) : (
         hint && <span className="mt-1 block text-[10px] muted">{hint}</span>
       )}
@@ -138,7 +138,7 @@ function SectionCard({ icon: Icon, title, desc, children }) {
     <section className="card2 rounded-2xl p-3 sm:p-4">
       <header className="mb-3 flex items-start gap-2">
         <span
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-yellow"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-accent"
           style={{ background: 'rgba(255,106,0,0.12)' }}
         >
           <Icon size={16} />
@@ -180,7 +180,7 @@ function Toggle({ checked, onChange, title, desc, disabled = false }) {
       </span>
       <span
         className="relative grid h-6 w-11 shrink-0 place-items-center rounded-full transition-colors"
-        style={{ background: checked ? 'var(--primary-color)' : 'rgba(130,140,170,0.35)' }}
+        style={{ background: checked ? 'var(--primary-color)' : 'rgba(160,160,160,0.35)' }}
       >
         <span className="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all" style={knob} />
       </span>
@@ -760,7 +760,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
         >
           <div className="flex items-center gap-1.5 text-[11px] muted">
             {form.seller_trust ? (
-              <BadgeCheck size={13} className="text-yellow" />
+              <BadgeCheck size={13} className="text-accent" />
             ) : (
               <ShieldOff size={13} />
             )}
@@ -781,7 +781,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             <button
               type="submit"
               disabled={saving || !dirtyKeys.length}
-              className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-sm disabled:opacity-50"
+              className="btn-primary inline-flex items-center gap-1.5 !py-2 text-sm disabled:opacity-50"
             >
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
               {saving ? translateText("در حال ذخیره…") : translateText("ذخیره تغییرات")}

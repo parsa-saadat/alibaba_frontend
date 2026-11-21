@@ -15,7 +15,7 @@ function AboutStoryComponent() {
     <section className="max-w-[1200px] mx-auto px-4 py-10 grid gap-6 lg:grid-cols-3">
       {/* داستان */}
       <div className="lg:col-span-2 card rounded-3xl p-6 sm:p-8">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-accent">
           <Flag size={13} />{translateText("داستان ما ")}</span>
         <h2 className="font-black text-xl sm:text-2xl mt-2 leading-tight">{translateText("v20.communication")}</h2>
 
@@ -24,7 +24,7 @@ function AboutStoryComponent() {
             href="/products"
             target="_blank"
             rel="noreferrer"
-            className="font-bold hover-yellow transition-colors"
+            className="font-bold hover-accent transition-colors"
             style={{ color: 'var(--primary-color)' }}
           >{translateText("b2b.catalog")}</a>{' '}{translateText("v20.explore")}</p>
         <p className="text-sm muted leading-8 mt-3">{translateText("b2b.responsibilityDesc")}</p>
@@ -32,7 +32,7 @@ function AboutStoryComponent() {
         <ul className="mt-5 space-y-2">
           {COMMITMENTS.map((item) => (
             <li key={item} className="flex items-start gap-2 text-xs sm:text-sm leading-6">
-              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-yellow" />
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-accent" />
               {item}
             </li>
           ))}
@@ -49,7 +49,7 @@ function AboutStoryComponent() {
 
         <Link
           to="/contact"
-          className="inline-flex items-center gap-1 text-xs font-bold text-yellow mt-4"
+          className="inline-flex items-center gap-1 text-xs font-bold text-accent mt-4"
         >{translateText("گفتگو با تیم ژئوکالا ")}<ChevronLeft className="logical-icon" size={14} />
         </Link>
       </div>
@@ -59,7 +59,7 @@ function AboutStoryComponent() {
         <div
           className="rounded-3xl p-6 text-white"
           style={{
-            background: 'linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
+            background: 'linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >

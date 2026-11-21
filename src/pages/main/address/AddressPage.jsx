@@ -79,7 +79,7 @@ function EmptyState({ onAdd }) {
       </span>
       <h2 className="mt-4 text-base font-black">{translateText("هنوز نشانی‌ای ثبت نکرده‌اید")}</h2>
       <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">{translateText("برای ثبت سفارش، دست‌کم یک نشانی تحویل لازم است. نشانی را یک‌بار ثبت کنید تا در خریدهای بعدی سریع‌تر باشد. ")}</p>
-      <button type="button" onClick={onAdd} className="btn-yellow mt-5 inline-flex items-center gap-2 !py-2.5">
+      <button type="button" onClick={onAdd} className="btn-primary mt-5 inline-flex items-center gap-2 !py-2.5">
         <Plus size={16} />{translateText("افزودن نشانی ")}</button>
     </div>
   );
@@ -278,7 +278,7 @@ function AddressPage() {
           </span>
           <h1 className="mt-4 text-base font-black">{translateText("برای مدیریت نشانی‌ها وارد شوید")}</h1>
           <p className="mt-2 text-xs muted">{translateText("پس از ورود می‌توانید نشانی‌های تحویل سفارش را ثبت و ویرایش کنید.")}</p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">{translateText("ورود به حساب ")}</Link>
+          <Link to="/auth/pre" className="btn-primary mt-5 inline-flex items-center gap-2">{translateText("ورود به حساب ")}</Link>
         </div>
       </div>
     );
@@ -310,7 +310,7 @@ function AddressPage() {
         <button
           type="button"
           onClick={() => setFormOpen(true)}
-          className="btn-yellow inline-flex items-center justify-center gap-1.5 !py-2.5 text-sm"
+          className="btn-primary inline-flex items-center justify-center gap-1.5 !py-2.5 text-sm"
         >
           <Plus size={16} />{translateText("افزودن نشانی جدید ")}</button>
       </header>
@@ -481,7 +481,7 @@ function AddressPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="btn-yellow inline-flex flex-1 items-center justify-center gap-2 !py-2.5 text-sm disabled:opacity-60"
+                className="btn-primary inline-flex flex-1 items-center justify-center gap-2 !py-2.5 text-sm disabled:opacity-60"
               >
                 {saving ? translateText("در حال ذخیره…") : translateText("ذخیره نشانی")}
               </button>

@@ -23,7 +23,7 @@ export const itemLineTotal = (item) =>
 
 /* ---------- رنگ وضعیت مرسوله ---------- */
 const SUB_STATUS_COLORS = {
-  awaiting_approval: ['#c2740a', 'rgba(194,116,10,0.14)'],
+  awaiting_approval: ['#ff6a00', 'rgba(255,106,0,0.14)'],
   preparing: ['#2563eb', 'rgba(37,99,235,0.14)'],
   ready_to_ship: ['#7c3aed', 'rgba(124,58,237,0.14)'],
   shipped: ['#0f766e', 'rgba(15,118,110,0.14)'],
@@ -50,8 +50,8 @@ const PAY_META = {
   failed: { label: translateText('پرداخت ناموفق'), color: '#e53935', bg: 'rgba(229,57,53,0.14)' },
   pending: {
     label: translateText('در انتظار پرداخت'),
-    color: '#c2740a',
-    bg: 'rgba(194,116,10,0.14)',
+    color: '#ff6a00',
+    bg: 'rgba(255,106,0,0.14)',
   },
 };
 
@@ -153,7 +153,7 @@ export function OrderItemRow({ item }) {
 export function InfoBox({ icon: Icon, title, children, className = '' }) {
   return (
     <section className={`card2 rounded-xl p-3 space-y-1.5 text-xs ${className}`}>
-      <div className="mb-1 flex items-center gap-1.5 font-black text-yellow">
+      <div className="mb-1 flex items-center gap-1.5 font-black text-accent">
         {Icon && <Icon size={13} />}
         {title}
       </div>

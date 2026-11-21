@@ -20,7 +20,7 @@ function AboutHeroComponent() {
       highlights={HERO_HIGHLIGHTS}
       actions={
         <>
-          <Link to="/products" className="btn-yellow inline-flex items-center gap-2">{translateText("شروع خرید ")}<ChevronLeft className="logical-icon" size={16} />
+          <Link to="/products" className="btn-primary inline-flex items-center gap-2">{translateText("شروع خرید ")}<ChevronLeft className="logical-icon" size={16} />
           </Link>
           <Link
             to="/seller"

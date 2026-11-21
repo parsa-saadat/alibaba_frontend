@@ -278,7 +278,7 @@ function StoreEditorModalComponent({
       >
         <div className="flex items-center justify-between gap-2 border-b border-theme pb-3">
           <h2 className="font-black text-lg flex items-center gap-2">
-            <Store size={20} className="text-yellow" />
+            <Store size={20} className="text-accent" />
             <span>
               {store
                 ? translateText('ویرایش فروشگاه: {{v0}}', { v0: store.name })
@@ -444,7 +444,7 @@ function StoreEditorModalComponent({
         ) : null}
 
         <div className="space-y-3">
-          <div className="relative h-32 rounded-2xl overflow-hidden border border-theme bg-navy">
+          <div className="relative h-32 rounded-2xl overflow-hidden border border-theme bg-charcoal">
             {form.banner_image_id ? (
               <StorageImageComponent
                 file={form.banner_image_id}
@@ -461,7 +461,7 @@ function StoreEditorModalComponent({
               type="button"
               onClick={() => bannerRef.current?.click()}
               disabled={uploading === 'banner_image_id'}
-              className="absolute bottom-2 start-2 btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 shadow"
+              className="absolute bottom-2 start-2 btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 shadow"
             >
               <Upload size={13} />
               {uploading === 'banner_image_id'
@@ -478,7 +478,7 @@ function StoreEditorModalComponent({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden border border-theme shrink-0 bg-navy">
+            <div className="w-16 h-16 rounded-2xl overflow-hidden border border-theme shrink-0 bg-charcoal">
               {form.profile_image_id ? (
                 <StorageImageComponent
                   file={form.profile_image_id}
@@ -487,7 +487,7 @@ function StoreEditorModalComponent({
                   onZoom={(f, a) => setZoomFile({ file: f, alt: a })}
                 />
               ) : (
-                <div className="w-full h-full grid place-items-center font-black text-brand-yellow">
+                <div className="w-full h-full grid place-items-center font-black text-brand-orange">
                   {form.name?.[0] || translateText('ف')}
                 </div>
               )}
@@ -619,7 +619,7 @@ function StoreEditorModalComponent({
           <button type="button" onClick={onClose} className="btn-ghost !py-2 text-sm">
             {translateText('انصراف ')}
           </button>
-          <button type="submit" disabled={saving} className="btn-yellow !py-2 text-sm">
+          <button type="submit" disabled={saving} className="btn-primary !py-2 text-sm">
             {saving
               ? translateText('در حال ذخیره…')
               : store

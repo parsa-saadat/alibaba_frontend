@@ -28,7 +28,7 @@ import useSellerProfile from '../../hooks/useSellerProfile';
 /* ------------------------------------------------------------------ */
 /* رنگ‌ها                                                              */
 /*   تأیید شده   → سبز (کل بخش سبز می‌شود)                               */
-/*   تأییدنشده  → خنثی + تأکید زرد برند                                 */
+/*   تأییدنشده  → خنثی + تأکید نارنجی برند                                 */
 /*   نامشخص     → خنثی، بدون هیچ ادعایی                                 */
 /* ------------------------------------------------------------------ */
 
@@ -51,7 +51,7 @@ const tone = (trust) => {
   return {
     trusted: false,
     accent: 'var(--primary-color)',
-    onAccent: 'var(--navy)',
+    onAccent: 'var(--on-primary)',
     soft: 'color-mix(in srgb, var(--primary-color) 14%, transparent)',
     softer: 'var(--card2)',
     line: 'var(--border)',

@@ -40,7 +40,7 @@ function OfferProductsComponent({ products = [], loading = false, limit = 14 }) 
       subtitle={translateText("تخفیف‌های فعال امشب — کارت‌ها را کنار بکشید")}
       extra={
         <span className="flex items-center gap-2 rounded-full border border-theme px-3 py-1 text-xs sm:text-sm font-bold shrink-0">
-          <Timer size={15} className="text-yellow" />
+          <Timer size={15} className="text-accent" />
           <span className="muted">{translateText("پایان تا")}</span>
           <span dir="ltr" className="tabular-nums">
             {toFa(countdown)}

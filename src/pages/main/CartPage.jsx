@@ -47,7 +47,7 @@ function StepsStrip() {
               className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-black"
               style={{
                 background: step.active ? 'var(--primary-color)' : 'var(--card2)',
-                color: step.active ? 'var(--navy)' : 'var(--muted)',
+                color: step.active ? 'var(--charcoal)' : 'var(--muted)',
                 border: step.active ? 'none' : '1px solid var(--border)',
               }}
             >
@@ -278,7 +278,7 @@ function CartPage() {
           <p className="mt-2 text-xs leading-6 muted">
             {translateText('سبد خرید به حساب شما گره خورده است تا از هر دستگاهی در دسترس باشد. ')}
           </p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
+          <Link to="/auth/pre" className="btn-primary mt-5 inline-flex items-center gap-2">
             {translateText('ورود به حساب ')}
             <ArrowLeft size={15} />
           </Link>
@@ -325,7 +325,7 @@ function CartPage() {
             )}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <Link to="/products" className="btn-yellow inline-flex items-center gap-2">
+            <Link to="/products" className="btn-primary inline-flex items-center gap-2">
               <Sparkles size={16} />
               {translateText('شروع خرید ')}
             </Link>
@@ -419,7 +419,7 @@ function CartPage() {
                 type="button"
                 onClick={goToCheckout}
                 disabled={syncState === 'saving' || !cartCode}
-                className="btn-yellow inline-flex h-11 items-center gap-2 !py-0 disabled:opacity-50"
+                className="btn-primary inline-flex h-11 items-center gap-2 !py-0 disabled:opacity-50"
               >
                 {syncState === 'saving' ? (
                   <LoaderCircle size={16} className="animate-spin" />

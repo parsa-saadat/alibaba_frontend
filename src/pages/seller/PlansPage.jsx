@@ -163,7 +163,7 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
       {plan.is_featured && (
         <div
           className="absolute top-0 start-0 px-4 py-1.5 text-[11px] font-black rounded-ee-2xl flex items-center gap-1"
-          style={{ background: 'var(--primary-color)', color: '#ffffff' }}
+          style={{ background: 'var(--primary-color)', color: '#242424' }}
         >
           <Crown size={12} />
           {translateText(' پیشنهادی ')}
@@ -193,7 +193,7 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
           </div>
         )}
         <div className="flex items-baseline gap-1.5">
-          <span className="font-black text-3xl text-yellow">
+          <span className="font-black text-3xl text-accent">
             {formatMoney(p.final, p.currency)}
           </span>
           <span className="text-xs muted">{displayCurrency}</span>
@@ -234,7 +234,7 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
         type="button"
         onClick={() => onBuy(plan)}
         disabled={disabled || !!active}
-        className={`${plan.is_featured ? 'btn-yellow' : 'btn-ghost'} w-full flex items-center justify-center gap-2 disabled:opacity-60`}
+        className={`${plan.is_featured ? 'btn-primary' : 'btn-ghost'} w-full flex items-center justify-center gap-2 disabled:opacity-60`}
       >
         {busy ? (
           <>
@@ -272,7 +272,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
       >
         <div
           className="w-12 h-12 rounded-2xl grid place-items-center shrink-0"
-          style={{ background: 'var(--primary-color)', color: '#ffffff' }}
+          style={{ background: 'var(--primary-color)', color: '#242424' }}
         >
           <Crown size={22} />
         </div>
@@ -287,7 +287,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
         </div>
         <span
           className="text-[11px] px-2.5 py-1 rounded-full font-black shrink-0"
-          style={{ background: 'var(--primary-color)', color: '#ffffff' }}
+          style={{ background: 'var(--primary-color)', color: '#242424' }}
         >
           {translateText('فعال ')}
         </span>
@@ -309,7 +309,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
   const critical = !expired && days < 1;
   const warning = !expired && days < 3;
 
-  const color = expired ? '#f87171' : critical ? '#f87171' : warning ? '#f59e0b' : '#34d399';
+  const color = expired ? '#f87171' : critical ? '#f87171' : warning ? '#e85f00' : '#34d399';
 
   let mainText;
   if (expired) {
@@ -369,7 +369,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
           type="button"
           onClick={() => onBuy?.(plan)}
           disabled={!!buyingId}
-          className="btn-yellow text-xs !py-2 !px-4 shrink-0 flex items-center gap-1.5"
+          className="btn-primary text-xs !py-2 !px-4 shrink-0 flex items-center gap-1.5"
         >
           {buyingId === plan._id ? (
             <>
@@ -420,7 +420,7 @@ function PaymentBanner({ result, onClose }) {
     },
     cancelled: {
       icon: XCircle,
-      color: '#f59e0b',
+      color: '#e85f00',
       title: translateText('پرداخت انجام نشد یا لغو شد'),
     },
     error: {

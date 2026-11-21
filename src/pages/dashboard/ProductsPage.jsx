@@ -159,7 +159,7 @@ function ProductsPage() {
         </div>
         <Link
           to="/dashboard/products/create"
-          className="btn-yellow !py-2.5 text-sm flex items-center gap-1.5"
+          className="btn-primary !py-2.5 text-sm flex items-center gap-1.5"
         >
           <Plus size={16} />
           {translateText(' افزودن محصول جدید ')}

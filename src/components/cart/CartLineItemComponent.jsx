@@ -124,7 +124,7 @@ function CartLineItemComponent({ product, quantity, onChangeQuantity, onRemove, 
               </span>
             ) : Number.isFinite(stock) ? (
               atMax ? (
-                <span style={{ color: '#c2740a' }}>
+                <span style={{ color: '#ff6a00' }}>
                   {translateText('حداکثر موجودی (')}
                   {toFa(stock)}
                   {translateText(' عدد) در سبد شماست ')}

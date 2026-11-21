@@ -52,9 +52,9 @@ function Chip({ children, tone = 'neutral', icon: Icon }) {
   const tones = {
     neutral: 'border border-theme muted',
     success: 'bg-emerald-500/15 text-emerald-400',
-    warning: 'bg-amber-500/15 text-amber-400',
+    warning: 'bg-orange-500/15 text-orange-400',
     danger: 'bg-red-500/15 text-red-400',
-    brand: 'text-white',
+    brand: 'text-[#242424]',
     info: 'bg-blue-500/15 text-blue-400',
   };
 
@@ -72,7 +72,7 @@ function Chip({ children, tone = 'neutral', icon: Icon }) {
 function InfoRow({ icon: Icon, label, value, mono = false }) {
   return (
     <div className="flex items-center gap-1.5 min-w-0">
-      <Icon size={12} className="shrink-0 text-yellow" />
+      <Icon size={12} className="shrink-0 text-accent" />
       <span className="shrink-0 text-[10px] muted">{label}:</span>
       <b className="truncate text-[11px]" dir={mono ? 'ltr' : undefined} title={String(value)}>
         {value}
@@ -276,8 +276,8 @@ function SellersPage() {
                   <span
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-lg font-black"
                     style={{
-                      background: approved ? 'var(--primary-color)' : 'rgba(130,140,170,0.25)',
-                      color: approved ? '#1a1b1e' : 'var(--text)',
+                      background: approved ? 'var(--primary-color)' : 'rgba(160,160,160,0.25)',
+                      color: approved ? '#242424' : 'var(--text)',
                     }}
                     aria-hidden
                   >
@@ -301,7 +301,7 @@ function SellersPage() {
                         </span>
                       )}
                       <span className="inline-flex items-center gap-1" dir="ltr">
-                        <Phone size={11} className="text-yellow" />
+                        <Phone size={11} className="text-accent" />
                         {toFa(seller.phone || '—')}
                       </span>
                     </div>
@@ -368,7 +368,7 @@ function SellersPage() {
                 </div>
 
                 <div className="flex items-start gap-1.5 text-[11px] muted">
-                  <MapPin size={12} className="mt-0.5 shrink-0 text-yellow" />
+                  <MapPin size={12} className="mt-0.5 shrink-0 text-accent" />
                   <span className="line-clamp-2">
                     {seller.address
                       ? `${seller.address.province || ''}${seller.address.city ? translateText('، {{v0}}', { v0: seller.address.city }) : ''} — ${seller.address.full_address || ''}`
@@ -381,7 +381,7 @@ function SellersPage() {
                   <button
                     type="button"
                     onClick={() => setEditingSeller(seller)}
-                    className="btn-yellow inline-flex items-center gap-1 !py-1.5 !px-3 text-xs"
+                    className="btn-primary inline-flex items-center gap-1 !py-1.5 !px-3 text-xs"
                   >
                     <Pencil size={13} />
                     {translateText(' ویرایش ')}

@@ -96,7 +96,7 @@ function DashboardProductComponent({
             {formatPrice(product.price?.amount, product.price?.currency)}
           </del>
         )}
-        <strong className="block text-lg font-black text-yellow break-words leading-7" dir="auto">
+        <strong className="block text-lg font-black text-accent break-words leading-7" dir="auto">
           {formatPrice(finalPrice(product), product.price?.currency)}
         </strong>
         {disc && (
@@ -132,7 +132,7 @@ function DashboardProductComponent({
         <button
           type="button"
           onClick={() => onEdit?.(product)}
-          className="btn-yellow !py-1.5 text-xs flex-1 min-w-[110px] flex items-center justify-center gap-1"
+          className="btn-primary !py-1.5 text-xs flex-1 min-w-[110px] flex items-center justify-center gap-1"
         >
           <Pencil size={13} />
           {translateText(' ویرایش محصول ')}

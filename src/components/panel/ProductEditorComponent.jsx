@@ -364,7 +364,7 @@ function ProductEditorComponent({
           <button
             type="submit"
             disabled={saving || uploading}
-            className="btn-yellow !py-2 text-sm flex items-center gap-1.5"
+            className="btn-primary !py-2 text-sm flex items-center gap-1.5"
           >
             <Save size={15} />{' '}
             {saving
@@ -416,7 +416,7 @@ function ProductEditorComponent({
               resetKey={(product ? getId(product) : 'new-product') + content.locale}
               fallback={
                 <div className="space-y-2">
-                  <p className="text-[11px] leading-6" style={{ color: '#e0a800' }}>
+                  <p className="text-[11px] leading-6" style={{ color: '#ff6a00' }}>
                     {translateText('ویرایشگر بصری باز نشد؛ متن Markdown را همین‌جا ویرایش کنید. ')}
                   </p>
                   <textarea
@@ -516,7 +516,7 @@ function ProductEditorComponent({
                   <button
                     type="button"
                     onClick={addImageById}
-                    className="btn-yellow !py-2 text-xs flex items-center gap-1.5"
+                    className="btn-primary !py-2 text-xs flex items-center gap-1.5"
                   >
                     <KeyRound size={14} />
                     {translateText(' افزودن ')}
@@ -564,7 +564,7 @@ function ProductEditorComponent({
                     {idx === 0 ? (
                       <span
                         className="absolute bottom-1 end-1 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--primary-color)', color: '#ffffff' }}
+                        style={{ background: 'var(--primary-color)', color: '#242424' }}
                       >
                         <Star size={10} />
                         {translateText(' اصلی ')}
@@ -573,7 +573,7 @@ function ProductEditorComponent({
                       <button
                         type="button"
                         onClick={() => makeMainImage(idx)}
-                        className="absolute bottom-1 end-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-white"
+                        className="absolute bottom-1 end-1 inline-flex items-center gap-1 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-[var(--primary-color)] hover:!text-[#242424]"
                         aria-label={translateText('انتخاب به‌عنوان تصویر اصلی')}
                         title={translateText('انتخاب به‌عنوان تصویر اصلی')}
                       >

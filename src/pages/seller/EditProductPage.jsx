@@ -57,7 +57,7 @@ function EditProductPage() {
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="btn-yellow !py-2 text-xs"
+              className="btn-primary !py-2 text-xs"
             >
               {translateText('تلاش دوباره ')}
             </button>

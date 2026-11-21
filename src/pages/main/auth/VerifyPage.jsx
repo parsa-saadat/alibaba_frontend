@@ -56,11 +56,11 @@ function VerifyPage() {
           <input className="input text-center tracking-[.5em] text-xl font-black" dir="ltr" maxLength={6}
             placeholder="••••••" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} required />
           {devCode && (
-            <div className="text-xs mt-2 p-2 rounded-lg text-center bg-navy text-brand-yellow">{translateText("حالت توسعه — کد شما: ")}<b dir="ltr">{toFa(devCode)}</b>
+            <div className="text-xs mt-2 p-2 rounded-lg text-center bg-charcoal text-brand-orange">{translateText("حالت توسعه — کد شما: ")}<b dir="ltr">{toFa(devCode)}</b>
             </div>
           )}
         </div>
-        <button type="submit" className="btn-yellow w-full">{translateText("ورود")}</button>
+        <button type="submit" className="btn-primary w-full">{translateText("ورود")}</button>
         <Link to="/auth/pre" className="block text-center text-sm muted">{translateText("تغییر شماره موبایل")}</Link>
       </form>
     </AuthShellComponent>

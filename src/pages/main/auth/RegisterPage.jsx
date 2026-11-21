@@ -94,7 +94,7 @@ function RegisterPage() {
       subtitle={translateText("با شماره موبایل ثبت‌نام کنید")}
       footer={
         <>{translateText("حساب دارید؟")}{' '}
-          <Link to="/auth/pre" className="font-bold text-yellow">{translateText("وارد شوید")}</Link>
+          <Link to="/auth/pre" className="font-bold text-accent">{translateText("وارد شوید")}</Link>
         </>
       }
     >
@@ -113,7 +113,7 @@ function RegisterPage() {
             />
             <button
               type="submit"
-              className="btn-yellow w-full flex items-center justify-center gap-2"
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >{translateText("ارسال کد تایید ")}<ArrowLeft size={16} />
             </button>
           </form>
@@ -131,10 +131,10 @@ function RegisterPage() {
               required
             />
             {devCode && (
-              <div className="text-xs p-2 rounded-lg text-center bg-navy text-brand-yellow">{translateText("حالت توسعه — کد شما: ")}<b dir="ltr">{toFa(devCode)}</b>
+              <div className="text-xs p-2 rounded-lg text-center bg-charcoal text-brand-orange">{translateText("حالت توسعه — کد شما: ")}<b dir="ltr">{toFa(devCode)}</b>
               </div>
             )}
-            <button type="submit" className="btn-yellow w-full">{translateText("تایید و ادامه ")}</button>
+            <button type="submit" className="btn-primary w-full">{translateText("تایید و ادامه ")}</button>
             <button
               type="button"
               onClick={() => setStep(1)}
@@ -169,7 +169,7 @@ function RegisterPage() {
               required
             />
             <p className="text-[11px] muted leading-5">{translateText("نام و نام خانوادگی اختیاری است و بعداً از پنل کاربری قابل تغییر است. ")}</p>
-            <button type="submit" className="btn-yellow w-full">{translateText("تکمیل ثبت‌نام ")}</button>
+            <button type="submit" className="btn-primary w-full">{translateText("تکمیل ثبت‌نام ")}</button>
           </form>
         )}
 

@@ -64,7 +64,7 @@ function AboutStatsComponent() {
                 <Icon size={20} />
               </span>
               <span className="min-w-0">
-                <b className="block text-lg font-black leading-tight text-yellow">{item.value}</b>
+                <b className="block text-lg font-black leading-tight text-accent">{item.value}</b>
                 <span className="block text-[11px] muted truncate">{item.label}</span>
               </span>
             </div>

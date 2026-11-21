@@ -69,7 +69,7 @@ export function isValidBackendMarkdown(text) {
   return MD_PATTERNS.some((re) => re.test(text));
 }
 
-const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#ffffff' };
+const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#242424' };
 
 /* ------------------------------------------------------------------ */
 /* ابزارهای کمکی رسانه                                                 */
@@ -450,7 +450,7 @@ function TableMenu({ editor, onClose }) {
       {/* سرصفحه‌ی پنل */}
       <div className="flex items-center justify-between gap-2">
         <b className="text-[11px] flex items-center gap-1.5">
-          <TableIcon size={13} className="text-yellow" />
+          <TableIcon size={13} className="text-accent" />
           {translateText(' جدول ')}
         </b>
         <button
@@ -503,7 +503,7 @@ function TableMenu({ editor, onClose }) {
               .insertTable({ rows: size.rows, cols: size.cols, withHeaderRow: true })
               .run()
           }
-          className="btn-yellow !py-1 !px-2.5 text-[11px] flex items-center gap-1"
+          className="btn-primary !py-1 !px-2.5 text-[11px] flex items-center gap-1"
         >
           <TableIcon size={12} />
           {translateText(' درج ')}
@@ -651,7 +651,7 @@ function LinkDialog({ state, onSubmit, onClose }) {
   return (
     <div
       className="fixed inset-0 z-[320] flex items-center justify-center p-4"
-      style={{ background: 'rgba(3,7,20,0.62)', backdropFilter: 'blur(3px)' }}
+      style={{ background: 'rgba(20,20,20,0.62)', backdropFilter: 'blur(3px)' }}
       role="dialog"
       aria-modal="true"
       aria-label={state.title}
@@ -699,7 +699,7 @@ function LinkDialog({ state, onSubmit, onClose }) {
           <button type="button" onClick={onClose} className="btn-ghost !py-1.5 !px-3 text-xs">
             {translateText('انصراف ')}
           </button>
-          <button type="button" onClick={submit} className="btn-yellow !py-1.5 !px-3.5 text-xs">
+          <button type="button" onClick={submit} className="btn-primary !py-1.5 !px-3.5 text-xs">
             {translateText('افزودن ')}
           </button>
         </div>
@@ -1404,7 +1404,7 @@ function MarkdownEditorComponent({
           }`}
           style={{ background: 'var(--card)' }}
         >
-          <span className="text-amber-400 font-bold">{translateText('در حال آپلود…')}</span>
+          <span className="text-orange-400 font-bold">{translateText('در حال آپلود…')}</span>
         </div>
       )}
 

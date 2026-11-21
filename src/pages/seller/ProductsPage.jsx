@@ -159,7 +159,7 @@ function ProductsPage() {
         {canAdd ? (
           <Link
             to="/seller/products/create"
-            className="btn-yellow !py-2.5 text-sm flex items-center gap-1.5"
+            className="btn-primary !py-2.5 text-sm flex items-center gap-1.5"
           >
             <Plus size={16} />
             {translateText(' محصول جدید ')}
@@ -172,7 +172,7 @@ function ProductsPage() {
               toast.error(translateText('برای ساخت محصول باید پلن فعال داشته باشید'));
               navigate('/seller/plans');
             }}
-            className="btn-yellow !py-2.5 text-sm flex items-center gap-1.5 disabled:opacity-60"
+            className="btn-primary !py-2.5 text-sm flex items-center gap-1.5 disabled:opacity-60"
             title={translateText('پلن فعال لازم است')}
           >
             <Plus size={16} />

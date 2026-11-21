@@ -24,14 +24,14 @@ function StoreCapacityComponent({ capacity, onCreate = null, className = '' }) {
 
   const percent = maxShops > 0 ? Math.min(100, Math.round((used / maxShops) * 100)) : 0;
   const full = reason === 'full';
-  const barColor = full ? '#e53935' : percent >= 70 ? '#c2740a' : 'var(--primary-color)';
+  const barColor = full ? '#e53935' : percent >= 70 ? '#ff6a00' : 'var(--primary-color)';
 
   return (
     <section className={`card rounded-2xl p-4 sm:p-5 ${className}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <b className="flex items-center gap-2 text-sm">
-            <Store size={16} className="text-yellow" />{translateText("ظرفیت فروشگاه‌های شما ")}</b>
+            <Store size={16} className="text-accent" />{translateText("ظرفیت فروشگاه‌های شما ")}</b>
           <p className="mt-1 text-xs muted">
             {plan
               ? translateText("پلن «{{v0}}» — {{v1}} فروشگاه مجاز", {v0: (plan.name),v1: (toFa(maxShops))})
@@ -44,7 +44,7 @@ function StoreCapacityComponent({ capacity, onCreate = null, className = '' }) {
           <button
             type="button"
             onClick={onCreate}
-            className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5"
+            className="btn-primary !py-2 !px-3 text-xs flex items-center gap-1.5"
           >
             <Plus size={14} />{translateText(" فروشگاه جدید ")}</button>
         ) : onCreate ? (
@@ -87,7 +87,7 @@ function StoreCapacityComponent({ capacity, onCreate = null, className = '' }) {
           <AlertTriangle size={14} className="text-red-400 shrink-0" />
           <span className="min-w-0">{blockedText}</span>
           {reason === 'not-seller' || reason === 'no-plan' || reason === 'expired' ? (
-            <Link to="/seller/plans" className="btn-yellow !py-1 !px-2.5 text-[11px] flex items-center gap-1">
+            <Link to="/seller/plans" className="btn-primary !py-1 !px-2.5 text-[11px] flex items-center gap-1">
               <Sparkles size={12} /> {reason === 'expired' ? translateText("تمدید پلن") : translateText("تهیه پلن")}
             </Link>
           ) : null}

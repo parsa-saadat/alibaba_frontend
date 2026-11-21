@@ -34,7 +34,7 @@ const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 
 function statusTone(status = '') {
   if (['paid', 'delivered', 'finalized'].includes(status)) return '#17994f';
   if (['cancelled', 'rejected', 'failed'].includes(status)) return '#e53935';
-  return '#c2740a';
+  return '#ff6a00';
 }
 
 const FILTERS = [
@@ -176,7 +176,7 @@ function OrdersPage() {
           <p className="mt-2 text-xs muted">
             {translateText('وضعیت سفارش‌ها، مرسوله‌ها و پرداخت‌ها در این بخش نمایش داده می‌شود.')}
           </p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex items-center gap-2">
+          <Link to="/auth/pre" className="btn-primary mt-5 inline-flex items-center gap-2">
             {translateText('ورود به حساب ')}
           </Link>
         </div>
@@ -280,7 +280,7 @@ function OrdersPage() {
             <button
               type="button"
               onClick={load}
-              className="btn-yellow mt-4 inline-flex items-center gap-2"
+              className="btn-primary mt-4 inline-flex items-center gap-2"
             >
               <RotateCcw size={15} />
               {translateText('تلاش دوباره ')}
@@ -307,7 +307,7 @@ function OrdersPage() {
                 : translateText('فیلتر را عوض کنید تا سفارش‌های دیگر را ببینید.')}
             </p>
             {orders.length === 0 ? (
-              <Link to="/products" className="btn-yellow mt-5 inline-flex items-center gap-2">
+              <Link to="/products" className="btn-primary mt-5 inline-flex items-center gap-2">
                 {translateText('شروع خرید ')}
               </Link>
             ) : (
@@ -415,7 +415,7 @@ function OrdersPage() {
                           type="button"
                           onClick={() => payOrder(order._id)}
                           disabled={payBusy === order._id}
-                          className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-xs disabled:opacity-60"
+                          className="btn-primary inline-flex items-center gap-1.5 !py-2 text-xs disabled:opacity-60"
                         >
                           <CreditCard size={14} />
                           {payBusy === order._id

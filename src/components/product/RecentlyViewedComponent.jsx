@@ -113,7 +113,7 @@ function RecentlyViewedComponent({
     <button
       type="button"
       onClick={clear}
-      className="inline-flex items-center gap-1 text-xs muted hover:text-yellow transition-colors"
+      className="inline-flex items-center gap-1 text-xs muted hover:text-accent transition-colors"
       title={translateText("پاک کردن تاریخچه‌ی بازدید")}
     >
       <Trash2 size={14} />{translateText("پاک کردن ")}</button>

@@ -151,7 +151,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
         setOpen(true);
       }}
       aria-label={translateText("پاک کردن جستجو")}
-      className={hero ? 'shrink-0 muted hover:text-yellow transition-colors' : 'search-clear'}
+      className={hero ? 'shrink-0 muted hover:text-accent transition-colors' : 'search-clear'}
     >
       <X size={15} />
     </button>
@@ -189,8 +189,8 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
       aria-label={translateText("جستجو")}
       className={
         hero
-          ? 'btn-yellow !rounded-full flex shrink-0 items-center justify-center gap-1.5 !p-0 h-9 w-9 sm:h-auto sm:w-auto sm:!px-6 sm:!py-2 text-sm'
-          : 'btn-yellow !py-2.5 !px-4 text-sm shrink-0 inline-flex items-center justify-center gap-1.5 whitespace-nowrap'
+          ? 'btn-primary !rounded-full flex shrink-0 items-center justify-center gap-1.5 !p-0 h-9 w-9 sm:h-auto sm:w-auto sm:!px-6 sm:!py-2 text-sm'
+          : 'btn-primary !py-2.5 !px-4 text-sm shrink-0 inline-flex items-center justify-center gap-1.5 whitespace-nowrap'
       }
     >
       <Search size={hero ? 16 : 15} className="shrink-0" />
@@ -241,7 +241,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
                 </>
               ) : (
                 <>
-                  <TrendingUp size={14} className="text-yellow" />{translateText("پرطرفدارترین محصولات ")}</>
+                  <TrendingUp size={14} className="text-accent" />{translateText("پرطرفدارترین محصولات ")}</>
               )}
             </span>
             {loading && <Loading label={translateText("در حال جستجو…")} className="!text-xs" />}
@@ -287,14 +287,14 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
                     <div className="text-xs muted truncate flex items-center gap-1.5">
                       <span>{product.brand || translateText("بدون برند")}</span>
                       {hasDiscount(product) ? (
-                        <span className="text-yellow font-bold">
+                        <span className="text-accent font-bold">
                           • {toFa(product.discount.percentage)}{translateText("٪ تخفیف ")}</span>
                       ) : (
                         product.store_name && <span>• {product.store_name}</span>
                       )}
                     </div>
                   </div>
-                  <div className="text-xs font-black text-yellow shrink-0">
+                  <div className="text-xs font-black text-accent shrink-0">
                     {formatPrice(finalPrice(product),product.price?.currency)}
                   </div>
                 </Link>

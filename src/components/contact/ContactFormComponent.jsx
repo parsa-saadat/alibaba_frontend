@@ -83,7 +83,7 @@ function ContactFormComponent() {
         <button
           type="button"
           onClick={() => setSent(false)}
-          className="btn-yellow mt-5 inline-flex items-center gap-2"
+          className="btn-primary mt-5 inline-flex items-center gap-2"
         >
           <Send size={16} />
           {translateText('ارسال پیام جدید ')}
@@ -101,7 +101,7 @@ function ContactFormComponent() {
         <label className="block">
           <span className="text-xs font-bold mb-1.5 block">
             {translateText('نام و نام خانوادگی ')}
-            <span className="text-yellow">*</span>
+            <span className="text-accent">*</span>
           </span>
           <input
             className="input"
@@ -120,7 +120,7 @@ function ContactFormComponent() {
         <label className="block">
           <span className="text-xs font-bold mb-1.5 block">
             {translateText('ایمیل ')}
-            <span className="text-yellow">*</span>
+            <span className="text-accent">*</span>
           </span>
           <input
             className="input"
@@ -171,7 +171,7 @@ function ContactFormComponent() {
         <label className="block sm:col-span-2">
           <span className="text-xs font-bold mb-1.5 block">
             {translateText('متن پیام ')}
-            <span className="text-yellow">*</span>
+            <span className="text-accent">*</span>
           </span>
           <textarea
             className="input resize-y"
@@ -203,7 +203,7 @@ function ContactFormComponent() {
         </span>
         <button
           type="submit"
-          className="btn-yellow inline-flex items-center gap-2"
+          className="btn-primary inline-flex items-center gap-2"
           disabled={sending}
         >
           {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}

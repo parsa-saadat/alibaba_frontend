@@ -80,7 +80,7 @@ function AboutHowItWorksComponent() {
   return (
     <section className="max-w-[1200px] mx-auto px-4 pb-10">
       <div className="mb-5">
-        <span className="text-[11px] font-bold text-yellow">{translateText('فرایند کار')}</span>
+        <span className="text-[11px] font-bold text-accent">{translateText('فرایند کار')}</span>
         <h2 className="font-black text-xl sm:text-2xl mt-1.5">
           {translateText('ژئوکالا چطور کار می‌کند؟')}
         </h2>
@@ -93,7 +93,7 @@ function AboutHowItWorksComponent() {
             <b className="font-black text-sm">{translateText('اگر خریدار هستی')}</b>
             <Link
               to="/products"
-              className="text-[11px] font-bold text-yellow inline-flex items-center gap-1"
+              className="text-[11px] font-bold text-accent inline-flex items-center gap-1"
             >
               {translateText('شروع خرید ')}
               <ChevronLeft className="logical-icon" size={12} />
@@ -115,7 +115,7 @@ function AboutHowItWorksComponent() {
             <b className="font-black text-sm">{translateText('اگر فروشنده هستی')}</b>
             <Link
               to="/seller"
-              className="text-[11px] font-bold text-yellow inline-flex items-center gap-1"
+              className="text-[11px] font-bold text-accent inline-flex items-center gap-1"
             >
               {translateText('ثبت‌نام فروشنده ')}
               <ChevronLeft className="logical-icon" size={12} />

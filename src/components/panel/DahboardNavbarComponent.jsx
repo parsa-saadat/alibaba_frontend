@@ -46,7 +46,7 @@ function DashboardNavbarComponent() {
   const SidebarInner = ({ isMobile = false }) => {
     const isCompact = !isMobile && collapsed;
     return (
-      <div className="flex flex-col h-full bg-[#1a1b1e] text-white select-none">
+      <div className="flex flex-col h-full bg-[#242424] text-white select-none">
         <div
           className={`border-b border-white/10 flex items-center ${
             isCompact ? 'justify-center p-3' : 'justify-between gap-2 p-4'
@@ -57,7 +57,7 @@ function DashboardNavbarComponent() {
             {!isCompact && (
               <div className="min-w-0">
                 <div className="font-black text-sm truncate">{translateText('پنل مدیریت')}</div>
-                <div className="text-[11px] text-[#9aa8cc] truncate">
+                <div className="text-[11px] text-[#a8a8a8] truncate">
                   {translateText('مدیر کل سیستم')}
                 </div>
               </div>
@@ -67,7 +67,7 @@ function DashboardNavbarComponent() {
             <button
               type="button"
               onClick={() => setCollapsed(true)}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-[#9aa8cc] shrink-0"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-[#a8a8a8] shrink-0"
               title={translateText('کوچک‌نمایی منو')}
               aria-label={translateText('کوچک‌نمایی منو')}
             >
@@ -122,8 +122,8 @@ function DashboardNavbarComponent() {
                     isCompact ? 'justify-center px-2' : 'justify-between px-3'
                   } py-2.5 rounded-xl text-sm transition-all ${
                     isActive
-                      ? 'bg-[#ff6a00] text-white font-black shadow-md'
-                      : 'text-[#d8e1fa] hover:bg-white/10'
+                      ? 'bg-[var(--primary-color)] text-white font-black shadow-md'
+                      : 'text-[#e5e5e5] hover:bg-white/10'
                   }`
                 }
               >
@@ -143,7 +143,7 @@ function DashboardNavbarComponent() {
             onClick={toggleTheme}
             className={`w-full flex items-center ${
               isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-            } py-2.5 rounded-xl text-sm text-[#d8e1fa] hover:bg-white/10`}
+            } py-2.5 rounded-xl text-sm text-[#e5e5e5] hover:bg-white/10`}
           >
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             {!isCompact && (
@@ -155,7 +155,7 @@ function DashboardNavbarComponent() {
             onClick={() => isMobile && setMobileOpen(false)}
             className={`w-full flex items-center ${
               isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-            } py-2.5 rounded-xl text-sm text-brand-yellow hover:bg-white/10`}
+            } py-2.5 rounded-xl text-sm text-brand-orange hover:bg-white/10`}
           >
             <Store size={17} className="shrink-0" />
             {!isCompact && <span>{translateText('پنل فروشنده')}</span>}
@@ -165,7 +165,7 @@ function DashboardNavbarComponent() {
             onClick={() => isMobile && setMobileOpen(false)}
             className={`w-full flex items-center ${
               isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-            } py-2.5 rounded-xl text-sm text-[#d8e1fa] hover:bg-white/10`}
+            } py-2.5 rounded-xl text-sm text-[#e5e5e5] hover:bg-white/10`}
           >
             <ExternalLink size={17} className="shrink-0" />
             {!isCompact && <span>{translateText('مشاهده فروشگاه')}</span>}
@@ -190,7 +190,7 @@ function DashboardNavbarComponent() {
 
   return (
     <>
-      <div className="lg:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-theme bg-[#1a1b1e] text-white">
+      <div className="lg:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-theme bg-[#242424] text-white">
         <div className="flex items-center gap-2">
           <button
             type="button"

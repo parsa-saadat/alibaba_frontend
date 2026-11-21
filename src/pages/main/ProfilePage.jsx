@@ -226,7 +226,7 @@ function ProfilePage() {
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <User size={36} className="mx-auto muted mb-3" />
         <p className="muted mb-4">{translateText('برای مشاهده پنل کاربری وارد شوید.')}</p>
-        <Link to="/auth/pre" className="btn-yellow">
+        <Link to="/auth/pre" className="btn-primary">
           {translateText('ورود ')}
         </Link>
       </div>
@@ -494,7 +494,7 @@ function ProfilePage() {
                 </span>
                 {isSeller && isTrustedSeller(user) && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-theme px-2.5 py-1 text-[10px] sm:text-xs">
-                    <BadgeCheck size={13} className="text-yellow shrink-0" />
+                    <BadgeCheck size={13} className="text-accent shrink-0" />
                     {translateText('فروشنده مورد اعتماد ')}
                   </span>
                 )}
@@ -528,7 +528,7 @@ function ProfilePage() {
           {isSeller && (
             <Link
               to="/seller"
-              className="btn-yellow !py-2 !px-3 !text-xs inline-flex items-center gap-1.5"
+              className="btn-primary !py-2 !px-3 !text-xs inline-flex items-center gap-1.5"
             >
               <Store size={14} />
               {translateText(' پنل فروشنده ')}
@@ -617,7 +617,7 @@ function ProfilePage() {
             />
           </label>
           <div className="sm:col-span-2">
-            <button type="submit" disabled={savingName} className="btn-yellow">
+            <button type="submit" disabled={savingName} className="btn-primary">
               {savingName ? translateText('در حال ذخیره…') : translateText('ذخیره مشخصات')}
             </button>
           </div>
@@ -631,7 +631,7 @@ function ProfilePage() {
       <div className="card rounded-3xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-black flex items-center gap-2">
-            <MapPin size={18} className="text-yellow" />
+            <MapPin size={18} className="text-accent" />
             {translateText(' نشانی‌های من ( ')}
             {toFa(addresses.length)})
           </h2>
@@ -707,7 +707,7 @@ function ProfilePage() {
       {!isSeller && (
         <div className="card rounded-3xl p-6">
           <h2 className="font-black text-lg flex items-center gap-2 mb-4">
-            <Store size={20} className="text-yellow" />
+            <Store size={20} className="text-accent" />
             {translateText(' درخواست فروشندگی در ژئوکالا ')}
           </h2>
 
@@ -830,7 +830,7 @@ function ProfilePage() {
             type="button"
             onClick={requestSeller}
             disabled={submittingSeller || !!uploadingField}
-            className="btn-yellow mt-4"
+            className="btn-primary mt-4"
           >
             {submittingSeller
               ? translateText('در حال ارسال…')

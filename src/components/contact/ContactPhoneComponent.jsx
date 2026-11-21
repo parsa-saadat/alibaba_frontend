@@ -74,7 +74,7 @@ function ContactPhoneComponent() {
                 <button
                   type="button"
                   onClick={() => copyValue(channel.copy)}
-                  className="muted hover-yellow transition-colors"
+                  className="muted hover-accent transition-colors"
                   aria-label={translateText('کپی')}
                   title={translateText('کپی')}
                 >
@@ -86,7 +86,7 @@ function ContactPhoneComponent() {
             <b className="block mt-3 text-sm font-black">{channel.title}</b>
             <div className="text-sm mt-1 leading-6 break-words" dir="auto">
               {channel.href ? (
-                <a href={channel.href} className="hover-yellow transition-colors">
+                <a href={channel.href} className="hover-accent transition-colors">
                   {channel.value}
                 </a>
               ) : (
@@ -99,15 +99,15 @@ function ContactPhoneComponent() {
             </span>
 
             {channel.href ? (
-              <a href={channel.href} className="inline-block mt-3 text-xs font-bold text-yellow">
+              <a href={channel.href} className="inline-block mt-3 text-xs font-bold text-accent">
                 {channel.action}
               </a>
             ) : channel.to ? (
-              <Link to={channel.to} className="mt-3 inline-block text-xs font-bold text-yellow">
+              <Link to={channel.to} className="mt-3 inline-block text-xs font-bold text-accent">
                 {channel.action}
               </Link>
             ) : (
-              <a href={channel.anchor} className="mt-3 inline-block text-xs font-bold text-yellow">
+              <a href={channel.anchor} className="mt-3 inline-block text-xs font-bold text-accent">
                 {channel.action}
               </a>
             )}

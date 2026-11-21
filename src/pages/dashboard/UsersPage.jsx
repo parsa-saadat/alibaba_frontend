@@ -222,7 +222,7 @@ function UsersPage() {
           value={toFa(stats.admins)}
           hint={translateText('دسترسی کامل')}
           icon={ShieldCheck}
-          tint="#c2740a"
+          tint="#ff6a00"
         />
         <StatTile
           label={translateText('مورد اعتماد')}
@@ -248,7 +248,7 @@ function UsersPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: 'var(--on-primary)',
+                        color: '#242424',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -390,8 +390,8 @@ function UsersPage() {
                         style={{
                           background: u.seller_approved_status
                             ? 'rgba(23,153,79,0.14)'
-                            : 'rgba(194,116,10,0.14)',
-                          color: u.seller_approved_status ? '#17994f' : '#c2740a',
+                            : 'rgba(255,106,0,0.14)',
+                          color: u.seller_approved_status ? '#17994f' : '#ff6a00',
                         }}
                       >
                         {u.seller_approved_status
@@ -404,7 +404,7 @@ function UsersPage() {
                           background:
                             u.seller_active_status === 'ACTIVE'
                               ? 'rgba(37,99,235,0.14)'
-                              : 'rgba(130,140,170,0.16)',
+                              : 'rgba(160,160,160,0.16)',
                           color: u.seller_active_status === 'ACTIVE' ? '#2563eb' : 'var(--muted)',
                         }}
                       >
@@ -556,7 +556,7 @@ function UsersPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn-yellow !py-2 !px-4 text-xs flex items-center gap-1.5 disabled:opacity-60"
+                  className="btn-primary !py-2 !px-4 text-xs flex items-center gap-1.5 disabled:opacity-60"
                 >
                   <Check size={14} />{' '}
                   {saving ? translateText('در حال ذخیره…') : translateText('ذخیره تغییرات')}
@@ -602,7 +602,7 @@ function UsersPage() {
                 type="button"
                 disabled={saving}
                 onClick={deleteUser}
-                className="btn-yellow !py-2 !px-4 text-xs disabled:opacity-60"
+                className="btn-primary !py-2 !px-4 text-xs disabled:opacity-60"
                 style={{ background: '#e53935', color: '#fff' }}
               >
                 {saving ? translateText('در حال حذف…') : translateText('بله، حذف کن')}

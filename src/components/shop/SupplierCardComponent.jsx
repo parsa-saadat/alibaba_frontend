@@ -184,7 +184,7 @@ function SupplierCardComponent({ store }) {
           </button>
           <Link
             to={`/store/${id}`}
-            className="btn-yellow inline-flex items-center gap-1 !py-2 text-xs"
+            className="btn-primary inline-flex items-center gap-1 !py-2 text-xs"
           >
             {translateText('مشاهده فروشگاه ')}
             <ChevronLeft className="logical-icon" size={13} />
@@ -219,7 +219,7 @@ function SupplierCardComponent({ store }) {
                 type="button"
                 onClick={() => scrollRow(-1)}
                 aria-label={translateText('قبلی')}
-                className="card absolute start-1 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full shadow-md transition-colors hover:text-yellow md:grid"
+                className="card absolute start-1 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full shadow-md transition-colors hover:text-accent md:grid"
               >
                 <ChevronRight className="logical-icon" size={16} />
               </button>
@@ -227,7 +227,7 @@ function SupplierCardComponent({ store }) {
                 type="button"
                 onClick={() => scrollRow(1)}
                 aria-label={translateText('بعدی')}
-                className="card absolute end-1 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full shadow-md transition-colors hover:text-yellow md:grid"
+                className="card absolute end-1 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center rounded-full shadow-md transition-colors hover:text-accent md:grid"
               >
                 <ChevronLeft className="logical-icon" size={16} />
               </button>

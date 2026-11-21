@@ -39,7 +39,7 @@ function PanelPageHeader({
           {Icon ? (
             <span
               className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl"
-              style={{ background: 'var(--primary-color)', color: '#ffffff' }}
+              style={{ background: 'var(--primary-color)', color: '#242424' }}
             >
               <Icon size={22} />
             </span>
@@ -58,7 +58,7 @@ function PanelPageHeader({
                 type="button"
                 onClick={onRefresh}
                 disabled={refreshing}
-                className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5 disabled:opacity-60"
+                className="btn-primary !py-2 !px-3 text-xs flex items-center gap-1.5 disabled:opacity-60"
               >
                 <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
                 {refreshing ? translateText("در حال به‌روزرسانی…") : refreshLabel}

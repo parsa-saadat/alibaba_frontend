@@ -103,7 +103,7 @@ function LegalPageComponent({
     <div className="mx-auto max-w-6xl px-3 py-5 sm:px-4 sm:py-7">
       {/* مسیر */}
       <nav className="mb-3 flex items-center gap-1 text-[11px] muted">
-        <Link to="/" className="hover-yellow">{translateText("خانه ")}</Link>
+        <Link to="/" className="hover-accent">{translateText("خانه ")}</Link>
         <ChevronLeft className="logical-icon" size={12} />
         <span>{crumb}</span>
         <ChevronLeft className="logical-icon" size={12} />
@@ -141,7 +141,7 @@ function LegalPageComponent({
         className="relative overflow-hidden rounded-3xl p-6 sm:p-8"
         style={{
           background:
-            'radial-gradient(circle at 85% 10%, rgba(255,106,0,0.20) 0%, rgba(255,106,0,0) 55%), linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
+            'radial-gradient(circle at 85% 10%, rgba(255,106,0,0.20) 0%, rgba(255,106,0,0) 55%), linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
@@ -230,7 +230,7 @@ function LegalPageComponent({
                 translateText("b2b.webSupportDesc")}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link to="/contact" className="btn-yellow !py-2 text-xs">{translateText("b2b.webSupport")}</Link>
+              <Link to="/contact" className="btn-primary !py-2 text-xs">{translateText("b2b.webSupport")}</Link>
               <Link to="/about" className="btn-ghost !py-2 text-xs">{translateText("درباره ژئوکالا ")}</Link>
               {tabs
                 .filter((tab) => tab.key !== activeTab)

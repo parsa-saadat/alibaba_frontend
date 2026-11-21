@@ -215,7 +215,7 @@ function FavoritesPage() {
                   style={{
                     borderColor: on ? 'var(--primary-color)' : 'var(--border)',
                     background: on ? 'var(--primary-color)' : 'transparent',
-                    color: on ? 'var(--navy)' : 'var(--muted)',
+                    color: on ? 'var(--charcoal)' : 'var(--muted)',
                   }}
                 >
                   {item.label}
@@ -238,7 +238,7 @@ function FavoritesPage() {
           <h2 className="mt-4 text-base font-black">{translateText("لیست علاقه‌مندی‌های شما خالی است")}</h2>
           <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">{translateText("روی آیکن قلب هر کالا بزنید تا اینجا ذخیره شود و بعداً راحت پیدایش کنید. ")}</p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <Link to="/products" className="btn-yellow inline-flex items-center gap-2">
+            <Link to="/products" className="btn-primary inline-flex items-center gap-2">
               <ShoppingBag size={16} />{translateText("شروع خرید ")}</Link>
             <Link to="/" className="btn-ghost inline-flex items-center gap-2">
               <Sparkles size={16} />{translateText("پیشنهادهای امروز ")}</Link>

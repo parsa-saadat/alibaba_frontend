@@ -23,7 +23,7 @@ function AboutTimelineComponent() {
     <section className="max-w-[1200px] mx-auto px-4 pb-10">
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div>
-          <span className="text-[11px] font-bold text-yellow">{translateText('مسیر ما')}</span>
+          <span className="text-[11px] font-bold text-accent">{translateText('مسیر ما')}</span>
           <h2 className="font-black text-xl sm:text-2xl mt-1.5">{translateText('v20.steps')}</h2>
         </div>
         <p className="text-xs muted max-w-md leading-6">{translateText('v20.mission')}</p>
@@ -62,7 +62,7 @@ function AboutTimelineComponent() {
           className="rounded-3xl p-6 sm:p-7 text-white flex flex-col justify-between"
           style={{
             background:
-              'radial-gradient(circle at 80% 15%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 50%), linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
+              'radial-gradient(circle at 80% 15%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 50%), linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >

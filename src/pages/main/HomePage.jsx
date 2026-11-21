@@ -56,7 +56,7 @@ const HomePage = () => {
         <div className="max-w-[1440px] mx-auto px-4 pt-6">
           <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
             <span className="text-sm muted">{translateText("دریافت اطلاعات از بک‌اند ناموفق بود.")}</span>
-            <button type="button" className="btn-yellow !py-2 text-sm" onClick={() => setRetry((v) => v + 1)}>{translateText("تلاش دوباره ")}</button>
+            <button type="button" className="btn-primary !py-2 text-sm" onClick={() => setRetry((v) => v + 1)}>{translateText("تلاش دوباره ")}</button>
           </div>
         </div>
       )}

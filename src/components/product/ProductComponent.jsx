@@ -139,7 +139,7 @@ function ProductComponent({
   const priceBlock = (
     <div className="flex items-baseline gap-2 flex-wrap">
       <span
-        className={`font-black leading-none text-yellow ${
+        className={`font-black leading-none text-accent ${
           variant === 'grid'
             ? 'text-base @[180px]:text-lg @[240px]:text-xl'
             : 'text-lg sm:text-xl'

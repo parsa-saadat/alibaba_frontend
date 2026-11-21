@@ -11,7 +11,7 @@ function PromoBannerComponent() {
   return (
     <div
       className="relative overflow-hidden text-white"
-      style={{ background: 'linear-gradient(90deg,#e2352c 0%,#ff7a1a 60%,#ffb800 100%)' }}
+      style={{ background: 'linear-gradient(90deg,#e2352c 0%,#ff7a1a 60%,#e85f00 100%)' }}
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-2 px-4 py-2 text-xs font-bold sm:gap-3 sm:text-sm">
         <Zap size={15} className="shrink-0 fill-white/20" />

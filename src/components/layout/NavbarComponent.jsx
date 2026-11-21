@@ -220,7 +220,7 @@ function NavbarComponent() {
                 <Link
                   to={`/products?category_id=${node._id}`}
                   onClick={() => setMobileOpen(false)}
-                  className="block px-3 py-2 me-3 rounded-lg text-[11px] font-bold text-brand-yellow hover:bg-white/10"
+                  className="block px-3 py-2 me-3 rounded-lg text-[11px] font-bold text-brand-orange hover:bg-white/10"
                 >
                   {translateText('همه محصولات ')}
                   {node.name}
@@ -344,7 +344,7 @@ function NavbarComponent() {
                   data-testid="account-trigger"
                   aria-haspopup="menu"
                   aria-label={translateText('منوی حساب کاربری')}
-                  className="btn-yellow !py-2 !px-2.5 sm:!px-3 text-xs sm:text-sm inline-flex items-center gap-1.5"
+                  className="btn-primary !py-2 !px-2.5 sm:!px-3 text-xs sm:text-sm inline-flex items-center gap-1.5"
                 >
                   <User size={16} className="shrink-0" />
                   <span className="hidden md:inline max-w-[90px] truncate">
@@ -402,7 +402,7 @@ function NavbarComponent() {
                         <Link
                           to="/seller"
                           onClick={() => setAccountOpen(false)}
-                          className="account-link text-yellow font-bold"
+                          className="account-link text-accent font-bold"
                         >
                           <Store size={15} />
                           {translateText(' پنل فروشنده ')}
@@ -412,7 +412,7 @@ function NavbarComponent() {
                         <Link
                           to="/dashboard"
                           onClick={() => setAccountOpen(false)}
-                          className="account-link text-yellow font-bold"
+                          className="account-link text-accent font-bold"
                         >
                           <ShieldCheck size={15} />
                           {translateText(' پنل ادمین ')}
@@ -433,7 +433,7 @@ function NavbarComponent() {
             ) : (
               <Link
                 to="/auth/pre"
-                className="btn-yellow !py-2 !px-3 sm:!px-4 text-xs sm:text-sm whitespace-nowrap"
+                className="btn-primary !py-2 !px-3 sm:!px-4 text-xs sm:text-sm whitespace-nowrap"
               >
                 <span className="sm:hidden">{translateText('ورود')}</span>
                 <span className="hidden sm:inline">{translateText('ورود | ثبت‌نام')}</span>
@@ -495,7 +495,7 @@ function NavbarComponent() {
                   {isSeller && (
                     <NavLink
                       to="/seller"
-                      className="header-nav-link shrink-0 text-brand-yellow font-bold"
+                      className="header-nav-link shrink-0 text-brand-orange font-bold"
                     >
                       {translateText('پنل فروشندگی ')}
                     </NavLink>
@@ -503,7 +503,7 @@ function NavbarComponent() {
                   {user?.role === 'admin' && (
                     <NavLink
                       to="/dashboard"
-                      className="header-nav-link shrink-0 text-brand-yellow font-bold"
+                      className="header-nav-link shrink-0 text-brand-orange font-bold"
                     >
                       {translateText('مدیریت سایت ')}
                     </NavLink>
@@ -568,7 +568,7 @@ function NavbarComponent() {
                       <span>{translateText('مقایسه')}</span>
                     </span>
                     {compare.length > 0 && (
-                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-white">
+                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-[#242424]">
                         {compare.length}
                       </span>
                     )}
@@ -584,7 +584,7 @@ function NavbarComponent() {
                       <span>{translateText('علاقه‌مندی')}</span>
                     </span>
                     {favorites.length > 0 && (
-                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-white">
+                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-[#242424]">
                         {favorites.length}
                       </span>
                     )}
@@ -600,7 +600,7 @@ function NavbarComponent() {
                       <span>{translateText('سبد خرید')}</span>
                     </span>
                     {cartCount > 0 && (
-                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-white">
+                      <span className="rounded-full bg-[#ff6a00] px-1.5 py-0.5 text-[10px] font-black text-[#242424]">
                         {cartCount}
                       </span>
                     )}
@@ -612,7 +612,7 @@ function NavbarComponent() {
                   <div className="rounded-xl bg-white/5 border border-white/10 p-2.5 space-y-1.5">
                     <div className="flex items-center justify-between gap-2 px-1">
                       <span className="flex items-center gap-2 text-xs font-bold text-white min-w-0">
-                        <User size={14} className="text-brand-yellow shrink-0" />
+                        <User size={14} className="text-brand-orange shrink-0" />
                         <span className="truncate">
                           {userDisplayName(user, translateText('حساب کاربری'))}
                         </span>
@@ -654,7 +654,7 @@ function NavbarComponent() {
                   <Link
                     to="/auth/pre"
                     onClick={() => setMobileOpen(false)}
-                    className="btn-yellow w-full flex items-center justify-center gap-2 text-xs !py-2.5"
+                    className="btn-primary w-full flex items-center justify-center gap-2 text-xs !py-2.5"
                   >
                     <User size={15} />
                     <span>{translateText('ورود | ثبت‌نام')}</span>
@@ -681,7 +681,7 @@ function NavbarComponent() {
                   <Link
                     to="/products?discount=true"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-yellow hover:bg-white/10"
+                    className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-orange hover:bg-white/10"
                   >
                     {translateText('پیشنهادهای شگفت‌انگیز ')}
                   </Link>
@@ -704,7 +704,7 @@ function NavbarComponent() {
                     <NavLink
                       to="/seller"
                       onClick={() => setMobileOpen(false)}
-                      className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-yellow hover:bg-white/10"
+                      className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-orange hover:bg-white/10"
                     >
                       {translateText('پنل فروشندگی ')}
                     </NavLink>
@@ -713,7 +713,7 @@ function NavbarComponent() {
                     <NavLink
                       to="/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-yellow hover:bg-white/10"
+                      className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-orange hover:bg-white/10"
                     >
                       {translateText('پنل مدیریت ادمین ')}
                     </NavLink>
@@ -726,7 +726,7 @@ function NavbarComponent() {
                     type="button"
                     onClick={() => setCatsExpanded((v) => !v)}
                     aria-expanded={catsExpanded}
-                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-brand-yellow"
+                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-brand-orange"
                   >
                     <span>{translateText('دسته‌بندی کالاها')}</span>
                     <ChevronDown

@@ -10,7 +10,7 @@ function AboutCtaComponent() {
         className="rounded-3xl p-6 sm:p-9 flex flex-col md:flex-row items-center justify-between gap-6"
         style={{
           background:
-            'radial-gradient(circle at 85% 20%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 45%), linear-gradient(135deg, var(--navy-mid), var(--navy-deep))',
+            'radial-gradient(circle at 85% 20%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 45%), linear-gradient(135deg, var(--charcoal-mid), var(--charcoal-deep))',
           border: '1px solid rgba(255,106,0,0.28)',
         }}
       >
@@ -20,7 +20,7 @@ function AboutCtaComponent() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          <Link to="/seller" className="btn-yellow inline-flex items-center gap-2">
+          <Link to="/seller" className="btn-primary inline-flex items-center gap-2">
             <Store size={16} />{translateText("فروشنده شوید ")}</Link>
           <Link
             to="/contact"

@@ -2,7 +2,7 @@ import { language } from '../../i18n/runtime';
 export default function StatsNotice({ error, stats = {} }) {
   if (!error && !Object.values(stats).some((value) => value?.error_code)) return null;
   return (
-    <p role="status" className="card rounded-xl p-3 text-xs text-amber-600 dark:text-amber-300">
+    <p role="status" className="card rounded-xl p-3 text-xs text-orange-600 dark:text-orange-300">
       {
         {
           en: 'Some statistics or exchange rates are unavailable. Missing amounts are not shown as zero. Refresh to retry.',

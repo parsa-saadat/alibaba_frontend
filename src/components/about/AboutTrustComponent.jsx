@@ -71,7 +71,7 @@ function AboutTrustComponent() {
           <span className="text-[11px] muted leading-6">{translateText('v20.termsShort')}</span>
           <Link
             to="/contact"
-            className="text-[11px] font-bold text-yellow inline-flex items-center gap-1 shrink-0"
+            className="text-[11px] font-bold text-accent inline-flex items-center gap-1 shrink-0"
           >
             {translateText('سوال دارم ')}
             <ChevronLeft className="logical-icon" size={12} />
@@ -84,7 +84,7 @@ function AboutTrustComponent() {
         <div
           className="rounded-3xl p-6 text-white"
           style={{
-            background: 'linear-gradient(150deg, var(--navy-soft), var(--navy-deep))',
+            background: 'linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >
@@ -95,7 +95,7 @@ function AboutTrustComponent() {
               style={{
                 border: '1px solid rgba(255,255,255,0.12)',
                 background: 'rgba(255,255,255,0.04)',
-                color: '#c9d4ef',
+                color: '#d4d4d4',
               }}
             >
               {translateText('v20.platform')}
@@ -105,7 +105,7 @@ function AboutTrustComponent() {
               style={{
                 border: '1px solid rgba(255,255,255,0.12)',
                 background: 'rgba(255,255,255,0.04)',
-                color: '#c9d4ef',
+                color: '#d4d4d4',
               }}
             >
               {translateText('v20.profiles')}
@@ -115,7 +115,7 @@ function AboutTrustComponent() {
               style={{
                 border: '1px solid rgba(255,255,255,0.12)',
                 background: 'rgba(255,255,255,0.04)',
-                color: '#c9d4ef',
+                color: '#d4d4d4',
               }}
             >
               {translateText('v20.website')}

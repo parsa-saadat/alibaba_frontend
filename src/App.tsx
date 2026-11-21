@@ -85,14 +85,14 @@ const MainApp = () => {
     return (
       <div
         className="min-h-screen grid place-items-center"
-        style={{ background: 'var(--navy-deep, #0a1736)' }}
+        style={{ background: 'var(--charcoal-deep, #242424)' }}
       >
         <div className="text-center space-y-4" role="status" aria-live="polite">
           <div
             className="mx-auto h-14 w-14 rounded-full animate-spin"
-            style={{ border: '3px solid rgba(255,255,255,.14)', borderTopColor: '#ffd60a' }}
+            style={{ border: '3px solid rgba(255,255,255,.14)', borderTopColor: '#ff6a00' }}
           />
-          <p className="text-sm font-bold" style={{ color: '#eef2ff' }}>
+          <p className="text-sm font-bold" style={{ color: '#f5f5f5' }}>
             {translateText('در حال بارگذاری ژئوکالا… ')}
           </p>
         </div>

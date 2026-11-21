@@ -46,7 +46,7 @@ function ContactDepartmentsComponent() {
             href={`mailto:${item.email}`}
             className="card rounded-2xl p-4 flex flex-col gap-1 transition-transform duration-200 hover:-translate-y-1"
           >
-            <span className="text-yellow">
+            <span className="text-accent">
               <Icon size={20} />
             </span>
             <b className="text-sm font-black mt-1">{item.title}</b>

@@ -10,7 +10,7 @@ function OurPolicyComponent() {
         <div
           className="mt-4 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-4 justify-between text-white"
           style={{
-            background: 'linear-gradient(135deg,#1a1b1e 0%,#292a2e 55%,#1f2023 100%)',
+            background: 'linear-gradient(135deg,#242424 0%,#343434 55%,#292929 100%)',
             border: '1px solid var(--border)',
           }}
         >
@@ -29,7 +29,7 @@ function OurPolicyComponent() {
               </div>
             </div>
           </div>
-          <Link to="/profile" className="btn-yellow shrink-0">
+          <Link to="/profile" className="btn-primary shrink-0">
             {translateText('درخواست فروشندگی ')}
           </Link>
         </div>

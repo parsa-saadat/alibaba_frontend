@@ -13,9 +13,9 @@ export default function LocaleFlag({ code }) {
           <>
             <rect width="30" height="22" fill="#fff" />
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <rect key={i} y={i * 3.38} width="30" height="1.7" fill="#c93b4c" />
+              <rect key={i} y={i * 3.38} width="30" height="1.7" fill="#b22234" />
             ))}
-            <rect width="13" height="12" fill="#294987" />
+            <rect width="13" height="12" fill="#3c3b6e" />
             {[0, 1, 2].flatMap((y) =>
               [0, 1, 2].map((x) => (
                 <circle key={`${y}-${x}`} cx={2.5 + x * 4} cy={2.5 + y * 3.4} r=".8" fill="white" />
@@ -40,7 +40,7 @@ export default function LocaleFlag({ code }) {
           <>
             <rect width="30" height="22" fill="#fff" />
             <rect width="30" height="7.3" fill="#269568" />
-            <rect y="14.7" width="30" height="7.3" fill="#202733" />
+            <rect y="14.7" width="30" height="7.3" fill="#292929" />
             <rect width="8" height="22" fill="#e74452" />
           </>
         ) : null}

@@ -302,7 +302,7 @@ function ComparePage() {
           <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
             {translateText('روی آیکن مقایسه در کارت هر کالا بزنید تا اینجا کنار هم بررسی شوند. ')}
           </p>
-          <Link to="/products" className="btn-yellow mt-5 inline-flex items-center gap-2">
+          <Link to="/products" className="btn-primary mt-5 inline-flex items-center gap-2">
             <Sparkles size={16} />
             {translateText('انتخاب محصول ')}
           </Link>

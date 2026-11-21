@@ -260,7 +260,7 @@ function OrdersPage() {
           label={translateText('در انتظار پرداخت')}
           value={toFa(summary.pending)}
           icon={Clock3}
-          tint="#c2740a"
+          tint="#ff6a00"
         />
         <StatTile
           label={translateText('مجموع پرداخت‌شده')}
@@ -305,7 +305,7 @@ function OrdersPage() {
       {loadError && (
         <div className="card rounded-2xl p-6 text-center space-y-3">
           <p className="text-sm muted">{translateText('دریافت سفارش‌ها ناموفق بود.')}</p>
-          <button type="button" onClick={load} className="btn-yellow !py-2 text-xs">
+          <button type="button" onClick={load} className="btn-primary !py-2 text-xs">
             {translateText('تلاش دوباره ')}
           </button>
         </div>
@@ -374,7 +374,7 @@ function OrdersPage() {
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <b className="font-black text-base text-yellow">
+                    <b className="font-black text-base text-accent">
                       {formatPrice(o.final_amount ?? o.total_amount)}
                     </b>
                     <ChevronDown
@@ -543,7 +543,7 @@ function OrdersPage() {
                                     {formatPrice(sub.discount_applied)}
                                   </span>
                                 )}
-                                <span className="font-black text-yellow">
+                                <span className="font-black text-accent">
                                   {translateText('خالص مرسوله: ')}
                                   {formatPrice(netOf(sub))}
                                 </span>
@@ -555,7 +555,7 @@ function OrdersPage() {
                                     type="button"
                                     disabled={busy}
                                     onClick={() => approveSubOrder(sub._id)}
-                                    className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
+                                    className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-60"
                                   >
                                     <Check size={13} />
                                     {translateText(' تأیید مرسوله ')}
@@ -566,7 +566,7 @@ function OrdersPage() {
                                     type="button"
                                     disabled={busy}
                                     onClick={() => updateSubOrderStatus(sub._id, 'ready_to_ship')}
-                                    className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60"
+                                    className="btn-primary !py-1.5 !px-3 text-xs disabled:opacity-60"
                                   >
                                     {translateText('آماده ارسال ')}
                                   </button>
@@ -576,7 +576,7 @@ function OrdersPage() {
                                     type="button"
                                     disabled={busy}
                                     onClick={() => updateSubOrderStatus(sub._id, 'shipped')}
-                                    className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60"
+                                    className="btn-primary !py-1.5 !px-3 text-xs disabled:opacity-60"
                                   >
                                     {translateText('ثبت ارسال ')}
                                   </button>
@@ -586,7 +586,7 @@ function OrdersPage() {
                                     type="button"
                                     disabled={busy}
                                     onClick={() => updateSubOrderStatus(sub._id, 'delivered')}
-                                    className="btn-yellow !py-1.5 !px-3 text-xs disabled:opacity-60"
+                                    className="btn-primary !py-1.5 !px-3 text-xs disabled:opacity-60"
                                   >
                                     {translateText('ثبت تحویل ')}
                                   </button>
@@ -662,7 +662,7 @@ function OrdersPage() {
               <button
                 type="submit"
                 disabled={busyId === cancelTarget}
-                className="btn-yellow !py-2 text-xs disabled:opacity-60"
+                className="btn-primary !py-2 text-xs disabled:opacity-60"
               >
                 {translateText('تأیید لغو ')}
               </button>

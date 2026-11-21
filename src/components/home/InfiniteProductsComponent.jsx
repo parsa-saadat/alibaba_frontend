@@ -86,13 +86,13 @@ function InfiniteProductsComponent() {
         {error && (
           <div className="text-center py-4">
             <p className="text-sm muted mb-2">{translateText("خطا در دریافت محصولات")}</p>
-            <button type="button" onClick={load} className="btn-yellow">{translateText("تلاش مجدد ")}</button>
+            <button type="button" onClick={load} className="btn-primary">{translateText("تلاش مجدد ")}</button>
           </div>
         )}
 
         {!loading && !error && visible.length > 0 && (
           <div className="text-center pt-4">
-            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-yellow hover:underline">{translateText("مشاهده‌ی همه‌ی محصولات ")}</Link>
+            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">{translateText("مشاهده‌ی همه‌ی محصولات ")}</Link>
           </div>
         )}
       </div>

@@ -14,9 +14,9 @@ const DashboardLayout = () => {
       <div className="min-h-screen flex flex-col gap-4 items-center justify-center p-6">
         <LanguageSelector variant="admin" />
         <div className="card rounded-3xl p-8 max-w-md w-full text-center space-y-4">
-          <ShieldAlert size={38} className="mx-auto text-yellow" />
+          <ShieldAlert size={38} className="mx-auto text-accent" />
           <h1 className="font-black text-xl">{translateText('ورود به پنل مدیریت')}</h1>
-          <Link to="/auth/pre" className="btn-yellow inline-block">
+          <Link to="/auth/pre" className="btn-primary inline-block">
             {translateText('ورود به حساب ')}
           </Link>
         </div>
@@ -36,7 +36,7 @@ const DashboardLayout = () => {
       <div className="min-h-screen flex flex-col gap-4 items-center justify-center p-6">
         <LanguageSelector variant="admin" />
         <div className="card rounded-3xl p-8 max-w-md w-full text-center space-y-4">
-          <ShieldAlert size={38} className="mx-auto text-yellow" />
+          <ShieldAlert size={38} className="mx-auto text-accent" />
           <h1 className="font-black text-xl">{translateText('این بخش مخصوص مدیر است')}</h1>
           <p className="text-sm muted leading-6">
             {translateText('حساب فعلی شما نقش «')}
@@ -46,7 +46,7 @@ const DashboardLayout = () => {
             )}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <Link to="/auth/pre" className="btn-yellow inline-flex items-center gap-1.5">
+            <Link to="/auth/pre" className="btn-primary inline-flex items-center gap-1.5">
               {translateText('ورود با حساب ادمین ')}
             </Link>
             <Link

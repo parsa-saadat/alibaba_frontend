@@ -260,7 +260,7 @@ function CreateOrderPage() {
               'برای ثبت سفارش و پرداخت، ابتدا با شماره موبایل خود وارد حساب کاربری شوید. ',
             )}
           </p>
-          <Link to="/auth/pre" className="btn-yellow mt-5 inline-flex">
+          <Link to="/auth/pre" className="btn-primary mt-5 inline-flex">
             {translateText('ورود به حساب ')}
           </Link>
         </div>
@@ -313,7 +313,7 @@ function CreateOrderPage() {
               style={{ borderColor: 'var(--border)' }}
             >
               <dt className="font-bold">{translateText('مبلغ قابل پرداخت')}</dt>
-              <dd className="text-base font-black text-yellow">
+              <dd className="text-base font-black text-accent">
                 {placed.amount == null ? '—' : formatOrderPrice(placed.amount)}
               </dd>
             </div>
@@ -324,7 +324,7 @@ function CreateOrderPage() {
               type="button"
               onClick={startPayment}
               disabled={payingNow}
-              className="btn-yellow inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="btn-primary inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {payingNow ? (
                 <Loader2 size={17} className="animate-spin" />
@@ -386,7 +386,7 @@ function CreateOrderPage() {
             )}
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <Link to="/products" className="btn-yellow">
+            <Link to="/products" className="btn-primary">
               {translateText('شروع خرید ')}
             </Link>
             <Link to="/favorites" className="btn-ghost">
@@ -502,7 +502,7 @@ function CreateOrderPage() {
                         style={{
                           border: `1.5px solid ${active ? 'var(--primary-color)' : 'var(--muted)'}`,
                           background: active ? 'var(--primary-color)' : 'transparent',
-                          color: 'var(--navy, #1a1b1e)',
+                          color: 'var(--charcoal, #242424)',
                         }}
                       >
                         {active && <Check size={11} strokeWidth={3.5} />}
@@ -591,7 +591,7 @@ function CreateOrderPage() {
                     </div>
 
                     <div className="shrink-0 text-end">
-                      <b className="block text-xs font-black text-yellow sm:text-sm">
+                      <b className="block text-xs font-black text-accent sm:text-sm">
                         {formatPrice(unit * quantity, product.price?.currency)}
                       </b>
                       <span className="mt-0.5 block text-[10px] muted">
@@ -660,7 +660,7 @@ function CreateOrderPage() {
               style={{ borderColor: 'var(--border)' }}
             >
               <span className="text-xs font-bold">{translateText('قابل پرداخت')}</span>
-              <b className="text-base font-black text-yellow sm:text-lg">
+              <b className="text-base font-black text-accent sm:text-lg">
                 {cartCode ? formatPrice(subtotal, cartCode) : '—'}
               </b>
             </div>
@@ -679,14 +679,14 @@ function CreateOrderPage() {
               type="button"
               disabled={paying || !selected || !cartCode}
               onClick={submitOrder}
-              className="btn-yellow mt-4 flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="btn-primary mt-4 flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {paying ? <Loader2 size={17} className="animate-spin" /> : <ReceiptText size={17} />}
               {paying ? translateText('در حال ثبت سفارش…') : translateText('ثبت سفارش')}
             </button>
 
             {!selected && (
-              <p className="mt-2 text-center text-[11px]" style={{ color: '#c2740a' }}>
+              <p className="mt-2 text-center text-[11px]" style={{ color: '#ff6a00' }}>
                 {translateText('برای ادامه، یک آدرس تحویل انتخاب کنید. ')}
               </p>
             )}

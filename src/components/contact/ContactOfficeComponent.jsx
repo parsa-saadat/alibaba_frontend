@@ -61,7 +61,7 @@ function EmailCard({ channel }) {
       >
         <a
           href={emailHref(channel.email)}
-          className="text-sm font-black break-all hover-yellow"
+          className="text-sm font-black break-all hover-accent"
           dir="ltr"
         >
           {channel.email}
@@ -81,7 +81,7 @@ function EmailCard({ channel }) {
       </div>
       <a
         href={emailHref(channel.email, t(channel.title))}
-        className="btn-yellow w-full inline-flex items-center justify-center gap-2 text-xs !py-3"
+        className="btn-primary w-full inline-flex items-center justify-center gap-2 text-xs !py-3"
       >
         <Send size={15} />
         {t('v21.writeEmail')}
@@ -97,7 +97,7 @@ export default function ContactOfficeComponent() {
         <header className="flex items-start gap-3 mb-5">
           <span
             className="grid h-11 w-11 place-items-center rounded-2xl shrink-0"
-            style={{ background: 'var(--navy-deep)', color: 'var(--primary-color)' }}
+            style={{ background: 'var(--charcoal-deep)', color: 'var(--primary-color)' }}
           >
             <Mail size={21} />
           </span>

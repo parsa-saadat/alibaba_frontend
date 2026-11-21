@@ -20,7 +20,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           type="button"
           onClick={onIncrement}
           disabled={soldOut}
-          className="btn-yellow w-full !rounded-xl !py-2 flex items-center justify-center gap-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-primary w-full !rounded-xl !py-2 flex items-center justify-center gap-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ShoppingCart size={16} />
           {soldOut ? translateText("ناموجود") : translateText("افزودن به سبد")}

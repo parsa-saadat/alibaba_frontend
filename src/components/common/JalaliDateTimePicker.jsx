@@ -31,7 +31,7 @@ function DayCell({ day, selected, today, onClick }) {
   const base =
     'h-8 w-8 rounded-lg text-xs font-bold grid place-items-center transition-colors';
   const style = selected
-    ? { background: 'var(--primary-color)', color: '#ffffff' }
+    ? { background: 'var(--primary-color)', color: '#242424' }
     : today
       ? { background: 'rgba(255,106,0,0.16)', color: 'var(--text)' }
       : undefined;
@@ -285,7 +285,7 @@ export default function JalaliDateTimePicker({
             aria-expanded={open}
           >
             <span className={selectedDate ? '' : 'muted'}>{label}</span>
-            <CalendarDays size={14} className="text-yellow shrink-0" />
+            <CalendarDays size={14} className="text-accent shrink-0" />
           </button>
         )}
       </div>
@@ -295,7 +295,7 @@ export default function JalaliDateTimePicker({
           <button
             type="button"
             onClick={() => setTyping(true)}
-            className="text-[10px] muted hover:text-yellow underline decoration-dotted"
+            className="text-[10px] muted hover:text-accent underline decoration-dotted"
           >{translateText("ورود دستی ")}</button>
           <span className="muted text-[10px]">·</span>
           <button
@@ -448,7 +448,7 @@ export default function JalaliDateTimePicker({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="btn-yellow !py-1 !px-2.5 text-[10px] flex items-center gap-1 me-auto"
+              className="btn-primary !py-1 !px-2.5 text-[10px] flex items-center gap-1 me-auto"
             >
               <Check size={10} />{translateText(" تأیید ")}</button>
           </div>

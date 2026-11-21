@@ -54,7 +54,7 @@ function ConfirmDialog({ options, settle }) {
       >
         <div className="flex items-start gap-3">
           <span
-            className={`grid place-items-center h-11 w-11 shrink-0 rounded-2xl ${options.danger ? 'bg-red-500/10 text-red-500' : 'card2 text-yellow'}`}
+            className={`grid place-items-center h-11 w-11 shrink-0 rounded-2xl ${options.danger ? 'bg-red-500/10 text-red-500' : 'card2 text-accent'}`}
           >
             <Icon size={22} />
           </span>
@@ -87,7 +87,7 @@ function ConfirmDialog({ options, settle }) {
             className={
               options.danger
                 ? 'rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 text-sm'
-                : 'btn-yellow !py-2.5 text-sm'
+                : 'btn-primary !py-2.5 text-sm'
             }
             onClick={() => settle(true)}
           >

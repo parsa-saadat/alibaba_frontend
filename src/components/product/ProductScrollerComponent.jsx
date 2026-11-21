@@ -38,7 +38,7 @@ function ProductScrollerComponent({
   };
 
   const arrow =
-    'hidden md:grid w-9 h-9 rounded-full card place-items-center hover:text-yellow transition-colors';
+    'hidden md:grid w-9 h-9 rounded-full card place-items-center hover:text-accent transition-colors';
 
   return (
     <section className="rounded-3xl p-4 sm:p-5 sm:card section-flat-mobile">
@@ -51,7 +51,7 @@ function ProductScrollerComponent({
         <div className="flex items-center gap-3">
           {extra}
           {moreTo ? (
-            <Link to={moreTo} className="text-sm font-bold flex items-center gap-1 text-yellow">{translateText("مشاهده همه ")}<ChevronLeft className="logical-icon" size={15} />
+            <Link to={moreTo} className="text-sm font-bold flex items-center gap-1 text-accent">{translateText("مشاهده همه ")}<ChevronLeft className="logical-icon" size={15} />
             </Link>
           ) : null}
           <button type="button" onClick={() => scroll(-1)} className={arrow} aria-label={translateText("قبلی")}>

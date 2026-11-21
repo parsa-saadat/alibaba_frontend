@@ -15,8 +15,8 @@ function HotPicksBannerComponent({ products = [] }) {
   return (
     <Link
       to="/products?discount=true"
-      className="group relative flex h-[304px] flex-col overflow-hidden rounded-xl p-4 text-white transition-transform hover:-translate-y-0.5"
-      style={{ background: 'linear-gradient(160deg,#6d28d9 0%,#8b5cf6 55%,#c084fc 100%)' }}
+      className="group relative flex h-[400px] flex-col overflow-hidden rounded-xl p-4 text-white transition-transform hover:-translate-y-0.5"
+      style={{ background: 'linear-gradient(160deg,#e85f00 0%,#ff6a00 55%,#e85f00 100%)' }}
     >
       <div
         aria-hidden="true"
@@ -31,27 +31,29 @@ function HotPicksBannerComponent({ products = [] }) {
       </p>
 
       {deals.length ? (
-        <div className="mt-3 grid flex-1 min-h-0 grid-cols-3 gap-2">
+        <div className="mt-3 grid flex-1 min-h-0 grid-rows-3 gap-2">
           {deals.map((p) => (
             <div
               key={p._id}
-              className="flex min-h-0 flex-col overflow-hidden rounded-xl p-1.5 transition-transform group-hover:scale-[1.02]"
+              className="flex min-h-0 items-center gap-2 overflow-hidden rounded-xl p-2 transition-transform group-hover:scale-[1.02]"
               style={{ background: 'rgba(255,255,255,0.16)' }}
             >
-              <div className="aspect-square w-full shrink-0 overflow-hidden rounded-lg bg-white/25">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white/25">
                 <StorageImageComponent
                   file={productImages(p)[0]}
                   alt={p.name}
                   compact
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain bg-white p-1"
                 />
               </div>
-              <span className="mt-1.5 text-[11px] font-bold leading-4 line-clamp-2 break-words">
-                {p.name}
-              </span>
-              <span className="mt-auto pt-1 text-[11px] font-black truncate">
-                {formatPrice(finalPrice(p), p.price?.currency)}
-              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-[11px] font-bold leading-4 line-clamp-2 break-words">
+                  {p.name}
+                </span>
+                <span className="text-[11px] font-black truncate">
+                  {formatPrice(finalPrice(p), p.price?.currency)}
+                </span>
+              </div>
             </div>
           ))}
         </div>

@@ -17,7 +17,7 @@ export function CartSyncBadge({ state }) {
       </>
     ) : (
       <>
-        <LoaderCircle size={13} className="animate-spin text-yellow" />
+        <LoaderCircle size={13} className="animate-spin text-accent" />
         {state === 'pending'
           ? translateText('در انتظار ثبت تغییرات…')
           : translateText('همگام‌سازی با سرور…')}
@@ -103,7 +103,7 @@ function CartSummaryComponent({
         type="button"
         onClick={onCheckout}
         disabled={disabled || busy}
-        className="btn-yellow mt-4 inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-primary mt-4 inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {busy ? <LoaderCircle size={16} className="animate-spin" /> : <ArrowLeft size={16} />}
         {translateText('ادامه‌ی فرایند خرید ')}

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0a1736" />
+    <meta name="theme-color" content="#ff6a00" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <meta property="og:image" content="/logo.png" />
@@ -20,14 +20,59 @@
       content="ژئوکالا، پلتفرم B2B معرفی فروشندگان و محصولات تجهیزات نقشه‌برداری."
     />
     <style>
-      html,body{margin:0;background:#0a1736}
-      #boot-splash{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 20% 15%,rgba(255,214,10,.14),transparent 55%),linear-gradient(135deg,#0f2150,#0a1736);font-family:Vazirmatn,Tahoma,sans-serif;direction:inherit;color:#eef2ff;z-index:9999}
-      #boot-splash .boot-card{text-align:center;padding:24px;max-width:420px}
-      #boot-splash b{display:block;font-size:20px;font-weight:900;margin-top:18px;letter-spacing:.02em}
-      #boot-splash p{margin:8px 0 0;font-size:12px;color:#9aa8cc;line-height:2}
-      #boot-splash .boot-ring{width:54px;height:54px;margin:0 auto;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:#ffd60a;animation:boot-spin .9s linear infinite}
-      #boot-splash .boot-ring span{display:none}
-      @keyframes boot-spin{to{transform:rotate(360deg)}}
+      html,
+      body {
+        margin: 0;
+        background: #242424;
+      }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 20% 15%, rgba(255, 106, 0, 0.14), transparent 55%),
+          linear-gradient(135deg, #292929, #242424);
+        font-family: Vazirmatn, Tahoma, sans-serif;
+        direction: inherit;
+        color: #f5f5f5;
+        z-index: 9999;
+      }
+      #boot-splash .boot-card {
+        text-align: center;
+        padding: 24px;
+        max-width: 420px;
+      }
+      #boot-splash b {
+        display: block;
+        font-size: 20px;
+        font-weight: 900;
+        margin-top: 18px;
+        letter-spacing: 0.02em;
+      }
+      #boot-splash p {
+        margin: 8px 0 0;
+        font-size: 12px;
+        color: #a8a8a8;
+        line-height: 2;
+      }
+      #boot-splash .boot-ring {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.12);
+        border-top-color: #ff6a00;
+        animation: boot-spin 0.9s linear infinite;
+      }
+      #boot-splash .boot-ring span {
+        display: none;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
@@ -49,16 +94,34 @@
     <script>
       (function () {
         var bootLang = 'en';
-        try { bootLang = localStorage.getItem('app.language') || 'en'; } catch (e) {}
+        try {
+          bootLang = localStorage.getItem('app.language') || 'en';
+        } catch (e) {}
         var bootMessages = {
-          en: ['Loading…','Connection is slow. Please wait…','Loading took too long. Reload the page.'],
-          fa: ['در حال بارگذاری…','اتصال کند است؛ لطفاً صبر کنید…','بارگذاری طول کشید؛ صفحه را دوباره بارگذاری کنید.'],
-          ar: ['جارٍ التحميل…','الاتصال بطيء، يرجى الانتظار…','استغرق التحميل وقتاً طويلاً. أعد تحميل الصفحة.'],
-          tr: ['Yükleniyor…','Bağlantı yavaş. Lütfen bekleyin…','Yükleme uzun sürdü. Sayfayı yenileyin.']
+          en: [
+            'Loading…',
+            'Connection is slow. Please wait…',
+            'Loading took too long. Reload the page.',
+          ],
+          fa: [
+            'در حال بارگذاری…',
+            'اتصال کند است؛ لطفاً صبر کنید…',
+            'بارگذاری طول کشید؛ صفحه را دوباره بارگذاری کنید.',
+          ],
+          ar: [
+            'جارٍ التحميل…',
+            'الاتصال بطيء، يرجى الانتظار…',
+            'استغرق التحميل وقتاً طويلاً. أعد تحميل الصفحة.',
+          ],
+          tr: [
+            'Yükleniyor…',
+            'Bağlantı yavaş. Lütfen bekleyin…',
+            'Yükleme uzun sürdü. Sayfayı yenileyin.',
+          ],
         };
         var bootText = bootMessages[bootLang] || bootMessages.en;
         document.documentElement.lang = bootMessages[bootLang] ? bootLang : 'en';
-        document.documentElement.dir = ['fa','ar'].indexOf(bootLang) >= 0 ? 'rtl' : 'ltr';
+        document.documentElement.dir = ['fa', 'ar'].indexOf(bootLang) >= 0 ? 'rtl' : 'ltr';
         document.getElementById('boot-splash-text').textContent = bootText[0];
         var lastError = '';
         window.addEventListener(
@@ -83,7 +146,8 @@
          * مثل «Invalid hook call» یا «reading 'useState' of null» رخ می‌دهد.
          * یک‌بار (و فقط یک‌بار برای هر تب) صفحه را با آدرس تازه دوباره بارگذاری می‌کنیم.
          */
-        var hookErrorPattern = /Invalid hook call|reading 'useState'|does not provide an export named/;
+        var hookErrorPattern =
+          /Invalid hook call|reading 'useState'|does not provide an export named/;
         function autoRepair(message) {
           if (!hookErrorPattern.test(String(message || ''))) return;
           try {

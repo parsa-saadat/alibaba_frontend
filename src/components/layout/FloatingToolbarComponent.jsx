@@ -5,7 +5,7 @@ import { Store, LayoutGrid, ArrowUp } from 'lucide-react';
 import ThemeToggleComponent from '../common/ThemeToggleComponent';
 
 const item =
-  'w-[72px] py-3 flex flex-col items-center gap-1 text-[11px] muted hover:text-yellow transition-colors';
+  'w-[72px] py-3 flex flex-col items-center gap-1 text-[11px] muted hover:text-accent transition-colors';
 const divider = { borderBottom: '1px solid var(--border)' };
 
 function FloatingToolbarComponent() {

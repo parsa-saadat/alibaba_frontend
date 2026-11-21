@@ -89,7 +89,7 @@ function MediaThumb({ file, onZoom }) {
 
   if (image && broken) {
     return (
-      <div className="grid h-full w-full place-items-center gap-1 bg-black/25 text-[#8fa0c9]">
+      <div className="grid h-full w-full place-items-center gap-1 bg-black/25 text-[#a3a3a3]">
         <ImageOff size={22} />
         <span className="text-[9px]">{translateText('تصویر باز نشد')}</span>
       </div>
@@ -98,7 +98,7 @@ function MediaThumb({ file, onZoom }) {
 
   if (!image) {
     return (
-      <div className="grid h-full w-full place-items-center bg-black/30 text-[#8fa0c9]">
+      <div className="grid h-full w-full place-items-center bg-black/30 text-[#a3a3a3]">
         {String(file?.contentType || '').startsWith('video/') ? (
           <Film size={26} />
         ) : (
@@ -111,7 +111,7 @@ function MediaThumb({ file, onZoom }) {
   if (!url) {
     return (
       <div className="grid h-full w-full place-items-center bg-black/20">
-        <Loader2 size={20} className="animate-spin text-[#8fa0c9]" />
+        <Loader2 size={20} className="animate-spin text-[#a3a3a3]" />
       </div>
     );
   }
@@ -330,7 +330,7 @@ function MediaPage() {
   if (denied) {
     return (
       <div className="card rounded-3xl p-8 text-center">
-        <ShieldAlert size={40} className="mx-auto mb-3 text-yellow" />
+        <ShieldAlert size={40} className="mx-auto mb-3 text-accent" />
         <h1 className="text-lg font-black">
           {translateText('دسترسی به کتابخانه‌ی رسانه ممکن نشد')}
         </h1>
@@ -366,7 +366,7 @@ function MediaPage() {
               setDenied('');
               load();
             }}
-            className="btn-yellow !py-2 text-sm"
+            className="btn-primary !py-2 text-sm"
           >
             {translateText('تلاش دوباره ')}
           </button>
@@ -392,7 +392,7 @@ function MediaPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="flex items-center gap-2 text-base font-black sm:text-lg">
-              <ImageIcon size={18} className="text-yellow" />
+              <ImageIcon size={18} className="text-accent" />
               {translateText('کتابخانه‌ی رسانه ')}
             </h1>
             <p className="mt-1 text-xs muted">
@@ -428,7 +428,7 @@ function MediaPage() {
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-sm disabled:opacity-60"
+              className="btn-primary inline-flex items-center gap-1.5 !py-2 text-sm disabled:opacity-60"
             >
               {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
               {uploading ? translateText('در حال آپلود…') : translateText('آپلود فایل')}
@@ -530,7 +530,7 @@ function MediaPage() {
                   </div>
                   {file.used_by?.length > 0 && (
                     <div
-                      className="truncate text-[10px] text-yellow"
+                      className="truncate text-[10px] text-accent"
                       title={file.used_by.join(translateText('، '))}
                     >
                       {file.used_by[0]}

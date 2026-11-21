@@ -13,7 +13,7 @@ export default function ContactEmailScopeComponent() {
   return (
     <aside data-testid="email-scope" className="card rounded-3xl p-5 min-w-0">
       <h3 className="flex items-center gap-2 text-sm font-black">
-        <Mail size={17} className="text-yellow shrink-0" />
+        <Mail size={17} className="text-accent shrink-0" />
         {t('v20.scope')}
       </h3>
       <p className="text-[11px] muted leading-6 mt-2">{t('v21.scopeHint')}</p>
@@ -30,7 +30,7 @@ export default function ContactEmailScopeComponent() {
                   {email}
                 </span>
               </span>
-              <ArrowUpRight size={15} className="text-yellow shrink-0 logical-icon" />
+              <ArrowUpRight size={15} className="text-accent shrink-0 logical-icon" />
             </a>
           </li>
         ))}

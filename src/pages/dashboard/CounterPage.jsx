@@ -61,8 +61,8 @@ const dayKey = (date) => {
 };
 
 const ORDER_STATUS_TONE = {
-  pending: { color: '#c2740a', bg: 'rgba(194,116,10,0.14)' },
-  awaiting_payment: { color: '#c2740a', bg: 'rgba(194,116,10,0.14)' },
+  pending: { color: '#ff6a00', bg: 'rgba(255,106,0,0.14)' },
+  awaiting_payment: { color: '#ff6a00', bg: 'rgba(255,106,0,0.14)' },
   paid: { color: '#17994f', bg: 'rgba(23,153,79,0.14)' },
   delivered: { color: '#17994f', bg: 'rgba(23,153,79,0.14)' },
   cancelled: { color: '#e53935', bg: 'rgba(229,57,53,0.14)' },
@@ -310,7 +310,7 @@ function CounterPage() {
         className="card rounded-3xl overflow-hidden relative"
         style={{
           background:
-            'linear-gradient(120deg, rgba(255,106,0,0.20), rgba(255,106,0,0.04) 45%, rgba(37,99,235,0.10))',
+            'linear-gradient(120deg, rgba(255,106,0,0.20), rgba(255,106,0,0.04) 45%, rgba(160,160,160,0.08))',
         }}
       >
         <div className="p-5 flex flex-wrap items-center justify-between gap-4">
@@ -318,7 +318,7 @@ function CounterPage() {
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black"
               style={{
-                background: 'rgba(10,23,54,0.35)',
+                background: 'rgba(36,36,36,0.35)',
                 color: 'var(--primary-color)',
               }}
             >
@@ -350,7 +350,7 @@ function CounterPage() {
               type="button"
               onClick={() => load(true)}
               disabled={refreshing}
-              className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5 disabled:opacity-60"
+              className="btn-primary !py-2 !px-3 text-xs flex items-center gap-1.5 disabled:opacity-60"
             >
               <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
               {refreshing ? translateText('به‌روزرسانی…') : translateText('به‌روزرسانی')}
@@ -381,7 +381,7 @@ function CounterPage() {
           value={toFa(panelStats.seller?.counts.pending ?? '—')}
           hint={translateText('درخواست فروشندگی')}
           icon={Clock3}
-          tint="#c2740a"
+          tint="#ff6a00"
           to="/dashboard/sellers"
         />
         <KpiTile
@@ -476,8 +476,8 @@ function CounterPage() {
                   <span
                     className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-xs font-black"
                     style={{
-                      background: 'rgba(194,116,10,0.16)',
-                      color: '#c2740a',
+                      background: 'rgba(255,106,0,0.16)',
+                      color: '#ff6a00',
                     }}
                   >
                     {(userFullName(seller) || seller.username || translateText('؟'))[0]}
@@ -509,7 +509,7 @@ function CounterPage() {
                     <button
                       type="button"
                       onClick={() => approveSeller(seller._id)}
-                      className="btn-yellow !py-1.5 !px-2 text-[11px] flex items-center gap-1"
+                      className="btn-primary !py-1.5 !px-2 text-[11px] flex items-center gap-1"
                     >
                       <Check size={12} />
                       {translateText(' تأیید ')}

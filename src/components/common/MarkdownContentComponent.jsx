@@ -117,7 +117,7 @@ const decorate = (html, resolved) => {
       cell.style.fontWeight = '800';
     });
     [...table.querySelectorAll('tbody tr:nth-child(even)')].forEach((row) => {
-      row.style.background = 'rgba(130, 150, 200, 0.06)';
+      row.style.background = 'rgba(160,160,160, 0.06)';
     });
 
     const wrap = document.createElement('div');
@@ -239,7 +239,7 @@ function MarkdownContentComponent({ content, className = '' }) {
             position: 'fixed',
             inset: 0,
             zIndex: 220,
-            background: 'rgba(4, 8, 22, 0.86)',
+            background: 'rgba(20,20,20, 0.86)',
             backdropFilter: 'blur(6px)',
             display: 'grid',
             placeItems: 'center',

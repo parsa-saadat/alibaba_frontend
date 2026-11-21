@@ -48,7 +48,7 @@ const SORTS = [
 function ContactChip({ icon: Icon, label, value, href }) {
   const body = (
     <div className="card2 flex items-center gap-2.5 rounded-2xl p-3 min-w-0 transition hover:border-[var(--primary-color)]">
-      <Icon size={16} className="shrink-0 text-yellow" />
+      <Icon size={16} className="shrink-0 text-accent" />
       <div className="min-w-0">
         <div className="text-[11px] muted">{label}</div>
         <div className="truncate text-xs font-bold" dir={href ? 'ltr' : undefined}>
@@ -253,7 +253,7 @@ function StorePage() {
       <div className="mx-auto max-w-lg px-4 py-20">
         <div className="card rounded-3xl p-8 text-center">
           <span
-            className="mx-auto grid h-16 w-16 place-items-center rounded-2xl text-yellow"
+            className="mx-auto grid h-16 w-16 place-items-center rounded-2xl text-accent"
             style={{ background: 'rgba(255,106,0,0.12)' }}
           >
             <StoreIcon size={30} />
@@ -263,7 +263,7 @@ function StorePage() {
             {error || translateText('این فروشگاه ممکن است حذف شده باشد یا آدرس آن اشتباه است.')}
           </p>
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-            <button type="button" onClick={() => setRetry((v) => v + 1)} className="btn-yellow">
+            <button type="button" onClick={() => setRetry((v) => v + 1)} className="btn-primary">
               {translateText('تلاش دوباره ')}
             </button>
             <Link to="/products" className="btn-ghost">
@@ -289,7 +289,7 @@ function StorePage() {
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-navy">
+            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-charcoal">
               <StorageImageComponent
                 file={store.profile_image_id}
                 alt={store.name}
@@ -313,7 +313,7 @@ function StorePage() {
 
       {/* هیرو */}
       <section className="card relative overflow-hidden rounded-3xl">
-        <div className="relative h-52 w-full bg-navy sm:h-72">
+        <div className="relative h-52 w-full bg-charcoal sm:h-72">
           <StorageImageComponent
             file={store.banner_image_id}
             alt={translateText('بنر {{v0}}', { v0: store.name })}
@@ -334,7 +334,7 @@ function StorePage() {
         <div className="relative px-5 pb-6 sm:px-8">
           <div className="-mt-16 flex flex-col gap-5 md:flex-row md:items-end md:justify-between sm:-mt-20">
             <div className="flex min-w-0 items-end gap-4">
-              <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-3xl border-4 border-[var(--card)] bg-navy shadow-2xl sm:h-32 sm:w-32">
+              <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-3xl border-4 border-[var(--card)] bg-charcoal shadow-2xl sm:h-32 sm:w-32">
                 <StorageImageComponent
                   file={store.profile_image_id}
                   alt={store.name}
@@ -534,7 +534,7 @@ function StorePage() {
       <div
         role="status"
         aria-live="polite"
-        className={`pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-navy px-4 py-2.5 text-xs font-bold text-white shadow-2xl transition-all duration-300 ${
+        className={`pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-charcoal px-4 py-2.5 text-xs font-bold text-white shadow-2xl transition-all duration-300 ${
           toast ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
         }`}
       >

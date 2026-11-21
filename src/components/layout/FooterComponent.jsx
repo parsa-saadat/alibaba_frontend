@@ -134,7 +134,7 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
         </span>
         <ChevronDown
           size={16}
-          className={`text-[#8fa0c9] transition-transform duration-300 lg:hidden ${open ? 'rotate-180' : ''}`}
+          className={`text-[#a3a3a3] transition-transform duration-300 lg:hidden ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -148,7 +148,7 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
             <li key={`${item.to}-${index}`}>
               <Link
                 to={item.to}
-                className="group flex items-center gap-2 py-1 text-[0.82rem] text-[#a9b6d8] transition-colors hover:text-white"
+                className="group flex items-center gap-2 py-1 text-[0.82rem] text-[#b8b8b8] transition-colors hover:text-white"
               >
                 {item.Icon ? (
                   <item.Icon
@@ -205,8 +205,8 @@ function FooterComponent() {
 
   return (
     <footer
-      className="site-footer relative mt-16 overflow-x-clip pt-8 text-[#dfe6fb]"
-      style={{ background: 'linear-gradient(180deg, #0c1a3d 0%, #060d21 100%)' }}
+      className="site-footer relative mt-16 overflow-x-clip pt-8 text-[#ededed]"
+      style={{ background: 'linear-gradient(180deg, #262626 0%, #161616 100%)' }}
     >
       {/* درخشش‌های تزئینی */}
       <div
@@ -217,7 +217,7 @@ function FooterComponent() {
       <div
         aria-hidden
         className="pointer-events-none absolute -end-40 bottom-0 h-96 w-96 rounded-full blur-3xl"
-        style={{ background: 'rgba(80,120,255,0.12)' }}
+        style={{ background: 'rgba(255,106,0,0.12)' }}
       />
 
       <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6">
@@ -225,15 +225,15 @@ function FooterComponent() {
         <div
           className="flex flex-col gap-6 rounded-3xl p-5 sm:p-6 lg:p-8"
           style={{
-            background: 'linear-gradient(135deg, var(--primary-color) 0%, #ffb800 100%)',
-            color: 'var(--navy)',
+            background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%)',
+            color: 'var(--on-primary)',
           }}
         >
           <div className="flex flex-col items-start gap-3 rounded-2xl bg-white/25 p-4 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span
                 className="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
-                style={{ background: 'var(--navy)', color: 'var(--primary-color)' }}
+                style={{ background: 'var(--charcoal)', color: 'var(--brand-orange)' }}
               >
                 <Store size={20} />
               </span>
@@ -247,7 +247,7 @@ function FooterComponent() {
             <Link
               to="/seller"
               className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold transition hover:-translate-y-0.5"
-              style={{ color: 'var(--navy)' }}
+              style={{ color: 'var(--charcoal)' }}
             >
               {translateText('شروع فروش ')}
               <ArrowLeft size={16} />
@@ -272,7 +272,7 @@ function FooterComponent() {
                 </span>
                 <div className="min-w-0">
                   <b className="block truncate text-xs text-white md:text-sm">{item.title}</b>
-                  <span className="block truncate text-[11px] text-[#8fa0c9] md:text-xs">
+                  <span className="block truncate text-[11px] text-[#a3a3a3] md:text-xs">
                     {item.desc}
                   </span>
                 </div>
@@ -287,10 +287,10 @@ function FooterComponent() {
           <div className="md:col-span-2 lg:col-span-4">
             <Link to="/" className="inline-flex flex-col items-start gap-2">
               <BrandLogoComponent variant="full" size="md" tone="white" />
-              <span className="text-[11px] text-[#8fa0c9]">{translateText('b2b.identity')}</span>
+              <span className="text-[11px] text-[#a3a3a3]">{translateText('b2b.identity')}</span>
             </Link>
 
-            <p className="mt-4 max-w-sm text-xs leading-6 text-[#8fa0c9]">
+            <p className="mt-4 max-w-sm text-xs leading-6 text-[#a3a3a3]">
               {translateText('b2b.intro')}
             </p>
 
@@ -304,7 +304,7 @@ function FooterComponent() {
                   <b className="block text-sm font-black" style={{ color: 'var(--primary-color)' }}>
                     {stat.value}
                   </b>
-                  <span className="text-[10px] text-[#8fa0c9]">{stat.label}</span>
+                  <span className="text-[10px] text-[#a3a3a3]">{stat.label}</span>
                 </div>
               ))}
             </div>
@@ -338,7 +338,7 @@ function FooterComponent() {
               const content = (
                 <>
                   <Icon size={14} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
-                  <span className="text-xs text-[#a9b6d8]">{c.text}</span>
+                  <span className="text-xs text-[#b8b8b8]">{c.text}</span>
                 </>
               );
               return (
@@ -358,7 +358,7 @@ function FooterComponent() {
             })}
           </ul>
 
-          <span className="inline-flex w-max items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[11px] text-[#c9d4ef]">
+          <span className="inline-flex w-max items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[11px] text-[#d4d4d4]">
             <BadgeCheck size={14} style={{ color: 'var(--primary-color)' }} />
             {translateText('v20.platform')}
           </span>
@@ -368,12 +368,12 @@ function FooterComponent() {
       {/* نوار پایانی */}
       <div className="relative border-t border-white/[0.08] bg-black/20">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
-          <p className="text-center text-[11px] text-[#8fa0c9] lg:text-start">
+          <p className="text-center text-[11px] text-[#a3a3a3] lg:text-start">
             © {year}
             {translateText('v20.rights')}
           </p>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#8fa0c9]">
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#a3a3a3]">
             <Link to="/terms/customers" className="transition-colors hover:text-white">
               {translateText('قوانین مشتریان ')}
             </Link>
@@ -407,7 +407,7 @@ function FooterComponent() {
             ].map((gateway) => (
               <span
                 key={gateway}
-                className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#c9d4ef]"
+                className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#d4d4d4]"
               >
                 {gateway}
               </span>

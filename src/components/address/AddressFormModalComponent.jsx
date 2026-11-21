@@ -211,7 +211,7 @@ function AddressFormModalComponent({
 
         <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-theme pt-3">
           <button type="button" onClick={onClose} className="btn-ghost !py-2 text-xs">{translateText("انصراف ")}</button>
-          <button type="submit" disabled={saving} className="btn-yellow inline-flex items-center gap-2 !py-2 text-xs disabled:opacity-60">
+          <button type="submit" disabled={saving} className="btn-primary inline-flex items-center gap-2 !py-2 text-xs disabled:opacity-60">
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
             {saving ? translateText("در حال ذخیره…") : isEdit ? translateText("ذخیره تغییرات") : translateText("ذخیره نشانی")}
           </button>

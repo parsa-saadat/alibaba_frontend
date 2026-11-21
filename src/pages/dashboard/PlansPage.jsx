@@ -129,7 +129,7 @@ const DP_CSS = `
 .plan-dp .rmdp-day.rmdp-disabled,.plan-dp .rmdp-day.rmdp-disabled span{opacity:.3}
 .plan-dp .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover{background:var(--card2)!important;color:inherit!important}
 .plan-dp .rmdp-day.rmdp-today span{background:var(--card2)!important;color:var(--primary-color)!important;font-weight:800}
-.plan-dp .rmdp-day.rmdp-selected span:not(.highlight){background:var(--primary-color)!important;color:#1a1b1e!important;box-shadow:none!important;font-weight:800}
+.plan-dp .rmdp-day.rmdp-selected span:not(.highlight){background:var(--primary-color)!important;color:#242424!important;box-shadow:none!important;font-weight:800}
 .plan-dp .rmdp-arrow{border-color:currentColor!important}
 .plan-dp .rmdp-arrow-container:hover{background:var(--card2)!important;box-shadow:none!important}
 .plan-dp .rmdp-border-top{border-color:rgba(128,128,128,.25)!important}
@@ -175,7 +175,7 @@ function ConfirmDeleteModal({ plan, busy, onCancel, onConfirm }) {
         <h3 className="font-black text-lg mb-2">{translateText('حذف پلن')}</h3>
         <p className="text-sm muted leading-7 mb-5 break-words">
           {translateText('آیا از حذف پلن ')}
-          <b className="text-yellow">«{plan.name}»</b>
+          <b className="text-accent">«{plan.name}»</b>
           {translateText(' مطمئن هستید؟ ')}
           <br />
           {translateText('این کار قابل بازگشت نیست. ')}
@@ -446,7 +446,7 @@ function PlansPage() {
 
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <h2 className="font-black flex items-center gap-2 text-sm sm:text-base">
-              <CreditCard size={18} className="text-yellow shrink-0" />
+              <CreditCard size={18} className="text-accent shrink-0" />
               <span className="break-words">
                 {editingId ? translateText('ویرایش پلن اشتراک') : translateText('ایجاد پلن اشتراک')}
               </span>
@@ -603,7 +603,7 @@ function PlansPage() {
           <button
             type="submit"
             disabled={saving}
-            className="btn-yellow w-full flex items-center justify-center gap-1.5"
+            className="btn-primary w-full flex items-center justify-center gap-1.5"
           >
             {editingId ? <Save size={16} /> : <Plus size={16} />}
             {saving
@@ -662,7 +662,7 @@ function PlansPage() {
                         {formatMoney(shownPlan.price?.amount, shownPlan.price?.currency)}
                       </del>
                     )}
-                    <strong className="block font-black text-xl sm:text-2xl text-yellow break-words">
+                    <strong className="block font-black text-xl sm:text-2xl text-accent break-words">
                       {formatMoney(finalPrice(shownPlan), shownPlan.price?.currency)}
                     </strong>
                   </div>

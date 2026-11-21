@@ -250,7 +250,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                     <Link
                       to={`/products?category_id=${selectedId}`}
                       onClick={() => setOpen(false)}
-                      className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1"
+                      className="btn-primary !py-2 !px-3 text-xs flex items-center gap-1"
                     >
                       {translateText('مشاهده دسته ')}
                       <ChevronLeft size={13} className={direction === 'ltr' ? 'rotate-180' : ''} />
@@ -325,7 +325,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
                         <div className="text-xs font-bold line-clamp-2 leading-5 flex-1">
                           {product.name}
                         </div>
-                        <div className="text-xs font-black text-yellow mt-2">
+                        <div className="text-xs font-black text-accent mt-2">
                           {formatPrice(finalPrice(product),product.price?.currency)}
                         </div>
                       </Link>

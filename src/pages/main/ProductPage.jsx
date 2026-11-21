@@ -591,7 +591,7 @@ function ProductPage() {
           </h1>
           <p className="text-sm muted">{error || translateText('محصول موردنظر پیدا نشد.')}</p>
           <div className="flex flex-wrap justify-center gap-2">
-            <button type="button" className="btn-yellow" onClick={() => setRetry((v) => v + 1)}>
+            <button type="button" className="btn-primary" onClick={() => setRetry((v) => v + 1)}>
               {translateText('تلاش دوباره ')}
             </button>
             <Link to="/products" className="btn-ghost">

@@ -43,7 +43,7 @@ function WhyChoseUsComponent() {
     <section className="max-w-[1200px] mx-auto px-4 pb-10">
       <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
         <div>
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-accent">
             <ShieldCheck size={13} />
             {translateText('چرا ژئوکالا ')}
           </span>

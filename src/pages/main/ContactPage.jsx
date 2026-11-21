@@ -81,7 +81,7 @@ function ContactPage() {
           <>
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
-              className="btn-yellow inline-flex items-center gap-2"
+              className="btn-primary inline-flex items-center gap-2"
             >
               <Mail size={16} />
               {translateText('v20.siteHelp')}
@@ -110,7 +110,7 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 py-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <span className="text-[11px] font-bold text-yellow">{translateText('ارسال پیام')}</span>
+            <span className="text-[11px] font-bold text-accent">{translateText('ارسال پیام')}</span>
             <h2 className="mt-1.5 font-black text-lg">{translateText('v20.formTitle')}</h2>
           </div>
           <p className="max-w-md text-xs muted leading-6">{translateText('v20.formIntro')}</p>
@@ -128,7 +128,7 @@ function ContactPage() {
             {/* تماس مستقیم */}
             <div data-testid="direct-contact" className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <Mail size={16} className="text-yellow" />
+                <Mail size={16} className="text-accent" />
                 {translateText('تماس مستقیم ')}
               </h3>
               <ul className="mt-3 space-y-2.5">
@@ -144,7 +144,7 @@ function ContactPage() {
                           className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
                           style={{ background: 'var(--card2)' }}
                         >
-                          <Icon size={14} className="text-yellow" />
+                          <Icon size={14} className="text-accent" />
                         </span>
                         <span className="min-w-0">
                           <span className="block text-[10px] muted">{item.label}</span>
@@ -164,7 +164,7 @@ function ContactPage() {
             {/* میان‌بُرها */}
             <div className="card rounded-3xl p-5">
               <h3 className="flex items-center gap-2 text-sm font-black">
-                <ShieldCheck size={16} className="text-yellow" />
+                <ShieldCheck size={16} className="text-accent" />
                 {translateText('قبل از تماس بخوانید ')}
               </h3>
               <div className="mt-3 space-y-2">
@@ -173,7 +173,7 @@ function ContactPage() {
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={14} className="text-yellow" />
+                    <FileText size={14} className="text-accent" />
                     {translateText('قوانین و مقررات مشتریان ')}
                   </span>
                   <ChevronLeft size={14} className="logical-icon muted" />
@@ -183,7 +183,7 @@ function ContactPage() {
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <FileText size={14} className="text-yellow" />
+                    <FileText size={14} className="text-accent" />
                     {translateText('قوانین خریداران ')}
                   </span>
                   <ChevronLeft size={14} className="logical-icon muted" />
@@ -193,7 +193,7 @@ function ContactPage() {
                   className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-colors hover:bg-[var(--card2)]"
                 >
                   <span className="flex items-center gap-2">
-                    <MapPin size={14} className="text-yellow" />
+                    <MapPin size={14} className="text-accent" />
                     {translateText('پیگیری سفارش‌های من ')}
                   </span>
                   <ChevronLeft size={14} className="logical-icon muted" />
@@ -208,7 +208,7 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <span className="text-[11px] font-bold text-yellow">
+            <span className="text-[11px] font-bold text-accent">
               {translateText('v20.helpTitle')}
             </span>
             <h2 className="mt-1.5 font-black text-lg">{translateText('v20.noVisit')}</h2>
@@ -222,7 +222,7 @@ function ContactPage() {
       <section className="max-w-[1200px] mx-auto px-4 pb-8">
         <div className="flex items-end justify-between gap-3 mb-4">
           <div>
-            <span className="text-[11px] font-bold text-yellow">
+            <span className="text-[11px] font-bold text-accent">
               {translateText('v20.subjects')}
             </span>
             <h2 className="mt-1.5 font-black text-lg">{translateText('v20.helpTitle')}</h2>
@@ -230,7 +230,7 @@ function ContactPage() {
           </div>
           <Link
             to="/about"
-            className="text-xs font-bold text-yellow inline-flex items-center gap-1"
+            className="text-xs font-bold text-accent inline-flex items-center gap-1"
           >
             {translateText('درباره تیم ما ')}
             <ChevronLeft className="logical-icon" size={14} />
@@ -263,7 +263,7 @@ function ContactPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
-              className="btn-yellow inline-flex items-center gap-2"
+              className="btn-primary inline-flex items-center gap-2"
             >
               <Mail size={16} />
               {translateText('v20.siteHelp')}

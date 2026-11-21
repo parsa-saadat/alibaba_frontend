@@ -27,7 +27,7 @@ function FeaturedStoresComponent({ stores = [] }) {
               />
               <div className="min-w-0">
                 <div className="font-black truncate">{s.name}</div>
-                <div className="mt-0.5 flex items-center gap-1 text-xs font-bold text-yellow">
+                <div className="mt-0.5 flex items-center gap-1 text-xs font-bold text-accent">
                   <BadgeCheck size={14} />{translateText(" فروشنده تأیید شده ")}</div>
                 <p className="mt-1 text-xs muted line-clamp-2">
                   {s.description || translateText("فروشگاه ایرانی")}

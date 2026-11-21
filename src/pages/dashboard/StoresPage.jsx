@@ -38,7 +38,7 @@ const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || 
 
 const STATUS_META = {
   ENABLE: { color: '#17994f', bg: 'rgba(23,153,79,0.14)', icon: CheckCircle2 },
-  DISABLE: { color: '#c2740a', bg: 'rgba(194,116,10,0.14)', icon: PauseCircle },
+  DISABLE: { color: '#ff6a00', bg: 'rgba(255,106,0,0.14)', icon: PauseCircle },
   ROOT_DISABLE: { color: '#e53935', bg: 'rgba(229,57,53,0.14)', icon: Ban },
 };
 const metaOf = (status) => STATUS_META[status] || STATUS_META.DISABLE;
@@ -222,7 +222,7 @@ function StoresPage() {
           value={toFa(counts.DISABLE)}
           hint={translateText('موقتاً بسته')}
           icon={PauseCircle}
-          tint="#c2740a"
+          tint="#ff6a00"
         />
         <StatTile
           label={translateText('مسدود')}
@@ -248,7 +248,7 @@ function StoresPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: 'var(--on-primary)',
+                        color: '#242424',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -257,7 +257,7 @@ function StoresPage() {
                 {tab.label}
                 <span
                   className="rounded-full px-1.5 text-[10px] font-black"
-                  style={{ background: active ? 'rgba(10,23,54,0.16)' : 'var(--card2)' }}
+                  style={{ background: active ? 'rgba(36,36,36,0.16)' : 'var(--card2)' }}
                 >
                   {toFa(counts[tab.id] || 0)}
                 </span>
@@ -431,7 +431,7 @@ function StoresPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => setStoreModal(store)}
-                      className="btn-yellow !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
+                      className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1 disabled:opacity-50"
                     >
                       <Pencil size={13} />
                       {translateText(' ویرایش ')}
@@ -567,7 +567,7 @@ function StoresPage() {
                 type="button"
                 disabled={busyId === getId(deleteTarget)}
                 onClick={() => deleteStore(deleteTarget)}
-                className="btn-yellow !py-2 !px-4 text-xs disabled:opacity-60"
+                className="btn-primary !py-2 !px-4 text-xs disabled:opacity-60"
                 style={{ background: '#e53935', color: '#fff' }}
               >
                 {translateText('بله، حذف کن ')}

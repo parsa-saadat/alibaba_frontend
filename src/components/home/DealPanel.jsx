@@ -17,7 +17,7 @@ function DealPanel({
   return (
     <section
       className="relative rounded-xl overflow-hidden text-white"
-      style={{ background: 'linear-gradient(180deg,#8f2236 0%,#5e1423 100%)' }}
+      style={{ background: 'linear-gradient(180deg,#e85f00 0%,#713000 100%)' }}
     >
       <div className="px-5 pt-5 text-center">
         <Link

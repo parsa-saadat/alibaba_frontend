@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ------------------------------------------------------------------ */
 /* فونت وزیرمتن — به‌صورت محلی در سورس اپ (بدون CDN)                    */
@@ -10,60 +10,58 @@
  * خارجی‌ای لازم نیست).
  */
 @font-face {
-  font-family: "Vazirmatn";
-  src: url("./assets/fonts/Vazirmatn-Variable.woff2") format("woff2");
+  font-family: 'Vazirmatn';
+  src: url('./assets/fonts/Vazirmatn-Variable.woff2') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
-
 :root {
-  --app-font: "Vazirmatn", Tahoma, Arial, sans-serif;
+  --app-font: 'Vazirmatn', Tahoma, Arial, sans-serif;
   /* پالت علی‌بابا: نارنجی برند؛ متن روی نارنجی همیشه سفید */
   --primary-color: #ff6a00;
+  --brand-orange: #ff6a00;
   --primary-hover: #e85f00;
   --on-primary: #ffffff;
-  /* «navy»های قدیم حالا خاکستری خنثی‌اند (بدون سرمه‌ای) */
-  --navy: #1a1b1e;
-  --navy-deep: #101113;
-  --navy-mid: #1f2023;
-  --navy-soft: #292a2e;
+  --charcoal: #242424;
+  --charcoal-deep: #161616;
+  --charcoal-mid: #292929;
+  --charcoal-soft: #343434;
 
   /* models-frontend compatible variables */
   --color-main: #ff6a00;
   --color-main-dark: #e85f00;
   --color-main-light: rgba(255, 106, 0, 0.14);
   --color-white: #ffffff;
-  --color-light-gray: #292a2e;
-  --color-gray: #9d9da3;
-  --color-dark-gray: #f2f2f3;
-  --color-black: #1a1b1e;
+  --color-light-gray: #343434;
+  --color-gray: #a8a8a8;
+  --color-dark-gray: #f5f5f5;
+  --color-black: #242424;
   --color-success: #2ba84a;
   --color-warning: #ff9f43;
   --color-danger: #e53935;
   --toastify-font-family: var(--app-font) !important;
 }
 
-html[data-theme="dark"] {
-  /* دارک‌مود خنثی: خاکستری تیره بدون ته‌رنگ آبی/سرمه‌ای + تاکید نارنجی */
-  --bg: #131417;
-  --bg2: #1a1b1e;
-  --card: #1f2023;
-  --card2: #292a2e;
+html[data-theme='dark'] {
+  --bg: #161616;
+  --bg2: #242424;
+  --card: #292929;
+  --card2: #343434;
   --border: rgba(255, 255, 255, 0.09);
-  --text: #f2f2f3;
-  --muted: #9d9da3;
-  --accent-text: #ff8120;
-  --header-bg: #1a1b1e;
-  --header-text: #f2f2f3;
-  --header-muted: #9d9da3;
-  --header-surface: #242528;
+  --text: #f5f5f5;
+  --muted: #a8a8a8;
+  --accent-text: #ff6a00;
+  --header-bg: #242424;
+  --header-text: #f5f5f5;
+  --header-muted: #a8a8a8;
+  --header-surface: #343434;
   --header-border: rgba(255, 255, 255, 0.1);
   color-scheme: dark;
 }
 
-html[data-theme="light"] {
+html[data-theme='light'] {
   /*
    * تم روشن — پالت علی‌بابا: سطح‌های سفید/خاکستری روشن، متن تیره،
    * تاکید نارنجی (قیمت‌ها و لینک‌ها) و هدر سفید.
@@ -120,14 +118,14 @@ body {
 .border-theme {
   border-color: var(--border);
 }
-.text-yellow {
+.text-accent {
   color: var(--accent-text);
 }
-.text-brand-yellow {
-  color: var(--primary-color);
+.text-brand-orange {
+  color: var(--brand-orange);
 }
-.bg-navy {
-  background: var(--navy);
+.bg-charcoal {
+  background: var(--charcoal);
   color: #ffffff;
 }
 .input {
@@ -141,9 +139,8 @@ body {
 }
 .input:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.22);
 }
-.btn-yellow,
 .btn-primary {
   background: var(--primary-color);
   color: var(--on-primary);
@@ -153,12 +150,12 @@ body {
   transition: 0.15s;
   cursor: pointer;
 }
-.btn-yellow:hover,
+.btn-primary:hover,
 .btn-primary:hover {
   background: var(--primary-hover);
 }
-.btn-navy {
-  background: var(--navy);
+.btn-charcoal {
+  background: var(--charcoal);
   color: var(--primary-color);
   font-weight: 800;
   border-radius: 0.75rem;
@@ -167,8 +164,8 @@ body {
   transition: 0.15s;
   cursor: pointer;
 }
-.btn-navy:hover {
-  background: var(--navy-soft);
+.btn-charcoal:hover {
+  background: var(--charcoal-soft);
 }
 .btn-ghost,
 .btn-cancel {
@@ -271,12 +268,12 @@ button:disabled {
   border-color: var(--primary-color);
 }
 .site-footer {
-  background: var(--navy);
-  color: #f2f2f3;
+  background: var(--charcoal);
+  color: #f5f5f5;
   border-top: 2px solid rgba(255, 106, 0, 0.4);
 }
 .site-footer .muted {
-  color: #9d9da3;
+  color: #a8a8a8;
 }
 /* لوگو: نسخه‌ی سفید برای تم تاریک، نسخه‌ی سرمه‌ای برای تم روشن */
 .brand-on-dark {
@@ -295,7 +292,7 @@ html.light .brand-on-light {
 .brand-logo,
 .header-badge {
   background: var(--primary-color);
-  color: var(--on-primary);
+  color: var(--charcoal);
 }
 .header-badge {
   position: absolute;
@@ -509,7 +506,7 @@ html.light .brand-on-light {
   position: fixed;
   inset: 0;
   z-index: 110;
-  background: rgba(6, 13, 36, 0.68);
+  background: rgba(22, 22, 22, 0.68);
   backdrop-filter: blur(4px);
 }
 .mobile-drawer {
@@ -519,7 +516,7 @@ html.light .brand-on-light {
   inset-inline-start: 0;
   width: min(310px, 84vw);
   z-index: 120;
-  background: var(--navy);
+  background: var(--charcoal);
   color: #ffffff;
   border-inline-end: 2px solid rgba(255, 106, 0, 0.3);
   display: flex;
@@ -578,25 +575,15 @@ html.light .brand-on-light {
   overflow: hidden;
 }
 .skeleton::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.07),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
   transform: translateX(-100%);
   animation: shimmer 1.5s infinite;
 }
-html[data-theme="light"] .skeleton::after {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(10, 23, 54, 0.08),
-    transparent
-  );
+html[data-theme='light'] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(36, 36, 36, 0.08), transparent);
 }
 .route-progress {
   position: fixed;
@@ -677,8 +664,8 @@ html[data-theme="light"] .skeleton::after {
   direction: ltr;
   text-align: left;
   padding: 16px;
-  background: var(--navy-deep);
-  color: var(--text);
+  background: var(--charcoal-deep);
+  color: #f5f5f5;
   border: 1px solid var(--border);
   border-radius: 12px;
   margin: 1em 0;
@@ -1002,10 +989,10 @@ html[data-theme="light"] .skeleton::after {
 }
 
 /* لینک‌های زرد با هاور (کلاس کمکی) */
-.hover-yellow {
+.hover-accent {
   transition: color 0.18s ease;
 }
-.hover-yellow:hover {
+.hover-accent:hover {
   color: var(--accent-text);
 }
 
@@ -1071,26 +1058,104 @@ html[data-theme="light"] .skeleton::after {
     --fade-r 0.2s ease;
 }
 
-
-
 /* Latin UI uses a Latin font; Persian/Arabic UI keeps the locally bundled script font. */
-html:lang(en), html:lang(tr) { --app-font: "Segoe UI", Arial, sans-serif; }
-html:lang(fa), html:lang(ar) { --app-font: "Vazirmatn", Tahoma, Arial, sans-serif; }
-button,input,select,textarea { font-family: inherit; }
-.numeric, time, input[type=number] { font-variant-numeric: tabular-nums; }
-[lang=en], [lang=tr] { --content-font: "Segoe UI", Arial, sans-serif; }
-[lang=fa], [lang=ar] { --content-font: "Vazirmatn", Tahoma, Arial, sans-serif; }
-input[lang],textarea[lang],.md-visual { font-family: var(--content-font,var(--app-font)); }
+html:lang(en),
+html:lang(tr) {
+  --app-font: 'Segoe UI', Arial, sans-serif;
+}
+html:lang(fa),
+html:lang(ar) {
+  --app-font: 'Vazirmatn', Tahoma, Arial, sans-serif;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+.numeric,
+time,
+input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
+[lang='en'],
+[lang='tr'] {
+  --content-font: 'Segoe UI', Arial, sans-serif;
+}
+[lang='fa'],
+[lang='ar'] {
+  --content-font: 'Vazirmatn', Tahoma, Arial, sans-serif;
+}
+input[lang],
+textarea[lang],
+.md-visual {
+  font-family: var(--content-font, var(--app-font));
+}
 
 /* Keep the thumbnail geometry stable while resolving, downloading and decoding. */
-.storage-image-frame{display:inline-block;vertical-align:middle;isolation:isolate;max-width:100%;min-width:1px;min-height:1px;object-fit:cover;}
-.storage-image-content{display:block;width:100%;height:100%;object-fit:inherit;filter:blur(14px);opacity:.35;transform:scale(1.04);transition:filter .45s ease,opacity .45s ease,transform .45s ease;}
-.storage-image-content.is-loaded{filter:blur(0);opacity:1;transform:scale(1);}
-.storage-image-loading{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:color-mix(in srgb,var(--card2) 80%,transparent);backdrop-filter:blur(8px);color:var(--primary-color);}
-.storage-image-shimmer{position:absolute;inset:0;transform:translateX(-110%);background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);animation:storage-image-shimmer 1.5s ease-in-out infinite;}
-@keyframes storage-image-shimmer{to{transform:translateX(110%);}}
-@media(prefers-reduced-motion:reduce){.storage-image-shimmer,.storage-image-loading .animate-spin{animation:none}.storage-image-content{transition:none;transform:none}}
-.storage-image-content{max-width:inherit;max-height:inherit;}
+.storage-image-frame {
+  display: inline-block;
+  vertical-align: middle;
+  isolation: isolate;
+  max-width: 100%;
+  min-width: 1px;
+  min-height: 1px;
+  object-fit: cover;
+}
+.storage-image-content {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: inherit;
+  filter: blur(14px);
+  opacity: 0.35;
+  transform: scale(1.04);
+  transition:
+    filter 0.45s ease,
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+.storage-image-content.is-loaded {
+  filter: blur(0);
+  opacity: 1;
+  transform: scale(1);
+}
+.storage-image-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card2) 80%, transparent);
+  backdrop-filter: blur(8px);
+  color: var(--primary-color);
+}
+.storage-image-shimmer {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  animation: storage-image-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes storage-image-shimmer {
+  to {
+    transform: translateX(110%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .storage-image-shimmer,
+  .storage-image-loading .animate-spin {
+    animation: none;
+  }
+  .storage-image-content {
+    transition: none;
+    transform: none;
+  }
+}
+.storage-image-content {
+  max-width: inherit;
+  max-height: inherit;
+}
 
 /* بخش‌های صفحه اول در موبایل: سطح صاف بدون کارت (مثل اپ علی‌بابا)؛ از sm به بالا کارت */
 @media (max-width: 639px) {

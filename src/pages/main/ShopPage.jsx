@@ -330,8 +330,8 @@ const RANGE_CSS = `
 .ab-range{position:absolute;inset:0;width:100%;height:100%;margin:0;appearance:none;-webkit-appearance:none;background:transparent;pointer-events:none}
 .ab-range::-webkit-slider-runnable-track{background:transparent;height:100%}
 .ab-range::-moz-range-track{background:transparent}
-.ab-range::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:22px;height:22px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 1px 6px rgba(10,23,54,.35);cursor:grab}
-.ab-range::-moz-range-thumb{pointer-events:auto;width:16px;height:16px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 1px 6px rgba(10,23,54,.35);cursor:grab}
+.ab-range::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:22px;height:22px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 1px 6px rgba(36,36,36,.35);cursor:grab}
+.ab-range::-moz-range-thumb{pointer-events:auto;width:16px;height:16px;border-radius:9999px;background:var(--primary-color);border:3px solid var(--card);box-shadow:0 1px 6px rgba(36,36,36,.35);cursor:grab}
 .ab-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent-text);outline-offset:2px}
 .ab-range:active::-webkit-slider-thumb{cursor:grabbing}
 `;
@@ -1038,7 +1038,7 @@ function FiltersSheet({ open, onClose, total, activeCount, onReset, children }) 
         <div className="flex-1 overflow-y-auto px-4 pb-4">{children}</div>
 
         <div className="border-t border-theme p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <button type="button" onClick={onClose} className="btn-yellow w-full !py-2.5">
+          <button type="button" onClick={onClose} className="btn-primary w-full !py-2.5">
             {translateText('مشاهده ')}
             {toFa(total)}
             {translateText(' کالا ')}
@@ -1601,7 +1601,7 @@ function ShopPage() {
               <button
                 type="button"
                 onClick={() => setRetry((v) => v + 1)}
-                className="btn-yellow mt-4"
+                className="btn-primary mt-4"
               >
                 {translateText('تلاش دوباره ')}
               </button>

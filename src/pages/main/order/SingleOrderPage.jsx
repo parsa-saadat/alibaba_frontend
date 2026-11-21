@@ -43,7 +43,7 @@ function SingleOrderPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
         <p className="muted">{translateText('سفارش مورد نظر یافت نشد.')}</p>
-        <Link to="/orders" className="btn-yellow inline-block">
+        <Link to="/orders" className="btn-primary inline-block">
           {translateText('بازگشت به سفارش‌ها ')}
         </Link>
       </div>
@@ -60,7 +60,7 @@ function SingleOrderPage() {
           <ArrowRight size={17} />
         </Link>
         <h1 className="font-black text-xl flex items-center gap-2">
-          <Package size={20} className="text-yellow" />
+          <Package size={20} className="text-accent" />
           {translateText(' جزئیات سفارش')}{' '}
           <span dir="ltr">#{order.order_number || String(order._id).slice(-8)}</span>
         </h1>
@@ -73,14 +73,14 @@ function SingleOrderPage() {
         </div>
         <div>
           <div className="text-xs muted">{translateText('مبلغ کل سفارش')}</div>
-          <div className="font-black text-yellow text-lg mt-1">
+          <div className="font-black text-accent text-lg mt-1">
             {formatPrice(order.final_amount ?? order.total_amount)}
           </div>
         </div>
         {addr && (
           <div className="sm:col-span-2 pt-3 border-t border-theme">
             <div className="text-xs muted flex items-center gap-1">
-              <MapPin size={14} className="text-yellow" />
+              <MapPin size={14} className="text-accent" />
               {translateText(' نشانی تحویل ')}
             </div>
             <div className="font-bold mt-1">

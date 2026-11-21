@@ -18,7 +18,7 @@ import { toFa, statusFa } from '../../utils/helpers/format';
  */
 const STATUS_META = {
   ENABLE: { color: '#17994f', bg: 'rgba(23,153,79,0.14)', icon: CheckCircle2 },
-  DISABLE: { color: '#c2740a', bg: 'rgba(194,116,10,0.14)', icon: PauseCircle },
+  DISABLE: { color: '#ff6a00', bg: 'rgba(255,106,0,0.14)', icon: PauseCircle },
   ROOT_DISABLE: { color: '#e53935', bg: 'rgba(229,57,53,0.14)', icon: Ban },
 };
 
@@ -31,7 +31,7 @@ function MyStoresSectionComponent() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <b className="flex items-center gap-2 text-sm">
-          <Store size={16} className="text-yellow" />
+          <Store size={16} className="text-accent" />
           {translateText('فروشگاه‌های من ')}
           <span
             className="rounded-full px-2 py-0.5 text-[10px] font-black"
@@ -63,7 +63,7 @@ function MyStoresSectionComponent() {
             <button
               type="button"
               onClick={() => setCreating(true)}
-              className="btn-yellow !py-2 !px-3 text-xs inline-flex items-center gap-1.5"
+              className="btn-primary !py-2 !px-3 text-xs inline-flex items-center gap-1.5"
             >
               <Plus size={14} />
               {translateText(' ساخت فروشگاه ')}
@@ -87,7 +87,7 @@ function MyStoresSectionComponent() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <span className="grid h-full w-full place-items-center font-black text-yellow">
+                    <span className="grid h-full w-full place-items-center font-black text-accent">
                       {(store.name || translateText('ف'))[0]}
                     </span>
                   )}

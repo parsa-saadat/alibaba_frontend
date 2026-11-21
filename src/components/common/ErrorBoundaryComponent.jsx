@@ -64,7 +64,7 @@ class ErrorBoundaryComponent extends React.Component {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <button type="button" onClick={this.reset} className="btn-yellow inline-flex items-center gap-1.5 !py-2 text-xs">
+            <button type="button" onClick={this.reset} className="btn-primary inline-flex items-center gap-1.5 !py-2 text-xs">
               <RotateCcw size={14} />{translateText("تلاش دوباره ")}</button>
             <a
               href="/"

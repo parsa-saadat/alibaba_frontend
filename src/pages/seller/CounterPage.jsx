@@ -60,7 +60,7 @@ const netOf = (sub) =>
   (Number(sub.amount ?? sub.subtotal ?? 0) || 0) - (Number(sub.discount_applied ?? 0) || 0);
 
 const STATUS_TONE = {
-  awaiting_approval: { color: '#c2740a', bg: 'rgba(194,116,10,0.14)' },
+  awaiting_approval: { color: '#ff6a00', bg: 'rgba(255,106,0,0.14)' },
   preparing: { color: '#2563eb', bg: 'rgba(37,99,235,0.14)' },
   ready_to_ship: { color: '#7c3aed', bg: 'rgba(124,58,237,0.14)' },
   shipped: { color: '#0f766e', bg: 'rgba(15,118,110,0.14)' },
@@ -276,7 +276,7 @@ function CounterPage() {
         className="card rounded-3xl overflow-hidden"
         style={{
           background:
-            'linear-gradient(120deg, rgba(255,106,0,0.20), rgba(255,106,0,0.04) 45%, rgba(37,99,235,0.10))',
+            'linear-gradient(120deg, rgba(255,106,0,0.20), rgba(255,106,0,0.04) 45%, rgba(160,160,160,0.08))',
         }}
       >
         <div className="p-5 flex flex-wrap items-center justify-between gap-4">
@@ -284,7 +284,7 @@ function CounterPage() {
             <span
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black"
               style={{
-                background: 'rgba(10,23,54,0.35)',
+                background: 'rgba(36,36,36,0.35)',
                 color: 'var(--primary-color)',
               }}
             >
@@ -315,7 +315,7 @@ function CounterPage() {
             </Link>
             <Link
               to="/seller/orders"
-              className="btn-yellow !py-2 !px-3 text-xs flex items-center gap-1.5"
+              className="btn-primary !py-2 !px-3 text-xs flex items-center gap-1.5"
             >
               <ShoppingBag size={14} />
               {translateText(' سفارش‌ها ')}
@@ -355,7 +355,7 @@ function CounterPage() {
           value={toFa(totals.waiting)}
           hint={translateText('نیازمند اقدام')}
           icon={Clock3}
-          tint="#c2740a"
+          tint="#ff6a00"
           to="/seller/orders"
         />
         <KpiTile
@@ -470,7 +470,7 @@ function CounterPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => approve(sub._id)}
-                        className="btn-yellow !py-1.5 !px-2 text-[11px] flex items-center gap-1 shrink-0 whitespace-nowrap disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-2 text-[11px] flex items-center gap-1 shrink-0 whitespace-nowrap disabled:opacity-60"
                       >
                         <Check size={12} />
                         {translateText(' تأیید ')}
@@ -481,7 +481,7 @@ function CounterPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => nextStatus(sub._id, 'ready_to_ship')}
-                        className="btn-yellow !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
                       >
                         {translateText('آماده ارسال ')}
                       </button>
@@ -491,7 +491,7 @@ function CounterPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => nextStatus(sub._id, 'shipped')}
-                        className="btn-yellow !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
+                        className="btn-primary !py-1.5 !px-2 text-[11px] shrink-0 whitespace-nowrap disabled:opacity-60"
                       >
                         {translateText('ثبت ارسال ')}
                       </button>

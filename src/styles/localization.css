@@ -359,11 +359,11 @@ body:has(.store-editor-overlay) .locale-selector {
 .regional-placement--menu .regional-trigger,
 .regional-placement--navbar .regional-trigger {
   background: #ffffff08;
-  color: #dfe6fb;
+  color: #ededed;
   border-color: #ffffff25;
 }
 .regional-placement--menu .regional-bar__caption {
-  color: #b7c4e3;
+  color: #c4c4c4;
 }
 .locale-selector.regional-placement--menu {
   display: flex;
@@ -489,7 +489,7 @@ textarea[dir='rtl'] {
   flex-direction: column;
 }
 .regional-dialog::backdrop {
-  background: #050d229e;
+  background: #1717179e;
   backdrop-filter: blur(5px);
 }
 .regional-dialog header {
@@ -647,7 +647,7 @@ textarea[dir='rtl'] {
 .regional-apply {
   border: 1px solid transparent;
   background: var(--primary-color);
-  color: #101a30;
+  color: #262626;
 }
 .regional-dialog button:focus-visible,
 .regional-trigger:focus-visible {
@@ -903,7 +903,7 @@ textarea[dir='rtl'] {
 }
 .is-active .store-filter-switch::after {
   transform: translateX(11px);
-  background: var(--navy);
+  background: var(--charcoal);
 }
 [dir='rtl'] .is-active .store-filter-switch::after {
   transform: translateX(-11px);
@@ -940,22 +940,60 @@ textarea[dir='rtl'] {
   }
 }
 
-/* The public language strip shares the header's navy in both themes. */
+/* The public language strip shares the header's charcoal in both themes. */
 .locale-selector.regional-bar--main.regional-placement--bar {
-  background:#1a1b1e;color:#f3f6ff;border-color:rgba(255,255,255,.13);
+  background: #242424;
+  color: #fafafa;
+  border-color: rgba(255, 255, 255, 0.13);
 }
-.regional-bar--main.regional-placement--bar .regional-bar__caption {color:#e6ecfa;min-width:0;}
-.regional-bar--main.regional-placement--bar .regional-trigger {color:#f3f6ff;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);}
+.regional-bar--main.regional-placement--bar .regional-bar__caption {
+  color: #ededed;
+  min-width: 0;
+}
+.regional-bar--main.regional-placement--bar .regional-trigger {
+  color: #fafafa;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+}
 /* Translated labels can wrap; they must never push actions outside the viewport. */
-.regional-bar__caption span{overflow-wrap:anywhere;line-height:1.65;}
-@media(max-width:640px){
- .locale-selector.regional-bar--main.regional-placement--bar{padding:8px 12px;gap:8px;}
- .regional-bar--main .regional-bar__caption{font-size:10px;flex:1;}
- .regional-bar--main .regional-trigger{flex-shrink:0;}
- .btn-yellow,.btn-ghost{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+.regional-bar__caption span {
+  overflow-wrap: anywhere;
+  line-height: 1.65;
 }
-/* Public header strip and mobile menu use the same navy surface. */
-.site-regional-strip{background:#1a1b1e;border-color:rgba(255,255,255,.13);}
-.site-regional-strip .regional-placement--header,.regional-bar--main.regional-placement--menu{background:#1a1b1e;color:#f3f6ff;}
-.site-regional-strip .regional-bar__caption,.site-regional-strip .regional-trigger{color:#f2f2f3;}
-.site-regional-strip .regional-trigger{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);}
+@media (max-width: 640px) {
+  .locale-selector.regional-bar--main.regional-placement--bar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .regional-bar--main .regional-bar__caption {
+    font-size: 10px;
+    flex: 1;
+  }
+  .regional-bar--main .regional-trigger {
+    flex-shrink: 0;
+  }
+  .btn-primary,
+  .btn-ghost {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+/* Public header strip and mobile menu use the same charcoal surface. */
+.site-regional-strip {
+  background: #242424;
+  border-color: rgba(255, 255, 255, 0.13);
+}
+.site-regional-strip .regional-placement--header,
+.regional-bar--main.regional-placement--menu {
+  background: #242424;
+  color: #fafafa;
+}
+.site-regional-strip .regional-bar__caption,
+.site-regional-strip .regional-trigger {
+  color: #f5f5f5;
+}
+.site-regional-strip .regional-trigger {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+}

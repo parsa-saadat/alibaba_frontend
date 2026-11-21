@@ -12,7 +12,7 @@ function GateCard({ icon: Icon, title, text, actions }) {
     <div className="min-h-screen flex flex-col gap-4 items-center justify-center p-6">
       <LanguageSelector variant="seller" />
       <div className="card rounded-3xl p-8 max-w-md w-full text-center space-y-4">
-        <Icon size={38} className="mx-auto text-yellow" />
+        <Icon size={38} className="mx-auto text-accent" />
         <h1 className="font-black text-xl">{title}</h1>
         {text && <p className="text-sm muted leading-6">{text}</p>}
         <div className="flex flex-wrap items-center justify-center gap-2">{actions}</div>
@@ -30,7 +30,7 @@ const SellerLayout = () => {
         icon={Store}
         title={translateText('ورود به پنل فروشندگان')}
         actions={
-          <Link to="/auth/pre" className="btn-yellow inline-block">
+          <Link to="/auth/pre" className="btn-primary inline-block">
             {translateText('ورود به حساب ')}
           </Link>
         }
@@ -52,7 +52,7 @@ const SellerLayout = () => {
         )}
         actions={
           <>
-            <Link to="/profile" className="btn-yellow inline-block">
+            <Link to="/profile" className="btn-primary inline-block">
               {translateText('ثبت درخواست فروشندگی ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">
@@ -75,7 +75,7 @@ const SellerLayout = () => {
         )}
         actions={
           <>
-            <Link to="/profile" className="btn-yellow inline-block">
+            <Link to="/profile" className="btn-primary inline-block">
               {translateText('مشاهده پروفایل ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">

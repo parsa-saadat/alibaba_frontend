@@ -41,7 +41,7 @@ function PrePage() {
       subtitle={translateText("ورود با شماره موبایل و کد تایید یک‌بارمصرف")}
       footer={
         <>{translateText("حساب ندارید؟")}{' '}
-          <Link to="/auth/register" className="font-bold text-yellow">{translateText("ثبت‌نام کنید")}</Link>
+          <Link to="/auth/register" className="font-bold text-accent">{translateText("ثبت‌نام کنید")}</Link>
         </>
       }
     >
@@ -52,7 +52,7 @@ function PrePage() {
           <input className="input" dir="ltr" type="tel" placeholder="0912xxxxxxx" value={phone}
             onChange={(e) => setPhone(e.target.value)} required />
         </div>
-        <button type="submit" className="btn-yellow w-full flex items-center justify-center gap-2">{translateText("ارسال کد تایید ")}<ArrowLeft size={16} />
+        <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">{translateText("ارسال کد تایید ")}<ArrowLeft size={16} />
         </button>
       </form>
     </AuthShellComponent>

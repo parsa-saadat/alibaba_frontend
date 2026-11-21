@@ -143,7 +143,7 @@ function CategoriesPage() {
             }
             className="flex items-center gap-2 text-start min-w-0 flex-1"
           >
-            <FolderTree size={16} className="text-yellow shrink-0" />
+            <FolderTree size={16} className="text-accent shrink-0" />
             <div className="min-w-0">
               <div className="font-black text-sm flex items-center gap-2">
                 <span>{node.name}</span>
@@ -326,7 +326,7 @@ function CategoriesPage() {
           </div>
           <button
             type="submit"
-            className="btn-yellow w-full flex items-center justify-center gap-2"
+            className="btn-primary w-full flex items-center justify-center gap-2"
           >
             <Plus size={16} />{' '}
             {editingCat ? translateText('ذخیره تغییرات') : translateText('ساخت دسته‌بندی')}
