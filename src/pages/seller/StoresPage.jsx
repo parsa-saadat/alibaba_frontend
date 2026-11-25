@@ -1,3 +1,4 @@
+import { storeDisplay, displayText } from '../../utils/helpers/display-text';
 import usePanelStats from '../../hooks/usePanelStats';
 import StatsNotice from '../../components/panel/StatsNoticeComponent';
 import { t as translateText } from '../../i18n/runtime.js';
@@ -90,7 +91,7 @@ function StoresPage() {
             params: { search, status: statusFilter === 'all' ? undefined : statusFilter },
           }),
         ]);
-        setStores(storesRes.data.body?.data || storesRes.data.body || []);
+        setStores((storesRes.data.body?.data || storesRes.data.body || []).map(storeDisplay));
       } catch (error) {
         /* توکن قدیمی (نقش هنوز «کاربر» است) → توکن را از سرور تازه کن و یک‌بار دوباره بخوان */
         if (!retried && [401, 403].includes(error?.response?.status) && (await syncSession?.())) {
@@ -154,7 +155,7 @@ function StoresPage() {
   if (loadError && stores.length === 0) {
     return (
       <div className="card rounded-2xl p-8 text-center space-y-3">
-        <p className="text-sm muted">{loadError}</p>
+        <p className="text-sm muted">{displayText(loadError)}</p>
         <button type="button" onClick={() => load()} className="btn-primary !py-2 text-xs">
           {translateText('تلاش دوباره ')}
         </button>
@@ -330,7 +331,8 @@ function StoresPage() {
         </section>
       ) : (
         <div className="grid gap-3 xl:grid-cols-2">
-          {filtered.map((store) => {
+          {filtered.map((rawStore) => {
+            const store = storeDisplay(rawStore);
             const id = getId(store);
             const busy = busyId === id;
             const meta = metaOf(store.status);

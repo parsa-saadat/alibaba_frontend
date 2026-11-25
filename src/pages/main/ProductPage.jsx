@@ -1,3 +1,5 @@
+import { direction as siteDirection } from '../../i18n/runtime';
+import ReviewsComponent from '../../components/product/ReviewsComponent';
 import { direction as i18nDirection } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
 import { useEffect, useRef, useState } from 'react';
@@ -45,7 +47,6 @@ import RecentlyViewedComponent from '../../components/product/RecentlyViewedComp
 import { fetchCategories, descendantIds } from '../../utils/helpers/categories';
 import {
   SellerStoreCard,
-  StoreContactModal,
   TrustBadge,
 } from '../../components/store/StoreInfoComponent';
 import CartQtyControl from '../../components/cart/CartQtyControlComponent';
@@ -55,6 +56,7 @@ import MarkdownContentComponent from '../../components/common/MarkdownContentCom
 import ErrorBoundaryComponent from '../../components/common/ErrorBoundaryComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import { fetchStore, fetchPublicUser, primeSeller } from '../../services/sellerApi';
+import ChatNowButton from '../../components/chat/ChatNowButton';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
@@ -160,7 +162,7 @@ function ProductGallery({ images, productName, discountPercentage, onZoom }) {
         onTouchEnd={handleTouchEnd}
       >
         {/* 🔧 نسبت ۱:۱ (مربع) و حذف padding اضافی */}
-        <div className="relative aspect-square w-full overflow-hidden">
+        <div className="product-gallery-viewport" data-testid="product-gallery-viewport">
           {images.length > 0 ? (
             <>
               {discountPercentage != null && (
@@ -293,6 +295,9 @@ function MobileBottomBar({
   loggedIn,
   onIncrement,
   onDecrement,
+  chatSellerId = '',
+  chatProductId = '',
+  chatStoreId = '',
 }) {
   const atMax = stock !== null && cartQty >= stock;
   const cannotIncrement = soldOut || atMax;
@@ -300,12 +305,20 @@ function MobileBottomBar({
   return (
     <div
       dir={i18nDirection}
-      className="lg:hidden fixed inset-x-0 bottom-0 z-30 border-t border-theme bg-[var(--card)]/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      className="product-mobile-actions lg:hidden fixed inset-x-0 bottom-0 z-50 border-t border-theme bg-[var(--card)]/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 pt-2.5">
+      <div className="mx-auto flex site-width max-w-7xl items-center gap-3 px-3 pt-2.5">
+        <ChatNowButton
+          className="product-mobile-chat"
+          variant="ghost"
+          label={translateText('chat.chatNowShort')}
+          seller_id={chatSellerId}
+          product_id={chatProductId}
+          store_id={chatStoreId}
+        />
         {/* قیمت */}
-        <div className="min-w-0 flex-1">
+        <div className="product-mobile-action-price min-w-0 flex-1">
           <div className="text-[10px] muted">{translateText('قیمت محصول')}</div>
           <div className="flex items-baseline gap-2">
             <span className="truncate text-base font-black" style={accent}>
@@ -392,7 +405,24 @@ function ProductPage() {
   const [retry, setRetry] = useState(0);
 
   const [zoomFile, setZoomFile] = useState(null);
-  const [contactOpen, setContactOpen] = useState(false);
+  const [mobileSection, setMobileSection] = useState('product-overview');
+  useEffect(() => {
+    if (loading) return;
+    const nodes = ['product-overview', 'product-description', 'product-recommendations']
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setMobileSection(visible[0].target.id);
+      },
+      { rootMargin: '-130px 0px -50% 0px', threshold: 0 },
+    );
+    nodes.forEach((n) => observer.observe(n));
+    return () => observer.disconnect();
+  }, [loading, activeProductId]);
 
   /* ---------- بارگذاری اطلاعات محصول ---------- */
   useEffect(() => {
@@ -402,7 +432,6 @@ function ProductPage() {
     setProduct(null);
     setStore(null);
     setOwner(null);
-    setContactOpen(false);
     setCategory(null);
     setSimilar([]);
     setError('');
@@ -567,7 +596,7 @@ function ProductPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-8" aria-busy="true">
+      <main className="mx-auto site-width max-w-7xl px-4 py-8" aria-busy="true">
         <Loading label={translateText('در حال بارگذاری جزئیات محصول…')} />
         <div className="mt-6 grid gap-6 lg:grid-cols-12">
           <div className="skeleton aspect-square rounded-2xl lg:col-span-6" />
@@ -586,7 +615,7 @@ function ProductPage() {
       <main className="mx-auto max-w-lg px-4 py-20 text-center">
         <div className="card space-y-4 rounded-2xl p-8">
           <Package size={36} className="mx-auto muted" />
-          <h1 dir="auto" className="text-lg font-black">
+          <h1 dir={siteDirection} className="text-lg font-black">
             {translateText('دریافت محصول ناموفق بود')}
           </h1>
           <p className="text-sm muted">{error || translateText('محصول موردنظر پیدا نشد.')}</p>
@@ -606,6 +635,15 @@ function ProductPage() {
   /* ---------- داده‌های محاسبه‌شده ---------- */
 
   const images = productImages(product) || [];
+  const keyAttributes = (
+    Array.isArray(product.key_attributes) ? product.key_attributes : []
+  ).filter(
+    (row) =>
+      typeof row?.name === 'string' &&
+      row.name.trim() &&
+      typeof row?.value === 'string' &&
+      row.value.trim(),
+  );
   const storeId = getId(product.store_id);
   const categoryId = getId(product.category_id);
 
@@ -641,8 +679,35 @@ function ProductPage() {
   return (
     <main
       dir={i18nDirection}
-      className="mx-auto max-w-7xl px-4 pt-6 pb-24 md:pt-8 md:pb-24 lg:pb-12"
+      className="product-detail-page mx-auto site-width max-w-7xl px-4 pt-6 pb-24 md:pt-8 md:pb-24 lg:pb-12"
     >
+      <nav className="product-mobile-tabs" aria-label={translateText('product.overview')}>
+        {[
+          ['product-overview', 'product.overview'],
+          ['product-description', 'product.details'],
+          ['product-recommendations', 'product.recommended'],
+        ].map(([id, label]) => (
+          <a
+            key={id}
+            href={'#' + id}
+            aria-current={mobileSection === id ? 'location' : undefined}
+            onClick={(e) => {
+              e.preventDefault();
+              setMobileSection(id);
+              document
+                .getElementById(id)
+                ?.scrollIntoView({
+                  behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+                    ? 'auto'
+                    : 'smooth',
+                  block: 'start',
+                });
+            }}
+          >
+            {translateText(label)}
+          </a>
+        ))}
+      </nav>
       {/* مسیر صفحه */}
       <nav
         aria-label={translateText('مسیر صفحه')}
@@ -673,9 +738,9 @@ function ProductPage() {
       </nav>
 
       {/* بخش اصلی */}
-      <div className="grid items-start gap-6 lg:grid-cols-12 lg:gap-8">
+      <div id="product-overview" className="product-hero-grid">
         {/* گالری */}
-        <div className="min-w-0 lg:sticky lg:top-24 lg:col-span-6">
+        <div className="product-hero-gallery min-w-0">
           <ProductGallery
             key={activeProductId}
             images={images}
@@ -685,8 +750,22 @@ function ProductPage() {
           />
         </div>
 
+        <section className="product-mobile-summary">
+          <div className="product-mobile-price">
+            <strong>{formatPrice(finalPrice(product), product.price?.currency)}</strong>
+            {discounted && (
+              <span>
+                <del>{formatPrice(product.price?.amount, product.price?.currency)}</del>
+                <b>{toFa(product.discount?.percentage)}٪</b>
+              </span>
+            )}
+          </div>
+          <h1 dir={siteDirection}>{product.name}</h1>
+          {product.short_description && <p>{product.short_description}</p>}
+          <a href="#product-reviews">{translateText('reviews.title')}</a>
+        </section>
         {/* اطلاعات محصول و خرید */}
-        <div className="min-w-0 space-y-5 lg:col-span-6">
+        <div className="product-hero-info min-w-0 space-y-5">
           {/* برچسب‌ها و اکشن‌های سریع */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -746,8 +825,11 @@ function ProductPage() {
           </div>
 
           {/* عنوان و معرفی کوتاه */}
-          <div className="space-y-3">
-            <h1 dir="auto" className="text-xl font-black leading-8 md:text-2xl md:leading-9">
+          <div className="product-title-intro space-y-3">
+            <h1
+              dir={siteDirection}
+              className="text-xl font-black leading-8 md:text-2xl md:leading-9"
+            >
               {product.name}
             </h1>
             {product.short_description && (
@@ -757,6 +839,40 @@ function ProductPage() {
             )}
           </div>
 
+          {/* مشخصات کلیدی */}
+          {keyAttributes.length > 0 && (
+            <section className="key-attributes-section card">
+              <h2>{translateText('attributes.title')}</h2>
+              <dl>
+                {keyAttributes.map((row, index) => (
+                  <div key={index}>
+                    <dt dir={siteDirection}>{row.name}</dt>
+                    <dd dir={siteDirection}>{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+          <section aria-label={translateText('خلاصه مشخصات')}>
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-theme bg-[var(--border-color)]">
+              {[
+                [translateText('وزن'), formatWeight(product.weight) || translateText('ثبت نشده')],
+                [
+                  translateText('ابعاد'),
+                  formatDimensions(product.dimensions) || translateText('ثبت نشده'),
+                ],
+                [translateText('سال تولید'), formatProductionYear(product.production)],
+                [translateText('برند'), product.brand || translateText('ثبت نشده')],
+              ].map(([label, value]) => (
+                <div key={label} className="min-w-0 bg-[var(--card)] p-3.5">
+                  <div className="text-[11px] muted">{label}</div>
+                  <div className="mt-1 break-words text-sm font-bold">{value}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+        <div className="product-hero-purchase min-w-0 space-y-4">
           {/* کارت خرید */}
           <aside className="card space-y-4 rounded-2xl p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-theme pb-4">
@@ -835,37 +951,11 @@ function ProductPage() {
               />
             </div>
           </aside>
-
-          {/* مشخصات کلیدی */}
-          <section aria-label={translateText('خلاصه مشخصات')}>
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-theme bg-[var(--border-color)]">
-              {[
-                [translateText('وزن'), formatWeight(product.weight) || translateText('ثبت نشده')],
-                [
-                  translateText('ابعاد'),
-                  formatDimensions(product.dimensions) || translateText('ثبت نشده'),
-                ],
-                [translateText('سال تولید'), formatProductionYear(product.production)],
-                [translateText('برند'), product.brand || translateText('ثبت نشده')],
-              ].map(([label, value]) => (
-                <div key={label} className="min-w-0 bg-[var(--card)] p-3.5">
-                  <div className="text-[11px] muted">{label}</div>
-                  <div className="mt-1 break-words text-sm font-bold">{value}</div>
-                </div>
-              ))}
-            </div>
-          </section>
+          {/* فروشگاه فروشنده — تماس با فروشنده در خود صفحهٔ فروشگاه است */}
+          <div className="mt-6 lg:mt-8">
+            <SellerStoreCard store={store} owner={owner} product={product} />
+          </div>
         </div>
-      </div>
-
-      {/* فروشگاه فروشنده — با کلیک، پاپ‌آپ اطلاعات تماس باز می‌شود */}
-      <div className="mt-6 lg:mt-8">
-        <SellerStoreCard
-          store={store}
-          owner={owner}
-          product={product}
-          onOpenContact={() => setContactOpen(true)}
-        />
       </div>
 
       {/* توضیحات و مشخصات فنی */}
@@ -935,7 +1025,10 @@ function ProductPage() {
               <ErrorBoundaryComponent
                 resetKey={activeProductId}
                 fallback={
-                  <pre dir="auto" className="whitespace-pre-wrap font-sans text-sm leading-7">
+                  <pre
+                    dir={siteDirection}
+                    className="whitespace-pre-wrap font-sans text-sm leading-7"
+                  >
                     {String(product.description || '')}
                   </pre>
                 }
@@ -1047,14 +1140,12 @@ function ProductPage() {
                 </div>
               )}
 
-              <button
-                type="button"
-                onClick={() => setContactOpen(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-theme px-4 py-2.5 text-sm font-bold transition hover:border-[var(--primary-color)]"
-              >
-                <Store size={16} />
-                {translateText('ارتباط با فروشنده ')}
-              </button>
+              <ChatNowButton
+                seller_id={getId(owner?._id) || getId(product.seller_id)}
+                product_id={activeProductId}
+                store_id={storeId}
+                variant="solid"
+              />
             </div>
           </section>
 
@@ -1103,6 +1194,10 @@ function ProductPage() {
         </section>
       </div>
 
+      <div id="product-reviews">
+        <ReviewsComponent productId={activeProductId} storeId={storeId} />
+      </div>
+      <div id="product-recommendations" />
       {/* محصولات مرتبط — فقط از همین دسته‌بندی، اسکرولی و بیشتر */}
       {(similarLoading || similar.length > 0) && (
         <section className="mt-10">
@@ -1143,18 +1238,18 @@ function ProductPage() {
         loggedIn={loggedIn}
         onIncrement={incrementCart}
         onDecrement={decrementCart}
-      />
-
-      <StoreContactModal
-        open={contactOpen}
-        onClose={() => setContactOpen(false)}
-        store={store}
-        owner={owner}
-        product={product}
+        chatSellerId={getId(owner?._id) || getId(product.seller_id)}
+        chatProductId={activeProductId}
+        chatStoreId={storeId}
       />
 
       <ImageLightboxComponent
         file={zoomFile?.file}
+        files={images}
+        initialIndex={Math.max(
+          0,
+          images.findIndex((image) => image === zoomFile?.file),
+        )}
         alt={zoomFile?.alt}
         onClose={() => setZoomFile(null)}
       />

@@ -39,6 +39,32 @@ const belongsToCategory = (product, category) => {
   return ids.some((id) => categoryIdOf(id) === categoryIdOf(category));
 };
 
+/*
+ * ستون‌های ویترین دسته‌بندی فقط در دسکتاپ دیده می‌شود (بخش `hidden lg:block`)؛
+ * همان دو نقطه‌شکنی که در CSS تعریف شده‌اند اینجا خوانده می‌شوند تا تعداد
+ * محصولات = ستون × ۲ ردیف باشد و هیچ ردیفی نیمه‌پر نماند.
+ */
+const SHOWCASE_BREAKPOINTS = [
+  ['(min-width: 1600px)', 6],
+  ['(min-width: 1024px)', 5],
+];
+const showcaseColumns = () => {
+  if (typeof window === 'undefined' || !window.matchMedia) return 5;
+  const hit = SHOWCASE_BREAKPOINTS.find(([query]) => window.matchMedia(query).matches);
+  return hit ? hit[1] : 5;
+};
+function useShowcaseColumns() {
+  const [columns, setColumns] = useState(showcaseColumns);
+  useEffect(() => {
+    const onChange = () => setColumns(showcaseColumns());
+    const lists = SHOWCASE_BREAKPOINTS.map(([query]) => window.matchMedia(query));
+    lists.forEach((list) => list.addEventListener('change', onChange));
+    onChange();
+    return () => lists.forEach((list) => list.removeEventListener('change', onChange));
+  }, []);
+  return columns;
+}
+
 /* ───────── هیرو: تب‌ها + باکس جستجو ─────────
    موبایل: جستجوی فشرده‌ی قرصی‌شکل + ردیف سرویس‌های آیکنی (مثل اپ علی‌بابا)
    دسکتاپ: جعبه‌ی جستجوی بزرگ وسط‌چین با حاشیه‌ی رنگ برند                    */
@@ -46,10 +72,7 @@ function HeroSearch() {
   const tab = 'relative pb-2 whitespace-nowrap';
 
   return (
-    <section
-      className="px-3 pt-3 pb-4 sm:px-4 sm:pt-6 sm:pb-8 md:pt-4 md:pb-6"
-      style={{ background: 'var(--card)' }}
-    >
+    <section className="home-search-hero px-3 pt-3 pb-4 sm:px-4 sm:pt-6 sm:pb-8 md:pt-4 md:pb-6">
       {/* تب‌ها — پخش‌شده در کل عرض مثل اپ علی‌بابا؛ فعال با زیرخط نارنجی */}
       <div className="flex items-center justify-between gap-2 px-1 text-sm min-[400px]:text-base sm:justify-center sm:gap-12 sm:text-xl md:text-2xl font-black">
         <Link
@@ -132,7 +155,7 @@ function HeroSearch() {
 
       {/* ───── دسکتاپ: جعبه‌ی جستجوی بزرگ ───── */}
       <div
-        className="card mt-5 hidden max-w-[960px] mx-auto rounded-2xl p-4 lg:block"
+        className="hero-search-frame card mt-5 hidden max-w-[960px] mx-auto rounded-2xl p-4 lg:block"
         style={{ border: '2px solid var(--primary-color)' }}
       >
         <ProductSearchBox variant="hero" />
@@ -174,7 +197,7 @@ function WelcomeStrip() {
 
   return (
     <div style={{ background: 'var(--card2)' }} className="hidden md:block">
-      <div className="max-w-[1440px] mx-auto px-4 h-[72px] flex items-center justify-between">
+      <div className="site-width max-w-[1440px] mx-auto px-4 h-[72px] flex items-center justify-between">
         <h2 className="text-lg sm:text-xl font-black">
           {user
             ? translateText('سلام{{v0}}', { v0: name ? `، ${name}` : '' })
@@ -210,7 +233,7 @@ function WelcomeStrip() {
 /* ───────── سایدبار دسته‌بندی (با قابلیت هاور) ───────── */
 function CategoryCard({ categories, loading, activeCategoryId, onHoverCategory }) {
   return (
-    <aside className="hidden lg:flex flex-col h-[400px] card rounded-2xl overflow-hidden">
+    <aside className="home-category-sidebar hidden lg:flex flex-col card rounded-2xl overflow-hidden">
       <div className="px-4 py-4 text-sm font-black border-b border-theme">
         {translateText('محصولات دسته‌بندی')}
       </div>
@@ -251,16 +274,19 @@ function CategoryCard({ categories, loading, activeCategoryId, onHoverCategory }
 
 /* ───────── نمایش نمونه محصولاتِ دسته‌بندی انتخاب‌شده ───────── */
 function CategoryShowcase({ category, products, loading }) {
+  const columns = useShowcaseColumns();
+
   if (loading) {
     return <div className="skeleton h-[400px] w-full rounded-xl" />;
   }
 
+  // دو ردیف کامل: تعداد کارت‌ها با تعداد ستون‌های همان عرض صفحه تنظیم می‌شود.
   const categoryProducts = category
-    ? products.filter((p) => belongsToCategory(p, category)).slice(0, 3)
+    ? products.filter((p) => belongsToCategory(p, category)).slice(0, columns * 2)
     : [];
 
   return (
-    <div className="flex min-w-0 w-full flex-col h-[400px] card rounded-2xl p-4 xl:p-5">
+    <div className="category-showcase flex min-w-0 w-full flex-col card rounded-2xl p-4 xl:p-5">
       <div
         className="flex items-center justify-between pb-3 mb-3 shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
@@ -287,27 +313,32 @@ function CategoryShowcase({ category, products, loading }) {
           {translateText('محصولی در این دسته‌بندی وجود ندارد ')}
         </div>
       ) : (
-        <div className="category-showcase-grid flex-1 grid grid-cols-3 gap-3 min-h-0">
+        <div className="category-showcase-grid flex-1 grid grid-cols-3 min-[1600px]:grid-cols-4 gap-2.5 min-h-0">
           {categoryProducts.map((p) => (
             <Link
               key={p._id}
               to={`/product/${p._id}`}
-              className="category-showcase-product group flex min-w-0 flex-col rounded-xl p-2.5 transition-shadow hover:shadow-md overflow-hidden"
+              className="category-showcase-product group flex min-w-0 flex-col rounded-xl overflow-hidden"
               style={{ background: 'var(--card2)' }}
             >
-              <div className="category-showcase-image flex h-40 xl:h-44 shrink-0 items-center justify-center rounded-lg overflow-hidden bg-white">
+              <div className="category-showcase-image relative aspect-square w-full shrink-0 overflow-hidden rounded-lg">
                 <StorageImageComponent
                   file={productImages(p)[0]}
                   alt={p.name}
                   compact
-                  className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <span className="mt-3 min-h-10 text-sm font-bold leading-5 line-clamp-2 break-words">
+              <span className="mt-2 min-h-8 text-xs font-bold leading-4 line-clamp-2 break-words">
                 {p.name}
               </span>
-              <span className="mt-2 text-sm font-black text-accent" dir="auto">
+              <span className="category-showcase-price mt-1.5 text-xs font-black text-accent">
                 {formatPrice(finalPrice(p), p.price?.currency)}
+                {hasDiscount(p) && (
+                  <del className="muted text-xs font-normal">
+                    {formatPrice(p.price?.amount, p.price?.currency)}
+                  </del>
+                )}
               </span>
               <span className="mt-auto pt-2 flex items-center justify-between gap-1">
                 <TrustBadge product={p} size={11} />
@@ -329,77 +360,6 @@ function CategoryShowcase({ category, products, loading }) {
 }
 
 /* ───────── اسکرول ساده از آخرین محصولات ───────── */
-function LatestProducts({ products, loading }) {
-  if (loading) return <div className="skeleton h-[240px] rounded-xl" />;
-
-  const latest = products.slice(0, 10);
-
-  return (
-    <div className="flex w-full flex-col h-[240px] card rounded-2xl p-4 overflow-hidden">
-      <div
-        className="flex items-center justify-between pb-3 mb-2 shrink-0"
-        style={{ borderBottom: '1px solid var(--border)' }}
-      >
-        <h3 className="text-base font-black">{translateText('آخرین محصولات')}</h3>
-        <Link to="/products" className="text-xs font-semibold flex items-center gap-1 text-accent">
-          {translateText('همه محصولات ')}
-          <ChevronLeft className="logical-icon" size={14} />
-        </Link>
-      </div>
-
-      {latest.length === 0 ? (
-        <div className="flex-1 grid place-items-center text-sm muted">
-          {translateText('محصولی یافت نشد ')}
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-2 flex-1 overflow-y-auto min-h-0 [scrollbar-width:thin]">
-          {latest.map((p) => (
-            <Link
-              key={p._id}
-              to={`/product/${p._id}`}
-              className="flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-[var(--card2)] group"
-            >
-              <div
-                className="w-14 h-14 rounded-lg overflow-hidden shrink-0"
-                style={{ background: 'var(--card2)' }}
-              >
-                <StorageImageComponent
-                  file={productImages(p)[0]}
-                  alt={p.name}
-                  compact
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <MarqueeText
-                  text={p.name}
-                  className="text-sm font-semibold group-hover:text-accent"
-                />
-                {hasDiscount(p) && (
-                  <span className="inline-block mt-1 text-[11px] text-accent font-bold">
-                    {translateText('دارای تخفیف ویژه ')}
-                  </span>
-                )}
-                {/* نشان اعتماد فروشنده — فهرست «آخرین محصولات» */}
-                <span className="mt-1 flex min-h-[16px] items-center gap-1">
-                  <TrustBadge product={p} size={11} />
-                </span>
-              </div>
-
-              <ChevronLeft
-                size={16}
-                className="logical-icon muted shrink-0 group-hover:text-accent"
-              />
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ───────── اصلی ───────── */
 function HeaderComponent({ products = [], categories = [], loading = false }) {
   /* محو‌شدگی ردیف چیپ‌های موبایل فقط وقتی سرریز دارد */
   const [mobileRowRef, , mobileRowFade] = useScrollFade();
@@ -428,7 +388,7 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
       <HeroSearch />
       <WelcomeStrip />
 
-      <div className="max-w-[1440px] mx-auto px-4 mt-5">
+      <div className="site-width max-w-[1440px] mx-auto px-4 mt-5">
         {/* چیپ دسته‌بندی برای موبایل */}
         <div
           ref={mobileRowRef}
@@ -450,7 +410,7 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
 
         {/* دسکتاپ: [سایدبار دسته‌ها | کارت‌های محتوا | بنر پیشنهادهای داغ] — مثل Alibaba.com */}
         <section data-testid="home-category-browser" className="hidden lg:block space-y-4">
-          <div className="grid min-w-0 grid-cols-[220px_minmax(0,1fr)] min-[1440px]:grid-cols-[240px_minmax(0,1fr)_240px] gap-4">
+          <div className="home-category-layout grid min-w-0 grid-cols-[220px_minmax(0,1fr)] min-[1440px]:grid-cols-[240px_minmax(0,1fr)_240px] gap-4">
             <CategoryCard
               categories={categories}
               loading={loading}
@@ -465,25 +425,34 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
             >
               <CategoryShowcase category={activeCategory} products={products} loading={loading} />
             </div>
-            <div className="hidden min-[1440px]:block min-w-0">
+            <div className="home-hot-picks-slot hidden min-[1440px]:block min-w-0">
               <HotPicksBannerComponent products={products} />
             </div>
           </div>
-          <LatestProducts products={products} loading={loading} />
         </section>
 
         {/* کشف فروشندگان — لینک به تب «تأمین‌کنندگان» صفحه فروشگاه */}
         <Link
           to="/products?tab=suppliers"
-          className="card mt-3 flex items-center justify-between rounded-xl px-5 sm:px-6 h-16 hover:-translate-y-0.5 transition-transform"
+          className="seller-discovery-banner card mt-3 flex items-center justify-between gap-4 rounded-xl px-5 sm:px-6 py-4 hover:-translate-y-0.5 transition-transform"
         >
-          <span className="text-sm sm:text-[15px]">
-            <b className="text-accent">{translateText('b2b.sellers')}</b>{' '}
-            {translateText('b2b.sellersDesc')}
+          <span className="seller-discovery-emblem" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path
+                d="M9 21h30v20H9zM6 21l5-13h26l5 13M18 41V28h12v13M6 21c0 7 9 7 9 0 0 7 9 7 9 0 0 7 9 7 9 0 0 7 9 7 9 0"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+              />
+            </svg>
           </span>
-          <span className="flex items-center gap-1 text-sm font-bold text-accent shrink-0">
+          <span className="seller-discovery-banner__copy">
+            <b>{translateText('b2b.sellers')}</b>
+            <span>{translateText('b2b.sellersDesc')}</span>
+          </span>
+          <span className="seller-discovery-banner__action">
             {translateText('مشاهده فروشندگان ')}
-            <ChevronLeft className="logical-icon" size={16} />
+            <ChevronLeft className="logical-icon" size={18} />
           </span>
         </Link>
       </div>

@@ -125,7 +125,7 @@ function FavoritesPage() {
   const empty = !loading && products.length === 0;
 
   return (
-    <div className="mx-auto max-w-7xl px-3 py-5 sm:px-4 sm:py-6">
+    <div className="mx-auto site-width max-w-7xl px-3 py-5 sm:px-4 sm:py-6">
       {/* ───── هدر صفحه ───── */}
       <header className="card mb-4 flex flex-col gap-3 rounded-3xl p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="flex items-center gap-3">

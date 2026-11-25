@@ -5,7 +5,6 @@ import axios from 'axios';
 import HeaderComponent from '../../components/home/HeaderComponent';
 import PromoBannerComponent from '../../components/home/PromoBannerComponent';
 import OfferProductsComponent from '../../components/home/OfferProductsComponent';
-import NewProductsComponent from '../../components/home/NewProductsComponent';
 import InfiniteProductsComponent from '../../components/home/InfiniteProductsComponent';
 import RecentlyViewedComponent from '../../components/product/RecentlyViewedComponent';
 import OurPolicyComponent from '../../components/home/OurPolicyComponnet';
@@ -49,21 +48,27 @@ const HomePage = () => {
        (قبلاً bg-white/text-[#222] ثابت بود و تم روی صفحه اول کار نمی‌کرد) */
     <div dir={i18nDirection} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       {/* نوار تبلیغاتی بالای صفحه — مثل نوار قرمز Alibaba.com */}
-      <PromoBannerComponent />
       <HeaderComponent products={products} categories={categories} loading={loading} />
 
       {error && !loading && (
-        <div className="max-w-[1440px] mx-auto px-4 pt-6">
+        <div className="site-width max-w-[1440px] mx-auto px-4 pt-6">
           <div className="card rounded-2xl p-4 flex items-center justify-between gap-3 flex-wrap">
-            <span className="text-sm muted">{translateText("دریافت اطلاعات از بک‌اند ناموفق بود.")}</span>
-            <button type="button" className="btn-primary !py-2 text-sm" onClick={() => setRetry((v) => v + 1)}>{translateText("تلاش دوباره ")}</button>
+            <span className="text-sm muted">
+              {translateText('دریافت اطلاعات از بک‌اند ناموفق بود.')}
+            </span>
+            <button
+              type="button"
+              className="btn-primary !py-2 text-sm"
+              onClick={() => setRetry((v) => v + 1)}
+            >
+              {translateText('تلاش دوباره ')}
+            </button>
           </div>
         </div>
       )}
 
-      <div className="max-w-[1440px] mx-auto px-4 mt-5 space-y-4">
+      <div className="site-width max-w-[1440px] mx-auto px-4 mt-5 space-y-4">
         <OfferProductsComponent products={products} loading={loading} />
-        <NewProductsComponent products={products} loading={loading} />
         {/* اخیراً مشاهده‌شده‌ها — برای کاربری که قبلاً محصولی باز کرده است */}
         <RecentlyViewedComponent limit={8} />
       </div>

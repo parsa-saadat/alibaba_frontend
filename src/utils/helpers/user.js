@@ -47,27 +47,16 @@ export const isTrustedStore = (store, owner) =>
  */
 export const storeContactInfo = (store, owner) => {
   const info = store?.contact_info || {};
-  const address = owner?.address || {};
-  const ownerAddress = [address.province, address.city, address.full_address]
-    .filter(Boolean)
-    .join(translateText('، '));
 
   return {
     storeName: String(store?.name || '').trim(),
     sellerName: (userFullName(owner) || owner?.username || '').trim(),
     phone: String(info.phone || owner?.phone || '').trim(),
     email: String(info.email || owner?.email || '').trim(),
-    /* آدرس چندزبانه‌ی فروشگاه (store.address بومی‌شده) در اولویت است */
-    address: String(store?.address || info.address || ownerAddress || '').trim(),
+    /* نشانی فقط از خود فروشگاه (store.address / contact_info) خوانده می‌شود */
+    address: String(store?.address || info.address || '').trim(),
   };
 };
-
-/*
- * دسترسی به ویرایش فیلدهای هویتی فروشنده
- * طبق بک‌اند: بعد از تأیید فروشنده (یا identity_locked) فقط حساب تسویه قابل تغییر است.
- */
-export const isSellerIdentityLocked = (seller) =>
-  seller?.identity_locked === true || seller?.seller_approved_status === true;
 
 /*
  * نام نمایشی فروشنده از روت عمومی کاربر

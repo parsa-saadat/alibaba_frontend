@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import BrandLogoComponent from '../common/BrandLogoComponent';
 import {
+  MessageSquare,
+  MessagesSquare,
   LayoutDashboard,
   Users,
   Store,
@@ -32,6 +34,8 @@ const ADMIN_ITEMS = [
   { path: '/dashboard/stores', label: translateText('فروشگاه‌ها'), icon: Store },
   { path: '/dashboard/products', label: translateText('محصولات'), icon: Package },
   { path: '/dashboard/categories', label: translateText('دسته‌بندی‌ها'), icon: FolderTree },
+  { path: '/dashboard/reviews', label: translateText('reviews.manage'), icon: MessageSquare },
+  { path: '/dashboard/messages', label: translateText('chat.adminTitle'), icon: MessagesSquare },
   { path: '/dashboard/orders', label: translateText('سفارش‌ها'), icon: ShoppingBag },
   { path: '/dashboard/plans', label: translateText('پلن‌ها'), icon: CreditCard },
   { path: '/dashboard/media', label: translateText('رسانه‌ها'), icon: Images },

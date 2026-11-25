@@ -18,8 +18,10 @@ import {
   X,
   ChevronDown,
   RefreshCw,
+  MessageSquare,
 } from 'lucide-react';
 import { useShop } from '../../contexts/ShopContext';
+import { useChat } from '../../contexts/ChatContext';
 import { userDisplayName } from '../../utils/helpers/user';
 import { fetchCategories, buildCategoryTree } from '../../utils/helpers/categories';
 import MegaMenuComponent from './MegaMenuComponent';
@@ -30,6 +32,7 @@ function NavbarComponent() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, cartCount, theme, toggleTheme, compare, favorites } = useShop();
+  const { unread } = useChat();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,35 +47,46 @@ function NavbarComponent() {
   const accountMenuRef = useRef(null);
   const headerRef = useRef(null);
   const [navigationHidden, setNavigationHidden] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(false);
+  useEffect(() => {
+    let observer;
+    const frame = requestAnimationFrame(() => {
+      const hero = document.querySelector('.home-search-hero');
+      if (location.pathname !== '/' || !hero) {
+        setHeroVisible(false);
+        return;
+      }
+      observer = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), {
+        threshold: 0,
+      });
+      observer.observe(hero);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+    };
+  }, [location.pathname]);
   useEffect(() => {
     let previous = window.scrollY,
       movement = 0,
-      frame = 0,
-      changedAt = 0;
+      frame = 0;
     const update = () => {
       frame = 0;
-      const y = Math.max(
-        0,
-        Math.min(window.scrollY, document.documentElement.scrollHeight - window.innerHeight),
-      );
+      const max = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+      const y = Math.min(max, Math.max(0, window.scrollY));
       const delta = y - previous;
       previous = y;
-      if (y <= 10) {
+      const isMobile = matchMedia('(max-width: 767px)').matches;
+      const editing = document.activeElement?.matches('.site-header input');
+      if (mobileOpen || editing || y < 80) {
         movement = 0;
         setNavigationHidden(false);
         return;
       }
-      if (mobileOpen || Date.now() - changedAt < 360) return;
+      if (Math.abs(delta) < 2 || y >= max - 2) return;
       movement = Math.sign(delta) === Math.sign(movement) ? movement + delta : delta;
-      if (Math.abs(movement) < 14) return;
-      const hidden = movement > 0;
-      if (hidden && y < 110) return;
-      if (hidden && document.activeElement?.matches('.site-header input'))
-        document.activeElement.blur();
-      setNavigationHidden((current) => {
-        if (current !== hidden) changedAt = Date.now();
-        return hidden;
-      });
+      if (Math.abs(movement) < (isMobile ? 40 : 32)) return;
+      setNavigationHidden(movement > 0);
       movement = 0;
     };
     const scroll = () => {
@@ -245,17 +259,20 @@ function NavbarComponent() {
   return (
     <>
       <div className="hidden md:block site-regional-strip">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="site-width max-w-7xl mx-auto px-4">
           <LanguageSelector variant="main" placement="header" />
         </div>
       </div>
-      <header ref={headerRef} className="site-header sticky top-0 z-50">
+      <header
+        ref={headerRef}
+        className={`site-header sticky top-0 z-50  ${heroVisible ? 'home-hero-visible' : ''} ${navigationHidden && !mobileOpen ? 'is-search-hidden' : ''}`}
+      >
         {/* نوار اصلی هدر */}
         {/*
         موبایل: منو و لوگو کنار هم؛ اکشن‌ها جدا و جستجو در ردیف جمع‌شونده.
         دسکتاپ: ردیف فلکس با لوگوی کامل در ابتدا.
       */}
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex flex-nowrap items-center justify-between gap-2 md:gap-3 header-main-row">
+        <div className="site-width max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex flex-nowrap items-center justify-between gap-2 md:gap-3 header-main-row">
           {/* دکمه منوی موبایل + لوگوی کامل در دسکتاپ */}
           <div className="flex items-center gap-1.5 min-w-0 header-brand-group">
             <button
@@ -284,6 +301,9 @@ function NavbarComponent() {
             </Link>
           </div>
 
+          <div className="product-header-search">
+            <SearchBoxComponent />
+          </div>
           {/* باکس جستجو — ردیف دوم تمام‌عرض در موبایل، وسط هدر در دسکتاپ */}
           <div className="hidden md:block w-full flex-1 max-w-xl search-shell">
             <SearchBoxComponent />
@@ -383,6 +403,17 @@ function NavbarComponent() {
                         {translateText(' پروفایل من ')}
                       </Link>
                       <Link
+                        to="/account/messages"
+                        onClick={() => setAccountOpen(false)}
+                        className="account-link"
+                      >
+                        <MessageSquare size={15} />
+                        {translateText('chat.messages')}
+                        {unread.total > 0 ? (
+                          <span className="header-badge ms-auto">{formatNumber(unread.total)}</span>
+                        ) : null}
+                      </Link>
+                      <Link
                         to="/address"
                         onClick={() => setAccountOpen(false)}
                         className="account-link"
@@ -443,26 +474,26 @@ function NavbarComponent() {
         </div>
 
         <div
-          className={`header-collapse md:hidden ${navigationHidden ? 'is-hidden' : ''}`}
+          className="header-collapse md:hidden"
+          data-testid="mobile-search-row"
           inert={navigationHidden ? true : undefined}
           aria-hidden={navigationHidden}
-          data-testid="mobile-search-row"
         >
           <div className="header-collapse__inner">
             <div className="px-3 pb-2.5">
-              <SearchBoxComponent />
+              <SearchBoxComponent placeholder={location.pathname.startsWith('/product/') ? translateText('product.searchShort') : undefined} />
             </div>
           </div>
         </div>
         {/* زیرمنوی دسکتاپ */}
         <div
-          className={`header-collapse hidden md:grid ${navigationHidden ? 'is-hidden' : ''}`}
+          className="header-collapse hidden md:grid"
+          data-testid="desktop-navigation-row"
           inert={navigationHidden ? true : undefined}
           aria-hidden={navigationHidden}
-          data-testid="desktop-navigation-row"
         >
           <div className="header-collapse__inner border-t border-slate-400/20">
-            <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+            <div className="site-width max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 min-w-0 w-full">
                 <MegaMenuComponent
                   categories={categories}

@@ -891,39 +891,6 @@ function FiltersPanel({
   );
 }
 
-/*
- * سایدبار فیلترها تا وقتی همه‌ی بخش‌ها بسته‌اند کوتاه است و می‌تواند چسبان بماند.
- * اگر کاربر همه را باز کند و بلندتر از صفحه شود، حالت چسبان برداشته می‌شود تا
- * ناحیه‌ی فیلترها هیچ‌وقت اسکرول داخلی (نوار اسکرول جدا) نداشته باشد و کل صفحه
- * به‌جای آن اسکرول شود.
- */
-function useFitsViewport(ref, reserved = 120) {
-  const [fits, setFits] = useState(true);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-
-    const check = () => setFits(el.scrollHeight <= window.innerHeight - reserved);
-    check();
-
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(check) : null;
-    ro?.observe(el);
-    window.addEventListener('resize', check);
-    window.addEventListener('orientationchange', check);
-    const id = window.setInterval(check, 600); // بعد از باز/بسته شدن بخش‌ها هم دوباره بسنجد
-
-    return () => {
-      ro?.disconnect();
-      window.removeEventListener('resize', check);
-      window.removeEventListener('orientationchange', check);
-      window.clearInterval(id);
-    };
-  }, [ref, reserved]);
-
-  return fits;
-}
-
 function SelectField({ value, onChange, options, label, icon: Icon }) {
   return (
     <div className="relative">
@@ -1107,15 +1074,14 @@ function Pagination({ page, totalPages, onChange }) {
 function ProductsGrid({ products, loading, onClear, viewMode = 'double' }) {
   const showSkeletons = loading && products.length === 0;
   /* حالت‌های نمایش: دوتایی / تکی افقی / تکی عمودی (تکی عمودی فقط موبایل — دسکتاپ → دوتایی) */
-  const variant =
-    viewMode === 'single' ? 'wide' : viewMode === 'single-vertical' ? 'tall' : 'grid';
+  const variant = viewMode === 'single' ? 'wide' : viewMode === 'single-vertical' ? 'tall' : 'grid';
   /* دوتایی: دسکتاپ ۴ کنار هم، تبلت ۳، گوشی ۲ — تکی عمودی: از ۳ تا ۱ ستون */
   const gridClass =
     viewMode === 'single'
       ? 'grid grid-cols-1 gap-2.5 sm:gap-3'
       : viewMode === 'single-vertical'
         ? 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3'
-        : 'grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4';
+        : 'catalog-product-grid grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 min-[1440px]:grid-cols-5 min-[1800px]:grid-cols-6';
 
   if (showSkeletons) {
     return (
@@ -1156,11 +1122,7 @@ function ProductsGrid({ products, loading, onClear, viewMode = 'double' }) {
       aria-busy={loading}
     >
       {products.map((product) => (
-        <ProductComponent
-          key={product._id || product.id}
-          product={product}
-          variant={variant}
-        />
+        <ProductComponent key={product._id || product.id} product={product} variant={variant} />
       ))}
     </div>
   );
@@ -1216,9 +1178,9 @@ function SuppliersList({ suppliers, loading, onClear }) {
 
 function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  /* سایدبار فیلتر بدون اسکرول داخلی (توضیح در useFitsViewport) */
+  /* Tall desktop filters remain reachable inside the sticky dock. */
   const asideRef = useRef(null);
-  const asideFits = useFitsViewport(asideRef, 112);
+
   const search = searchParams.toString();
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const sort = searchParams.get('sort') || '';
@@ -1432,7 +1394,7 @@ function ShopPage() {
 
   return (
     <div
-      className="mx-auto max-w-7xl space-y-4 px-3 py-5 sm:space-y-5 sm:px-4 sm:py-6"
+      className="mx-auto site-width max-w-7xl space-y-4 px-3 py-5 sm:space-y-5 sm:px-4 sm:py-6"
       style={{ color: 'var(--text)' }}
     >
       {/* هدر */}
@@ -1533,9 +1495,7 @@ function ShopPage() {
         </div>
 
         {/* انتخابگر حالت نمایش — فقط در تب محصولات */}
-        {!isSuppliers && (
-          <ProductViewSwitcher value={effectiveViewMode} onChange={setViewMode} />
-        )}
+        {!isSuppliers && <ProductViewSwitcher value={effectiveViewMode} onChange={setViewMode} />}
       </div>
 
       {/* چیپ‌های فعال */}
@@ -1566,10 +1526,7 @@ function ShopPage() {
 
       <div className="grid items-start gap-4 lg:grid-cols-[272px_minmax(0,1fr)] xl:gap-5 2xl:grid-cols-[288px_minmax(0,1fr)]">
         {/* سایدبار دسکتاپ — بدون اسکرول داخلی؛ اگر بلندتر از صفحه شد، چسبان نمی‌ماند */}
-        <aside
-          ref={asideRef}
-          className={`card hidden rounded-3xl p-3 lg:block ${asideFits ? 'sticky top-24' : ''}`}
-        >
+        <aside ref={asideRef} className="shop-filter-dock card hidden rounded-2xl p-3 lg:block">
           <div className="mb-2.5 flex items-center justify-between gap-2 px-1">
             <div className="flex items-center gap-2 text-[13px] font-black">
               <SlidersHorizontal size={16} style={{ color: 'var(--accent-text)' }} />

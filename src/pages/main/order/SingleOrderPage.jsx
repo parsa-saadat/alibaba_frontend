@@ -1,3 +1,4 @@
+import { CancellationInfo } from '../../../components/orders/OrderPartsComponent';
 import {
   formatOrderPrice as formatPrice,
   orderItemName,
@@ -106,6 +107,7 @@ function SingleOrderPage() {
               <b dir="ltr">#{sub.order_number || String(sub._id).slice(-8)}</b>
               <span className="chip !cursor-default text-xs">{statusFa(sub.status)}</span>
             </div>
+            <CancellationInfo sub={sub} />
             <div className="space-y-2">
               {(sub.items || []).map((item, idx) => (
                 <div

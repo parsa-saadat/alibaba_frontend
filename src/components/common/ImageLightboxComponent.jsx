@@ -1,98 +1,187 @@
+import { t, numberLocale, numberingSystem } from '../../i18n/runtime';
+import { useEffect, useRef, useState } from 'react';
+import { X, ZoomIn, ZoomOut, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
 import StorageImage from './StorageImageComponent';
-import { t as translateText } from '../../i18n/runtime.js';
-import React, { useEffect, useState } from 'react';
-import { X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
-import { resolveStorageImage } from '../../utils/helpers/storage-files';
-
-function ImageLightboxComponent({ file, alt = translateText('تصویر'), onClose }) {
-  const [url, setUrl] = useState('');
-  const [scale, setScale] = useState(1);
-
+export default function ImageLightboxComponent({
+  file,
+  files = [],
+  initialIndex = 0,
+  alt = t('تصویر'),
+  onClose,
+}) {
+  const dialog = useRef(null),
+    stage = useRef(null),
+    drag = useRef(null),
+    moved = useRef(false),
+    close = useRef(onClose);
+  close.current = onClose;
+  const [index, setIndex] = useState(initialIndex),
+    [scale, setScale] = useState(1);
+  const count = (n) => new Intl.NumberFormat(numberLocale, { numberingSystem }).format(n);
+  const gallery = files.length ? files : file ? [file] : [];
   useEffect(() => {
     if (!file) return;
-    let active = true;
+    setIndex(Math.min(initialIndex, gallery.length - 1));
     setScale(1);
-    resolveStorageImage(file)
-      .then((res) => active && setUrl(res))
-      .catch(() => active && setUrl(''));
-    const onKey = (e) => e.key === 'Escape' && onClose?.();
-    document.addEventListener('keydown', onKey);
+    dialog.current?.showModal();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     return () => {
-      active = false;
-      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
     };
-  }, [file, onClose]);
-
+  }, [file, initialIndex]);
+  useEffect(() => {
+    setScale(1);
+    dialog.current
+      ?.querySelector('.image-viewer-thumbnails [aria-current="true"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (stage.current) {
+      stage.current.scrollTop = 0;
+      stage.current.scrollLeft = 0;
+    }
+  }, [index]);
+  const move = (step) => setIndex((v) => (v + step + gallery.length) % gallery.length);
   if (!file) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-sm flex flex-col"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialog}
+      className="image-viewer"
       aria-label={alt}
+      onClick={(e) => {
+        if (moved.current) {
+          moved.current = false;
+          return;
+        }
+        if (
+          e.target.closest(
+            'button, .image-viewer-toolbar, .image-viewer-thumbnails, .image-viewer-arrows',
+          )
+        )
+          return;
+        const image = stage.current?.querySelector('img');
+        if (!image || !image.naturalWidth) {
+          if (e.target === e.currentTarget) dialog.current.close();
+          return;
+        }
+        const rect = image.getBoundingClientRect();
+        const ratio = Math.min(rect.width / image.naturalWidth, rect.height / image.naturalHeight);
+        const width = image.naturalWidth * ratio,
+          height = image.naturalHeight * ratio;
+        const left = rect.left + (rect.width - width) / 2,
+          top = rect.top + (rect.height - height) / 2;
+        if (
+          e.clientX < left ||
+          e.clientX > left + width ||
+          e.clientY < top ||
+          e.clientY > top + height
+        )
+          dialog.current.close();
+      }}
+      onClose={() => close.current?.()}
+      onKeyDown={(e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          move(1);
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          move(-1);
+        }
+      }}
     >
-      <div
-        className="flex items-center justify-between px-4 py-3 text-white border-b border-white/10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span className="font-bold text-sm truncate">{alt}</span>
-        <div className="flex items-center gap-2">
+      <div className="image-viewer-toolbar">
+        <span>{alt}</span>
+        <b dir="ltr">
+          {count(index + 1)} / {count(gallery.length)}
+        </b>
+        <div>
           <button
             type="button"
-            onClick={() => setScale((s) => Math.max(0.5, +(s - 0.25).toFixed(2)))}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-            title={translateText('کوچک‌نمایی')}
-            aria-label={translateText('کوچک‌نمایی')}
+            aria-label={t('کوچک‌نمایی')}
+            onClick={() => setScale((v) => Math.max(1, v - 0.5))}
           >
-            <ZoomOut size={17} />
+            <ZoomOut size={20} />
+          </button>
+          <button type="button" aria-label={t('اندازه اصلی')} onClick={() => setScale(1)}>
+            <RotateCcw size={19} />
           </button>
           <button
             type="button"
-            onClick={() => setScale(1)}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-            title={translateText('اندازه اصلی')}
-            aria-label={translateText('اندازه اصلی')}
+            aria-label={t('بزرگ‌نمایی')}
+            onClick={() => setScale((v) => Math.min(4, v + 0.5))}
           >
-            <RotateCcw size={17} />
+            <ZoomIn size={20} />
           </button>
-          <button
-            type="button"
-            onClick={() => setScale((s) => Math.min(3, +(s + 0.25).toFixed(2)))}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20"
-            title={translateText('بزرگ‌نمایی')}
-            aria-label={translateText('بزرگ‌نمایی')}
-          >
-            <ZoomIn size={17} />
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-lg bg-white/10 hover:bg-red-500/40"
-            title={translateText('بستن')}
-            aria-label={translateText('بستن')}
-          >
-            <X size={18} />
+          <button type="button" aria-label={t('بستن')} onClick={() => dialog.current.close()}>
+            <X size={25} />
           </button>
         </div>
       </div>
-
-      <div className="flex-1 overflow-auto flex items-center justify-center p-4" onClick={onClose}>
-        <div
-          onClick={(event) => event.stopPropagation()}
-          style={{ transform: `scale(${scale})`, transition: 'transform 0.15s ease' }}
-        >
-          <StorageImage
-            file={file}
-            alt={alt}
-            eager
-            className="max-w-[90vw] max-h-[82vh] object-contain rounded-xl shadow-2xl"
-          />
+      <div className="image-viewer-layout">
+        <div className="image-viewer-thumbnails">
+          {gallery.map((image, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`${t('تصویر')} ${count(i + 1)}`}
+              aria-current={i === index ? 'true' : undefined}
+              onClick={() => setIndex(i)}
+            >
+              <StorageImage file={image} className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+        <div className="image-viewer-main">
+          <div
+            ref={stage}
+            className={`image-viewer-stage ${scale > 1 ? 'is-zoomed' : ''}`}
+            onDoubleClick={() => setScale((v) => (v === 1 ? 2 : 1))}
+            onPointerDown={(e) => {
+              moved.current = false;
+              if (scale <= 1 || e.pointerType === 'touch') return;
+              drag.current = {
+                x: e.clientX,
+                y: e.clientY,
+                left: stage.current.scrollLeft,
+                top: stage.current.scrollTop,
+              };
+              stage.current.setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => {
+              if (!drag.current) return;
+              if (Math.hypot(e.clientX - drag.current.x, e.clientY - drag.current.y) > 5)
+                moved.current = true;
+              stage.current.scrollLeft = drag.current.left + drag.current.x - e.clientX;
+              stage.current.scrollTop = drag.current.top + drag.current.y - e.clientY;
+            }}
+            onPointerUp={() => (drag.current = null)}
+            onPointerCancel={() => (drag.current = null)}
+          >
+            <div
+              className="image-viewer-canvas"
+              style={{ width: `${scale * 100}%`, height: `${scale * 100}%` }}
+            >
+              <StorageImage
+                key={index}
+                file={gallery[index]}
+                alt={alt}
+                eager
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+          {gallery.length > 1 && (
+            <div className="image-viewer-arrows">
+              <button type="button" aria-label={t('reviews.previous')} onClick={() => move(-1)}>
+                <ChevronUp size={23} />
+              </button>
+              <button type="button" aria-label={t('reviews.next')} onClick={() => move(1)}>
+                <ChevronDown size={23} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
-
-export default ImageLightboxComponent;

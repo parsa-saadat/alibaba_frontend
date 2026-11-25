@@ -158,15 +158,3 @@ export const STATUS_FA = {
 };
 
 export const statusFa = (status) => (status ? (STATUS_FA[status] ?? status) : '—');
-
-// Existing identity API stores a Jalali date string; localize display without changing storage.
-export const formatStoredBirthDate = (value) => {
-  if (!value) return '—';
-  const normalized = String(value)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-  const parts = normalized.split('/').map(Number);
-  if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return String(value);
-  const { gy, gm, gd } = toGregorian(parts[0], parts[1], parts[2]);
-  return formatDate(new Date(gy, gm - 1, gd));
-};

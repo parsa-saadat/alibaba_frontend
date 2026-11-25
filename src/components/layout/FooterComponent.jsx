@@ -220,7 +220,7 @@ function FooterComponent() {
         style={{ background: 'rgba(255,106,0,0.12)' }}
       />
 
-      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6">
+      <div className="relative mx-auto site-width max-w-[1440px] px-4 sm:px-6">
         {/* کارت دعوت: خبرنامه و فروشندگان */}
         <div
           className="flex flex-col gap-6 rounded-3xl p-5 sm:p-6 lg:p-8"
@@ -331,7 +331,7 @@ function FooterComponent() {
 
       {/* نوار تماس و نماد */}
       <div className="relative border-t border-white/[0.08]">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mx-auto flex site-width max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <ul className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2">
             {CONTACTS.map((c) => {
               const Icon = c.icon;
@@ -367,7 +367,7 @@ function FooterComponent() {
 
       {/* نوار پایانی */}
       <div className="relative border-t border-white/[0.08] bg-black/20">
-        <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
+        <div className="mx-auto flex site-width max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
           <p className="text-center text-[11px] text-[#a3a3a3] lg:text-start">
             © {year}
             {translateText('v20.rights')}

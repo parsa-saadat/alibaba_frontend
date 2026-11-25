@@ -1,3 +1,4 @@
+import { storeDisplay, displayText } from '../../utils/helpers/display-text';
 import usePanelStats from '../../hooks/usePanelStats';
 import StatsNotice from '../../components/panel/StatsNoticeComponent';
 import { t as translateText } from '../../i18n/runtime.js';
@@ -89,7 +90,7 @@ function StoresPage() {
           }),
           axios.get(`${API}/user?limit=100`, authHeaders()).catch(() => null),
         ]);
-        setStores(storesRes.data.body?.data || storesRes.data.body || []);
+        setStores((storesRes.data.body?.data || storesRes.data.body || []).map(storeDisplay));
         setUsers(usersRes?.data?.body?.data || usersRes?.data?.body || []);
       } catch {
         setStores([]);
@@ -309,7 +310,8 @@ function StoresPage() {
         </section>
       ) : (
         <div className="grid gap-3 xl:grid-cols-2">
-          {filtered.map((store) => {
+          {filtered.map((rawStore) => {
+            const store = storeDisplay(rawStore);
             const id = getId(store);
             const owner = userMap[getId(store.user)];
             const busy = busyId === id;
@@ -380,7 +382,9 @@ function StoresPage() {
                       <div className="mt-1 flex items-center gap-1 text-[11px] muted min-w-0">
                         <UserRound size={11} className="shrink-0" />
                         <span className="truncate">
-                          {userFullName(owner) || owner?.username || translateText('مالک نامشخص')}
+                          {userFullName(owner) ||
+                            displayText(owner?.username) ||
+                            translateText('مالک نامشخص')}
                         </span>
                         {owner?.seller_trust === true && (
                           <BadgeCheck size={12} style={{ color: '#17994f' }} />
@@ -421,7 +425,9 @@ function StoresPage() {
                     {(store.address || store.contact_info?.address) && (
                       <span className="flex min-w-0 items-center gap-1.5 sm:col-span-2">
                         <MapPin size={12} className="shrink-0" />
-                        <span className="truncate">{store.address || store.contact_info?.address}</span>
+                        <span className="truncate">
+                          {store.address || store.contact_info?.address}
+                        </span>
                       </span>
                     )}
                   </div>
@@ -549,7 +555,7 @@ function StoresPage() {
             <div className="space-y-1">
               <b className="block text-sm">{translateText('حذف فروشگاه')}</b>
               <p className="text-xs muted leading-6">
-                «{deleteTarget.name}
+                «{displayText(deleteTarget.name)}
                 {translateText(
                   '» حذف شود؟ اگر حذف ممکن نباشد، فروشگاه مسدود می‌شود و کالاهایش از دسترس خارج می‌شوند. ',
                 )}

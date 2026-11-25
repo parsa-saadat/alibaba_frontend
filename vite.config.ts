@@ -34,6 +34,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
+      /* درگاه زمان‌واقعی چت — همان سرور بک‌اند، با ارتقای WebSocket */
+      '/ws': {
+        target: process.env.API_PROXY_TARGET || 'http://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+      },
     },
   },
   preview: {
@@ -45,6 +51,11 @@ export default defineConfig({
         target: process.env.API_PROXY_TARGET || 'http://localhost:3000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/ws': {
+        target: process.env.API_PROXY_TARGET || 'http://localhost:3000',
+        ws: true,
+        changeOrigin: true,
       },
     },
   },

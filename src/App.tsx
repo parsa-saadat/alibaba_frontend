@@ -1,3 +1,4 @@
+import ReviewManagementPage from './pages/dashboard/ReviewsPage';
 import LanguageSelector from './components/common/locale/LanguageSelectorComponent';
 import { direction } from './i18n/runtime';
 import { t as translateText } from './i18n/runtime.js';
@@ -40,6 +41,7 @@ import CategoriesPage from './pages/dashboard/CategoriesPage';
 import AdminOrdersPage from './pages/dashboard/OrdersPage';
 import PlansPage from './pages/dashboard/PlansPage';
 import MediaPage from './pages/dashboard/MediaPage';
+import AdminMessagesPage from './pages/dashboard/MessagesPage';
 import PreAdminPage from './pages/authAdmin/PreAdminPage';
 import VerifyAdminPage from './pages/authAdmin/VerifyAdminPage';
 
@@ -52,6 +54,16 @@ import SellerStoresPage from './pages/seller/StoresPage';
 import SellerOrdersPage from './pages/seller/OrdersPage';
 import SellerPlansPage from './pages/seller/PlansPage';
 import SellerSettingPage from './pages/seller/SettingPage';
+import SellerMessagesPage from './pages/seller/MessagesPage';
+
+// User panel (My GeoCala)
+import UserLayout from './components/layout/UserLayout';
+import AccountDashboardPage from './pages/account/AccountDashboardPage';
+import AccountMessagesPage from './pages/account/AccountMessagesPage';
+import AccountPaymentPage from './pages/account/AccountPaymentPage';
+import AccountSavedPage from './pages/account/AccountSavedPage';
+import AccountComingSoonPage from './pages/account/AccountComingSoonPage';
+import AccountProfilePage from './pages/account/AccountProfilePage';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -61,17 +73,18 @@ import AuthLayout from './components/layout/AuthAdminLayout';
 
 // Context & Shared
 import { ShopProvider, useShop } from './contexts/ShopContext';
+import { ChatProvider } from './contexts/ChatContext';
 import NotFoundPage from './pages/NotFoundPage';
 import ScrollToTopComponent, { RouteProgress } from './components/common/ScroolToTopComponent';
 import ErrorBoundaryComponent from './components/common/ErrorBoundaryComponent';
 
 const App = () => {
   return (
-    <>
-      <ShopProvider>
+    <ShopProvider>
+      <ChatProvider>
         <MainApp />
-      </ShopProvider>
-    </>
+      </ChatProvider>
+    </ShopProvider>
   );
 };
 
@@ -149,6 +162,19 @@ const MainApp = () => {
             <Route path="/orders/:orderId" element={<SingleOrderPage />} />
             <Route path="/order/:orderId" element={<SingleOrderPage />} />
           </Route>
+
+          {/* پنل کاربر (My GeoCala) */}
+          <Route path="/account" element={<UserLayout />}>
+            <Route index element={<AccountDashboardPage />} />
+            <Route path="messages" element={<AccountMessagesPage />} />
+            <Route path="messages/:tab" element={<AccountMessagesPage />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="payment" element={<AccountPaymentPage />} />
+            <Route path="saved" element={<AccountSavedPage />} />
+            <Route path="saved/history" element={<AccountSavedPage />} />
+            <Route path="settings" element={<AccountProfilePage />} />
+            <Route path="service/:key" element={<AccountComingSoonPage />} />
+          </Route>
           {/* Admin Dashboard Routes (/dashboard & /admin) */}
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<CounterPage />} />
@@ -160,8 +186,10 @@ const MainApp = () => {
             <Route path="products/:productId" element={<EditProductPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="reviews" element={<ReviewManagementPage />} />
             <Route path="plans" element={<PlansPage />} />
             <Route path="media" element={<MediaPage />} />
+            <Route path="messages" element={<AdminMessagesPage />} />
           </Route>
           <Route path="/admin" element={<DashboardLayout />}>
             <Route index element={<CounterPage />} />
@@ -173,8 +201,10 @@ const MainApp = () => {
             <Route path="products/:productId" element={<EditProductPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="reviews" element={<ReviewManagementPage />} />
             <Route path="plans" element={<PlansPage />} />
             <Route path="media" element={<MediaPage />} />
+            <Route path="messages" element={<AdminMessagesPage />} />
           </Route>
           {/* Seller Dashboard Routes */}
           <Route path="/seller" element={<SellerLayout />}>
@@ -184,8 +214,10 @@ const MainApp = () => {
             <Route path="products/:productId" element={<SellerEditProductPage />} />
             <Route path="stores" element={<SellerStoresPage />} />
             <Route path="orders" element={<SellerOrdersPage />} />
+            <Route path="reviews" element={<ReviewManagementPage />} />
             <Route path="plans" element={<SellerPlansPage />} />
             <Route path="settings" element={<SellerSettingPage />} />
+            <Route path="messages" element={<SellerMessagesPage />} />
           </Route>
           {/* Admin Auth Routes */}
           <Route element={<AuthLayout />}>

@@ -293,18 +293,23 @@ export function SellerStoreCard({
               </div>
             </div>
 
-            {/* ───── ۴) دو دکمه‌ی هم‌اندازه ───── */}
+            {/* ───── ۴) دو دکمه‌ی هم‌اندازه ─────
+                دکمهٔ «اطلاعات تماس» فقط آن‌جا نشان داده می‌شود که والد آن را
+                آماده کرده باشد (صفحهٔ فروشگاه). در صفحهٔ محصول گفتگو جای آن را
+                می‌گیرد، پس دکمهٔ تماس آنجا رندر نمی‌شود. */}
             <div className="flex flex-col gap-2 border-t border-theme pt-3 lg:w-[216px] lg:shrink-0 lg:border-s lg:border-t-0 lg:ps-4 lg:pt-0">
-              <button
-                type="button"
-                onClick={onOpenContact}
-                aria-haspopup="dialog"
-                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-black transition hover:opacity-90"
-                style={{ background: c.accent, color: c.onAccent }}
-              >
-                <Phone size={15} />
-                {translateText('اطلاعات تماس ')}
-              </button>
+              {onOpenContact ? (
+                <button
+                  type="button"
+                  onClick={onOpenContact}
+                  aria-haspopup="dialog"
+                  className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-black transition hover:opacity-90"
+                  style={{ background: c.accent, color: c.onAccent }}
+                >
+                  <Phone size={15} />
+                  {translateText('اطلاعات تماس ')}
+                </button>
+              ) : null}
 
               {storeKey ? (
                 <Link

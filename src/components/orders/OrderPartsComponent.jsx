@@ -273,7 +273,13 @@ export function CancellationInfo({ sub }) {
       {hasRefund && (
         <div>
           {translateText('بازپرداخت: ')}
-          <b>{statusFa(refund.status)}</b>
+          <b>
+            {translateText(
+              'refund.' +
+                ({ submitted: 'submittedStatus', unknown: 'unknownStatus' }[refund.status] ||
+                  refund.status),
+            )}
+          </b>
           {refund.amount ? (
             <>
               {translateText(' — مبلغ ')}

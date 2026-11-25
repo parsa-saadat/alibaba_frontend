@@ -1,3 +1,4 @@
+import { storeDisplay } from '../../utils/helpers/display-text';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -25,7 +26,8 @@ const STATUS_META = {
 function MyStoresSectionComponent() {
   const capacity = useStoreCapacity();
   const [creating, setCreating] = useState(false);
-  const { stores = [], loading } = capacity;
+  const { stores: rawStores = [], loading } = capacity;
+  const stores = rawStores.map(storeDisplay);
 
   return (
     <div className="space-y-3">

@@ -10,6 +10,10 @@ const fields = [
   'firstname',
   'lastname',
   'store_name',
+  'email',
+  'phone',
+  'fax',
+  'planName',
 ];
 export const isLanguageMap = (value) =>
   value &&

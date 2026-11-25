@@ -8,9 +8,7 @@ import {
   BadgeCheck,
   CheckCircle2,
   CreditCard,
-  IdCard,
   Loader2,
-  MapPin,
   RotateCcw,
   Save,
   ShieldCheck,
@@ -20,8 +18,6 @@ import {
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
 import { clearSellerCache } from '../../services/sellerApi';
-import JalaliDateTimePicker from '../common/JalaliDateTimePicker';
-import { nationalIDValidator } from '../../utils/validators/national_id.validator';
 import { cardNumberValidator } from '../../utils/validators/card_number.validator';
 import { shebaNumberValidator } from '../../utils/validators/sheba_number.validator';
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
@@ -29,11 +25,6 @@ import { toFa } from '../../utils/helpers/format';
 import { userFullName } from '../../utils/helpers/user';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
-
-const SELLER_TYPES = [
-  ['Individual_seller', translateText("فروشنده حقیقی")],
-  ['institutional_seller', translateText("فروشنده حقوقی")],
-];
 
 /* ------------------------------------------------------------------ */
 /* تبدیل رکورد فروشنده به «فرم تخت»                                    */
@@ -44,14 +35,6 @@ const toForm = (seller) => ({
   lastname: seller?.lastname || '',
   email: seller?.email || '',
   phone: seller?.phone || '',
-  seller_type: seller?.seller_type || 'Individual_seller',
-  national_ID: seller?.national_ID || '',
-  birth_date: seller?.birth_date || '',
-  identity_image_id: seller?.identity_image_id || '',
-  identity_verification_image_id: seller?.identity_verification_image_id || '',
-  province: seller?.address?.province || '',
-  city: seller?.address?.city || '',
-  full_address: seller?.address?.full_address || '',
   account_type: seller?.settlement_account?.type || 'card',
   card_number: seller?.settlement_account?.card_number || '',
   sheba_number: seller?.settlement_account?.sheba_number || '',
@@ -61,7 +44,6 @@ const toForm = (seller) => ({
   seller_trust: seller?.seller_trust === true,
 });
 
-const ADDRESS_KEYS = ['province', 'city', 'full_address'];
 const ACCOUNT_KEYS = ['account_type', 'card_number', 'sheba_number', 'firstname_lastname'];
 /* فقط این دو فیلد بولی‌اند؛ seller_active_status رشته است ('ACTIVE' | 'INACTIVE').
    قبلاً هر سه در یک لیست بودند و تغییر «فعال/غیرفعال» هرگز به‌عنوان تغییر شناسایی
@@ -81,22 +63,6 @@ const RULES = {
     label: translateText("ایمیل"),
     test: (v) => (!v.trim() || validateEmailSyntax(v.trim()) ? '' : translateText("ایمیل معتبر نیست.")),
   },
-  seller_type: {
-    label: translateText("نوع فروشنده"),
-    test: (v) => (v ? '' : translateText("نوع فروشنده را انتخاب کنید.")),
-  },
-  national_ID: {
-    label: translateText("کد ملی"),
-    test: (v) => (nationalIDValidator(v.trim()) ? '' : translateText("کد ملی معتبر نیست (۱۰ رقم با رقم کنترل درست).")),
-  },
-  birth_date: {
-    label: translateText("تاریخ تولد"),
-    test: (v) =>
-      /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(v.trim()) ? '' : translateText("قالب تاریخ تولد: ۱۳۷۲/۰۴/۱۵"),
-  },
-  province: { label: translateText("استان"), test: (v) => (v.trim() ? '' : translateText("استان الزامی است.")) },
-  city: { label: translateText("شهر"), test: (v) => (v.trim() ? '' : translateText("شهر الزامی است.")) },
-  full_address: { label: translateText("نشانی کامل"), test: (v) => (v.trim() ? '' : translateText("نشانی کامل الزامی است.")) },
   card_number: {
     label: translateText("شماره کارت"),
     test: (v) => (cardNumberValidator(v.replace(/[\s-]/g, '')) ? '' : translateText("شماره کارت ۱۶ رقمی معتبر نیست.")),
@@ -269,19 +235,6 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
 
     const sellerPatch = {};
 
-    ['seller_type', 'national_ID', 'birth_date', 'identity_image_id', 'identity_verification_image_id'].forEach(
-      (key) => {
-        if (isDirty(key)) sellerPatch[key] = String(form[key]).trim();
-      },
-    );
-
-    if (ADDRESS_KEYS.some(isDirty))
-      sellerPatch.address = {
-        province: form.province.trim(),
-        city: form.city.trim(),
-        full_address: form.full_address.trim(),
-      };
-
     if (ACCOUNT_KEYS.some(isDirty))
       sellerPatch.settlement_account = {
         type: form.account_type || 'card',
@@ -348,7 +301,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
       jobs.push({
         label: translateText("اطلاعات فروشندگی"),
         keys: sellerKeys.flatMap((key) =>
-          key === 'address' ? ADDRESS_KEYS : key === 'settlement_account' ? ACCOUNT_KEYS : [key],
+          key === 'settlement_account' ? ACCOUNT_KEYS : [key],
         ),
         run: () => axios.put(`${API}/seller/${id}`, sellerPatch, authHeaders()),
       });
@@ -548,122 +501,6 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             </div>
           </SectionCard>
 
-          {/* هویتی */}
-          <SectionCard
-            icon={IdCard}
-            title={translateText("اطلاعات هویتی")}
-            desc={translateText("ادمین محدودیت «قفل هویت بعد از تأیید» را ندارد")}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field id="seller_type" label={translateText("نوع فروشنده")} error={errors.seller_type}>
-                <select
-                  id="in-seller_type"
-                  className="input"
-                  value={form.seller_type}
-                  onChange={set('seller_type')}
-                >
-                  {SELLER_TYPES.map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field
-                id="national_ID"
-                label={translateText("کد ملی")}
-                hint={translateText("۱۰ رقم با رقم کنترل")}
-                error={errors.national_ID}
-                legacy={isLegacyInvalid('national_ID')}
-              >
-                <input
-                  id="in-national_ID"
-                  className="input"
-                  dir="ltr"
-                  inputMode="numeric"
-                  value={form.national_ID}
-                  onChange={set('national_ID')}
-                />
-              </Field>
-
-              <Field
-                id="birth_date"
-                label={translateText("تاریخ تولد")}
-                hint={translateText("قالب: ۱۳۷۲/۰۴/۱۵")}
-                error={errors.birth_date}
-                legacy={isLegacyInvalid('birth_date')}
-              >
-                <JalaliDateTimePicker
-                  value={form.birth_date}
-                  onChange={(next) => set('birth_date')({ target: { value: next } })}
-                  placeholder={translateText("۱۳۷۲/۰۴/۱۵")}
-                  withTime={false}
-                  valueFormat="jalali"
-                />
-              </Field>
-
-              <Field
-                id="identity_image_id"
-                label={translateText("شناسه‌ی تصویر کارت ملی")}
-                hint={translateText("شناسه‌ی فایل در /storage (یا آدرس کامل تصویر)")}
-              >
-                <input
-                  id="in-identity_image_id"
-                  className="input"
-                  dir="ltr"
-                  value={form.identity_image_id}
-                  onChange={set('identity_image_id')}
-                />
-              </Field>
-
-              <Field
-                id="identity_verification_image_id"
-                label={translateText("شناسه‌ی تصویر سلفی احراز")}
-                hint={translateText("شناسه‌ی فایل در /storage (یا آدرس کامل تصویر)")}
-                className="sm:col-span-2"
-              >
-                <input
-                  id="in-identity_verification_image_id"
-                  className="input"
-                  dir="ltr"
-                  value={form.identity_verification_image_id}
-                  onChange={set('identity_verification_image_id')}
-                />
-              </Field>
-            </div>
-          </SectionCard>
-
-          {/* نشانی */}
-          <SectionCard icon={MapPin} title={translateText("نشانی فروشنده")}>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field id="province" label={translateText("استان")} error={errors.province}>
-                <input
-                  id="in-province"
-                  className="input"
-                  value={form.province}
-                  onChange={set('province')}
-                />
-              </Field>
-              <Field id="city" label={translateText("شهر")} error={errors.city}>
-                <input id="in-city" className="input" value={form.city} onChange={set('city')} />
-              </Field>
-              <Field
-                id="full_address"
-                label={translateText("نشانی کامل")}
-                error={errors.full_address}
-                className="sm:col-span-2"
-              >
-                <textarea
-                  id="in-full_address"
-                  className="input min-h-20"
-                  value={form.full_address}
-                  onChange={set('full_address')}
-                />
-              </Field>
-            </div>
-          </SectionCard>
-
           {/* حساب تسویه */}
           <SectionCard
             icon={CreditCard}
@@ -734,7 +571,6 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
                   }))
                 }
                 title={translateText("تأییدشده")}
-                desc={translateText("با تأیید، هویت قفل می‌شود")}
               />
               <Toggle
                 checked={form.seller_active_status === 'ACTIVE'}

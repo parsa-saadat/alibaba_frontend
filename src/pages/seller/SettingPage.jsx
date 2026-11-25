@@ -10,8 +10,6 @@ import {
   Check,
   Clock,
   Image as ImageIcon,
-  Info,
-  Lock,
   Package,
   Settings,
   Sparkles,
@@ -20,10 +18,8 @@ import {
 import { useShop } from '../../contexts/ShopContext';
 import { authHeaders } from '../../utils/helpers/storage';
 import { Loading } from '../../components/common/ScroolToTopComponent';
-import JalaliDateTimePicker from '../../components/common/JalaliDateTimePicker';
-import { toFa, faDigits, formatDate, formatStoredBirthDate } from '../../utils/helpers/format';
-import { isSellerIdentityLocked, isTrustedSeller } from '../../utils/helpers/user';
-import { nationalIDValidator } from '../../utils/validators/national_id.validator';
+import { toFa, formatDate } from '../../utils/helpers/format';
+import { isTrustedSeller } from '../../utils/helpers/user';
 import { cardNumberValidator } from '../../utils/validators/card_number.validator';
 import { shebaNumberValidator } from '../../utils/validators/sheba_number.validator';
 import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
@@ -31,12 +27,6 @@ import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const EMPTY_FORM = {
-  seller_type: 'Individual_seller',
-  national_ID: '',
-  birth_date: '',
-  province: '',
-  city: '',
-  full_address: '',
   card_number: '',
   sheba_number: '',
   firstname_lastname: '',
@@ -66,12 +56,6 @@ function SettingPage() {
         if (!data) return;
         setSeller(data);
         setForm({
-          seller_type: data.seller_type || 'Individual_seller',
-          national_ID: data.national_ID || '',
-          birth_date: data.birth_date || '',
-          province: data.address?.province || '',
-          city: data.address?.city || '',
-          full_address: data.address?.full_address || '',
           card_number: data.settlement_account?.card_number || '',
           sheba_number: data.settlement_account?.sheba_number || '',
           firstname_lastname: data.settlement_account?.firstname_lastname || '',
@@ -114,14 +98,13 @@ function SettingPage() {
     return () => controller.abort();
   }, [seller]);
 
-  /* بعد از تأیید فروشنده، فیلدهای هویتی قفل می‌شوند و فقط حساب تسویه قابل ویرایش است */
-  const identityLocked = isSellerIdentityLocked(seller);
   const isApproved = seller?.seller_approved_status === true;
   const isActive = String(seller?.seller_active_status || '').toUpperCase() === 'ACTIVE';
 
   const save = (event) => {
     event.preventDefault();
 
+    if (!form.firstname_lastname.trim()) return toast.error(translateText('نام صاحب حساب الزامی است'));
     if (!cardNumberValidator(form.card_number)) {
       return toast.error(translateText('شماره کارت ۱۶ رقمی معتبر نیست'));
     }
@@ -138,40 +121,14 @@ function SettingPage() {
       },
     };
 
-    /* فیلدهای هویتی فقط وقتی ارسال می‌شوند که قفل نباشند */
-    if (!identityLocked) {
-      if (!nationalIDValidator(form.national_ID)) {
-        return toast.error(translateText('کد ملی معتبر ۱۰ رقمی وارد کنید'));
-      }
-      payload.seller_type = form.seller_type;
-      payload.national_ID = form.national_ID;
-      if (form.birth_date) payload.birth_date = form.birth_date;
-      payload.address = {
-        province: form.province.trim(),
-        city: form.city.trim(),
-        full_address: form.full_address.trim(),
-      };
-    }
-
     axios
       .put(`${API}/seller/${user._id}`, payload, authHeaders())
       .then(() => {
-        toast.success(
-          identityLocked
-            ? translateText('حساب تسویه به‌روزرسانی شد')
-            : translateText('مشخصات فروشندگی به‌روزرسانی شد و در انتظار تأیید مدیر است'),
-        );
+        toast.success(translateText('حساب تسویه به‌روزرسانی شد'));
         refreshUser();
       })
       .catch((err) => {
-        const status = err.response?.status;
-        toast.error(
-          status === 403
-            ? translateText(
-                'اطلاعات هویتی بعد از تأیید فروشنده قابل ویرایش نیست؛ فقط حساب تسویه قابل تغییر است.',
-              )
-            : err.response?.data?.message || translateText('خطا در ذخیره تنظیمات'),
-        );
+        toast.error(err.response?.data?.message || translateText('خطا در ذخیره تنظیمات'));
       });
   };
 
@@ -202,14 +159,13 @@ function SettingPage() {
   }
 
   const set = (key) => (event) => setForm({ ...form, [key]: event.target.value });
-  const lockedInput = identityLocked ? 'input mt-1 opacity-60 cursor-not-allowed' : 'input mt-1';
 
   return (
     <div className="space-y-4 max-w-3xl">
       <PanelPageHeader
         icon={Settings}
         title={translateText('تنظیمات فروشندگی')}
-        subtitle={translateText('مشخصات فروشگاه، اطلاعات هویتی و حساب تسویه')}
+        subtitle={translateText('حساب تسویه و وضعیت فروشندگی')}
       />
 
       <form onSubmit={save} className="card rounded-3xl p-6 space-y-4">
@@ -236,106 +192,6 @@ function SettingPage() {
               {translateText('فروشنده مورد اعتماد ')}
             </span>
           )}
-        </div>
-
-        {/* توضیح قفل هویت */}
-        {identityLocked ? (
-          <div
-            className="rounded-2xl p-3.5 flex items-start gap-2 text-[11px] leading-6"
-            style={{ background: 'rgba(255,106,0,0.1)', border: '1px solid rgba(255,106,0,0.3)' }}
-          >
-            <Lock size={15} className="mt-0.5 shrink-0 text-accent" />
-            <span>
-              {translateText(
-                'حساب شما تأیید شده است؛ بنابراین اطلاعات هویتی (نوع فروشنده، کد ملی، تاریخ تولد و نشانی) قفل شده‌اند. برای تغییر آن‌ها از طریق',
-              )}{' '}
-              <Link to="/contact" className="font-bold text-accent">
-                {translateText('پشتیبانی ')}
-              </Link>{' '}
-              {translateText('درخواست بدهید. فقط حساب تسویه قابل ویرایش است. ')}
-            </span>
-          </div>
-        ) : (
-          <div className="text-[11px] muted leading-6 flex items-start gap-2">
-            <Info size={14} className="mt-0.5 shrink-0 text-accent" />
-            {translateText(
-              'پس از تأیید مدیر، اطلاعات هویتی قفل می‌شود و فقط حساب تسویه قابل ویرایش خواهد بود. ',
-            )}
-          </div>
-        )}
-
-        <div className="grid sm:grid-cols-2 gap-3">
-          <label className="text-xs muted">
-            {translateText('نوع فروشنده ')}
-            <select
-              className={lockedInput}
-              value={form.seller_type}
-              onChange={set('seller_type')}
-              disabled={identityLocked}
-            >
-              <option value="Individual_seller">{translateText('فروشنده حقیقی')}</option>
-              <option value="institutional_seller">{translateText('فروشنده حقوقی')}</option>
-            </select>
-          </label>
-
-          <label className="text-xs muted">
-            {translateText('کد ملی ')}
-            <input
-              className={lockedInput}
-              dir="ltr"
-              value={form.national_ID}
-              onChange={set('national_ID')}
-              disabled={identityLocked}
-              required={!identityLocked}
-            />
-          </label>
-
-          <div className="text-xs muted">
-            {translateText('تاریخ تولد (شمسی) ')}
-            {identityLocked ? (
-              <div className={`${lockedInput} mt-1`} dir="ltr">
-                {formatStoredBirthDate(form.birth_date)}
-              </div>
-            ) : (
-              <JalaliDateTimePicker
-                value={form.birth_date}
-                onChange={(next) => set('birth_date')({ target: { value: next } })}
-                placeholder={translateText('۱۳۷۲/۰۴/۱۵')}
-                withTime={false}
-                valueFormat="jalali"
-              />
-            )}
-          </div>
-
-          <label className="text-xs muted">
-            {translateText('استان ')}
-            <input
-              className={lockedInput}
-              value={form.province}
-              onChange={set('province')}
-              disabled={identityLocked}
-            />
-          </label>
-
-          <label className="text-xs muted">
-            {translateText('شهر ')}
-            <input
-              className={lockedInput}
-              value={form.city}
-              onChange={set('city')}
-              disabled={identityLocked}
-            />
-          </label>
-
-          <label className="text-xs muted sm:col-span-2">
-            {translateText('آدرس کامل ')}
-            <input
-              className={lockedInput}
-              value={form.full_address}
-              onChange={set('full_address')}
-              disabled={identityLocked}
-            />
-          </label>
         </div>
 
         {/* حساب تسویه — همیشه قابل ویرایش */}

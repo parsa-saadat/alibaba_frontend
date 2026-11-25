@@ -1,3 +1,4 @@
+import { CancellationInfo } from '../../../components/orders/OrderPartsComponent';
 import {
   formatOrderPrice as formatPrice,
   formatCompactOrderPrice,
@@ -485,6 +486,7 @@ function OrdersPage() {
                             </ul>
                           )}
 
+                          <CancellationInfo sub={sub} />
                           {sub.shipping_address && (
                             <p
                               className="mt-2 flex items-start gap-1 border-t pt-2 text-[10px] muted"

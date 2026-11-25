@@ -32,7 +32,6 @@ import {
 import { authHeaders, getUser } from '../../utils/helpers/storage';
 import { userFullName } from '../../utils/helpers/user';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
-import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import {
   toFa,
@@ -165,7 +164,6 @@ function CounterPage() {
   });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [zoomFile, setZoomFile] = useState(null);
 
   const admin = getUser() || {};
   const adminName = userFullName(admin) || admin.username || translateText('مدیر');
@@ -491,21 +489,6 @@ function CounterPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    {seller.identity_image_id && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setZoomFile({
-                            file: seller.identity_image_id,
-                            alt: translateText('مدرک {{v0}}', { v0: seller.username }),
-                          })
-                        }
-                        className="btn-ghost !p-1.5"
-                        title={translateText('مشاهده مدرک')}
-                      >
-                        <ImageIcon size={13} />
-                      </button>
-                    )}
                     <button
                       type="button"
                       onClick={() => approveSeller(seller._id)}
@@ -655,12 +638,6 @@ function CounterPage() {
           ))}
         </div>
       </Panel>
-
-      <ImageLightboxComponent
-        file={zoomFile?.file}
-        alt={zoomFile?.alt}
-        onClose={() => setZoomFile(null)}
-      />
     </div>
   );
 }

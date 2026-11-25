@@ -10,12 +10,12 @@ import { productImages, hasDiscount, finalPrice, formatPrice } from '../../utils
  * با محصولات تخفیف‌دار پر می‌شود: عکس مربع، نام دو خطی، قیمت با تخفیف.
  */
 function HotPicksBannerComponent({ products = [] }) {
-  const deals = products.filter(hasDiscount).slice(0, 3);
+  const deals = products.filter(hasDiscount).slice(0, 5);
 
   return (
     <Link
       to="/products?discount=true"
-      className="group relative flex h-[400px] flex-col overflow-hidden rounded-xl p-4 text-white transition-transform hover:-translate-y-0.5"
+      className="hot-picks-card group relative flex h-full flex-col overflow-hidden rounded-xl p-4 text-white transition-transform hover:-translate-y-0.5"
       style={{ background: 'linear-gradient(160deg,#e85f00 0%,#ff6a00 55%,#e85f00 100%)' }}
     >
       <div
@@ -31,7 +31,7 @@ function HotPicksBannerComponent({ products = [] }) {
       </p>
 
       {deals.length ? (
-        <div className="mt-3 grid flex-1 min-h-0 grid-rows-3 gap-2">
+        <div className="mt-3 grid flex-1 min-h-0 hot-picks-items gap-2">
           {deals.map((p) => (
             <div
               key={p._id}

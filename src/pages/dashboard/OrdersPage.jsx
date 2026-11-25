@@ -1,3 +1,4 @@
+import RefundActions from '../../components/orders/RefundActionsComponent';
 import { formatMoney } from '../../i18n/runtime';
 import usePanelStats from '../../hooks/usePanelStats';
 import StatsNotice from '../../components/panel/StatsNoticeComponent';
@@ -516,6 +517,7 @@ function OrdersPage() {
                             </div>
 
                             <CancellationInfo sub={sub} />
+                            <RefundActions sub={sub} onRefresh={load} />
 
                             <details
                               className="rounded-xl p-3"

@@ -7,6 +7,7 @@ import {
   formatMoney,
   currencyLabel,
   currency as selectedCurrency,
+  t as translateText,
 } from '../../i18n/runtime';
 export const preferredCurrency = selectedCurrency;
 const phrases = {
@@ -141,14 +142,16 @@ export function usePriceEntry(basePrice, entityKey = 'new') {
     }
   };
   const payload = () => {
-    if (!entry.ready || entry.error) throw new Error(phrases[language].error);
-    if (!entry.dirty && baseCurrency === 'USD' && Number.isFinite(baseAmount))
+    // Editing other fields must not require a successful display-currency quote.
+    // Preserve the exact stored USD amount; modified/new prices still fail closed.
+    if (!entry.dirty && baseCurrency === 'USD' && Number.isFinite(baseAmount) && baseAmount > 0)
       return { amount: baseAmount, currency: 'USD' };
+    if (!entry.ready || entry.error) throw new Error(phrases[language].error);
     const amount = Number(entry.amount);
     if (!Number.isFinite(amount) || amount <= 0) throw new Error(phrases[language].min);
     return { amount, currency: entry.currency };
   };
-  return { entry, setAmount, setCurrency, payload, retry: () => setRetry((v) => v + 1) };
+  return { entry, setAmount, setCurrency, payload, preservedUSD: !entry.dirty && baseCurrency === 'USD' && Number.isFinite(baseAmount) && baseAmount > 0 ? baseAmount : null, retry: () => setRetry((v) => v + 1) };
 }
 export default function MoneyInput({ price }) {
   const ui = phrases[language];
@@ -207,7 +210,8 @@ export default function MoneyInput({ price }) {
       {!entry.ready && !entry.error && <p role="status">{ui.loading}</p>}
       {entry.error && (
         <div role="alert" className="money-input__error">
-          {ui.error}
+          {price.preservedUSD != null ? translateText('price.displayOnlyError') : ui.error}
+          {price.preservedUSD != null && <b dir="ltr"> {formatMoney(price.preservedUSD, 'USD')} </b>}
           <button className="btn-ghost" type="button" onClick={price.retry}>
             {ui.retry}
           </button>

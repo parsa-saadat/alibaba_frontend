@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import BrandLogoComponent from '../common/BrandLogoComponent';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
+  MessageSquare,
+  MessagesSquare,
   LayoutDashboard,
   Package,
   Store,
@@ -27,6 +29,8 @@ const SELLER_ITEMS = [
   { path: '/seller', label: translateText('پیشخوان'), icon: LayoutDashboard, end: true },
   { path: '/seller/products', label: translateText('محصولات من'), icon: Package },
   { path: '/seller/stores', label: translateText('فروشگاه‌ها'), icon: Store },
+  { path: '/seller/reviews', label: translateText('reviews.manage'), icon: MessageSquare },
+  { path: '/seller/messages', label: translateText('chat.messages'), icon: MessagesSquare },
   { path: '/seller/orders', label: translateText('سفارش‌ها'), icon: ShoppingBag },
   { path: '/seller/plans', label: translateText('پلن و اشتراک'), icon: CreditCard },
   { path: '/seller/settings', label: translateText('تنظیمات فروشنده'), icon: Settings },

@@ -1,10 +1,11 @@
+import { storeDisplay, displayText } from '../../utils/helpers/display-text';
 import useLocalizedContent from '../../hooks/useLocalizedContent';
 import { createPortal } from 'react-dom';
 import { language as currentLocale } from '../../i18n/runtime';
 import { cleanTranslations } from '../../i18n/translation-helpers';
 import ContentLanguage from '../common/locale/ContentLanguageComponent';
 import { t as translateText } from '../../i18n/runtime.js';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { X, Upload, Store } from 'lucide-react';
@@ -30,13 +31,14 @@ const EMPTY = {
 };
 
 function StoreEditorModalComponent({
-  store = null,
+  store: sourceStore = null,
   isAdmin = false,
   users = [],
   defaultOwnerId = '',
   onClose,
   onSaved,
 }) {
+  const store = useMemo(() => (sourceStore ? storeDisplay(sourceStore) : null), [sourceStore]);
   useEffect(() => {
     const previous = document.activeElement;
     const overflow = document.body.style.overflow;
@@ -54,12 +56,7 @@ function StoreEditorModalComponent({
   const currentUser = getUser();
   const [form, setForm] = useState(EMPTY);
   /* آدرس فروشگاه هم مثل نام و توضیحات چندزبانه است */
-  const content = useLocalizedContent(
-    form,
-    setForm,
-    ['name', 'description', 'address'],
-    'store',
-  );
+  const content = useLocalizedContent(form, setForm, ['name', 'description', 'address'], 'store');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [zoomFile, setZoomFile] = useState(null);
@@ -134,7 +131,7 @@ function StoreEditorModalComponent({
       setOwnerCapacity({
         used: Array.isArray(list) ? list.length : 0,
         max: Number(plan?.features?.max_shops ?? 0),
-        planName: plan?.name || '',
+        planName: displayText(plan?.name),
       });
     });
 

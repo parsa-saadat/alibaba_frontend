@@ -6,7 +6,6 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
   Package,
   Percent,
   Store,
@@ -21,7 +20,7 @@ import {
 } from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
 import useScrollFade from '../../hooks/useScrollFade';
-import { StoreContactModal } from '../store/StoreInfoComponent';
+import ChatNowButton from '../chat/ChatNowButton';
 
 /* قیمت کوتاه برای نوار پایین عکس کالا (مثل «$850» در علی‌بابا) */
 const shortPrice = (amount, code) => formatPrice(amount, code);
@@ -116,7 +115,6 @@ function SupplierCardComponent({ store }) {
   const products = store.matched_products || [];
   const rest = Math.max(0, (store.matched_count || 0) - products.length);
   const member = memberLabel(seller.member_since);
-  const [contactOpen, setContactOpen] = useState(false);
   const rowRef = useRef(null);
   const [fadeRef, rowOverflows, fadeStyle] = useScrollFade();
 
@@ -132,14 +130,23 @@ function SupplierCardComponent({ store }) {
     store.min_price == null
       ? '—'
       : store.min_price === store.max_price
-        ? formatPrice(store.min_price,store.display_currency || store.matched_products?.[0]?.price?.currency)
+        ? formatPrice(
+            store.min_price,
+            store.display_currency || store.matched_products?.[0]?.price?.currency,
+          )
         : translateText('{{v0}} تا {{v1}}', {
-            v0: formatPrice(store.min_price,store.display_currency || store.matched_products?.[0]?.price?.currency),
-            v1: formatPrice(store.max_price,store.display_currency || store.matched_products?.[0]?.price?.currency),
+            v0: formatPrice(
+              store.min_price,
+              store.display_currency || store.matched_products?.[0]?.price?.currency,
+            ),
+            v1: formatPrice(
+              store.max_price,
+              store.display_currency || store.matched_products?.[0]?.price?.currency,
+            ),
           });
 
   return (
-    <article className="card rounded-3xl p-4 sm:p-5">
+    <article className="card min-w-0 rounded-3xl p-4 sm:p-5">
       {/* ردیف بالا: لوگو + نام + نشان‌ها + دکمه‌ها */}
       <div className="flex flex-wrap items-start gap-3 sm:flex-nowrap">
         <Link
@@ -169,22 +176,31 @@ function SupplierCardComponent({ store }) {
               </Badge>
             )}
             {member && <Badge icon={CalendarDays}>{member}</Badge>}
-            {store.has_discount && <Badge icon={Percent}>{translateText('دارای تخفیف')}</Badge>}
+            {store.has_discount && (
+              <span
+                className="supplier-discount-icon"
+                title={translateText('دارای تخفیف')}
+                aria-label={translateText('دارای تخفیف')}
+                role="img"
+              >
+                <Percent size={14} />
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-          <button
-            type="button"
-            onClick={() => setContactOpen(true)}
-            className="btn-ghost inline-flex items-center gap-1.5 !py-2 text-xs"
-          >
-            <MessageCircle size={13} />
-            {translateText('ارتباط با فروشنده ')}
-          </button>
+        {/* ردیف اکشن: گفتگو + ورود به فروشگاه. «ارتباط با فروشنده» فقط در
+            صفحهٔ فروشگاه نشان داده می‌شود، پس اینجا دکمهٔ تماس نیست. */}
+        <div className="supplier-contact-actions flex w-full shrink-0 items-center gap-2 sm:w-auto">
+          <ChatNowButton
+            className="!flex-1"
+            seller_id={seller?._id || seller?.user_id}
+            store_id={id}
+            variant="solid"
+          />
           <Link
             to={`/store/${id}`}
-            className="btn-primary inline-flex items-center gap-1 !py-2 text-xs"
+            className="supplier-store-link inline-flex items-center justify-center gap-1 !py-2 text-xs"
           >
             {translateText('مشاهده فروشگاه ')}
             <ChevronLeft className="logical-icon" size={13} />
@@ -239,10 +255,10 @@ function SupplierCardComponent({ store }) {
               fadeRef.current = node;
             }}
             style={fadeStyle}
-            className="scroll-fade-x no-scrollbar flex scroll-smooth snap-x snap-proximity gap-2.5 overflow-x-auto py-1.5"
+            className="supplier-product-strip scroll-fade-x no-scrollbar flex scroll-smooth snap-x snap-proximity gap-2.5 overflow-x-auto py-1.5"
           >
             {products.map((product) => (
-              <div key={getId(product)} className="snap-start">
+              <div key={getId(product)} className="snap-start shrink-0">
                 <ProductTile product={product} />
               </div>
             ))}
@@ -270,20 +286,17 @@ function SupplierCardComponent({ store }) {
       )}
 
       {/* پاپ‌آپ ارتباط با فروشنده — همان پاپ‌آپ صفحه‌ی محصول */}
-      <StoreContactModal
-        open={contactOpen}
-        onClose={() => setContactOpen(false)}
-        store={store}
-        owner={seller?._id ? seller : null}
-        product={null}
-      />
-    </article>
+          </article>
   );
 }
 
 export function SupplierSkeleton() {
   return (
-    <div className="card animate-pulse rounded-3xl p-5" aria-hidden>
+    <div
+      className="card min-w-0 overflow-hidden animate-pulse rounded-3xl p-4 sm:p-5"
+      data-testid="supplier-skeleton"
+      aria-hidden
+    >
       <div className="flex items-center gap-3">
         <div className="h-14 w-14 rounded-xl" style={{ background: 'var(--card2)' }} />
         <div className="flex-1 space-y-2">
@@ -292,11 +305,11 @@ export function SupplierSkeleton() {
         </div>
       </div>
       <div className="mt-4 h-14 rounded-2xl" style={{ background: 'var(--card2)' }} />
-      <div className="mt-3 flex gap-2.5">
+      <div className="supplier-skeleton-strip mt-3 flex gap-2.5 overflow-hidden">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-[132px] w-[132px] shrink-0 rounded-xl"
+            className="h-[132px] w-[132px] sm:h-[148px] sm:w-[148px] shrink-0 rounded-xl"
             style={{ background: 'var(--card2)' }}
           />
         ))}

@@ -15,6 +15,7 @@ function MobileBottomNavComponent() {
 
   /* در پنل‌ها، فرم‌های ورود و مرحله‌ی پرداخت نوار پایین ندارد */
   if (
+    pathname.startsWith('/product/') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/checkout') ||
     pathname.startsWith('/dashboard') ||
@@ -34,7 +35,10 @@ function MobileBottomNavComponent() {
       to: '/products',
       label: translateText('فروشگاه '),
       icon: LayoutGrid,
-      active: pathname.startsWith('/products') || pathname.startsWith('/shop') || pathname.startsWith('/product/'),
+      active:
+        pathname.startsWith('/products') ||
+        pathname.startsWith('/shop') ||
+        pathname.startsWith('/product/'),
     },
     {
       to: '/cart',

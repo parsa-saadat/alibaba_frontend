@@ -7,11 +7,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import {
   BadgeCheck,
-  CalendarDays,
   Check,
   CreditCard,
-  IdCard,
-  MapPin,
   Pencil,
   Phone,
   Search,
@@ -21,8 +18,6 @@ import {
   Ban,
 } from 'lucide-react';
 import { authHeaders } from '../../utils/helpers/storage';
-import StorageImageComponent from '../../components/common/StorageImageComponent';
-import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import { Loading } from '../../components/common/ScroolToTopComponent';
 import SellerEditorModalComponent from '../../components/panel/SellerEditorModalComponent';
 import { toFa } from '../../utils/helpers/format';
@@ -38,11 +33,6 @@ const FILTERS = [
   ['TRUSTED', translateText('مورد اعتماد')],
   ['INACTIVE', translateText('غیرفعال')],
 ];
-
-const TYPE_LABELS = {
-  Individual_seller: translateText('حقیقی'),
-  institutional_seller: translateText('حقوقی'),
-};
 
 /* ------------------------------------------------------------------ */
 /* اجزای کوچک                                                          */
@@ -81,21 +71,6 @@ function InfoRow({ icon: Icon, label, value, mono = false }) {
   );
 }
 
-function DocThumb({ file, alt, onZoom }) {
-  if (!file) return null;
-
-  return (
-    <button
-      type="button"
-      onClick={() => onZoom?.(file, alt)}
-      className="h-14 w-14 overflow-hidden rounded-xl border border-theme transition hover:border-[var(--primary-color)]"
-      title={alt}
-    >
-      <StorageImageComponent file={file} alt={alt} compact className="h-full w-full object-cover" />
-    </button>
-  );
-}
-
 /* ------------------------------------------------------------------ */
 /* صفحه                                                               */
 /* ------------------------------------------------------------------ */
@@ -106,7 +81,6 @@ function SellersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('ALL');
-  const [zoom, setZoom] = useState(null);
   const [editingSeller, setEditingSeller] = useState(null);
   const [busyId, setBusyId] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -302,16 +276,11 @@ function SellersPage() {
                       )}
                       <span className="inline-flex items-center gap-1" dir="ltr">
                         <Phone size={11} className="text-accent" />
-                        {toFa(seller.phone || '—')}
+                        {toFa(seller.seller_contact_phone || seller.phone || '—')}
                       </span>
                     </div>
 
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      <Chip>
-                        {TYPE_LABELS[seller.seller_type] ||
-                          seller.seller_type ||
-                          translateText('نوع نامشخص')}
-                      </Chip>
                       <Chip
                         tone={approved ? 'success' : 'warning'}
                         icon={approved ? Check : undefined}
@@ -323,36 +292,10 @@ function SellersPage() {
                       </Chip>
                     </div>
                   </div>
-
-                  {/* مدارک */}
-                  <div className="flex shrink-0 gap-1.5">
-                    <DocThumb
-                      file={seller.identity_image_id}
-                      alt={translateText('کارت ملی {{v0}}', { v0: seller.username })}
-                      onZoom={(file, alt) => setZoom({ file, alt })}
-                    />
-                    <DocThumb
-                      file={seller.identity_verification_image_id}
-                      alt={translateText('سلفی احراز {{v0}}', { v0: seller.username })}
-                      onZoom={(file, alt) => setZoom({ file, alt })}
-                    />
-                  </div>
                 </header>
 
-                {/* مشخصات */}
+                {/* حساب تسویه */}
                 <div className="grid grid-cols-2 gap-2 rounded-2xl p-3 card2">
-                  <InfoRow
-                    icon={IdCard}
-                    label={translateText('کد ملی')}
-                    value={toFa(seller.national_ID || '—')}
-                    mono
-                  />
-                  <InfoRow
-                    icon={CalendarDays}
-                    label={translateText('تولد')}
-                    value={toFa(seller.birth_date || '—')}
-                    mono
-                  />
                   <InfoRow
                     icon={CreditCard}
                     label={translateText('کارت')}
@@ -365,15 +308,6 @@ function SellersPage() {
                     value={seller.settlement_account?.sheba_number || '—'}
                     mono
                   />
-                </div>
-
-                <div className="flex items-start gap-1.5 text-[11px] muted">
-                  <MapPin size={12} className="mt-0.5 shrink-0 text-accent" />
-                  <span className="line-clamp-2">
-                    {seller.address
-                      ? `${seller.address.province || ''}${seller.address.city ? translateText('، {{v0}}', { v0: seller.address.city }) : ''} — ${seller.address.full_address || ''}`
-                      : translateText('نشانی ثبت نشده')}
-                  </span>
                 </div>
 
                 {/* عملیات */}
@@ -446,8 +380,6 @@ function SellersPage() {
           })}
         </div>
       )}
-
-      <ImageLightboxComponent file={zoom?.file} alt={zoom?.alt} onClose={() => setZoom(null)} />
 
       {editingSeller && (
         <SellerEditorModalComponent

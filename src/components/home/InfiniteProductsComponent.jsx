@@ -46,8 +46,8 @@ function InfiniteProductsComponent() {
   const isDouble = effectiveViewMode === 'double';
   const variant = isDouble ? 'grid' : effectiveViewMode === 'single' ? 'wide' : 'tall';
   const visible = useMemo(
-    () => items.slice(0, isDouble ? MAX_ROWS * 2 : SINGLE_COUNT),
-    [items, isDouble],
+    () => items.slice(0, isDouble ? MAX_ROWS * (isDesktop ? 6 : 2) : SINGLE_COUNT),
+    [items, isDouble, isDesktop],
   );
 
   /* دوتایی: دسکتاپ ۴ ستون، تبلت ۳، گوشی ۲ — تکی عمودی: از ۳ تا ۱ ستون — تکی: تک‌ستونه */
@@ -56,14 +56,14 @@ function InfiniteProductsComponent() {
       ? 'grid grid-cols-1 gap-3'
       : viewMode === 'single-vertical'
         ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'
-        : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4';
+        : 'recommended-grid grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6';
 
   const gridStyle = undefined;
 
   return (
     <section className="pb-4">
-      <div className="max-w-[1440px] mx-auto px-4">
-        <SectionTitle>{translateText("پیشنهاد برای شما")}</SectionTitle>
+      <div className="site-width max-w-[1440px] mx-auto px-4">
+        <SectionTitle>{translateText('پیشنهاد برای شما')}</SectionTitle>
 
         <div className="mb-3 flex justify-center lg:justify-end">
           <ProductViewSwitcher value={effectiveViewMode} onChange={setViewMode} />
@@ -71,28 +71,35 @@ function InfiniteProductsComponent() {
 
         <div>
           <div className={gridClass} style={gridStyle}>
-            {loading ? (
-              Array.from({ length: SKELETON_COUNT }, (_, i) => <ProductSkeleton key={`sk-${i}`} />)
-            ) : (
-              visible.map((p) => <ProductComponent key={p._id} product={p} variant={variant} />)
-            )}
+            {loading
+              ? Array.from({ length: SKELETON_COUNT }, (_, i) => (
+                  <ProductSkeleton key={`sk-${i}`} />
+                ))
+              : visible.map((p) => <ProductComponent key={p._id} product={p} variant={variant} />)}
           </div>
         </div>
 
         {!loading && !error && visible.length === 0 && (
-          <p className="text-center text-sm muted py-10">{translateText("محصولی یافت نشد")}</p>
+          <p className="text-center text-sm muted py-10">{translateText('محصولی یافت نشد')}</p>
         )}
 
         {error && (
           <div className="text-center py-4">
-            <p className="text-sm muted mb-2">{translateText("خطا در دریافت محصولات")}</p>
-            <button type="button" onClick={load} className="btn-primary">{translateText("تلاش مجدد ")}</button>
+            <p className="text-sm muted mb-2">{translateText('خطا در دریافت محصولات')}</p>
+            <button type="button" onClick={load} className="btn-primary">
+              {translateText('تلاش مجدد ')}
+            </button>
           </div>
         )}
 
         {!loading && !error && visible.length > 0 && (
           <div className="text-center pt-4">
-            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">{translateText("مشاهده‌ی همه‌ی محصولات ")}</Link>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline"
+            >
+              {translateText('مشاهده‌ی همه‌ی محصولات ')}
+            </Link>
           </div>
         )}
       </div>

@@ -27,7 +27,7 @@ import { userDisplayName, userInitial, isTrustedSeller } from '../../utils/helpe
 import { validateEmailSyntax } from '../../utils/validators/email.validator';
 import StorageImageComponent from '../../components/common/StorageImageComponent';
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
-import { nationalIDValidator } from '../../utils/validators/national_id.validator';
+import { normalizePhoneNumber, validateAuthPhone } from '../../utils/validators/phone.validator';
 import { cardNumberValidator } from '../../utils/validators/card_number.validator';
 import { shebaNumberValidator } from '../../utils/validators/sheba_number.validator';
 import MyStoresSectionComponent from '../../components/profile/MyStoresSectionComponent';
@@ -46,19 +46,7 @@ const EMPTY_ADDR = {
   postal_code: '',
 };
 
-const EMPTY_SELLER = {
-  seller_type: 'Individual_seller',
-  national_ID: '',
-  birth_date: '',
-  identity_image_id: '',
-  identity_verification_image_id: '',
-  province: '',
-  city: '',
-  full_address: '',
-  card_number: '',
-  sheba_number: '',
-  firstname_lastname: '',
-};
+const EMPTY_SELLER = { firstname: '', lastname: '', phone: '' };
 
 const ROLE_LABELS = {
   admin: translateText('مدیر سیستم'),
@@ -217,19 +205,46 @@ function ProfilePage() {
         lastname: user.lastname || '',
         email: user.email || '',
       });
+      setSeller(previous => ({ ...previous, firstname: user.firstname || '', lastname: user.lastname || '', phone: user.seller_contact_phone || user.phone || '' }));
       loadAddresses();
     }
   }, [user, loadAddresses]);
 
   if (!user) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <User size={36} className="mx-auto muted mb-3" />
-        <p className="muted mb-4">{translateText('برای مشاهده پنل کاربری وارد شوید.')}</p>
-        <Link to="/auth/pre" className="btn-primary">
-          {translateText('ورود ')}
-        </Link>
-      </div>
+      <section className="profile-welcome max-w-5xl mx-auto">
+        <div className="profile-welcome-visual" aria-hidden="true">
+          <div className="welcome-orbit">
+            <User size={56} />
+          </div>
+          <span className="welcome-mini">
+            <Store size={24} />
+            <ShieldCheck size={24} />
+            <MapPin size={24} />
+          </span>
+        </div>
+        <div className="profile-welcome-copy">
+          <span className="text-accent font-bold">GeoCala</span>
+          <h1>{translateText('welcome.title')}</h1>
+          <p className="muted">{translateText('welcome.description')}</p>
+          <ul>
+            {['orders', 'favorites', 'stores'].map((key) => (
+              <li key={key}>
+                <ShieldCheck size={17} />
+                {translateText(`welcome.${key}`)}
+              </li>
+            ))}
+          </ul>
+          <div className="profile-welcome-actions">
+            <Link to="/auth/pre" className="btn-primary">
+              {translateText('welcome.login')}
+            </Link>
+            <Link to="/products" className="btn-ghost">
+              {translateText('welcome.browse')}
+            </Link>
+          </div>
+        </div>
+      </section>
     );
   }
 
@@ -387,75 +402,18 @@ function ProfilePage() {
     }
   };
 
-  /* اعتبارسنجی فرم درخواست فروشندگی؛ مقدارهای نرمال‌شده را برمی‌گرداند */
-  const validateSellerForm = () => {
-    const errors = {};
-    const nationalId = onlyDigits(seller.national_ID);
-    const card = onlyDigits(seller.card_number);
-    const sheba = normalizeSheba(seller.sheba_number);
-
-    if (!nationalIDValidator(nationalId))
-      errors.national_ID = translateText('کد ملی باید ۱۰ رقم باشد');
-    if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(String(seller.birth_date || '').trim()))
-      errors.birth_date = translateText('تاریخ تولد را از تقویم انتخاب کنید');
-    if (!seller.firstname_lastname.trim())
-      errors.firstname_lastname = translateText('نام صاحب حساب الزامی است');
-    if (!cardNumberValidator(card))
-      errors.card_number = translateText('شماره کارت ۱۶ رقمی معتبر نیست');
-    if (!shebaNumberValidator(sheba))
-      errors.sheba_number = translateText('شبا باید با IR شروع شود و ۲۴ رقم داشته باشد');
-    if (!seller.province.trim()) errors.province = translateText('استان الزامی است');
-    if (!seller.city.trim()) errors.city = translateText('شهر الزامی است');
-    if (!seller.full_address.trim()) errors.full_address = translateText('نشانی کامل الزامی است');
-    if (!seller.identity_image_id)
-      errors.identity_image_id = translateText('تصویر کارت ملی را بارگذاری کنید');
-    if (!seller.identity_verification_image_id)
-      errors.identity_verification_image_id = translateText('سلفی احراز هویت را بارگذاری کنید');
-
-    return { errors, nationalId, card, sheba };
-  };
-
   const requestSeller = () => {
     if (submittingSeller) return;
-    const { errors, nationalId, card, sheba } = validateSellerForm();
-    if (Object.keys(errors).length) {
-      setSellerErrors(errors);
-      toast.error(translateText('لطفاً موارد مشخص‌شده را اصلاح کنید'));
-      return;
-    }
-    setSellerErrors({});
+    const errors = {};
+    if (!seller.firstname.trim() || seller.firstname.trim().length > 80) errors.firstname = translateText('seller.applicationNameError');
+    if (!seller.lastname.trim() || seller.lastname.trim().length > 80) errors.lastname = translateText('seller.applicationNameError');
+    if (!validateAuthPhone(seller.phone)) errors.phone = translateText('seller.applicationPhoneError');
+    setSellerErrors(errors);
+    if (Object.keys(errors).length) return toast.error(translateText('لطفاً موارد مشخص‌شده را اصلاح کنید'));
     setSubmittingSeller(true);
-    axios
-      .post(
-        `${API}/seller`,
-        {
-          seller_type: seller.seller_type,
-          national_ID: nationalId,
-          birth_date: seller.birth_date,
-          identity_image_id: seller.identity_image_id,
-          identity_verification_image_id: seller.identity_verification_image_id,
-          address: {
-            province: seller.province.trim(),
-            city: seller.city.trim(),
-            full_address: seller.full_address.trim(),
-          },
-          settlement_account: {
-            type: 'card',
-            card_number: card,
-            sheba_number: sheba,
-            firstname_lastname: seller.firstname_lastname.trim(),
-          },
-        },
-        authHeaders(),
-      )
-      .then(() => {
-        toast.success(translateText('درخواست فروشندگی ثبت شد و در انتظار تأیید مدیر است'));
-        setSellerErrors({});
-        refreshUser();
-      })
-      .catch((err) =>
-        toast.error(err.response?.data?.message || translateText('خطا در ثبت درخواست')),
-      )
+    axios.post(`${API}/seller`, { firstname: seller.firstname.trim(), lastname: seller.lastname.trim(), phone: normalizePhoneNumber(seller.phone) }, authHeaders())
+      .then(() => { toast.success(translateText('درخواست فروشندگی ثبت شد و در انتظار تأیید مدیر است')); refreshUser(); })
+      .catch(error => toast.error(error.response?.data?.message || translateText('خطا در ثبت درخواست')))
       .finally(() => setSubmittingSeller(false));
   };
 
@@ -711,119 +669,16 @@ function ProfilePage() {
             {translateText(' درخواست فروشندگی در ژئوکالا ')}
           </h2>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Field label={translateText('نوع فروشنده')}>
-              <select
-                className="input"
-                value={seller.seller_type}
-                onChange={(e) => setSellerField('seller_type', e.target.value)}
-              >
-                <option value="Individual_seller">{translateText('فروشنده حقیقی')}</option>
-                <option value="institutional_seller">{translateText('فروشنده حقوقی')}</option>
-              </select>
-            </Field>
-            <Field label={translateText('کد ملی (۱۰ رقم)')} error={err('national_ID')}>
-              <input
-                className={inputCls('national_ID')}
-                dir="ltr"
-                inputMode="numeric"
-                maxLength={10}
-                value={seller.national_ID}
-                onChange={(e) => setSellerField('national_ID', onlyDigits(e.target.value))}
-              />
-            </Field>
-            <Field label={translateText('تاریخ تولد (شمسی)')} error={err('birth_date')}>
-              <JalaliDateTimePicker
-                value={seller.birth_date}
-                onChange={(next) => setSellerField('birth_date', next)}
-                placeholder={translateText('مثلاً ۱۳۷۲/۰۴/۱۵')}
-                withTime={false}
-                valueFormat="jalali"
-              />
-            </Field>
-            <Field
-              label={translateText('نام و نام خانوادگی صاحب حساب')}
-              error={err('firstname_lastname')}
-            >
-              <input
-                className={inputCls('firstname_lastname')}
-                value={seller.firstname_lastname}
-                onChange={(e) => setSellerField('firstname_lastname', e.target.value)}
-              />
-            </Field>
-            <Field label={translateText('شماره کارت (۱۶ رقم)')} error={err('card_number')}>
-              <input
-                className={inputCls('card_number')}
-                dir="ltr"
-                inputMode="numeric"
-                maxLength={16}
-                value={seller.card_number}
-                onChange={(e) => setSellerField('card_number', onlyDigits(e.target.value))}
-              />
-            </Field>
-            <Field
-              label={translateText('شماره شبا (با IR یا بدون آن)')}
-              error={err('sheba_number')}
-            >
-              <input
-                className={inputCls('sheba_number')}
-                dir="ltr"
-                maxLength={26}
-                value={seller.sheba_number}
-                onChange={(e) =>
-                  setSellerField(
-                    'sheba_number',
-                    normalizeDigits(e.target.value)
-                      .toUpperCase()
-                      .replace(/[^0-9A-Z]/g, ''),
-                  )
-                }
-              />
-            </Field>
-            <Field label={translateText('استان')} error={err('province')}>
-              <input
-                className={inputCls('province')}
-                value={seller.province}
-                onChange={(e) => setSellerField('province', e.target.value)}
-              />
-            </Field>
-            <Field label={translateText('شهر')} error={err('city')}>
-              <input
-                className={inputCls('city')}
-                value={seller.city}
-                onChange={(e) => setSellerField('city', e.target.value)}
-              />
-            </Field>
-            <Field
-              label={translateText('نشانی کامل')}
-              error={err('full_address')}
-              className="sm:col-span-2"
-            >
-              <input
-                className={inputCls('full_address')}
-                value={seller.full_address}
-                onChange={(e) => setSellerField('full_address', e.target.value)}
-              />
-            </Field>
-
-            <ImageUploadSlot
-              label={translateText('تصویر کارت ملی')}
-              fileId={seller.identity_image_id}
-              uploading={uploadingField === 'identity_image_id'}
-              error={err('identity_image_id')}
-              onPick={(e) => uploadFile(e, 'identity_image_id')}
-              onRemove={() => setSellerField('identity_image_id', '')}
-              onZoom={setZoomFile}
-            />
-            <ImageUploadSlot
-              label={translateText('سلفی احراز هویت (همراه با کارت ملی)')}
-              fileId={seller.identity_verification_image_id}
-              uploading={uploadingField === 'identity_verification_image_id'}
-              error={err('identity_verification_image_id')}
-              onPick={(e) => uploadFile(e, 'identity_verification_image_id')}
-              onRemove={() => setSellerField('identity_verification_image_id', '')}
-              onZoom={setZoomFile}
-            />
+          <p className="muted text-sm mb-4">{translateText('seller.applicationHint')}</p>
+          <div className="seller-application-fields grid sm:grid-cols-3 gap-3">
+            {[['firstname', 'نام '], ['lastname', 'نام خانوادگی '], ['phone', 'تلفن تماس']].map(([field, label]) => (
+              <Field key={field} label={translateText(label)} error={err(field)}>
+                <input className={inputCls(field)} value={seller[field]} maxLength={field === 'phone' ? 20 : 80}
+                  dir={field === 'phone' ? 'ltr' : undefined} type={field === 'phone' ? 'tel' : 'text'}
+                  autoComplete={field === 'firstname' ? 'given-name' : field === 'lastname' ? 'family-name' : 'tel'}
+                  onChange={event => setSellerField(field, event.target.value)} />
+              </Field>
+            ))}
           </div>
 
           <button

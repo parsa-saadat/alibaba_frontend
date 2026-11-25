@@ -1,7 +1,7 @@
 import LanguageSelector from '../common/locale/LanguageSelectorComponent';
 import { direction as i18nDirection } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Clock3, ShieldAlert, Store } from 'lucide-react';
 import SellerNavbarComponent from '../panel/SellerNavbarComponent';
 import { useShop } from '../../contexts/ShopContext';
@@ -23,6 +23,7 @@ function GateCard({ icon: Icon, title, text, actions }) {
 
 const SellerLayout = () => {
   const { user } = useShop();
+  const { pathname } = useLocation();
 
   if (!user) {
     return (
@@ -65,17 +66,18 @@ const SellerLayout = () => {
   }
 
   /* درخواست ثبت شده ولی هنوز توسط مدیر تأیید نشده */
-  if (!isAdmin && user.seller_approved_status === false) {
+  if (!isAdmin && user.seller_approved_status === false && pathname.replace(/\/$/, '') !== '/seller/settings') {
     return (
       <GateCard
         icon={Clock3}
         title={translateText('درخواست فروشندگی در انتظار تأیید است')}
         text={translateText(
-          'درخواست شما ثبت شده و پس از بررسی و تأیید مدیر، پنل فروشنده برایتان باز می‌شود. بعد از تأیید یک‌بار خارج و دوباره وارد شوید.',
+          'seller.pendingHint',
         )}
         actions={
           <>
-            <Link to="/profile" className="btn-primary inline-block">
+            <Link to="/seller/settings" className="btn-primary inline-block">{translateText('حساب تسویه')}</Link>
+            <Link to="/profile" className="btn-ghost inline-block">
               {translateText('مشاهده پروفایل ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">

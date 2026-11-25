@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:ui": "node scripts/check-jsx-symbols.mjs src"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",

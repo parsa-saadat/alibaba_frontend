@@ -1,6 +1,7 @@
 import useLocalizedContent from '../../hooks/useLocalizedContent';
 import MoneyInput, { usePriceEntry } from './PriceInputComponent';
 import { language } from '../../i18n/runtime';
+import { localizedField } from '../../i18n/content-fields';
 import { cleanTranslations } from '../../i18n/translation-helpers';
 import ContentLanguage from '../common/locale/ContentLanguageComponent';
 import { t as translateText } from '../../i18n/runtime.js';
@@ -26,6 +27,7 @@ import {
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 
 const DEFAULT_FORM = {
+  key_attributes: [],
   name: '',
   store_id: '',
   category_id: '',
@@ -114,6 +116,9 @@ function ProductEditorComponent({
     }
     const pct = product.discount?.percentage || 0;
     setForm({
+      key_attributes: Array.isArray(product.key_attributes) ? product.key_attributes.map(row => ({
+        name: String(localizedField(row.name ?? row.key) ?? ''), value: String(localizedField(row.value) ?? '')
+      })) : [],
       name: product.name || '',
       store_id: getId(product.store_id) || '',
       category_id: getId(product.category_id) || '',
@@ -268,7 +273,14 @@ function ProductEditorComponent({
       };
     }
 
+    const attributes = form.key_attributes.map(row => ({ name: row.name.trim(), value: row.value.trim() }))
+      .filter(row => row.name || row.value);
+    if (attributes.length > 8 || attributes.some(row => !row.name || !row.value || row.name.length > 80 || row.value.length > 500)) {
+      document.querySelector('.key-attributes-editor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return toast.error(translateText('attributes.invalid'));
+    }
     const basePayload = {
+      key_attributes: attributes,
       name: form.name.trim(),
       category_id: form.category_id,
       brand: form.brand.trim(),
@@ -363,7 +375,7 @@ function ProductEditorComponent({
           )}
           <button
             type="submit"
-            disabled={saving || uploading}
+            disabled={saving || uploading || form.key_attributes.length > 8}
             className="btn-primary !py-2 text-sm flex items-center gap-1.5"
           >
             <Save size={15} />{' '}
@@ -376,7 +388,7 @@ function ProductEditorComponent({
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_340px] gap-5 items-start">
+      <div className="product-editor-columns grid lg:grid-cols-[1fr_340px] gap-5 items-start">
         <div className="space-y-5 min-w-0">
           <div className="card rounded-2xl p-5 space-y-4">
             <h3 className="font-black text-sm">{translateText('مشخصات اصلی')}</h3>
@@ -588,7 +600,7 @@ function ProductEditorComponent({
           </div>
         </div>
 
-        <div className="space-y-5 min-w-0">
+        <div className="product-editor-settings space-y-5 min-w-0">
           <div className="card rounded-2xl p-5 space-y-3">
             <h3 className="font-black text-sm">{translateText('انتشار و دسته‌بندی')}</h3>
 
@@ -888,6 +900,88 @@ function ProductEditorComponent({
               )}
             </div>
           </div>
+
+          <section className="card rounded-2xl p-5 space-y-3 key-attributes-editor key-attributes-editor-side">
+            <h3 className="font-black text-sm flex items-center gap-2">
+              <KeyRound size={16} className="text-accent" />
+              {translateText('attributes.title')}
+              <span className="muted text-[11px] font-normal" dir="ltr">
+                {toFa(form.key_attributes.length)} / {toFa(8)}
+              </span>
+            </h3>
+            <p className="muted text-[11px] leading-5">{translateText('attributes.hint')}</p>
+            {form.key_attributes.length > 8 && (
+              <p role="alert" className="text-xs text-red-500">
+                {translateText('attributes.limitExceeded')}
+              </p>
+            )}
+            {form.key_attributes.map((row, index) => (
+              <fieldset className="attribute-editor-row" key={index}>
+                <legend>{translateText('attributes.row', { count: index + 1 })}</legend>
+                <label className="attribute-input-label">{translateText('attributes.name')}
+                <input
+                  className="input"
+                  aria-label={`${translateText('attributes.name')} ${index + 1}`}
+                  placeholder={translateText('attributes.name')}
+                  value={row.name}
+                  maxLength={80}
+                  onChange={(e) =>
+                    setForm((v) => ({
+                      ...v,
+                      key_attributes: v.key_attributes.map((r, i) =>
+                        i === index ? { ...r, name: e.target.value } : r,
+                      ),
+                    }))
+                  }
+                />
+                </label>
+                <label className="attribute-input-label">{translateText('attributes.value')}
+                <input
+                  className="input"
+                  aria-label={`${translateText('attributes.value')} ${index + 1}`}
+                  placeholder={translateText('attributes.value')}
+                  value={row.value}
+                  maxLength={500}
+                  onChange={(e) =>
+                    setForm((v) => ({
+                      ...v,
+                      key_attributes: v.key_attributes.map((r, i) =>
+                        i === index ? { ...r, value: e.target.value } : r,
+                      ),
+                    }))
+                  }
+                />
+                </label>
+                <button
+                  type="button"
+                  className="review-button secondary icon"
+                  aria-label={translateText('attributes.remove')}
+                  onClick={() =>
+                    setForm((v) => ({
+                      ...v,
+                      key_attributes: v.key_attributes.filter((_, i) => i !== index),
+                    }))
+                  }
+                >
+                  <X size={16} />
+                </button>
+              </fieldset>
+            ))}
+            <button
+              type="button"
+              className="review-button secondary w-full"
+              disabled={form.key_attributes.length >= 8}
+              onClick={() =>
+                setForm((v) => ({
+                  ...v,
+                  key_attributes: [...v.key_attributes, { name: '', value: '' }],
+                }))
+              }
+            >
+              <Plus size={16} />
+              {translateText('attributes.add')}
+            </button>
+          </section>
         </div>
       </div>
 
