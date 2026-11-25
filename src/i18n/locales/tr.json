@@ -2677,5 +2677,6 @@
   "history.noSearches": "Yaptığınız aramalar burada görünecek.",
   "application.contactOnly": "Şimdilik yalnızca adınız, soyadınız ve iletişim telefonunuz gereklidir.",
   "application.contactDetails": "İletişim bilgileri",
-  "application.reviewNote": "Hesap incelemesi için bilgilerinizi gönderin. Banka bilgileri daha sonra satıcı panelinizde eklenir."
+  "application.reviewNote": "Hesap incelemesi için bilgilerinizi gönderin. Banka bilgileri daha sonra satıcı panelinizde eklenir.",
+  "home.noHotPicks": "Sıcak fırsat bulunmuyor"
 }

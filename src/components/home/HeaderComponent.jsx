@@ -41,8 +41,7 @@ const belongsToCategory = (product, category) => {
 
 /*
  * ستون‌های ویترین دسته‌بندی فقط در دسکتاپ دیده می‌شود (بخش `hidden lg:block`)؛
- * همان دو نقطه‌شکنی که در CSS تعریف شده‌اند اینجا خوانده می‌شوند تا تعداد
- * محصولات = ستون × ۲ ردیف باشد و هیچ ردیفی نیمه‌پر نماند.
+ * نقاط شکست CSS برای نمایش دقیقاً یک ردیف محصول خوانده می‌شوند.
  */
 const SHOWCASE_BREAKPOINTS = [
   ['(min-width: 1600px)', 6],
@@ -277,12 +276,12 @@ function CategoryShowcase({ category, products, loading }) {
   const columns = useShowcaseColumns();
 
   if (loading) {
-    return <div className="skeleton h-[400px] w-full rounded-xl" />;
+    return <div className="category-showcase-loading skeleton w-full rounded-2xl" />;
   }
 
-  // دو ردیف کامل: تعداد کارت‌ها با تعداد ستون‌های همان عرض صفحه تنظیم می‌شود.
+  // یک ردیف: تعداد کارت‌ها دقیقاً برابر ظرفیت ستون‌های همین عرض است.
   const categoryProducts = category
-    ? products.filter((p) => belongsToCategory(p, category)).slice(0, columns * 2)
+    ? products.filter((p) => belongsToCategory(p, category)).slice(0, columns)
     : [];
 
   return (
@@ -361,14 +360,6 @@ function CategoryShowcase({ category, products, loading }) {
 
 /* ───────── اسکرول ساده از آخرین محصولات ───────── */
 function HeaderComponent({ products = [], categories = [], loading = false }) {
-  useEffect(() => {
-    const pane = document.querySelector('[data-testid="category-showcase"]');
-    const layout = pane?.closest('.home-category-layout');
-    if (!pane || !layout) return;
-    const update = () => layout.style.setProperty('--showcase-h', `${Math.ceil(pane.getBoundingClientRect().height)}px`);
-    const observer = new ResizeObserver(update); observer.observe(pane); update();
-    return () => observer.disconnect();
-  }, []);
   /* محو‌شدگی ردیف چیپ‌های موبایل فقط وقتی سرریز دارد */
   const [mobileRowRef, , mobileRowFade] = useScrollFade();
   const [hoveredCatId, setHoveredCatId] = useState(null);

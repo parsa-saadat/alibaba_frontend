@@ -2859,3 +2859,28 @@ button.icon-control > svg { flex-shrink:0; }
 
 @media(max-width:767px) { .site-header.is-home-search-hidden [data-testid='mobile-search-row'] { transform:translateY(-105%); opacity:0; visibility:hidden; pointer-events:none; transition:transform 220ms ease,opacity 180ms ease,visibility 0s 220ms; } }
 @media(prefers-reduced-motion:reduce) { .site-header.is-home-search-hidden [data-testid='mobile-search-row'] { transition:none!important; } }
+/* V45: a stable, single-row category browser, including empty/loading states. */
+@media(min-width:1024px) {
+ .home-category-layout { --category-row-height:360px; height:var(--category-row-height); align-items:stretch; }
+ .home-category-layout [data-testid='category-showcase'],
+ .home-category-layout .home-category-sidebar,
+ .home-category-layout .home-hot-picks-slot { height:var(--category-row-height); min-height:0; max-height:var(--category-row-height); align-self:stretch; }
+ .category-showcase,.category-showcase-loading { height:100%; min-height:0; overflow:hidden; }
+ .category-showcase-grid { flex:1 1 0; min-height:0; grid-template-rows:minmax(0,1fr); grid-auto-rows:minmax(0,1fr); align-items:stretch; }
+ .category-showcase-grid > .category-showcase-product { height:100%; min-height:0; display:flex; }
+ .category-showcase-product .category-showcase-image { flex:1 1 0; min-height:0; height:auto!important; aspect-ratio:auto; }
+ .category-showcase-product > .category-showcase-price { flex:0 0 36px; min-height:36px; gap:2px 6px; align-content:center; font-size:11px; }
+ .category-showcase-product > .category-showcase-price del { font-size:10px; }
+ .category-showcase-product > span:last-child { min-height:26px; flex-shrink:0; }
+ .hot-picks-card .hot-picks-items { align-content:start; grid-auto-rows:72px; }
+}
+@media(min-width:1600px) { .home-category-layout { --category-row-height:380px; } }
+.product-loading-tabs,.product-loading-mobile-actions { display:none; }
+.product-detail-loading .product-hero-gallery,.product-detail-loading .product-hero-purchase { position:static; }
+@media(max-width:767px) {
+ .product-loading-tabs { display:flex; align-items:center; gap:16px; padding:0 16px; justify-content:space-around; }
+ .product-loading-breadcrumb,.product-loading-thumbs,.product-loading-desktop-intro { display:none; }
+ .product-detail-loading .product-hero-gallery { padding:10px; }
+ .product-loading-mobile-actions { display:flex; position:fixed; bottom:0; inset-inline:0; z-index:40; gap:8px; padding:10px 12px max(10px,env(safe-area-inset-bottom)); background:var(--card); border-top:1px solid var(--border); }
+}
+@media(prefers-reduced-motion:reduce) { .product-detail-loading .skeleton { animation:none!important; } }

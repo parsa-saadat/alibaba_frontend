@@ -68,7 +68,7 @@ function HotPicksBannerComponent({ products = [] }) {
       ) : (
         <div className="grid flex-1 place-items-center">
           <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-black">
-            {translateText('تخفیف‌های ویژه')}
+            {translateText('home.noHotPicks')}
           </span>
         </div>
       )}

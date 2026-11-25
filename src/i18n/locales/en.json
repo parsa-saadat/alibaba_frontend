@@ -2677,5 +2677,6 @@
   "history.noSearches": "Searches you submit will appear here.",
   "application.contactOnly": "Only your name and contact phone are needed now.",
   "application.contactDetails": "Contact details",
-  "application.reviewNote": "Submit your details for account review. Bank details are added later in your seller panel."
+  "application.reviewNote": "Submit your details for account review. Bank details are added later in your seller panel.",
+  "home.noHotPicks": "No hot offers available"
 }

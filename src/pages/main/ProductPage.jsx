@@ -55,7 +55,7 @@ import StorageImageComponent from '../../components/common/StorageImageComponent
 import ImageLightboxComponent from '../../components/common/ImageLightboxComponent';
 import MarkdownContentComponent from '../../components/common/MarkdownContentComponent';
 import ErrorBoundaryComponent from '../../components/common/ErrorBoundaryComponent';
-import { Loading } from '../../components/common/ScroolToTopComponent';
+import ProductDetailSkeleton from '../../components/product/ProductDetailSkeleton';
 import { fetchStore, fetchPublicUser, primeSeller } from '../../services/sellerApi';
 import ChatNowButton from '../../components/chat/ChatNowButton';
 
@@ -596,19 +596,7 @@ function ProductPage() {
   /* ---------- حالت‌های بارگذاری / خطا ---------- */
 
   if (loading) {
-    return (
-      <main className="mx-auto site-width max-w-7xl px-4 py-8" aria-busy="true">
-        <Loading label={translateText('در حال بارگذاری جزئیات محصول…')} />
-        <div className="mt-6 grid gap-6 lg:grid-cols-12">
-          <div className="skeleton aspect-square rounded-2xl lg:col-span-6" />
-          <div className="space-y-4 lg:col-span-6">
-            <div className="skeleton h-8 w-3/4 rounded-xl" />
-            <div className="skeleton h-20 rounded-xl" />
-            <div className="skeleton h-52 rounded-2xl" />
-          </div>
-        </div>
-      </main>
-    );
+    return <ProductDetailSkeleton direction={i18nDirection} />;
   }
 
   if (error || !product) {
