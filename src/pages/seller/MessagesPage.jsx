@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { t as translateText } from '../../i18n/runtime.js';
 import { MessagesSquare, ShieldAlert } from 'lucide-react';
 import MessengerComponent from '../../components/chat/MessengerComponent';
@@ -13,6 +13,7 @@ import { useShop } from '../../contexts/ShopContext';
 export default function SellerMessagesPage() {
   const { user } = useShop();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isAdmin = String(user?.role || '').toLowerCase() === 'admin';
   const reachable =
     isAdmin ||
@@ -22,6 +23,7 @@ export default function SellerMessagesPage() {
 
   return (
     <div className="space-y-4">
+      <button type="button" className="btn-primary" onClick={() => navigate('/products')}>{translateText('chat.new')}</button>
       <PanelPageHeader
         icon={MessagesSquare}
         title={translateText('chat.sellerInbox')}
@@ -30,7 +32,7 @@ export default function SellerMessagesPage() {
 
       {reachable ? (
         <div className="chat-panel-shell">
-          <MessengerComponent as="seller" onBrowse={() => navigate('/seller/products')} />
+          <MessengerComponent as="seller" initialConversationId={searchParams.get('conversation') || ''} onCreate={() => navigate('/products')} onBrowse={() => navigate('/products')} />
         </div>
       ) : (
         <div className="card rounded-3xl p-8 text-center space-y-3">

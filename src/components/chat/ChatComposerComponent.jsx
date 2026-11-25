@@ -22,6 +22,7 @@ function ChatComposerComponent({
   autoFocus = false,
   onDraftChange,
 }) {
+  const [sending, setSending] = useState(false);
   const [text, setText] = useState('');
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -61,23 +62,20 @@ function ChatComposerComponent({
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     const body = text.trim();
-    if (disabled || uploading) return;
-    if (!body && !images.length) return;
-
-    if (editing) {
-      if (!body) return;
-      onCancelEdit?.();
-      onSend?.({ body, editing: editing._id });
-      setText('');
-      return;
-    }
-
-    onSend?.({ body, images, pin: pin?.raw || null });
-    setText('');
-    setImages([]);
+    if (disabled || uploading || sending || (!body && !images.length)) return;
+    if (editing && !body) return;
+    setSending(true);
+    try {
+      const result = await onSend?.(editing ? { body, editing: editing._id } : { body, images });
+      if (result === false) return;
+      if (editing) onCancelEdit?.();
+      setText(''); setImages([]);
+    } finally { setSending(false); }
   };
+
+  if(disabled)return <div className="chat-readonly-note" role="note">{disabledReason || translateText('chat.readOnlyBlocked')}</div>;
 
   return (
     <div className="chat-composer">
@@ -86,7 +84,7 @@ function ChatComposerComponent({
           <span className="chat-editing-label">{translateText('chat.editing')}</span>
           <button
             type="button"
-            className="chat-action"
+            className="chat-action icon-control"
             aria-label={translateText('chat.cancelEdit')}
             onClick={() => {
               setText('');
@@ -109,7 +107,7 @@ function ChatComposerComponent({
               <StorageImageComponent file={id} alt={translateText('chat.imageAlt')} compact className="h-full w-full object-cover" />
               <button
                 type="button"
-                className="chat-attachment-remove"
+                className="chat-attachment-remove icon-control"
                 aria-label={translateText('chat.removeImage')}
                 onClick={() => setImages((prev) => prev.filter((item) => item !== id))}
               >
@@ -128,7 +126,7 @@ function ChatComposerComponent({
           className="chat-tool"
           aria-label={translateText('chat.attachImage')}
           title={translateText('chat.attachImage')}
-          disabled={disabled || uploading || images.length >= MAX_IMAGES}
+          disabled={disabled || sending || uploading || images.length >= MAX_IMAGES}
           onClick={() => fileRef.current?.click()}
         >
           {uploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
@@ -148,7 +146,7 @@ function ChatComposerComponent({
           rows={1}
           maxLength={4000}
           value={text}
-          disabled={disabled}
+          disabled={disabled || sending}
           placeholder={disabled ? disabledReason : translateText('chat.placeholder')}
           aria-label={translateText('chat.placeholder')}
           onChange={(event) => {
@@ -166,7 +164,7 @@ function ChatComposerComponent({
         <button
           type="submit"
           className="chat-send"
-          disabled={disabled || uploading || (!text.trim() && !images.length)}
+          disabled={disabled || sending || uploading || (!text.trim() && !images.length)}
           onClick={submit}
           aria-label={editing ? translateText('chat.saveEdit') : translateText('chat.send')}
           title={editing ? translateText('chat.saveEdit') : translateText('chat.send')}

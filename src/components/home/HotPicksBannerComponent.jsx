@@ -1,5 +1,5 @@
 import { t as translateText } from '../../i18n/runtime.js';
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Flame } from 'lucide-react';
 import StorageImageComponent from '../common/StorageImageComponent';
@@ -10,10 +10,18 @@ import { productImages, hasDiscount, finalPrice, formatPrice } from '../../utils
  * با محصولات تخفیف‌دار پر می‌شود: عکس مربع، نام دو خطی، قیمت با تخفیف.
  */
 function HotPicksBannerComponent({ products = [] }) {
-  const deals = products.filter(hasDiscount).slice(0, 5);
+  const card = useRef(null);
+  const [limit, setLimit] = useState(1);
+  useEffect(() => {
+    const observer = new ResizeObserver(() => setLimit(Math.max(0, Math.min(5, Math.floor((card.current.clientHeight - 140) / 78)))));
+    if (card.current) observer.observe(card.current);
+    return () => observer.disconnect();
+  }, []);
+  const deals = products.filter(hasDiscount).slice(0, limit);
 
   return (
     <Link
+      ref={card}
       to="/products?discount=true"
       className="hot-picks-card group relative flex h-full flex-col overflow-hidden rounded-xl p-4 text-white transition-transform hover:-translate-y-0.5"
       style={{ background: 'linear-gradient(160deg,#e85f00 0%,#ff6a00 55%,#e85f00 100%)' }}

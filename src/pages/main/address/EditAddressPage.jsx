@@ -76,7 +76,7 @@ function EditAddressPage() {
         <button
           type="button"
           onClick={() => navigate('/address')}
-          className="btn-ghost !p-2"
+          className="btn-ghost !p-2 icon-control"
         >
           <ArrowRight size={17} />
         </button>

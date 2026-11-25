@@ -142,6 +142,7 @@ export default function LanguageSelector({ variant = 'main', placement = 'bar', 
           requestAnimationFrame(place);
         }}
         aria-haspopup="dialog"
+        title={`${ui.lang}: ${names[language]} · ${ui.money}: ${currency}`}
         aria-label={`${ui.lang}: ${names[language]} · ${ui.money}: ${currency}`}
       >
         <Globe2 size={19} />
@@ -174,7 +175,7 @@ export default function LanguageSelector({ variant = 'main', placement = 'bar', 
           onCancel={() => trigger.current?.focus()}
         >
           <button
-            className="locale-popover-close"
+            className="locale-popover-close icon-control"
             type="button"
             aria-label={ui.close}
             onClick={close}

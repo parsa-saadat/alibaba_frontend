@@ -246,7 +246,7 @@ function MarkdownContentComponent({ content, className = '' }) {
             padding: 20,
           }}
         >
-          <button
+          <button className="icon-control"
             type="button"
             onClick={closeZoom}
             aria-label={translateText('بستن')}

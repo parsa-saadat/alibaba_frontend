@@ -139,7 +139,7 @@ function DashboardProductComponent({
         </button>
         <Link
           to={`/product/${product._id}`}
-          className="btn-ghost !p-2"
+          className="btn-ghost product-card-icon"
           title={translateText('مشاهده در سایت')}
         >
           <ExternalLink size={14} />
@@ -147,7 +147,7 @@ function DashboardProductComponent({
         {onDuplicate && (
           <button
             type="button"
-            className="btn-ghost !p-2"
+            className="btn-ghost product-card-icon"
             onClick={() => onDuplicate(product._id)}
             title={translateText('کپی محصول')}
           >
@@ -158,7 +158,7 @@ function DashboardProductComponent({
           <button
             type="button"
             onClick={() => onDelete(product._id)}
-            className="btn-ghost !p-2 text-red-400"
+            className="btn-ghost product-card-icon text-red-500"
             title={translateText('حذف محصول')}
           >
             <Trash2 size={14} />

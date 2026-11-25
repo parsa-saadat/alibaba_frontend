@@ -163,7 +163,7 @@ function PlanCard({ plan, active, busy, disabled, onBuy }) {
       {plan.is_featured && (
         <div
           className="absolute top-0 start-0 px-4 py-1.5 text-[11px] font-black rounded-ee-2xl flex items-center gap-1"
-          style={{ background: 'var(--primary-color)', color: '#242424' }}
+          style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
         >
           <Crown size={12} />
           {translateText(' پیشنهادی ')}
@@ -272,7 +272,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
       >
         <div
           className="w-12 h-12 rounded-2xl grid place-items-center shrink-0"
-          style={{ background: 'var(--primary-color)', color: '#242424' }}
+          style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
         >
           <Crown size={22} />
         </div>
@@ -287,7 +287,7 @@ function ActivePlanBanner({ user, plans, onBuy, buyingId }) {
         </div>
         <span
           className="text-[11px] px-2.5 py-1 rounded-full font-black shrink-0"
-          style={{ background: 'var(--primary-color)', color: '#242424' }}
+          style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
         >
           {translateText('فعال ')}
         </span>
@@ -452,7 +452,7 @@ function PaymentBanner({ result, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="btn-ghost !p-1.5"
+          className="btn-ghost !p-1.5 icon-control"
           aria-label={translateText('بستن')}
         >
           <X size={14} />

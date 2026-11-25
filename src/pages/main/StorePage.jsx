@@ -10,7 +10,6 @@ import {
   Package,
   Phone,
   Search,
-  Share2,
   ShoppingBag,
   Sparkles,
   Store as StoreIcon,
@@ -212,20 +211,6 @@ function StorePage() {
   const sellerTrusted = storeTrust === TRUST.TRUSTED;
   const sellerIdForCards = useMemo(() => sellerIdOfStore(store, owner), [owner, store]);
 
-  const shareStore = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: store?.name, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      setToast(translateText('لینک فروشگاه کپی شد'));
-    } catch {
-      // کاربر اشتراک‌گذاری را لغو کرده است
-    }
-  };
-
   const scrollToProducts = () => {
     productsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -375,10 +360,7 @@ function StorePage() {
                 <Phone size={15} />
                 {translateText('ارتباط با فروشنده ')}
               </button>
-              <button type="button" className="review-button secondary" onClick={shareStore}>
-                <Share2 size={15} />
-                {translateText('اشتراک‌گذاری')}
-              </button>
+
               <button
                 type="button"
                 className="review-button secondary"

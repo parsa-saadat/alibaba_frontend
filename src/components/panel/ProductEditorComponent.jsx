@@ -1,3 +1,4 @@
+import { editableAttributes, attributePayload, validAttributes } from '../../utils/helpers/attributes.mjs';
 import useLocalizedContent from '../../hooks/useLocalizedContent';
 import MoneyInput, { usePriceEntry } from './PriceInputComponent';
 import { language } from '../../i18n/runtime';
@@ -116,9 +117,7 @@ function ProductEditorComponent({
     }
     const pct = product.discount?.percentage || 0;
     setForm({
-      key_attributes: Array.isArray(product.key_attributes) ? product.key_attributes.map(row => ({
-        name: String(localizedField(row.name ?? row.key) ?? ''), value: String(localizedField(row.value) ?? '')
-      })) : [],
+      key_attributes: editableAttributes(product.key_attributes),
       name: product.name || '',
       store_id: getId(product.store_id) || '',
       category_id: getId(product.category_id) || '',
@@ -273,9 +272,8 @@ function ProductEditorComponent({
       };
     }
 
-    const attributes = form.key_attributes.map(row => ({ name: row.name.trim(), value: row.value.trim() }))
-      .filter(row => row.name || row.value);
-    if (attributes.length > 8 || attributes.some(row => !row.name || !row.value || row.name.length > 80 || row.value.length > 500)) {
+    const attributes = attributePayload(form.key_attributes);
+    if (!validAttributes(attributes)) {
       document.querySelector('.key-attributes-editor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return toast.error(translateText('attributes.invalid'));
     }
@@ -348,7 +346,7 @@ function ProductEditorComponent({
             <button
               type="button"
               onClick={onCancel}
-              className="btn-ghost !p-2"
+              className="btn-ghost !p-2 icon-control"
               aria-label={translateText('بازگشت')}
             >
               <ArrowRight size={18} />
@@ -567,7 +565,7 @@ function ProductEditorComponent({
                           images_id: prev.images_id.filter((_, i) => i !== idx),
                         }))
                       }
-                      className="absolute top-1 start-1 bg-black/75 text-white rounded-full p-1 hover:bg-red-600"
+                      className="absolute top-1 start-1 bg-black/75 text-white rounded-full p-1 hover:bg-red-600 icon-control"
                       aria-label={translateText('حذف تصویر')}
                     >
                       <X size={12} />
@@ -576,7 +574,7 @@ function ProductEditorComponent({
                     {idx === 0 ? (
                       <span
                         className="absolute bottom-1 end-1 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--primary-color)', color: '#242424' }}
+                        style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
                       >
                         <Star size={10} />
                         {translateText(' اصلی ')}
@@ -874,7 +872,7 @@ function ProductEditorComponent({
                     }
                   }}
                 />
-                <button type="button" onClick={addTag} className="btn-ghost !px-3">
+                <button type="button" onClick={addTag} className="btn-ghost !px-3 icon-control">
                   <Plus size={15} />
                 </button>
               </div>
@@ -883,7 +881,7 @@ function ProductEditorComponent({
                   {content.value('tags').map((t) => (
                     <span key={t} className="chip !py-0.5 !px-2 text-xs flex items-center gap-1">
                       {t}
-                      <button
+                      <button className="icon-control"
                         type="button"
                         onClick={() =>
                           content.update(
@@ -909,6 +907,7 @@ function ProductEditorComponent({
                 {toFa(form.key_attributes.length)} / {toFa(8)}
               </span>
             </h3>
+            <ContentLanguage editor={content} compact />
             <p className="muted text-[11px] leading-5">{translateText('attributes.hint')}</p>
             {form.key_attributes.length > 8 && (
               <p role="alert" className="text-xs text-red-500">
@@ -923,13 +922,14 @@ function ProductEditorComponent({
                   className="input"
                   aria-label={`${translateText('attributes.name')} ${index + 1}`}
                   placeholder={translateText('attributes.name')}
-                  value={row.name}
+                  value={row.name[content.locale] || ''}
+                  dir={content.dir} lang={content.locale}
                   maxLength={80}
                   onChange={(e) =>
                     setForm((v) => ({
                       ...v,
                       key_attributes: v.key_attributes.map((r, i) =>
-                        i === index ? { ...r, name: e.target.value } : r,
+                        i === index ? { ...r, name: {...r.name,[content.locale]:e.target.value} } : r,
                       ),
                     }))
                   }
@@ -940,13 +940,14 @@ function ProductEditorComponent({
                   className="input"
                   aria-label={`${translateText('attributes.value')} ${index + 1}`}
                   placeholder={translateText('attributes.value')}
-                  value={row.value}
+                  value={row.value[content.locale] || ''}
+                  dir={content.dir} lang={content.locale}
                   maxLength={500}
                   onChange={(e) =>
                     setForm((v) => ({
                       ...v,
                       key_attributes: v.key_attributes.map((r, i) =>
-                        i === index ? { ...r, value: e.target.value } : r,
+                        i === index ? { ...r, value: {...r.value,[content.locale]:e.target.value} } : r,
                       ),
                     }))
                   }
@@ -954,7 +955,7 @@ function ProductEditorComponent({
                 </label>
                 <button
                   type="button"
-                  className="review-button secondary icon"
+                  className="review-button secondary icon icon-control"
                   aria-label={translateText('attributes.remove')}
                   onClick={() =>
                     setForm((v) => ({
@@ -974,7 +975,7 @@ function ProductEditorComponent({
               onClick={() =>
                 setForm((v) => ({
                   ...v,
-                  key_attributes: [...v.key_attributes, { name: '', value: '' }],
+                  key_attributes: [...v.key_attributes, { name: {}, value: {} }],
                 }))
               }
             >

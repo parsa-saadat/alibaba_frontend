@@ -48,10 +48,10 @@ function MobileBottomNavComponent() {
       badge: cartCount,
     },
     {
-      to: '/profile',
+      to: '/account',
       label: translateText('حساب من '),
       icon: User,
-      active: pathname.startsWith('/profile') || pathname.startsWith('/order'),
+      active: pathname.startsWith('/account') || pathname.startsWith('/profile') || pathname.startsWith('/order'),
     },
   ];
 
@@ -82,7 +82,7 @@ function MobileBottomNavComponent() {
                 {item.badge > 0 && (
                   <span
                     className="absolute -top-1.5 -end-2 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[9px] font-black"
-                    style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
+                    style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
                   >
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>

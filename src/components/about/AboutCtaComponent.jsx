@@ -10,13 +10,13 @@ function AboutCtaComponent() {
         className="rounded-3xl p-6 sm:p-9 flex flex-col md:flex-row items-center justify-between gap-6"
         style={{
           background:
-            'radial-gradient(circle at 85% 20%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 45%), linear-gradient(135deg, var(--charcoal-mid), var(--charcoal-deep))',
+            'radial-gradient(circle at 85% 20%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 45%), linear-gradient(135deg, var(--card2), var(--card))',
           border: '1px solid rgba(255,106,0,0.28)',
         }}
       >
         <div className="max-w-xl">
-          <h2 className="font-black text-lg sm:text-2xl text-white leading-tight">{translateText("ژئوکالا برای کار شما ساخته شده ")}</h2>
-          <p className="text-xs sm:text-sm text-white/70 leading-7 mt-2">{translateText("b2b.sellStep")}</p>
+          <h2 className="font-black text-lg sm:text-2xl text-[var(--text)] leading-tight">{translateText("ژئوکالا برای کار شما ساخته شده ")}</h2>
+          <p className="text-xs sm:text-sm text-[var(--muted)] leading-7 mt-2">{translateText("b2b.sellStep")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
@@ -24,8 +24,8 @@ function AboutCtaComponent() {
             <Store size={16} />{translateText("فروشنده شوید ")}</Link>
           <Link
             to="/contact"
-            className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}
+            className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-[var(--text)] transition-colors"
+            style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
           >
             <Headset size={16} />{translateText("گفتگو با ما ")}<ChevronLeft className="logical-icon" size={14} />
           </Link>

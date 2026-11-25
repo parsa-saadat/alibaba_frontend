@@ -1,3 +1,4 @@
+import { rememberSearch } from '../../utils/helpers/browsing-history';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import axios from 'axios';
@@ -121,6 +122,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
   const submitSearch = (event) => {
     event?.preventDefault();
     setOpen(false);
+    rememberSearch(trimmed);
     navigate(trimmed ? `/products?name=${encodeURIComponent(trimmed)}` : '/products');
   };
 
@@ -139,6 +141,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
     } else if (event.key === 'Enter' && activeIndex >= 0 && results[activeIndex]) {
       event.preventDefault();
       setOpen(false);
+      rememberSearch(trimmed);
       navigate(`/product/${results[activeIndex]._id}`);
     }
   };
@@ -151,7 +154,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
         setOpen(true);
       }}
       aria-label={translateText("پاک کردن جستجو")}
-      className={hero ? 'shrink-0 muted hover:text-accent transition-colors' : 'search-clear'}
+      className={`icon-control ${hero ? 'shrink-0 muted hover:text-accent transition-colors' : 'search-clear'}`}
     >
       <X size={15} />
     </button>
@@ -178,7 +181,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
       className={
         hero
           ? 'min-w-0 flex-1 truncate bg-transparent py-1.5 text-[13px] outline-none placeholder:opacity-60 sm:py-0 sm:text-base'
-          : 'input !pr-10 !pl-9 !py-2.5 text-sm'
+          : 'input search-compact-input !py-2.5 text-sm'
       }
     />
   );
@@ -199,7 +202,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
   );
 
   return (
-    <div ref={boxRef} className={`search-box ${hero ? 'w-full' : ''}`}>
+    <div ref={boxRef} className={`search-box ${hero ? 'search-box--hero w-full' : 'search-box--compact'}`}>
       {hero ? (
         <form
           onSubmit={submitSearch}
@@ -273,7 +276,7 @@ function ProductSearchBox({ variant = 'compact', placeholder, compact = false })
                   to={`/product/${product._id}`}
                   role="option"
                   aria-selected={index === activeIndex}
-                  onClick={() => setOpen(false)}
+                  onClick={() => { rememberSearch(trimmed); setOpen(false); }}
                   className={`search-result ${index === activeIndex ? 'selected' : ''}`}
                 >
                   <StorageImageComponent

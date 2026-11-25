@@ -59,11 +59,11 @@ function AboutTimelineComponent() {
 
         {/* امروز */}
         <div
-          className="rounded-3xl p-6 sm:p-7 text-white flex flex-col justify-between"
+          className="rounded-3xl p-6 sm:p-7 text-[var(--text)] flex flex-col justify-between"
           style={{
             background:
-              'radial-gradient(circle at 80% 15%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 50%), linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
-            border: '1px solid rgba(255,255,255,0.08)',
+              'radial-gradient(circle at 80% 15%, rgba(255,106,0,0.18) 0%, rgba(255,106,0,0) 50%), linear-gradient(150deg, var(--card2), var(--card))',
+            border: '1px solid var(--border)',
           }}
         >
           <div>
@@ -77,7 +77,7 @@ function AboutTimelineComponent() {
             <b className="block font-black text-lg mt-3 leading-tight">
               {translateText('v20.communication')}
             </b>
-            <p className="text-[11px] text-white/70 leading-6 mt-2">
+            <p className="text-[11px] text-[var(--muted)] leading-6 mt-2">
               {translateText('v20.vision')}
             </p>
 
@@ -87,12 +87,12 @@ function AboutTimelineComponent() {
                 return (
                   <li
                     key={pillar.label}
-                    className="flex items-center gap-2 text-[11px] text-white/80"
+                    className="flex items-center gap-2 text-[11px] text-[var(--muted)]"
                   >
                     <span
                       className="w-7 h-7 rounded-lg grid place-items-center shrink-0"
                       style={{
-                        background: 'rgba(255,255,255,0.08)',
+                        background: 'var(--card2)',
                         color: 'var(--primary-color)',
                       }}
                     >

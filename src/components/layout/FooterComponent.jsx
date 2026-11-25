@@ -21,7 +21,6 @@ import {
   Satellite,
   Send,
   ShieldCheck,
-  Sparkles,
   Store,
   Tablet,
   Truck,
@@ -52,7 +51,7 @@ const LINK_COLUMNS = [
       { label: translateText('همه محصولات'), to: '/products' },
       { label: translateText('تخفیف‌های فعال'), to: '/products?discount=true' },
       { label: translateText('سبد خرید'), to: '/cart' },
-      { label: translateText('لیست علاقه‌مندی'), to: '/favorites' },
+      { label: translateText('لیست علاقه‌مندی'), to: '/account/saved' },
       { label: translateText('مقایسه محصولات'), to: '/compare' },
       { label: translateText('پیگیری سفارش‌ها'), to: '/orders' },
     ],
@@ -121,20 +120,20 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-white/[0.08] lg:border-0">
+    <div className="border-b border-[var(--border)] lg:border-0">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-2 py-4 text-start lg:pointer-events-none lg:mb-4 lg:py-0"
       >
-        <span className="flex items-center gap-2 text-sm font-extrabold text-white">
+        <span className="flex items-center gap-2 text-sm font-extrabold text-[var(--text)]">
           {Icon && <Icon size={16} style={{ color: 'var(--primary-color)' }} />}
           {title}
         </span>
         <ChevronDown
           size={16}
-          className={`text-[#a3a3a3] transition-transform duration-300 lg:hidden ${open ? 'rotate-180' : ''}`}
+          className={`text-[var(--muted)] transition-transform duration-300 lg:hidden ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -148,7 +147,7 @@ function FooterSection({ title, icon: Icon, items, defaultOpen = false }) {
             <li key={`${item.to}-${index}`}>
               <Link
                 to={item.to}
-                className="group flex items-center gap-2 py-1 text-[0.82rem] text-[#b8b8b8] transition-colors hover:text-white"
+                className="group flex items-center gap-2 py-1 text-[0.82rem] text-[var(--muted)] transition-colors hover:text-[var(--accent-text)]"
               >
                 {item.Icon ? (
                   <item.Icon
@@ -205,8 +204,8 @@ function FooterComponent() {
 
   return (
     <footer
-      className="site-footer relative mt-16 overflow-x-clip pt-8 text-[#ededed]"
-      style={{ background: 'linear-gradient(180deg, #262626 0%, #161616 100%)' }}
+      className="site-footer relative mt-16 overflow-x-clip pt-8 text-[var(--text)]"
+      style={{ background: 'linear-gradient(180deg, var(--card) 0%, var(--bg) 100%)' }}
     >
       {/* درخشش‌های تزئینی */}
       <div
@@ -262,7 +261,7 @@ function FooterComponent() {
             return (
               <div
                 key={item.title}
-                className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3 ring-1 ring-white/[0.06] transition hover:bg-white/[0.06]"
+                className="flex items-center gap-3 rounded-2xl bg-[var(--card2)] p-3 ring-1 ring-[var(--border)] transition hover:bg-[var(--card)]"
               >
                 <span
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl"
@@ -271,8 +270,8 @@ function FooterComponent() {
                   <Icon size={20} />
                 </span>
                 <div className="min-w-0">
-                  <b className="block truncate text-xs text-white md:text-sm">{item.title}</b>
-                  <span className="block truncate text-[11px] text-[#a3a3a3] md:text-xs">
+                  <b className="block truncate text-xs text-[var(--text)] md:text-sm">{item.title}</b>
+                  <span className="block truncate text-[11px] text-[var(--muted)] md:text-xs">
                     {item.desc}
                   </span>
                 </div>
@@ -286,11 +285,11 @@ function FooterComponent() {
           {/* برند */}
           <div className="md:col-span-2 lg:col-span-4">
             <Link to="/" className="inline-flex flex-col items-start gap-2">
-              <BrandLogoComponent variant="full" size="md" tone="white" />
-              <span className="text-[11px] text-[#a3a3a3]">{translateText('b2b.identity')}</span>
+              <BrandLogoComponent variant="full" size="md" tone="auto" />
+              <span className="text-[11px] text-[var(--muted)]">{translateText('b2b.identity')}</span>
             </Link>
 
-            <p className="mt-4 max-w-sm text-xs leading-6 text-[#a3a3a3]">
+            <p className="mt-4 max-w-sm text-xs leading-6 text-[var(--muted)]">
               {translateText('b2b.intro')}
             </p>
 
@@ -299,12 +298,12 @@ function FooterComponent() {
               {STATS.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-xl bg-white/[0.04] px-2 py-3 text-center ring-1 ring-white/[0.06]"
+                  className="rounded-xl bg-[var(--card2)] px-2 py-3 text-center ring-1 ring-[var(--border)]"
                 >
                   <b className="block text-sm font-black" style={{ color: 'var(--primary-color)' }}>
                     {stat.value}
                   </b>
-                  <span className="text-[10px] text-[#a3a3a3]">{stat.label}</span>
+                  <span className="text-[10px] text-[var(--muted)]">{stat.label}</span>
                 </div>
               ))}
             </div>
@@ -314,7 +313,6 @@ function FooterComponent() {
           <div className="lg:col-span-2">
             <FooterSection
               title={translateText('دسته‌بندی‌ها')}
-              icon={Sparkles}
               items={categoryItems}
               defaultOpen
             />
@@ -330,7 +328,7 @@ function FooterComponent() {
       </div>
 
       {/* نوار تماس و نماد */}
-      <div className="relative border-t border-white/[0.08]">
+      <div className="relative border-t border-[var(--border)]">
         <div className="mx-auto flex site-width max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <ul className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2">
             {CONTACTS.map((c) => {
@@ -338,7 +336,7 @@ function FooterComponent() {
               const content = (
                 <>
                   <Icon size={14} className="shrink-0" style={{ color: 'var(--primary-color)' }} />
-                  <span className="text-xs text-[#b8b8b8]">{c.text}</span>
+                  <span className="text-xs text-[var(--muted)]">{c.text}</span>
                 </>
               );
               return (
@@ -346,7 +344,7 @@ function FooterComponent() {
                   {c.href ? (
                     <a
                       href={c.href}
-                      className="flex items-center gap-2 transition-colors hover:text-white"
+                      className="flex items-center gap-2 transition-colors hover:text-[var(--accent-text)]"
                     >
                       {content}
                     </a>
@@ -358,7 +356,7 @@ function FooterComponent() {
             })}
           </ul>
 
-          <span className="inline-flex w-max items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.04] px-3 py-1.5 text-[11px] text-[#d4d4d4]">
+          <span className="inline-flex w-max items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--card2)] px-3 py-1.5 text-[11px] text-[var(--text)]">
             <BadgeCheck size={14} style={{ color: 'var(--primary-color)' }} />
             {translateText('v20.platform')}
           </span>
@@ -366,33 +364,33 @@ function FooterComponent() {
       </div>
 
       {/* نوار پایانی */}
-      <div className="relative border-t border-white/[0.08] bg-black/20">
+      <div className="relative border-t border-[var(--border)] bg-[var(--card2)]">
         <div className="mx-auto flex site-width max-w-[1440px] flex-col items-center gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:justify-between">
-          <p className="text-center text-[11px] text-[#a3a3a3] lg:text-start">
+          <p className="text-center text-[11px] text-[var(--muted)] lg:text-start">
             © {year}
             {translateText('v20.rights')}
           </p>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#a3a3a3]">
-            <Link to="/terms/customers" className="transition-colors hover:text-white">
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[var(--muted)]">
+            <Link to="/terms/customers" className="transition-colors hover:text-[var(--accent-text)]">
               {translateText('قوانین مشتریان ')}
             </Link>
-            <Link to="/terms/buyers" className="transition-colors hover:text-white">
+            <Link to="/terms/buyers" className="transition-colors hover:text-[var(--accent-text)]">
               {translateText('قوانین خریداران ')}
             </Link>
-            <Link to="/terms/sellers" className="transition-colors hover:text-white">
+            <Link to="/terms/sellers" className="transition-colors hover:text-[var(--accent-text)]">
               {translateText('قوانین فروشندگان ')}
             </Link>
-            <Link to="/privacy" className="transition-colors hover:text-white">
+            <Link to="/privacy" className="transition-colors hover:text-[var(--accent-text)]">
               {translateText('حریم خصوصی')}
             </Link>
-            <Link to="/contact" className="transition-colors hover:text-white">
+            <Link to="/contact" className="transition-colors hover:text-[var(--accent-text)]">
               {translateText('تماس با ما')}
             </Link>
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="inline-flex items-center gap-1 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 transition-colors hover:text-[var(--accent-text)]"
             >
               {translateText('بازگشت به بالا ')}
               <ArrowUp size={12} />
@@ -407,7 +405,7 @@ function FooterComponent() {
             ].map((gateway) => (
               <span
                 key={gateway}
-                className="rounded-lg border border-white/[0.12] bg-white/[0.03] px-2.5 py-1 text-[10px] text-[#d4d4d4]"
+                className="rounded-lg border border-[var(--border)] bg-[var(--card2)] px-2.5 py-1 text-[10px] text-[var(--text)]"
               >
                 {gateway}
               </span>

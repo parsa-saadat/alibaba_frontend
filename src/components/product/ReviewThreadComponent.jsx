@@ -117,7 +117,7 @@ export function ReviewComposer({ type, id, existing = null, parentId = null, onD
         {images.map((image, index) => (
           <div key={image}>
             <StorageImage file={image} className="w-full h-full object-cover" />
-            <button
+            <button className="icon-control"
               type="button"
               aria-label={t('reviews.removeImage')}
               onClick={() => setImages((v) => v.filter((_, i) => i !== index))}

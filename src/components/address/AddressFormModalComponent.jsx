@@ -177,7 +177,7 @@ function AddressFormModalComponent({
             <MapPin size={17} style={{ color: 'var(--accent-text)' }} />
             {isEdit ? translateText("ویرایش نشانی") : translateText("نشانی جدید")}
           </h2>
-          <button type="button" onClick={onClose} aria-label={translateText("بستن")} className="btn-ghost !p-2">
+          <button type="button" onClick={onClose} aria-label={translateText("بستن")} className="btn-ghost !p-2 icon-control">
             <X size={16} />
           </button>
         </div>

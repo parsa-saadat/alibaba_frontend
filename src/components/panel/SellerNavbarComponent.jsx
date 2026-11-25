@@ -45,18 +45,18 @@ function SellerNavbarComponent() {
   const SidebarInner = ({ isMobile = false }) => {
     const isCompact = !isMobile && collapsed;
     return (
-      <div className="flex flex-col h-full bg-[#242424] text-white select-none">
+      <div className="flex flex-col h-full panel-navigation-surface bg-[var(--card)] text-[var(--text)] select-none">
         <div
-          className={`border-b border-white/10 flex items-center ${
+          className={`border-b border-[var(--border)] flex items-center ${
             isCompact ? 'justify-center p-3' : 'justify-between gap-2 p-4'
           }`}
         >
           <Link to="/" className="flex items-center gap-2.5 min-w-0">
-            <BrandLogoComponent size="sm" tone="white" />
+            <BrandLogoComponent size="sm" tone="auto" />
             {!isCompact && (
               <div className="min-w-0">
                 <div className="font-black text-sm truncate">{translateText('پنل فروشنده')}</div>
-                <div className="text-[11px] text-[#a8a8a8] truncate">
+                <div className="text-[11px] text-[var(--muted)] truncate">
                   {userDisplayName(user, translateText('فروشنده ژئوکالا'))}
                 </div>
               </div>
@@ -66,7 +66,7 @@ function SellerNavbarComponent() {
             <button
               type="button"
               onClick={() => setCollapsed(true)}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-[#a8a8a8] shrink-0"
+              className="p-1.5 rounded-lg hover:bg-[var(--card2)] text-[var(--muted)] shrink-0"
               title={translateText('کوچک‌نمایی منو')}
               aria-label={translateText('کوچک‌نمایی منو')}
             >
@@ -77,7 +77,7 @@ function SellerNavbarComponent() {
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="p-1.5 rounded-lg hover:bg-white/10"
+              className="p-1.5 rounded-lg hover:bg-[var(--card2)] icon-control"
               aria-label={translateText('بستن منو')}
             >
               <X size={18} />
@@ -122,7 +122,7 @@ function SellerNavbarComponent() {
                   } py-2.5 rounded-xl text-sm transition-all ${
                     isActive
                       ? 'bg-[var(--primary-color)] text-white font-black shadow-md'
-                      : 'text-[#e5e5e5] hover:bg-white/10'
+                      : 'text-[var(--text)] hover:bg-[var(--card2)]'
                   }`
                 }
               >
@@ -135,14 +135,14 @@ function SellerNavbarComponent() {
           })}
         </nav>
 
-        <div className="p-3 border-t border-white/10 space-y-1">
+        <div className="p-3 border-t border-[var(--border)] space-y-1">
           <LanguageSelector variant="seller" placement="menu" compact={isCompact} />
           <button
             type="button"
             onClick={toggleTheme}
             className={`w-full flex items-center ${
               isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-            } py-2.5 rounded-xl text-sm text-[#e5e5e5] hover:bg-white/10`}
+            } py-2.5 rounded-xl text-sm text-[var(--text)] hover:bg-[var(--card2)]`}
           >
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             {!isCompact && (
@@ -155,7 +155,7 @@ function SellerNavbarComponent() {
               onClick={() => isMobile && setMobileOpen(false)}
               className={`w-full flex items-center ${
                 isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-              } py-2.5 rounded-xl text-sm text-brand-orange hover:bg-white/10`}
+              } py-2.5 rounded-xl text-sm text-brand-orange hover:bg-[var(--card2)]`}
             >
               <ShieldCheck size={17} className="shrink-0" />
               {!isCompact && <span>{translateText('پنل ادمین')}</span>}
@@ -166,7 +166,7 @@ function SellerNavbarComponent() {
             onClick={() => isMobile && setMobileOpen(false)}
             className={`w-full flex items-center ${
               isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-            } py-2.5 rounded-xl text-sm text-[#e5e5e5] hover:bg-white/10`}
+            } py-2.5 rounded-xl text-sm text-[var(--text)] hover:bg-[var(--card2)]`}
           >
             <ExternalLink size={17} className="shrink-0" />
             {!isCompact && <span>{translateText('مشاهده فروشگاه')}</span>}
@@ -179,7 +179,7 @@ function SellerNavbarComponent() {
             }}
             className={`w-full flex items-center ${
               isCompact ? 'justify-center px-2' : 'gap-2.5 px-3'
-            } py-2.5 rounded-xl text-sm text-red-300 hover:bg-red-500/15`}
+            } py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-500/15`}
           >
             <LogOut size={17} className="shrink-0" />
             {!isCompact && <span>{translateText('خروج از حساب')}</span>}
@@ -191,12 +191,12 @@ function SellerNavbarComponent() {
 
   return (
     <>
-      <div className="lg:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-theme bg-[#242424] text-white">
+      <div className="lg:hidden sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-theme panel-navigation-surface bg-[var(--card)] text-[var(--text)]">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="p-2 rounded-lg hover:bg-white/10"
+            className="p-2 rounded-lg hover:bg-[var(--card2)] icon-control"
             aria-label={translateText('باز کردن منوی پنل فروشنده')}
           >
             <Menu size={19} />
@@ -207,7 +207,7 @@ function SellerNavbarComponent() {
       </div>
 
       <aside
-        className={`hidden lg:block shrink-0 border-e border-white/10 transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
+        className={`hidden lg:block shrink-0 border-e border-[var(--border)] transition-all duration-200 lg:sticky lg:top-0 lg:h-screen self-start ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >

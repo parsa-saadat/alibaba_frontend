@@ -1,3 +1,4 @@
+import { t as translateText } from '../../i18n/runtime.js';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LoaderCircle } from 'lucide-react';

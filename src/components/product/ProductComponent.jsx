@@ -97,7 +97,7 @@ function ProductComponent({
     <button
       type="button"
       onClick={() => toggleFavorite(id)}
-      className={`${circle} h-7 w-7 @[180px]:h-8 @[180px]:w-8`}
+      className={`${`${circle} h-7 w-7 @[180px]:h-8 @[180px]:w-8`}`}
       style={{ color: fav ? '#ff4d6d' : 'var(--text-color)' }}
       aria-label={translateText('افزودن به علاقه‌مندی')}
       aria-pressed={fav}
@@ -130,7 +130,7 @@ function ProductComponent({
   const discountBadge = discount && (
     <span
       className="px-1.5 py-px rounded-sm font-black whitespace-nowrap text-[11px]"
-      style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
+      style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
     >
       {toFa(product.discount.percentage)}
       {translateText('٪ تخفیف ')}

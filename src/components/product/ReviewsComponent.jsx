@@ -260,6 +260,11 @@ export default function ReviewsComponent({ productId, storeId, incremental = fal
     [open, setOpen] = useState(false),
     [version, setVersion] = useState(0);
   const dialog = useRef(null);
+  const backdropStarted = useRef(false);
+  const outsideDialog = event => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+  };
   const type = tab === 'store' && storeId ? 'store' : productId ? 'product' : 'store',
     id = type === 'product' ? productId : storeId;
   useEffect(() => {
@@ -325,6 +330,11 @@ export default function ReviewsComponent({ productId, storeId, incremental = fal
       <dialog
         ref={dialog}
         className="reviews-dialog"
+        onPointerDown={event => {backdropStarted.current = event.target === event.currentTarget && outsideDialog(event);}}
+        onClick={event => {
+          if(backdropStarted.current && event.target === event.currentTarget && outsideDialog(event)) event.currentTarget.close();
+          backdropStarted.current = false;
+        }}
         onClose={() => {
           setOpen(false);
           setVersion((v) => v + 1);
@@ -337,7 +347,7 @@ export default function ReviewsComponent({ productId, storeId, incremental = fal
           </h3>
           <button
             type="button"
-            className="review-button secondary icon"
+            className="review-button secondary icon icon-control"
             aria-label={t('reviews.close')}
             onClick={() => dialog.current.close()}
           >

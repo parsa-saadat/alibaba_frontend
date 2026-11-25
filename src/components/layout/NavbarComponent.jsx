@@ -1,3 +1,4 @@
+import { SECTIONS } from '../panel/UserNavbarComponent';
 import LanguageSelector from '../common/locale/LanguageSelectorComponent';
 import { formatNumber } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
@@ -17,6 +18,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  ChevronLeft,
   RefreshCw,
   MessageSquare,
 } from 'lucide-react';
@@ -40,6 +42,20 @@ function NavbarComponent() {
   const [retry, setRetry] = useState(0);
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerMounted,setDrawerMounted] = useState(false);
+  const [drawerVisible,setDrawerVisible] = useState(false);
+  const drawerRef = useRef(null);
+  useEffect(()=>{
+    let first=0,second=0,timer=0;
+    if(mobileOpen){
+      setDrawerMounted(true);
+      first=requestAnimationFrame(()=>{second=requestAnimationFrame(()=>setDrawerVisible(true));});
+    }else{
+      setDrawerVisible(false);
+      timer=setTimeout(()=>setDrawerMounted(false),matchMedia('(prefers-reduced-motion:reduce)').matches?0:220);
+    }
+    return()=>{cancelAnimationFrame(first);cancelAnimationFrame(second);clearTimeout(timer);};
+  },[mobileOpen]);
   const [accountOpen, setAccountOpen] = useState(false);
   const [catsExpanded, setCatsExpanded] = useState(true);
   const [openBranchIds, setOpenBranchIds] = useState({});
@@ -47,25 +63,31 @@ function NavbarComponent() {
   const accountMenuRef = useRef(null);
   const headerRef = useRef(null);
   const [navigationHidden, setNavigationHidden] = useState(false);
-  const [heroVisible, setHeroVisible] = useState(false);
+  const home = location.pathname === '/';
+  const [heroVisible, setHeroVisible] = useState(home);
   useEffect(() => {
-    let observer;
-    const frame = requestAnimationFrame(() => {
-      const hero = document.querySelector('.home-search-hero');
-      if (location.pathname !== '/' || !hero) {
-        setHeroVisible(false);
-        return;
-      }
-      observer = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), {
-        threshold: 0,
-      });
-      observer.observe(hero);
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-      observer?.disconnect();
+    if(!home){setHeroVisible(false);return;}
+    setHeroVisible(true);
+    let frame=0;
+    const measure=()=>{
+      frame=0;
+      const forms=[...document.querySelectorAll('.home-search-hero .search-box--hero form[role="search"]')];
+      const form=forms.find(el=>el.getClientRects().length);
+      const rect=form?.getBoundingClientRect();
+      const row=headerRef.current?.querySelector('.header-main-row')?.getBoundingClientRect();
+      const top=row?.bottom||0;
+      setHeroVisible(window.scrollY<80 || Boolean(rect&&rect.bottom>top+8&&rect.top<innerHeight));
     };
-  }, [location.pathname]);
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
+    schedule();
+    const observer=new ResizeObserver(schedule);
+    const hero=document.querySelector('.home-search-hero');if(hero)observer.observe(hero);
+    // The route content may mount a frame after the shared header.
+    const mutation=new MutationObserver(schedule);const main=document.querySelector('main');if(main)mutation.observe(main,{childList:true,subtree:true});
+    window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);
+    return()=>{cancelAnimationFrame(frame);observer.disconnect();mutation.disconnect();window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
+  }, [home]);
+  const searchHidden = navigationHidden || (home && heroVisible);
   useEffect(() => {
     let previous = window.scrollY,
       movement = 0,
@@ -151,11 +173,19 @@ function NavbarComponent() {
   // مدیریت کلید Escape و قفل اسکرول بدنه هنگام باز بودن منوی موبایل
   useEffect(() => {
     if (!mobileOpen) return undefined;
+    const previousFocus=document.activeElement;
+    const focusFrame=requestAnimationFrame(()=>drawerRef.current?.querySelector('button')?.focus({preventScroll:true}));
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     const onKey = (e) => {
       if (e.key === 'Escape') setMobileOpen(false);
+      if(e.key==='Tab'){
+        const items=[...(drawerRef.current?.querySelectorAll('a,button,input,select,textarea')||[])].filter(el=>!el.disabled&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');
+        const first=items[0],last=items.at(-1);
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
+        if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
+      }
     };
     const onResize = () => {
       if (window.innerWidth >= 768) setMobileOpen(false);
@@ -164,11 +194,13 @@ function NavbarComponent() {
     document.addEventListener('keydown', onKey);
     window.addEventListener('resize', onResize);
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = prevOverflow;
+      if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
       document.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', onResize);
     };
-  }, [mobileOpen]);
+  }, [mobileOpen,drawerMounted]);
 
   // بستن منوی حساب کاربری با کلیک بیرون یا Escape (مناسب موبایل و دسکتاپ)
   useEffect(() => {
@@ -194,12 +226,8 @@ function NavbarComponent() {
   }, [accountOpen]);
 
   const categoryTree = useMemo(() => buildCategoryTree(categories), [categories]);
-  const isSeller =
-    user &&
-    ((user.role === 'seller' &&
-      user.seller_approved_status == true &&
-      user.seller_active_status == 'ACTIVE') ||
-      user.role === 'admin');
+  const isAdmin = ['admin','root'].includes(String(user?.role || '').toLowerCase());
+  const isSeller = !isAdmin && Boolean(user && (user.is_seller === true || user.role === 'seller'));
   const toggleBranch = (id) => setOpenBranchIds((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const handleLogout = () => {
@@ -214,14 +242,14 @@ function NavbarComponent() {
     const isOpen = Boolean(openBranchIds[node._id]);
 
     return (
-      <div key={node._id} className={depth > 0 ? 'pe-3 me-2 border-s border-white/15' : ''}>
+      <div key={node._id} className={depth > 0 ? 'pe-3 me-2 border-s border-[var(--border)]' : ''}>
         {hasChildren ? (
           <>
             <button
               type="button"
               onClick={() => toggleBranch(node._id)}
               aria-expanded={isOpen}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-xs text-gray-100 hover:bg-white/10 text-start font-semibold"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--card2)] text-start font-semibold"
             >
               <span className="min-w-0 truncate">{node.name}</span>
               <ChevronDown
@@ -234,7 +262,7 @@ function NavbarComponent() {
                 <Link
                   to={`/products?category_id=${node._id}`}
                   onClick={() => setMobileOpen(false)}
-                  className="block px-3 py-2 me-3 rounded-lg text-[11px] font-bold text-brand-orange hover:bg-white/10"
+                  className="block px-3 py-2 me-3 rounded-lg text-[11px] font-bold text-brand-orange hover:bg-[var(--card2)]"
                 >
                   {translateText('همه محصولات ')}
                   {node.name}
@@ -247,7 +275,7 @@ function NavbarComponent() {
           <Link
             to={`/products?category_id=${node._id}`}
             onClick={() => setMobileOpen(false)}
-            className="block px-3 py-2.5 rounded-xl text-xs text-gray-200 hover:bg-white/10 truncate"
+            className="block px-3 py-2.5 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--card2)] truncate"
           >
             {node.name}
           </Link>
@@ -265,7 +293,7 @@ function NavbarComponent() {
       </div>
       <header
         ref={headerRef}
-        className={`site-header sticky top-0 z-50  ${heroVisible ? 'home-hero-visible' : ''} ${navigationHidden && !mobileOpen ? 'is-search-hidden' : ''}`}
+        className={`site-header sticky top-0 z-50  ${home ? 'is-home-header' : ''} ${heroVisible ? 'home-hero-visible' : ''} ${navigationHidden ? 'is-search-hidden' : ''} ${home&&searchHidden ? 'is-home-search-hidden' : ''}`}
       >
         {/* نوار اصلی هدر */}
         {/*
@@ -278,7 +306,7 @@ function NavbarComponent() {
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="md:hidden btn-ghost !p-2 shrink-0"
+              className="site-mobile-menu-toggle md:hidden btn-ghost !p-2 shrink-0 icon-control"
               aria-label={translateText('باز کردن منو')}
               aria-expanded={mobileOpen}
             >
@@ -305,7 +333,7 @@ function NavbarComponent() {
             <SearchBoxComponent />
           </div>
           {/* باکس جستجو — ردیف دوم تمام‌عرض در موبایل، وسط هدر در دسکتاپ */}
-          <div className="hidden md:block w-full flex-1 max-w-xl search-shell">
+          <div className="hidden md:block w-full flex-1 max-w-xl search-shell" inert={home&&searchHidden?true:undefined} aria-hidden={home&&searchHidden?true:undefined}>
             <SearchBoxComponent />
           </div>
 
@@ -334,7 +362,7 @@ function NavbarComponent() {
             </Link>
 
             <Link
-              to="/favorites"
+              to="/account/saved"
               className="inline-flex btn-ghost !p-2 sm:!p-2.5 relative"
               title={translateText('علاقه‌مندی')}
               aria-label={translateText('علاقه‌مندی‌ها')}
@@ -364,7 +392,7 @@ function NavbarComponent() {
                   data-testid="account-trigger"
                   aria-haspopup="menu"
                   aria-label={translateText('منوی حساب کاربری')}
-                  className="btn-primary !py-2 !px-2.5 sm:!px-3 text-xs sm:text-sm inline-flex items-center gap-1.5"
+                  className="account-menu-trigger btn-primary !py-2 !px-2.5 sm:!px-3 text-xs sm:text-sm inline-flex items-center gap-1.5"
                 >
                   <User size={16} className="shrink-0" />
                   <span className="hidden md:inline max-w-[90px] truncate">
@@ -395,7 +423,7 @@ function NavbarComponent() {
                       </div>
 
                       <Link
-                        to="/profile"
+                        to="/account"
                         onClick={() => setAccountOpen(false)}
                         className="account-link"
                       >
@@ -409,41 +437,38 @@ function NavbarComponent() {
                       >
                         <MessageSquare size={15} />
                         {translateText('chat.messages')}
-                        {unread.total > 0 ? (
-                          <span className="header-badge ms-auto">{formatNumber(unread.total)}</span>
+                        {(unread.buyer_total ?? unread.total) > 0 ? (
+                          <span className="header-badge ms-auto">{formatNumber(unread.buyer_total ?? unread.total)}</span>
                         ) : null}
                       </Link>
-                      <Link
-                        to="/address"
-                        onClick={() => setAccountOpen(false)}
-                        className="account-link"
-                      >
-                        <Store size={15} />
-                        {translateText(' نشانی‌های من ')}
-                      </Link>
-                      <Link
-                        to="/orders"
-                        onClick={() => setAccountOpen(false)}
-                        className="account-link"
-                      >
-                        <ShoppingCart size={15} />
-                        {translateText(' سفارش‌های من ')}
-                      </Link>
+                      {SECTIONS.filter(section => !['dashboard','messages'].includes(section.key)).map(section => {
+                        const Icon=section.icon;
+                        return <div className="profile-menu-section" key={section.key}>
+                          <div className="profile-menu-heading">
+                            <Link to={section.path} className="account-link" onClick={()=>setAccountOpen(false)}><Icon size={15}/>{translateText(section.label)}</Link>
+                            {section.children?.length>0&&<button type="button" className="profile-submenu-toggle icon-control" aria-label={translateText(section.label)} aria-expanded={openBranchIds['profile-'+section.key]===true} onClick={()=>setOpenBranchIds(prev=>({...prev,['profile-'+section.key]:!prev['profile-'+section.key]}))}><ChevronLeft size={15}/></button>}
+                          </div>
+                          {section.children?.length>0&&<div className={`profile-menu-flyout${openBranchIds['profile-'+section.key]?' is-open':''}`}>
+                            {section.children.map(child=><Link className="account-link" to={child.path} key={child.path} onClick={()=>setAccountOpen(false)}>{translateText(child.label)}</Link>)}
+                          </div>}
+                        </div>;
+                      })}
+                      <Link to="/cart" className="account-link" onClick={()=>setAccountOpen(false)}><ShoppingCart size={15}/>{translateText('account.cart')}</Link>
                       {isSeller && (
                         <Link
                           to="/seller"
                           onClick={() => setAccountOpen(false)}
-                          className="account-link text-accent font-bold"
+                          className="account-link workspace-entry"
                         >
                           <Store size={15} />
                           {translateText(' پنل فروشنده ')}
                         </Link>
                       )}
-                      {user.role === 'admin' && (
+                      {isAdmin && (
                         <Link
-                          to="/dashboard"
+                          to="/admin"
                           onClick={() => setAccountOpen(false)}
-                          className="account-link text-accent font-bold"
+                          className="account-link workspace-entry"
                         >
                           <ShieldCheck size={15} />
                           {translateText(' پنل ادمین ')}
@@ -476,8 +501,8 @@ function NavbarComponent() {
         <div
           className="header-collapse md:hidden"
           data-testid="mobile-search-row"
-          inert={navigationHidden ? true : undefined}
-          aria-hidden={navigationHidden}
+          inert={searchHidden ? true : undefined}
+          aria-hidden={searchHidden}
         >
           <div className="header-collapse__inner">
             <div className="px-3 pb-2.5">
@@ -531,9 +556,9 @@ function NavbarComponent() {
                       {translateText('پنل فروشندگی ')}
                     </NavLink>
                   )}
-                  {user?.role === 'admin' && (
+                  {isAdmin && (
                     <NavLink
-                      to="/dashboard"
+                      to="/admin"
                       className="header-nav-link shrink-0 text-brand-orange font-bold"
                     >
                       {translateText('مدیریت سایت ')}
@@ -546,26 +571,30 @@ function NavbarComponent() {
         </div>
 
         {/* منوی کشویی موبایل */}
-        {mobileOpen && (
+        {drawerMounted && (
           <>
             <div
-              className="mobile-drawer-backdrop md:hidden"
+              className={`mobile-drawer-backdrop md:hidden${drawerVisible?' is-open':''}`}
+              aria-hidden="true"
               onClick={() => setMobileOpen(false)}
             />
             <aside
-              className="mobile-drawer md:hidden flex flex-col w-[min(86vw,340px)] max-w-full"
+              ref={drawerRef}
+              inert={!mobileOpen}
+              aria-hidden={!mobileOpen}
+              className={`mobile-drawer public-mobile-navigation md:hidden flex flex-col w-[min(86vw,340px)] max-w-full${drawerVisible?' is-open':''}`}
               role="dialog"
               aria-modal="true"
               aria-label={translateText('منوی موبایل')}
             >
-              <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
+              <div className="flex items-center justify-between p-4 border-b border-[var(--border)] shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
-                  <BrandLogoComponent variant="full" size="sm" tone="white" />
+                  <BrandLogoComponent variant="full" size="sm" tone="auto" />
                 </div>
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="btn-ghost !p-2 !text-white !border-white/15 hover:!bg-white/10 shrink-0"
+                  className="btn-ghost !p-2 !text-[var(--text)] !border-[var(--border)] hover:!bg-[var(--card2)] shrink-0 icon-control"
                   aria-label={translateText('بستن منو')}
                 >
                   <X size={18} />
@@ -579,7 +608,7 @@ function NavbarComponent() {
                   <button
                     type="button"
                     onClick={toggleTheme}
-                    className="flex items-center justify-between gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-gray-100 hover:bg-white/10"
+                    className="flex items-center justify-between gap-2 rounded-xl bg-[var(--card2)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text)] hover:bg-[var(--card2)]"
                   >
                     <span className="flex items-center gap-1.5">
                       {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
@@ -592,7 +621,7 @@ function NavbarComponent() {
                   <Link
                     to="/compare"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-gray-100 hover:bg-white/10"
+                    className="flex items-center justify-between gap-2 rounded-xl bg-[var(--card2)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text)] hover:bg-[var(--card2)]"
                   >
                     <span className="flex items-center gap-1.5">
                       <GitCompareArrows size={14} />
@@ -606,9 +635,9 @@ function NavbarComponent() {
                   </Link>
 
                   <Link
-                    to="/favorites"
+                    to="/account/saved"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-gray-100 hover:bg-white/10"
+                    className="flex items-center justify-between gap-2 rounded-xl bg-[var(--card2)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text)] hover:bg-[var(--card2)]"
                   >
                     <span className="flex items-center gap-1.5">
                       <Heart size={14} />
@@ -624,7 +653,7 @@ function NavbarComponent() {
                   <Link
                     to="/cart"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-gray-100 hover:bg-white/10"
+                    className="flex items-center justify-between gap-2 rounded-xl bg-[var(--card2)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text)] hover:bg-[var(--card2)]"
                   >
                     <span className="flex items-center gap-1.5">
                       <ShoppingCart size={14} />
@@ -640,9 +669,9 @@ function NavbarComponent() {
 
                 {/* حساب کاربری در منوی موبایل */}
                 {user ? (
-                  <div className="rounded-xl bg-white/5 border border-white/10 p-2.5 space-y-1.5">
+                  <div className="rounded-xl bg-[var(--card2)] border border-[var(--border)] p-2.5 space-y-1.5">
                     <div className="flex items-center justify-between gap-2 px-1">
-                      <span className="flex items-center gap-2 text-xs font-bold text-white min-w-0">
+                      <span className="flex items-center gap-2 text-xs font-bold text-[var(--text)] min-w-0">
                         <User size={14} className="text-brand-orange shrink-0" />
                         <span className="truncate">
                           {userDisplayName(user, translateText('حساب کاربری'))}
@@ -659,23 +688,23 @@ function NavbarComponent() {
                     </div>
                     <div className="grid grid-cols-3 gap-1.5 pt-1 text-[11px]">
                       <Link
-                        to="/profile"
+                        to="/account"
                         onClick={() => setMobileOpen(false)}
-                        className="rounded-lg bg-white/5 px-2 py-1.5 text-center text-gray-200 hover:bg-white/10"
+                        className="rounded-lg bg-[var(--card2)] px-2 py-1.5 text-center text-[var(--text)] hover:bg-[var(--card2)]"
                       >
                         {translateText('پروفایل ')}
                       </Link>
                       <Link
                         to="/orders"
                         onClick={() => setMobileOpen(false)}
-                        className="rounded-lg bg-white/5 px-2 py-1.5 text-center text-gray-200 hover:bg-white/10"
+                        className="rounded-lg bg-[var(--card2)] px-2 py-1.5 text-center text-[var(--text)] hover:bg-[var(--card2)]"
                       >
                         {translateText('سفارش‌ها ')}
                       </Link>
                       <Link
                         to="/address"
                         onClick={() => setMobileOpen(false)}
-                        className="rounded-lg bg-white/5 px-2 py-1.5 text-center text-gray-200 hover:bg-white/10"
+                        className="rounded-lg bg-[var(--card2)] px-2 py-1.5 text-center text-[var(--text)] hover:bg-[var(--card2)]"
                       >
                         {translateText('نشانی‌ها ')}
                       </Link>
@@ -698,35 +727,35 @@ function NavbarComponent() {
                     to="/"
                     end
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm font-bold hover:bg-white/10"
+                    className="block px-3 py-2.5 rounded-xl text-sm font-bold hover:bg-[var(--card2)]"
                   >
                     {translateText('صفحه اصلی ')}
                   </NavLink>
                   <NavLink
                     to="/products"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm font-bold hover:bg-white/10"
+                    className="block px-3 py-2.5 rounded-xl text-sm font-bold hover:bg-[var(--card2)]"
                   >
                     {translateText('همه محصولات ')}
                   </NavLink>
                   <Link
                     to="/products?discount=true"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-orange hover:bg-white/10"
+                    className="workspace-entry flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-bold"
                   >
                     {translateText('پیشنهادهای شگفت‌انگیز ')}
                   </Link>
                   <NavLink
                     to="/about"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm hover:bg-white/10"
+                    className="block px-3 py-2.5 rounded-xl text-sm hover:bg-[var(--card2)]"
                   >
                     {translateText('درباره ما ')}
                   </NavLink>
                   <NavLink
                     to="/contact"
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm hover:bg-white/10"
+                    className="block px-3 py-2.5 rounded-xl text-sm hover:bg-[var(--card2)]"
                   >
                     {translateText('تماس با ما ')}
                   </NavLink>
@@ -735,16 +764,16 @@ function NavbarComponent() {
                     <NavLink
                       to="/seller"
                       onClick={() => setMobileOpen(false)}
-                      className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-orange hover:bg-white/10"
+                      className="workspace-entry flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-bold"
                     >
                       {translateText('پنل فروشندگی ')}
                     </NavLink>
                   )}
-                  {user?.role === 'admin' && (
+                  {isAdmin && (
                     <NavLink
-                      to="/dashboard"
+                      to="/admin"
                       onClick={() => setMobileOpen(false)}
-                      className="block px-3 py-2.5 rounded-xl text-sm font-bold text-brand-orange hover:bg-white/10"
+                      className="workspace-entry flex items-center gap-2 px-3 py-3 rounded-xl text-sm font-bold"
                     >
                       {translateText('پنل مدیریت ادمین ')}
                     </NavLink>
@@ -752,7 +781,7 @@ function NavbarComponent() {
                 </div>
 
                 {/* دسته‌بندی کالاها */}
-                <div className="pt-3 border-t border-white/10">
+                <div className="pt-3 border-t border-[var(--border)]">
                   <button
                     type="button"
                     onClick={() => setCatsExpanded((v) => !v)}
@@ -775,12 +804,12 @@ function NavbarComponent() {
                           <div className="h-8 rounded-xl bg-white/10 animate-pulse" />
                         </div>
                       ) : error ? (
-                        <div className="rounded-xl bg-white/5 p-3 text-center space-y-2">
-                          <p className="text-[11px] text-rose-300">{error}</p>
+                        <div className="rounded-xl bg-[var(--card2)] p-3 text-center space-y-2">
+                          <p className="text-[11px] text-rose-600 dark:text-rose-300">{error}</p>
                           <button
                             type="button"
                             onClick={() => setRetry((value) => value + 1)}
-                            className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-white/20"
+                            className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-1.5 text-[11px] font-bold text-[var(--text)] hover:bg-white/20"
                           >
                             <RefreshCw size={12} />
                             {translateText('تلاش دوباره ')}

@@ -2397,7 +2397,7 @@
   "reviews.onlyUser": "Only this user",
   "reviews.onlyTarget": "Only this item",
   "attributes.title": "Key attributes",
-  "attributes.hint": "Define the names and values for this product. Up to 8 rows; no automatic translation.",
+  "attributes.hint": "Choose a content language to enter independent names and values. Up to 8 rows; removing a row removes every language. No automatic translation.",
   "attributes.name": "Attribute name",
   "attributes.value": "Attribute value",
   "attributes.remove": "Remove attribute",
@@ -2659,7 +2659,7 @@
   "profile.language": "Interface language",
   "profile.currency": "Display currency",
   "profile.appearance": "Appearance",
-  "profile.darkMode": "Dark",
+  "profile.darkMode": "Dark mode",
   "profile.lightMode": "Light",
   "profile.sellerBadge": "Seller",
   "profile.adminBadge": "Administrator",
@@ -2671,5 +2671,11 @@
   "profile.soundOn": "On",
   "profile.soundOff": "Off",
   "chat.closedShort": "Closed",
-  "chat.blockedShort": "Blocked"
+  "chat.blockedShort": "Blocked",
+  "history.browserNote": "Your searches and viewed products are saved in this browser, not across devices.",
+  "history.searches": "Search history",
+  "history.noSearches": "Searches you submit will appear here.",
+  "application.contactOnly": "Only your name and contact phone are needed now.",
+  "application.contactDetails": "Contact details",
+  "application.reviewNote": "Submit your details for account review. Bank details are added later in your seller panel."
 }

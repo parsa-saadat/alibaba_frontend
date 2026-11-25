@@ -318,7 +318,7 @@ function OrdersPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#242424',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -350,7 +350,7 @@ function OrdersPage() {
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
+              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2 icon-control"
               aria-label={translateText('پاک کردن جستجو')}
             >
               <X size={13} />
@@ -621,7 +621,7 @@ function OrdersPage() {
               <button
                 type="button"
                 onClick={() => setCancelTarget(null)}
-                className="btn-ghost !p-1.5"
+                className="btn-ghost !p-1.5 icon-control"
                 aria-label={translateText('بستن')}
               >
                 <X size={16} />
@@ -646,7 +646,7 @@ function OrdersPage() {
                       cancelPreset === reason
                         ? {
                             background: 'var(--primary-color)',
-                            color: '#242424',
+                            color: 'var(--on-primary)',
                             borderColor: 'transparent',
                           }
                         : undefined

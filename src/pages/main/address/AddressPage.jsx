@@ -401,7 +401,7 @@ function AddressPage() {
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(item)}
-                    className="btn-ghost ms-auto inline-flex items-center gap-1 !p-2 text-[11px] text-rose-500"
+                    className="btn-ghost ms-auto inline-flex items-center gap-1 !p-2 text-[11px] text-rose-500 icon-control"
                     aria-label={translateText("حذف نشانی")}
                     title={translateText("حذف نشانی")}
                   >
@@ -451,7 +451,7 @@ function AddressPage() {
             <div className="mb-4 flex items-center justify-between gap-3 border-b border-theme pb-3">
               <h2 id="add-address-title" className="flex items-center gap-2 text-base font-black">
                 <MapPin size={17} style={{ color: 'var(--accent-text)' }} />{translateText("نشانی جدید ")}</h2>
-              <button type="button" onClick={closeForm} aria-label={translateText("بستن")} className="btn-ghost !p-2">
+              <button type="button" onClick={closeForm} aria-label={translateText("بستن")} className="btn-ghost !p-2 icon-control">
                 <X size={16} />
               </button>
             </div>

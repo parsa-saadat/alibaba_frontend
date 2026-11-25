@@ -2397,7 +2397,7 @@
   "reviews.onlyUser": "هذا المستخدم فقط",
   "reviews.onlyTarget": "هذا العنصر فقط",
   "attributes.title": "الخصائص الرئيسية",
-  "attributes.hint": "حدّد أسماء الخصائص وقيمها لهذا المنتج. حتى ٨ صفاً دون ترجمة تلقائية.",
+  "attributes.hint": "اختر لغة المحتوى لإدخال أسماء وقيم مستقلة. حتى ٨ صفوف؛ حذف الصف يزيل جميع لغاته. لا توجد ترجمة تلقائية.",
   "attributes.name": "اسم الخاصية",
   "attributes.value": "قيمة الخاصية",
   "attributes.remove": "إزالة الخاصية",
@@ -2659,7 +2659,7 @@
   "profile.language": "لغة الواجهة",
   "profile.currency": "عملة العرض",
   "profile.appearance": "المظهر",
-  "profile.darkMode": "داكن",
+  "profile.darkMode": "الوضع الداكن",
   "profile.lightMode": "فاتح",
   "profile.sellerBadge": "بائع",
   "profile.adminBadge": "المشرف",
@@ -2671,5 +2671,11 @@
   "profile.soundOn": "مفعّل",
   "profile.soundOff": "متوقّف",
   "chat.closedShort": "مغلقة",
-  "chat.blockedShort": "محظورة"
+  "chat.blockedShort": "محظورة",
+  "history.browserNote": "تُحفظ عمليات البحث والمنتجات التي شاهدتها في هذا المتصفح فقط، وليس عبر الأجهزة.",
+  "history.searches": "سجل البحث",
+  "history.noSearches": "ستظهر عمليات البحث التي تجريها هنا.",
+  "application.contactOnly": "نحتاج الآن إلى اسمك ورقم هاتف التواصل فقط.",
+  "application.contactDetails": "بيانات التواصل",
+  "application.reviewNote": "أرسل بياناتك لمراجعة الحساب. تُضاف البيانات البنكية لاحقاً في لوحة البائع."
 }

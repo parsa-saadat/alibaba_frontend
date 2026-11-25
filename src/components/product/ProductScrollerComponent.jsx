@@ -54,10 +54,10 @@ function ProductScrollerComponent({
             <Link to={moreTo} className="text-sm font-bold flex items-center gap-1 text-accent">{translateText("مشاهده همه ")}<ChevronLeft className="logical-icon" size={15} />
             </Link>
           ) : null}
-          <button type="button" onClick={() => scroll(-1)} className={arrow} aria-label={translateText("قبلی")}>
+          <button type="button" onClick={() => scroll(-1)} className={`icon-control ${arrow}`} aria-label={translateText("قبلی")}>
             <ChevronRight className="logical-icon" size={18} />
           </button>
-          <button type="button" onClick={() => scroll(1)} className={arrow} aria-label={translateText("بعدی")}>
+          <button type="button" onClick={() => scroll(1)} className={`icon-control ${arrow}`} aria-label={translateText("بعدی")}>
             <ChevronLeft className="logical-icon" size={18} />
           </button>
         </div>

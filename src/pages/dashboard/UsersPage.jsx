@@ -248,7 +248,7 @@ function UsersPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#242424',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -276,7 +276,7 @@ function UsersPage() {
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
+              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2 icon-control"
               aria-label={translateText('پاک کردن جستجو')}
             >
               <X size={13} />
@@ -437,7 +437,7 @@ function UsersPage() {
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(u)}
-                    className="btn-ghost !p-2"
+                    className="btn-ghost !p-2 icon-control"
                     style={{ color: '#e53935' }}
                     title={translateText('حذف کاربر')}
                     aria-label={translateText('حذف کاربر')}
@@ -481,7 +481,7 @@ function UsersPage() {
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="btn-ghost !p-1.5"
+                className="btn-ghost !p-1.5 icon-control"
                 aria-label={translateText('بستن')}
               >
                 <X size={16} />

@@ -1,3 +1,6 @@
+import { createPortal } from 'react-dom';
+import { direction } from '../../i18n/runtime';
+import useMobileConversation from '../../hooks/useMobileConversation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { t as translateText } from '../../i18n/runtime.js';
 import { Ban, CheckCircle2, MessagesSquare, ShieldCheck } from 'lucide-react';
@@ -11,6 +14,7 @@ import { chatStats, setConversationStatus } from '../../services/chatApi';
 import { toFa } from '../../utils/helpers/format';
 import { getId } from '../../utils/helpers/response';
 import { personName } from '../../utils/helpers/chat-format';
+import { Link } from 'react-router-dom';
 import { useChat } from '../../contexts/ChatContext';
 
 /*
@@ -21,6 +25,8 @@ import { useChat } from '../../contexts/ChatContext';
 export default function AdminMessagesPage() {
   const [stats, setStats] = useState(null);
   const [active, setActive] = useState(null);
+  const close = useCallback(()=>setActive(null),[]);
+  const mobile = useMobileConversation(active?._id,close);
   const [inboxState, setInboxState] = useState({ loading: true, count: 0 });
   const { on } = useChat();
 
@@ -58,22 +64,8 @@ export default function AdminMessagesPage() {
 
   const soloEmpty = !inboxState.loading && inboxState.count === 0 && !active;
 
-  return (
-    <div className="space-y-4">
-      <PanelPageHeader
-        icon={MessagesSquare}
-        title={translateText('chat.adminTitle')}
-        subtitle={translateText('chat.adminHint')}
-      />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatTile label={translateText('chat.statConversations')} value={toFa(stats?.conversations ?? '—')} />
-        <StatTile label={translateText('chat.statMessages')} value={toFa(stats?.messages ?? '—')} />
-        <StatTile label={translateText('chat.statOpen')} value={toFa(stats?.open ?? '—')} />
-        <StatTile label={translateText('chat.statBlocked')} value={toFa(stats?.blocked ?? '—')} />
-      </div>
-
-      <div className={`chat-messenger is-admin${soloEmpty ? ' is-solo' : ''}`}>
+  const messenger = (
+      <div dir={direction} role={mobile&&active?'dialog':undefined} aria-modal={mobile&&active?true:undefined} aria-label={translateText('chat.messages')} className={`chat-messenger is-admin${active ? ' has-active' : ''}${mobile&&active ? ' chat-mobile-fullscreen' : ''}${soloEmpty ? ' is-solo' : ''}`}>
         {soloEmpty ? (
           <ChatEmptyStateComponent
             icon={MessagesSquare}
@@ -135,8 +127,10 @@ export default function AdminMessagesPage() {
                   </div>
 
                   <ChatThreadComponent
-                    conversation={{ ...active, role: 'admin' }}
-                    readOnly
+                    conversation={active}
+                    onBack={mobile?close:undefined}
+                    onClose={mobile?close:undefined}
+                    readOnly={active.role === 'admin' || active.status !== 'OPEN'}
                     readOnlyReason={translateText('chat.adminReadOnly')}
                   />
                 </>
@@ -151,6 +145,25 @@ export default function AdminMessagesPage() {
           </>
         )}
       </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <Link to="/products" className="btn-primary inline-flex">{translateText("chat.new")}</Link>
+      <PanelPageHeader
+        icon={MessagesSquare}
+        title={translateText('chat.adminTitle')}
+        subtitle={translateText('chat.adminHint')}
+      />
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatTile label={translateText('chat.statConversations')} value={toFa(stats?.conversations ?? '—')} />
+        <StatTile label={translateText('chat.statMessages')} value={toFa(stats?.messages ?? '—')} />
+        <StatTile label={translateText('chat.statOpen')} value={toFa(stats?.open ?? '—')} />
+        <StatTile label={translateText('chat.statBlocked')} value={toFa(stats?.blocked ?? '—')} />
+      </div>
+
+      {mobile&&active ? createPortal(messenger,document.body) : messenger}
     </div>
   );
 }

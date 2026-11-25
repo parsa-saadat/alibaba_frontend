@@ -33,7 +33,9 @@ export function readContent(value) {
   const result = {};
   const translations = {};
   for (const [field, text] of Object.entries(value)) {
-    if (
+    if (field === 'key_attributes' && Array.isArray(text)) {
+      result[field] = structuredClone(text);
+    } else if (
       fields.includes(field) &&
       text &&
       Object.getPrototypeOf(text) === Object.prototype &&

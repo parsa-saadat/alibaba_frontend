@@ -55,7 +55,7 @@ function ProductViewSwitcher({ value, onChange, className = '' }) {
             className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold transition-all duration-200 ${
               mode.mobileOnly ? 'lg:hidden' : ''
             } ${active ? 'shadow-md' : 'muted hover:opacity-80'}`}
-            style={active ? { background: 'var(--primary-color)', color: 'var(--on-primary' } : undefined}
+            style={active ? { background: 'var(--primary-color)', color: 'var(--on-primary)' } : undefined}
           >
             <Icon size={14} />
             {/* در دسکتاپ فقط آیکن — متن فقط در موبایل */}

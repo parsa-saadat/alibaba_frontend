@@ -118,6 +118,7 @@ export function SellerStoreCard({
   sellerId,
   onOpenContact,
   className = '',
+  hidePhone = false,
 }) {
   /* اگر داده از والد نرسیده باشد، خودِ کارت از بک‌اند می‌گیرد */
   const resolvedStoreId = getId(store) || getId(storeId) || getId(product?.store_id);
@@ -265,7 +266,7 @@ export function SellerStoreCard({
         ) : (
           <>
             {/* ───── ۲) شماره تماس ───── */}
-            <div className="min-w-0 border-t border-theme pt-3 lg:min-w-[210px] lg:max-w-[280px] lg:flex-1 lg:border-s lg:border-t-0 lg:ps-4 lg:pt-0">
+            {!hidePhone && <div className="min-w-0 border-t border-theme pt-3 lg:min-w-[210px] lg:max-w-[280px] lg:flex-1 lg:border-s lg:border-t-0 lg:ps-4 lg:pt-0">
               <div className="flex items-center gap-2">
                 <span
                   className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
@@ -291,7 +292,7 @@ export function SellerStoreCard({
                   )}
                 </div>
               </div>
-            </div>
+            </div>}
 
             {/* ───── ۴) دو دکمه‌ی هم‌اندازه ─────
                 دکمهٔ «اطلاعات تماس» فقط آن‌جا نشان داده می‌شود که والد آن را

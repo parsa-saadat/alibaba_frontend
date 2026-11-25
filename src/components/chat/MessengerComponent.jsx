@@ -1,3 +1,6 @@
+import { createPortal } from 'react-dom';
+import { direction } from '../../i18n/runtime';
+import useMobileConversation from '../../hooks/useMobileConversation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { t as translateText } from '../../i18n/runtime.js';
 import { MessagesSquare, Store } from 'lucide-react';
@@ -14,6 +17,8 @@ import { getConversation } from '../../services/chatApi';
 function MessengerComponent({ as = 'buyer', scope, initialConversationId, onSelect, onCreate, onBrowse }) {
   const { connected, on } = useChat();
   const [active, setActive] = useState(null);
+  const close = useCallback(()=>setActive(null),[]);
+  const mobile = useMobileConversation(active?._id,close);
   const [inboxState, setInboxState] = useState({ loading: true, count: 0 });
   const handleInboxState = useCallback((next) => setInboxState(next), []);
   const soloEmpty = !inboxState.loading && inboxState.count === 0 && !active;
@@ -32,7 +37,7 @@ function MessengerComponent({ as = 'buyer', scope, initialConversationId, onSele
     let cancelled = false;
     getConversation(initialConversationId)
       .then((row) => {
-        if (!cancelled && row) setActive(row);
+        if (!cancelled && row && ((row.workspace || row.role) === as || scope === 'all')) setActive(row);
       })
       .catch(() => {
         /* گفتگوی متعلق به کاربر نیست یا حذف شده — نمای پیشین می‌ماند */
@@ -40,7 +45,7 @@ function MessengerComponent({ as = 'buyer', scope, initialConversationId, onSele
     return () => {
       cancelled = true;
     };
-  }, [initialConversationId]);
+  }, [initialConversationId, as, scope]);
 
   /* اگر گفتگوی فعال بسته/مسدود شد، همان رشته تازه می‌شود */
   useEffect(
@@ -52,8 +57,8 @@ function MessengerComponent({ as = 'buyer', scope, initialConversationId, onSele
     [on],
   );
 
-  return (
-    <div className={`chat-messenger${active ? ' has-active' : ''}${soloEmpty ? ' is-solo' : ''}`}>
+  const view = (
+    <div dir={direction} role={mobile&&active?'dialog':undefined} aria-modal={mobile&&active?true:undefined} aria-label={translateText('chat.messages')} className={`chat-messenger${mobile&&active ? ' chat-mobile-fullscreen' : ''}${active ? ' has-active' : ''}${soloEmpty ? ' is-solo' : ''}`}>
       <div className="chat-messenger-status" role="status" aria-live="polite">
         <span className={`chat-dot${connected ? ' is-on' : ''}`} aria-hidden />
         {translateText(connected ? 'chat.connected' : 'chat.reconnecting')}
@@ -78,7 +83,8 @@ function MessengerComponent({ as = 'buyer', scope, initialConversationId, onSele
             {active ? (
               <ChatThreadComponent
                 conversation={active}
-                onBack={() => setActive(null)}
+                onBack={close}
+                onClose={mobile?close:undefined}
                 readOnly={active.status === 'BLOCKED' || active.status === 'CLOSED'}
                 readOnlyReason={translateText(active.status === 'BLOCKED' ? 'chat.blockedNotice' : 'chat.closedNotice')}
               />
@@ -103,6 +109,7 @@ function MessengerComponent({ as = 'buyer', scope, initialConversationId, onSele
       )}
     </div>
   );
+  return mobile&&active ? createPortal(view,document.body) : view;
 }
 
 export default MessengerComponent;

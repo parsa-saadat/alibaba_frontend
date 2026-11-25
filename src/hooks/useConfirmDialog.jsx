@@ -63,7 +63,7 @@ function ConfirmDialog({ options, settle }) {
           </h2>
           <button
             type="button"
-            className="btn-ghost !p-2"
+            className="btn-ghost !p-2 icon-control"
             aria-label={t('بستن')}
             onClick={() => settle(false)}
           >

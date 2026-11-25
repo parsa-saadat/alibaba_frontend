@@ -1,4 +1,5 @@
-import { language, currency, formatMoney, currencyLabel } from '../../i18n/runtime';
+import { rememberSearch } from '../../utils/helpers/browsing-history';
+import { direction, language, currency, formatMoney, currencyLabel } from '../../i18n/runtime';
 import { jalaliYearOfGregorian } from '../../utils/helpers/jalali';
 import { t as translateText } from '../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -1182,6 +1183,8 @@ function ShopPage() {
   const asideRef = useRef(null);
 
   const search = searchParams.toString();
+  const searchTerm = searchParams.get('name') || searchParams.get('q') || '';
+  useEffect(() => { rememberSearch(searchTerm); }, [searchTerm]);
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const sort = searchParams.get('sort') || '';
   const filters = Object.fromEntries(FILTER_KEYS.map((key) => [key, searchParams.get(key) || '']));
@@ -1394,18 +1397,19 @@ function ShopPage() {
 
   return (
     <div
-      className="mx-auto site-width max-w-7xl space-y-4 px-3 py-5 sm:space-y-5 sm:px-4 sm:py-6"
+      dir={direction}
+      className="catalog-page mx-auto site-width max-w-7xl space-y-4 px-3 py-5 sm:space-y-5 sm:px-4 sm:py-6"
       style={{ color: 'var(--text)' }}
     >
       {/* هدر */}
-      <header className="card relative overflow-hidden rounded-3xl p-4 sm:p-5 md:p-6">
+      <header className="catalog-page-header card relative overflow-hidden rounded-3xl p-4 sm:p-5 md:p-6">
         <div
           aria-hidden
           className="pointer-events-none absolute -end-20 -top-20 h-56 w-56 rounded-full blur-3xl"
           style={{ background: 'color-mix(in srgb, var(--primary-color) 12%, transparent)' }}
         />
         <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="min-w-0">
+          <div className="catalog-heading-text min-w-0">
             <nav className="flex flex-wrap items-center gap-1.5 text-[11px] muted">
               <Link to="/" className="transition hover:opacity-70">
                 {translateText('خانه ')}
@@ -1417,11 +1421,11 @@ function ShopPage() {
               {activeCategory && (
                 <>
                   <ChevronLeft className="logical-icon" size={12} />
-                  <span className="max-w-[40vw] truncate">{activeCategory.name}</span>
+                  <bdi dir="auto" className="max-w-[60vw] truncate">{activeCategory.name}</bdi>
                 </>
               )}
             </nav>
-            <h1 className="mt-2 truncate text-lg font-black sm:text-xl md:text-2xl">{title}</h1>
+            <h1 className="mt-2 text-lg font-black sm:text-xl md:text-2xl"><bdi dir="auto">{title}</bdi></h1>
             <p className="mt-1 text-xs muted" aria-live="polite">
               {loading
                 ? isSuppliers

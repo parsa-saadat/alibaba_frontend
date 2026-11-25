@@ -18,12 +18,17 @@ function ChatMessageComponent({
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(message.body || '');
+  const [saving,setSaving] = useState(false);
 
-  const commit = () => {
+  const commit = async () => {
+    if(saving)return;
     const value = draft.trim();
     if (!value || value === message.body) return setEditing(false);
-    onEdit?.(message._id, value);
-    setEditing(false);
+    setSaving(true);
+    try {
+      const ok = await onEdit?.(message._id, value);
+      if(ok !== false)setEditing(false);
+    } finally {setSaving(false);}
   };
 
   const deleted = message.kind === 'deleted';
@@ -31,7 +36,7 @@ function ChatMessageComponent({
 
   return (
     <div className={`chat-row${mine ? ' is-mine' : ''}`}>
-      {!mine && <span className="chat-avatar" aria-hidden>{(counterpartName || '?').slice(0, 1)}</span>}
+      <span className={`chat-avatar${mine ? ' is-mine' : ''}`} aria-hidden>{mine ? translateText('chat.youInitial') : (counterpartName || '?').slice(0, 1)}</span>
 
       <div className="chat-bubble-wrap">
         {!mine && <span className="chat-sender">{counterpartName || translateText('chat.seller')}</span>}
@@ -45,24 +50,27 @@ function ChatMessageComponent({
               rows={2}
               value={draft}
               maxLength={4000}
+              disabled={saving}
               autoFocus
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={(event) => {
+                if (event.nativeEvent.isComposing) return;
                 if (event.key === 'Enter' && !event.shiftKey) {
                   event.preventDefault();
                   commit();
                 }
-                if (event.key === 'Escape') setEditing(false);
+                if (event.key === 'Escape') {event.preventDefault();event.stopPropagation();setEditing(false);}
               }}
             />
             <div className="chat-edit-actions">
-              <button type="button" className="review-button primary" onClick={commit}>
+              <button type="button" className="review-button primary" disabled={saving} onClick={commit}>
                 {translateText('chat.saveEdit')}
               </button>
               <button
                 type="button"
-                className="review-button secondary icon"
+                className="review-button secondary icon icon-control"
                 aria-label={translateText('chat.cancelEdit')}
+                disabled={saving}
                 onClick={() => {
                   setDraft(message.body || '');
                   setEditing(false);
@@ -74,6 +82,7 @@ function ChatMessageComponent({
           </div>
         ) : (
           <div className="chat-bubble">
+            {message.pin && <ChatPinComponent pin={message.pin} compact />}
             {message.body ? <p className="chat-body">{message.body}</p> : null}
 
             {message.images?.length > 0 && (
@@ -89,7 +98,6 @@ function ChatMessageComponent({
               </div>
             )}
 
-            {message.pin && <ChatPinComponent pin={message.pin} compact />}
           </div>
         )}
 
@@ -111,7 +119,7 @@ function ChatMessageComponent({
                 className="chat-action"
                 aria-label={translateText('chat.editMessage')}
                 title={translateText('chat.editMessage')}
-                onClick={() => setEditing(true)}
+                onClick={() => {setDraft(message.body || '');setEditing(true);}}
               >
                 <Pencil size={12} />
               </button>
@@ -129,7 +137,6 @@ function ChatMessageComponent({
         </div>
       </div>
 
-      {mine && <span className="chat-avatar is-mine" aria-hidden>{translateText('chat.youInitial')}</span>}
     </div>
   );
 }

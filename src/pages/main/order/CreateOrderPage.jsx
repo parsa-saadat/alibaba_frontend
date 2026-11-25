@@ -50,7 +50,7 @@ const STEPS = [
 ];
 
 /* رنگ‌ها فقط از متغیرهای تم می‌آیند تا در تم روشن و تاریک یکسان باشد */
-const ACCENT = { background: 'var(--primary-color)', color: 'var(--on-primary' };
+const ACCENT = { background: 'var(--primary-color)', color: 'var(--on-primary)' };
 const ACCENT_SOFT = {
   background: 'color-mix(in srgb, var(--primary-color) 16%, transparent)',
   color: 'var(--accent-text)',
@@ -389,7 +389,7 @@ function CreateOrderPage() {
             <Link to="/products" className="btn-primary">
               {translateText('شروع خرید ')}
             </Link>
-            <Link to="/favorites" className="btn-ghost">
+            <Link to="/account/saved" className="btn-ghost">
               {translateText('علاقه‌مندی‌ها ')}
             </Link>
           </div>

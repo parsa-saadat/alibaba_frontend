@@ -41,7 +41,7 @@ export function ChatProvider({ children }) {
   const refreshUnread = useCallback(async () => {
     try {
       const body = await unreadSummary();
-      if (body) setUnread({ total: body.total || 0, conversations: body.conversations || 0, blocked: body.blocked === true });
+      if (body) setUnread({ total: body.total || 0, buyer_total: body.buyer_total ?? body.total ?? 0, seller_total: body.seller_total || 0, conversations: body.conversations || 0, blocked: body.blocked === true });
     } catch {
       /* شمارندهٔ ناخوانده نباید رابط را بشکند */
     }
@@ -71,7 +71,7 @@ export function ChatProvider({ children }) {
         id: `chat-${message._id}`,
         title: nameText(message.sender_name) || translateText(other),
         preview: previewOf(message),
-        to: `/account/messages?conversation=${encodeURIComponent(String(payload.conversation_id))}`,
+        to: `${(message.recipient_is_seller === false ? message.sender_role === 'seller' : message.sender_role === 'buyer') && (user?.is_seller === true || user?.role === 'seller') ? '/seller/messages' : '/account/messages'}?conversation=${encodeURIComponent(String(payload.conversation_id))}`,
       });
     },
     [refreshUnread, user?._id],
@@ -192,7 +192,7 @@ export function ChatProvider({ children }) {
         const body = await openConversation(params);
         const conversation = body?.conversation;
         if (!conversation) throw new Error('empty');
-        setDock({ open: true, busy: false, conversation: { ...conversation, _id: String(conversation._id) } });
+        setDock({ open: true, busy: false, conversation: { ...conversation, _id: String(conversation._id), _composePin: Boolean(params.product_id || params.store_id), _composeNonce: `${Date.now()}-${Math.random()}` } });
         return conversation;
       } catch (error) {
         setDock((prev) => ({ ...prev, busy: false }));
@@ -203,12 +203,13 @@ export function ChatProvider({ children }) {
     [user?._id],
   );
 
+  const consumePin = useCallback((id, nonce) => setDock(prev => String(prev.conversation?._id) === String(id) && prev.conversation?._composeNonce === nonce ? { ...prev, conversation: { ...prev.conversation, _composePin: false } } : prev), []);
   const closeChat = useCallback(() => setDock((prev) => ({ ...prev, open: false })), []);
   const showChat = useCallback(() => setDock((prev) => ({ ...prev, open: true })), []);
 
   const value = useMemo(
-    () => ({ connected, unread, refreshUnread, on, publish, setUnread, dock, openChat, closeChat, showChat, setActiveConversation }),
-    [connected, unread, refreshUnread, on, publish, dock, openChat, closeChat, showChat, setActiveConversation],
+    () => ({ connected, unread, refreshUnread, on, publish, setUnread, dock, openChat, closeChat, showChat, consumePin, setActiveConversation }),
+    [connected, unread, refreshUnread, on, publish, dock, openChat, closeChat, showChat, consumePin, setActiveConversation],
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

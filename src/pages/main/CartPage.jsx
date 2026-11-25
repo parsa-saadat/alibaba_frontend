@@ -329,7 +329,7 @@ function CartPage() {
               <Sparkles size={16} />
               {translateText('شروع خرید ')}
             </Link>
-            <Link to="/favorites" className="btn-ghost inline-flex items-center gap-2">
+            <Link to="/account/saved" className="btn-ghost inline-flex items-center gap-2">
               {translateText('علاقه‌مندی‌ها ')}
             </Link>
           </div>

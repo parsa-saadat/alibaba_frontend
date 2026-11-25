@@ -127,19 +127,7 @@ export default function AccountPaymentPage() {
         </ul>
       </section>
 
-      <section className="card rounded-3xl p-5">
-        <div className="account-section-head">
-          <b>{translateText('account.coupons')}</b>
-        </div>
-        <div className="account-empty-block is-compact">
-          <Ticket size={26} className="muted" />
-          <b>{translateText('account.notAvailable')}</b>
-          <p>{translateText('account.notAvailableHint')}</p>
-          <Link to="/products" className="btn-ghost">
-            {translateText('account.startSourcing')}
-          </Link>
-        </div>
-      </section>
+
     </div>
   );
 }

@@ -210,7 +210,7 @@ function WelcomeStrip() {
         />
 
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/profile" className={link}>
+          <Link to="/account" className={link}>
             <ClipboardList size={22} />
             {translateText(' درخواست فروشندگی ')}
           </Link>
@@ -361,6 +361,14 @@ function CategoryShowcase({ category, products, loading }) {
 
 /* ───────── اسکرول ساده از آخرین محصولات ───────── */
 function HeaderComponent({ products = [], categories = [], loading = false }) {
+  useEffect(() => {
+    const pane = document.querySelector('[data-testid="category-showcase"]');
+    const layout = pane?.closest('.home-category-layout');
+    if (!pane || !layout) return;
+    const update = () => layout.style.setProperty('--showcase-h', `${Math.ceil(pane.getBoundingClientRect().height)}px`);
+    const observer = new ResizeObserver(update); observer.observe(pane); update();
+    return () => observer.disconnect();
+  }, []);
   /* محو‌شدگی ردیف چیپ‌های موبایل فقط وقتی سرریز دارد */
   const [mobileRowRef, , mobileRowFade] = useScrollFade();
   const [hoveredCatId, setHoveredCatId] = useState(null);
@@ -370,7 +378,7 @@ function HeaderComponent({ products = [], categories = [], loading = false }) {
     clearTimeout(hoverTimer.current);
     if (!id) return;
     if (immediate) setHoveredCatId(id);
-    else hoverTimer.current = setTimeout(() => setHoveredCatId(id), 140);
+    else setHoveredCatId(id);
   };
 
   // دسته‌بندی فعال: دسته‌ای که موس روی آن است، یا به صورت پیش‌فرض اولین دسته‌ای که محصول دارد

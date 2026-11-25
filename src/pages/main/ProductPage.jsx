@@ -1,4 +1,5 @@
-import { direction as siteDirection } from '../../i18n/runtime';
+import { displayAttributes } from '../../utils/helpers/attributes.mjs';
+import { language, direction as siteDirection } from '../../i18n/runtime';
 import ReviewsComponent from '../../components/product/ReviewsComponent';
 import { direction as i18nDirection } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
@@ -105,7 +106,7 @@ function CopyUrlButton() {
     <button
       type="button"
       onClick={handleCopy}
-      className="btn-ghost !p-2"
+      className="btn-ghost product-detail-icon"
       aria-label={copied ? translateText('لینک کپی شد') : translateText('کپی لینک محصول')}
       title={copied ? translateText('لینک کپی شد') : translateText('کپی لینک')}
     >
@@ -311,7 +312,7 @@ function MobileBottomBar({
       <div className="mx-auto flex site-width max-w-7xl items-center gap-3 px-3 pt-2.5">
         <ChatNowButton
           className="product-mobile-chat"
-          variant="ghost"
+          variant="solid"
           label={translateText('chat.chatNowShort')}
           seller_id={chatSellerId}
           product_id={chatProductId}
@@ -338,7 +339,7 @@ function MobileBottomBar({
             type="button"
             onClick={onIncrement}
             disabled={soldOut || !loggedIn}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-3 text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: 'var(--primary-color)' }}
             aria-label={translateText('افزودن به سبد خرید')}
           >
@@ -346,7 +347,7 @@ function MobileBottomBar({
             {soldOut ? translateText('ناموجود') : translateText('افزودن به سبد')}
           </button>
         ) : (
-          <div className="flex shrink-0 items-center gap-1.5 rounded-xl border border-theme bg-[var(--card2)]/60 p-1">
+          <div className="product-mobile-quantity flex shrink-0 items-center justify-between gap-1.5 rounded-xl border border-theme bg-[var(--card2)]/60 p-1">
             <button
               type="button"
               onClick={onDecrement}
@@ -635,15 +636,7 @@ function ProductPage() {
   /* ---------- داده‌های محاسبه‌شده ---------- */
 
   const images = productImages(product) || [];
-  const keyAttributes = (
-    Array.isArray(product.key_attributes) ? product.key_attributes : []
-  ).filter(
-    (row) =>
-      typeof row?.name === 'string' &&
-      row.name.trim() &&
-      typeof row?.value === 'string' &&
-      row.value.trim(),
-  );
+  const keyAttributes = displayAttributes(product.key_attributes, language);
   const storeId = getId(product.store_id);
   const categoryId = getId(product.category_id);
 
@@ -791,12 +784,12 @@ function ProductPage() {
             </div>
 
             {/* 🔧 دکمه‌های اکشن هم‌اندازه — کپی لینک، علاقه‌مندی، مقایسه */}
-            <div className="flex items-center gap-1">
+            <div className="product-detail-actions flex items-center gap-1">
               <CopyUrlButton />
               <button
                 type="button"
                 onClick={() => toggleFavorite(activeProductId)}
-                className="btn-ghost !p-2"
+                className="btn-ghost product-detail-icon"
                 aria-label={
                   favorite
                     ? translateText('حذف از علاقه‌مندی‌ها')
@@ -813,7 +806,7 @@ function ProductPage() {
               <button
                 type="button"
                 onClick={() => toggleCompare(activeProductId)}
-                className="btn-ghost !p-2"
+                className="btn-ghost product-detail-icon"
                 aria-label={
                   compared ? translateText('حذف از مقایسه') : translateText('افزودن به مقایسه')
                 }
@@ -910,7 +903,7 @@ function ProductPage() {
                     </span>
                     <TrustBadge trusted={sellerTrusted} />
                   </span>
-                  <ArrowLeft size={14} className="shrink-0 muted" />
+                  <ArrowLeft size={14} className="logical-icon shrink-0 muted" />
                 </Link>
               ) : (
                 <div className="flex items-center gap-2 muted">
@@ -949,11 +942,12 @@ function ProductPage() {
                 onIncrement={incrementCart}
                 onDecrement={decrementCart}
               />
+              <ChatNowButton seller_id={getId(owner?._id) || getId(product.seller_id)} product_id={activeProductId} store_id={storeId} variant="solid" className="product-primary-chat" />
             </div>
           </aside>
           {/* فروشگاه فروشنده — تماس با فروشنده در خود صفحهٔ فروشگاه است */}
           <div className="mt-6 lg:mt-8">
-            <SellerStoreCard store={store} owner={owner} product={product} />
+            <SellerStoreCard store={store} owner={owner} product={product} hidePhone />
           </div>
         </div>
       </div>
@@ -1092,13 +1086,13 @@ function ProductPage() {
               )}
             </div>
 
-            <div className="mt-3 space-y-2">
+            <div className="product-purchase-buttons mt-3">
               {cartQty === 0 ? (
                 <button
                   type="button"
                   onClick={incrementCart}
                   disabled={soldOut || !loggedIn}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
                   style={{ background: 'var(--primary-color)' }}
                 >
                   <ShoppingCart size={16} />

@@ -119,7 +119,7 @@ function MegaMenuComponent({ categories = [], loading = false, error = '', onRet
         .finally(() => {
           if (!controller.signal.aborted) setSamplesLoading(false);
         });
-    }, 120);
+    }, 0);
     return () => {
       window.clearTimeout(timer);
       controller.abort();

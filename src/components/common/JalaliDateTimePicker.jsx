@@ -31,7 +31,7 @@ function DayCell({ day, selected, today, onClick }) {
   const base =
     'h-8 w-8 rounded-lg text-xs font-bold grid place-items-center transition-colors';
   const style = selected
-    ? { background: 'var(--primary-color)', color: '#242424' }
+    ? { background: 'var(--primary-color)', color: 'var(--on-primary)' }
     : today
       ? { background: 'rgba(255,106,0,0.16)', color: 'var(--text)' }
       : undefined;
@@ -324,7 +324,7 @@ export default function JalaliDateTimePicker({
             <button
               type="button"
               onClick={() => moveMonth(-1)}
-              className="btn-ghost !p-1"
+              className="btn-ghost !p-1 icon-control"
               aria-label={translateText("ماه قبل")}
             >
               <ChevronRight className="logical-icon" size={14} />
@@ -358,7 +358,7 @@ export default function JalaliDateTimePicker({
             <button
               type="button"
               onClick={() => moveMonth(1)}
-              className="btn-ghost !p-1"
+              className="btn-ghost !p-1 icon-control"
               aria-label={translateText("ماه بعد")}
             >
               <ChevronLeft className="logical-icon" size={14} />

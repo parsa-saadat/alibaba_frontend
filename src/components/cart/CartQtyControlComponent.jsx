@@ -54,7 +54,7 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           disabled={cannotIncrement}
           aria-label={translateText("افزایش تعداد")}
           className="flex h-9 w-9 items-center justify-center rounded-lg transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
-          style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
+          style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
         >
           <Plus size={16} />
         </button>
@@ -115,8 +115,8 @@ function CartQtyControl({ qty, busy, max, soldOut, onIncrement, onDecrement, com
           onClick={onIncrement}
           disabled={cannotIncrement}
           aria-label={qty === 0 ? translateText("افزودن به سبد خرید") : translateText("افزایش تعداد")}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-900 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
-          style={{ background: 'var(--primary-color)' }}
+          className="flex h-11 w-11 items-center justify-center rounded-lg transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-35"
+          style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
         >
           <Plus size={18} />
         </button>

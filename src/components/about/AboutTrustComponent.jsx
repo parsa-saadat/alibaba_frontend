@@ -82,10 +82,10 @@ function AboutTrustComponent() {
       {/* نمادها و لینک‌ها */}
       <div className="flex flex-col gap-4">
         <div
-          className="rounded-3xl p-6 text-white"
+          className="rounded-3xl p-6 text-[var(--text)]"
           style={{
-            background: 'linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'linear-gradient(150deg, var(--card2), var(--card))',
+            border: '1px solid var(--border)',
           }}
         >
           <b className="block font-black text-sm">{translateText('v20.scope')}</b>
@@ -93,8 +93,8 @@ function AboutTrustComponent() {
             <span
               className="text-[10px] px-2.5 py-1.5 rounded-lg"
               style={{
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid var(--border)',
+                background: 'var(--card2)',
                 color: '#d4d4d4',
               }}
             >
@@ -103,8 +103,8 @@ function AboutTrustComponent() {
             <span
               className="text-[10px] px-2.5 py-1.5 rounded-lg"
               style={{
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid var(--border)',
+                background: 'var(--card2)',
                 color: '#d4d4d4',
               }}
             >
@@ -113,15 +113,15 @@ function AboutTrustComponent() {
             <span
               className="text-[10px] px-2.5 py-1.5 rounded-lg"
               style={{
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid var(--border)',
+                background: 'var(--card2)',
                 color: '#d4d4d4',
               }}
             >
               {translateText('v20.website')}
             </span>
           </div>
-          <p className="text-[11px] text-white/60 leading-6 mt-3">
+          <p className="text-[11px] text-[var(--muted)] leading-6 mt-3">
             {translateText('v20.responsible')}
           </p>
         </div>

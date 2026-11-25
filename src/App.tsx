@@ -2,7 +2,7 @@ import ReviewManagementPage from './pages/dashboard/ReviewsPage';
 import LanguageSelector from './components/common/locale/LanguageSelectorComponent';
 import { direction } from './i18n/runtime';
 import { t as translateText } from './i18n/runtime.js';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -19,7 +19,7 @@ import FavoritesPage from './pages/main/FavoritesPage';
 import ComparePage from './pages/main/ComparePage';
 import ProductPage from './pages/main/ProductPage';
 import StorePage from './pages/main/StorePage';
-import ProfilePage from './pages/main/ProfilePage';
+import AccountSellerApplicationPage from './pages/account/AccountSellerApplicationPage';
 import AddressPage from './pages/main/address/AddressPage';
 import EditAddressPage from './pages/main/address/EditAddressPage';
 import PrePage from './pages/main/auth/PrePage';
@@ -91,7 +91,8 @@ const App = () => {
 const MainApp = () => {
   /* مسیر جاری، برای ری‌ست کردن مرز خطا بعد از هر جابه‌جایی */
   const location = useLocation();
-  const authReady = (useShop() as { authReady?: boolean } | null)?.authReady ?? true;
+  const shop = useShop() as { authReady?: boolean; theme?: string };
+  const authReady = shop?.authReady ?? true;
 
   /* لودینگ اولیه: تا بررسی نشست کاربر تمام نشده، به‌جای صفحه‌ی خطا/پرش، لودینگ نشان بده */
   if (!authReady) {
@@ -125,7 +126,7 @@ const MainApp = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
+        theme={shop?.theme === 'dark' ? 'dark' : 'light'}
         transition={Bounce}
       />
       <ScrollToTopComponent />
@@ -145,13 +146,13 @@ const MainApp = () => {
             <Route path="/guide" element={<GuidePage />} />
             <Route path="/guide/:topic" element={<GuidePage />} />
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/favorites" element={<Navigate to="/account/saved" replace />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/address" element={<AddressPage />} />
             <Route path="/address/:addressId" element={<EditAddressPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/store/:id" element={<StorePage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile" element={<Navigate to="/account" replace />} />
             <Route path="/auth/pre" element={<PrePage />} />
             <Route path="/auth/verify" element={<VerifyPage />} />
             <Route path="/auth/register" element={<RegisterPage />} />
@@ -173,6 +174,10 @@ const MainApp = () => {
             <Route path="saved" element={<AccountSavedPage />} />
             <Route path="saved/history" element={<AccountSavedPage />} />
             <Route path="settings" element={<AccountProfilePage />} />
+            <Route path="seller-application" element={<AccountSellerApplicationPage />} />
+            <Route path="service/more" element={<Navigate to="/account" replace />} />
+            <Route path="service/dropshipping" element={<Navigate to="/account" replace />} />
+            <Route path="service/logistics" element={<Navigate to="/account" replace />} />
             <Route path="service/:key" element={<AccountComingSoonPage />} />
           </Route>
           {/* Admin Dashboard Routes (/dashboard & /admin) */}

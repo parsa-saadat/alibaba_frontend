@@ -69,7 +69,7 @@ export function isValidBackendMarkdown(text) {
   return MD_PATTERNS.some((re) => re.test(text));
 }
 
-const ACTIVE_STYLE = { background: 'var(--primary-color)', color: '#242424' };
+const ACTIVE_STYLE = { background: 'var(--primary-color)', color: 'var(--on-primary)' };
 
 /* ------------------------------------------------------------------ */
 /* ابزارهای کمکی رسانه                                                 */
@@ -141,7 +141,7 @@ function MediaView({ node, selected, deleteNode }) {
 
         <button
           type="button"
-          className="md-media-del"
+          className="md-media-del icon-control"
           title={translateText('حذف')}
           aria-label={translateText('حذف')}
           onMouseDown={(e) => e.preventDefault()}
@@ -456,7 +456,7 @@ function TableMenu({ editor, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="btn-ghost !p-1"
+          className="btn-ghost !p-1 icon-control"
           aria-label={translateText('بستن')}
         >
           <X size={13} />
@@ -477,7 +477,7 @@ function TableMenu({ editor, onClose }) {
             <span className="text-[10px] muted">{label}</span>
             <button
               type="button"
-              className="btn-ghost !p-0.5"
+              className="btn-ghost !p-0.5 icon-control"
               onClick={() => setSize((prev) => ({ ...prev, [key]: Math.max(2, prev[key] - 1) }))}
               aria-label={translateText('کم کردن {{v0}}', { v0: label })}
             >
@@ -486,7 +486,7 @@ function TableMenu({ editor, onClose }) {
             <b className="w-4 text-center text-[11px]">{size[key]}</b>
             <button
               type="button"
-              className="btn-ghost !p-0.5"
+              className="btn-ghost !p-0.5 icon-control"
               onClick={() => setSize((prev) => ({ ...prev, [key]: Math.min(10, prev[key] + 1) }))}
               aria-label={translateText('زیاد کردن {{v0}}', { v0: label })}
             >
@@ -668,7 +668,7 @@ function LinkDialog({ state, onSubmit, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="btn-ghost !p-1.5"
+            className="btn-ghost !p-1.5 icon-control"
             aria-label={translateText('بستن')}
           >
             <X size={15} />

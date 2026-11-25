@@ -1,3 +1,5 @@
+import { localizedField } from '../../i18n/content-fields';
+import { language } from '../../i18n/runtime';
 import { t as translateText } from '../../i18n/runtime.js';
 import axios from 'axios';
 import { getBody, getList, getId } from './response.js';
@@ -12,6 +14,7 @@ export const flattenCategories = (nodes, parentId = '', seen = new Set()) => {
     seen.add(id);
     const category = {
       ...node,
+      name: localizedField(node.translations?.[language]?.name ?? node.name) || '',
       _id: id,
       parent_id: parentId || getId(node.parent_id ?? node.parent),
     };

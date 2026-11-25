@@ -285,7 +285,7 @@ function StoreEditorModalComponent({
           <button
             type="button"
             onClick={onClose}
-            className="btn-ghost !p-2"
+            className="btn-ghost !p-2 icon-control"
             aria-label={translateText('بستن')}
           >
             <X size={17} />

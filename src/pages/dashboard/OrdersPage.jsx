@@ -638,7 +638,7 @@ function OrdersPage() {
               <button
                 type="button"
                 onClick={() => setCancelTarget(null)}
-                className="btn-ghost !p-1.5"
+                className="btn-ghost !p-1.5 icon-control"
                 aria-label={translateText('بستن')}
               >
                 <X size={16} />

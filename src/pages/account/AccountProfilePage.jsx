@@ -89,7 +89,7 @@ function Row({ icon: Icon, label, value, to, action, disabled = false, note = ''
       {icon}
       <span className="profile-row-body">
         <b>{label}</b>
-        {value ? <small dir="ltr">{value}</small> : null}
+        {value ? <small><bdi dir="auto">{value}</bdi></small> : null}
         {note ? <em>{note}</em> : null}
       </span>
       {disabled ? (
@@ -351,11 +351,10 @@ export default function AccountProfilePage() {
           <Row icon={Heart} label={translateText('account.favorites')} to="/account/saved" />
           <Row
             icon={Store}
-            label={translateText('account.becomeSeller')}
-            note={isSeller ? translateText('profile.sellerActive') : translateText('profile.sellerApplyHint')}
-            to={isSeller ? '/seller' : '/profile'}
+            label={translateText(isAdmin ? 'profile.adminBadge' : isSeller ? 'پنل فروشنده' : 'account.becomeSeller')}
+            note={isAdmin ? '' : isSeller ? translateText('profile.sellerActive') : translateText('profile.sellerApplyHint')}
+            to={isAdmin ? '/admin' : isSeller ? '/seller' : '/account/seller-application'}
           />
-          <Row icon={Ticket} label={translateText('account.tax')} disabled note={translateText('profile.supportOnly')} />
         </Card>
 
         <Card icon={ShieldCheck} title={translateText('profile.accountSecurity')}>
@@ -372,12 +371,7 @@ export default function AccountProfilePage() {
             value={email ? maskEmail(email) : translateText('profile.notSet')}
             action={{ onClick: startEdit }}
           />
-          <Row
-            icon={ShieldAlert}
-            label={translateText('profile.changePassword')}
-            note={translateText('profile.otpOnlyNote')}
-            disabled
-          />
+
           <Row
             icon={LogOut}
             label={translateText('profile.deleteAccount')}
@@ -425,11 +419,10 @@ export default function AccountProfilePage() {
           />
           <Row
             icon={theme === 'dark' ? Moon : Sun}
-            label={translateText('profile.appearance')}
+            label={translateText('profile.darkMode')}
             value={
-              <button type="button" className="profile-switch" onClick={toggleTheme} aria-pressed={theme === 'dark'}>
+              <button type="button" className="profile-switch" onClick={toggleTheme} role="switch" aria-label={translateText('profile.darkMode')} aria-checked={theme === 'dark'}>
                 <span className={`profile-switch-knob${theme === 'dark' ? ' is-dark' : ''}`} aria-hidden="true" />
-                <span>{theme === 'dark' ? translateText('profile.darkMode') : translateText('profile.lightMode')}</span>
               </button>
             }
           />

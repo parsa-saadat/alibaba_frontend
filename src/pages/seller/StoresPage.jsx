@@ -237,7 +237,7 @@ function StoresPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#242424',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -271,7 +271,7 @@ function StoresPage() {
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
+              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2 icon-control"
               aria-label={translateText('پاک کردن جستجو')}
             >
               <X size={13} />
@@ -305,7 +305,7 @@ function StoresPage() {
           </p>
           {capacity.reason === 'not-seller' ? (
             <Link
-              to="/profile"
+              to="/account"
               className="btn-ghost !py-2 !px-3 text-xs inline-flex items-center gap-1.5"
             >
               {translateText('درخواست فروشندگی ')}

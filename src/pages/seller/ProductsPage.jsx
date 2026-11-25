@@ -130,19 +130,19 @@ function ProductsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatTile
           label={translateText('محصولات')}
-          value={toFa(panelStats.product?.counts.all ?? '—')}
+          value={toFa(panelStats.product?.counts?.all ?? '—')}
         />
         <StatTile
           label={translateText('فعال')}
-          value={toFa(panelStats.product?.counts.active ?? '—')}
+          value={toFa(panelStats.product?.counts?.active ?? '—')}
         />
         <StatTile
           label={translateText('غیرفعال')}
-          value={toFa(panelStats.product?.counts.inactive ?? '—')}
+          value={toFa(panelStats.product?.counts?.inactive ?? '—')}
         />
         <StatTile
           label={translateText('ناموجود')}
-          value={toFa(panelStats.product?.counts.outOfStock ?? '—')}
+          value={toFa(panelStats.product?.counts?.outOfStock ?? '—')}
         />
       </div>
 

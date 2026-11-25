@@ -97,7 +97,7 @@ export default function ContactOfficeComponent() {
         <header className="flex items-start gap-3 mb-5">
           <span
             className="grid h-11 w-11 place-items-center rounded-2xl shrink-0"
-            style={{ background: 'var(--charcoal-deep)', color: 'var(--primary-color)' }}
+            style={{ background: 'var(--card)', color: 'var(--primary-color)' }}
           >
             <Mail size={21} />
           </span>

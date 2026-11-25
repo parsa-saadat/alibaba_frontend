@@ -126,7 +126,7 @@ export default function EntitySelect({
         {value && (
           <button
             type="button"
-            className="entity-select-clear"
+            className="entity-select-clear icon-control"
             aria-label={`${t('reviews.reset')} ${label}`}
             onClick={() => {
               onChange('', '');

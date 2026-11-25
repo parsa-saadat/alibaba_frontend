@@ -10,14 +10,14 @@ function PageHeroComponent({ breadcrumb, badge, title, description, highlights =
       className="relative overflow-hidden"
       style={{
         background:
-          'radial-gradient(circle at 14% 16%, rgba(255,106,0,0.16) 0%, rgba(255,106,0,0) 52%), linear-gradient(135deg, var(--charcoal-mid) 0%, var(--charcoal-deep) 100%)',
+          'radial-gradient(circle at 14% 16%, rgba(255,106,0,0.16) 0%, rgba(255,106,0,0) 52%), linear-gradient(135deg, var(--card2) 0%, var(--card) 100%)',
       }}
     >
       <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-20">
-        <nav className="flex items-center gap-1.5 text-[11px] text-white/60">
-          <Link to="/" className="hover:text-white transition-colors">{translateText("خانه")}</Link>
+        <nav className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
+          <Link to="/" className="hover:text-[var(--text)] transition-colors">{translateText("خانه")}</Link>
           <ChevronLeft className="logical-icon" size={12} />
-          <span className="text-white/90">{breadcrumb}</span>
+          <span className="text-[var(--text)]">{breadcrumb}</span>
         </nav>
 
         <div className="mt-7 max-w-2xl">
@@ -30,8 +30,8 @@ function PageHeroComponent({ breadcrumb, badge, title, description, highlights =
               {badge}
             </span>
           )}
-          <h1 className="font-black text-2xl sm:text-4xl text-white mt-3 leading-tight">{title}</h1>
-          {description && <p className="text-xs sm:text-sm text-white/70 leading-7 mt-3">{description}</p>}
+          <h1 className="font-black text-2xl sm:text-4xl text-[var(--text)] mt-3 leading-tight">{title}</h1>
+          {description && <p className="text-xs sm:text-sm text-[var(--muted)] leading-7 mt-3">{description}</p>}
           {actions && <div className="flex flex-wrap items-center gap-3 mt-5">{actions}</div>}
         </div>
 
@@ -40,7 +40,7 @@ function PageHeroComponent({ breadcrumb, badge, title, description, highlights =
             {highlights.map((item) => {
               const Icon = item.icon;
               return (
-                <span key={item.label} className="flex items-center gap-1.5 text-[11px] text-white/70">
+                <span key={item.label} className="flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
                   {Icon && <Icon size={14} style={{ color: 'var(--primary-color)' }} />}
                   {item.label}
                 </span>

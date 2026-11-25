@@ -2397,7 +2397,7 @@
   "reviews.onlyUser": "Yalnız bu kullanıcı",
   "reviews.onlyTarget": "Yalnız bu öğe",
   "attributes.title": "Temel özellikler",
-  "attributes.hint": "Bu ürünün özellik adlarını ve değerlerini belirleyin. En fazla 8 satır; otomatik çeviri yoktur.",
+  "attributes.hint": "Bağımsız ad ve değerler için içerik dilini seçin. En fazla 8 satır; satır silindiğinde tüm dilleri silinir. Otomatik çeviri yapılmaz.",
   "attributes.name": "Özellik adı",
   "attributes.value": "Özellik değeri",
   "attributes.remove": "Özelliği kaldır",
@@ -2659,7 +2659,7 @@
   "profile.language": "Arayüz dili",
   "profile.currency": "Görüntüleme para birimi",
   "profile.appearance": "Görünüm",
-  "profile.darkMode": "Koyu",
+  "profile.darkMode": "Karanlık mod",
   "profile.lightMode": "Açık",
   "profile.sellerBadge": "Satıcı",
   "profile.adminBadge": "Yönetici",
@@ -2671,5 +2671,11 @@
   "profile.soundOn": "Açık",
   "profile.soundOff": "Kapalı",
   "chat.closedShort": "Kapalı",
-  "chat.blockedShort": "Engelli"
+  "chat.blockedShort": "Engelli",
+  "history.browserNote": "Aramalarınız ve görüntülediğiniz ürünler yalnızca bu tarayıcıda saklanır; cihazlar arasında paylaşılmaz.",
+  "history.searches": "Arama geçmişi",
+  "history.noSearches": "Yaptığınız aramalar burada görünecek.",
+  "application.contactOnly": "Şimdilik yalnızca adınız, soyadınız ve iletişim telefonunuz gereklidir.",
+  "application.contactDetails": "İletişim bilgileri",
+  "application.reviewNote": "Hesap incelemesi için bilgilerinizi gönderin. Banka bilgileri daha sonra satıcı panelinizde eklenir."
 }

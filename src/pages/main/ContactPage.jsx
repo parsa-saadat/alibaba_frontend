@@ -88,10 +88,10 @@ function ContactPage() {
             </a>
             <a
               href="#contact-form"
-              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-[var(--text)] transition-colors"
               style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.18)',
+                background: 'var(--card2)',
+                border: '1px solid var(--border)',
               }}
             >
               <MessageSquare size={16} />

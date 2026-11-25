@@ -52,7 +52,7 @@ function ChatDockComponent() {
           >
             {collapsed ? <Maximize2 size={15} /> : <Minimize2 size={15} />}
           </button>
-          <button type="button" className="chat-action" aria-label={translateText('chat.close')} onClick={closeChat}>
+          <button type="button" className="chat-action icon-control" aria-label={translateText('chat.close')} onClick={closeChat}>
             <X size={16} />
           </button>
         </span>

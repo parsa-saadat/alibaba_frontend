@@ -57,10 +57,10 @@ function AboutStoryComponent() {
       {/* ماموریت و چشم‌انداز */}
       <div className="flex flex-col gap-4">
         <div
-          className="rounded-3xl p-6 text-white"
+          className="rounded-3xl p-6 text-[var(--text)]"
           style={{
-            background: 'linear-gradient(150deg, var(--charcoal-soft), var(--charcoal-deep))',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'linear-gradient(150deg, var(--card2), var(--card))',
+            border: '1px solid var(--border)',
           }}
         >
           <span
@@ -70,7 +70,7 @@ function AboutStoryComponent() {
             <Target size={18} />
           </span>
           <b className="block font-black text-sm mt-3">{translateText("ماموریت ما")}</b>
-          <p className="text-[11px] leading-6 text-white/70 mt-1.5">{translateText("v20.mission")}</p>
+          <p className="text-[11px] leading-6 text-[var(--muted)] mt-1.5">{translateText("v20.mission")}</p>
         </div>
 
         <div className="card rounded-3xl p-6 flex-1">

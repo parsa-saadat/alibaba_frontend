@@ -29,7 +29,7 @@ function OurPolicyComponent() {
               </div>
             </div>
           </div>
-          <Link to="/profile" className="btn-primary shrink-0">
+          <Link to="/account" className="btn-primary shrink-0">
             {translateText('درخواست فروشندگی ')}
           </Link>
         </div>

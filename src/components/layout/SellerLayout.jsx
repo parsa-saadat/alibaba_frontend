@@ -39,7 +39,7 @@ const SellerLayout = () => {
     );
   }
 
-  const isAdmin = String(user.role || '').toLowerCase() === 'admin';
+  const isAdmin = ['admin','root'].includes(String(user.role || '').toLowerCase());
   const isSeller = user.is_seller === true || String(user.role || '').toLowerCase() === 'seller';
 
   /* کاربر عادی: فقط راهنمایی به فرم درخواست فروشندگی در پروفایل (مدیر مثل قبل اجازه‌ی ورود دارد) */
@@ -53,7 +53,7 @@ const SellerLayout = () => {
         )}
         actions={
           <>
-            <Link to="/profile" className="btn-primary inline-block">
+            <Link to="/account/seller-application" className="btn-primary inline-block">
               {translateText('ثبت درخواست فروشندگی ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">
@@ -77,7 +77,7 @@ const SellerLayout = () => {
         actions={
           <>
             <Link to="/seller/settings" className="btn-primary inline-block">{translateText('حساب تسویه')}</Link>
-            <Link to="/profile" className="btn-ghost inline-block">
+            <Link to="/account" className="btn-ghost inline-block">
               {translateText('مشاهده پروفایل ')}
             </Link>
             <Link to="/" className="btn-ghost inline-block">

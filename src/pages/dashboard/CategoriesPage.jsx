@@ -1,3 +1,4 @@
+import { localizedField } from '../../i18n/content-fields';
 import useConfirmDialog from '../../hooks/useConfirmDialog';
 import StatTile from '../../components/panel/StatTileComponent';
 import usePanelStats from '../../hooks/usePanelStats';
@@ -18,6 +19,7 @@ import PanelPageHeader from '../../components/panel/PanelPageHeaderComponent';
 
 const API = import.meta.env.VITE_APP_API_URL || import.meta.env.VITE_API_URL || '/api';
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const categoryText = value => {const text=localizedField(value);return typeof text==='string'?text:'';};
 const EMPTY_CAT = {
   translations: {},
   name: '',
@@ -146,14 +148,14 @@ function CategoriesPage() {
             <FolderTree size={16} className="text-accent shrink-0" />
             <div className="min-w-0">
               <div className="font-black text-sm flex items-center gap-2">
-                <span>{node.name}</span>
+                <span>{categoryText(node.name)}</span>
                 <span className="text-xs muted font-normal" dir="ltr">
-                  /{node.slug}
+                  /{categoryText(node.slug)}
                 </span>
               </div>
               <div className="text-[11px] muted">
                 {translateText('وضعیت: ')}
-                {statusFa(node.status || 'ACTIVE')}
+                {statusFa(categoryText(node.status) || 'ACTIVE')}
                 {hasChildren
                   ? translateText(' • {{v0}} زیردسته', { v0: toFa(node.children.length) })
                   : ''}
@@ -184,9 +186,9 @@ function CategoriesPage() {
               onClick={() => {
                 setEditingCat(node);
                 setCatForm({
-                  name: node.name || '',
+                  name: categoryText(node.name),
                   translations: node.translations || {},
-                  slug: node.slug || '',
+                  slug: categoryText(node.slug),
                   parent_id: node.parent_id || '',
                   status: node.status || 'ACTIVE',
                   sort_order: node.sort_order || 0,
@@ -200,7 +202,7 @@ function CategoriesPage() {
             <button
               type="button"
               onClick={() => deleteCat(node._id)}
-              className="btn-ghost !p-2 text-red-400"
+              className="btn-ghost !p-2 text-red-400 icon-control"
               title={translateText('حذف')}
             >
               <Trash2 size={13} />
@@ -238,15 +240,15 @@ function CategoriesPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatTile
           label={translateText('دسته\u200cبندی\u200cها')}
-          value={toFa(panelStats.category?.counts.all ?? '—')}
+          value={toFa(panelStats.category?.counts?.all ?? '—')}
         />
         <StatTile
           label={translateText('فعال')}
-          value={toFa(panelStats.category?.counts.active ?? '—')}
+          value={toFa(panelStats.category?.counts?.active ?? '—')}
         />
         <StatTile
           label={translateText('غیرفعال')}
-          value={toFa(panelStats.category?.counts.inactive ?? '—')}
+          value={toFa(panelStats.category?.counts?.inactive ?? '—')}
         />
       </div>
 
@@ -296,7 +298,7 @@ function CategoriesPage() {
                 .filter((c) => c._id !== editingCat?._id)
                 .map((c) => (
                   <option key={c._id} value={c._id}>
-                    {c.name}
+                    {categoryText(c.name)}
                   </option>
                 ))}
             </select>

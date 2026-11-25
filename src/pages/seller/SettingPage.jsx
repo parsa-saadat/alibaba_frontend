@@ -151,7 +151,7 @@ function SettingPage() {
             'برای دسترسی به تنظیمات فروشندگی، ابتدا درخواست فروشنده ثبت کنید و پس از تأیید مدیر، فروشگاه خود را بسازید. ',
           )}
         </p>
-        <Link to="/profile" className="btn-primary inline-flex mt-4">
+        <Link to="/account" className="btn-primary inline-flex mt-4">
           {translateText('ثبت درخواست فروشندگی ')}
         </Link>
       </div>

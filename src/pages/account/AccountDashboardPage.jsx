@@ -1,3 +1,4 @@
+import { ORDER_FILTERS } from '../../utils/helpers/orderFilters';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { t as translateText, formatNumber } from '../../i18n/runtime.js';
@@ -74,17 +75,20 @@ export default function AccountDashboardPage() {
   const { unread } = useChat();
   const [open, setOpen] = useState(true);
   const [orders, setOrders] = useState(null);
+  const [totalOrders,setTotalOrders] = useState(null);
   const [addresses, setAddresses] = useState(null);
 
   const load = useCallback(async () => {
     const id = getId(user);
     if (!id) return;
     try {
-      const res = await axios.get(`${API}/user/${id}/orders`, { ...authHeaders(), params: { limit: 5 } });
+      const res = await axios.get(`${API}/orders`, { ...authHeaders(), params: { limit: 5, desc:true, scope:'buyer' } });
       const body = res.data?.body;
+      setTotalOrders(body?.total ?? (Array.isArray(body) ? body.length : body?.data?.length ?? 0));
       setOrders(Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : []);
     } catch {
       setOrders([]);
+      setTotalOrders(0);
     }
     try {
       const res = await axios.get(`${API}/users/${id}/address`, { ...authHeaders(), params: { limit: 50 } });
@@ -100,7 +104,7 @@ export default function AccountDashboardPage() {
 
   const history = useMemo(() => readList('history').filter(Boolean), []);
   const name = userFullName(user) || user?.username || '';
-  const orderCount = orders?.length ?? null;
+  const orderCount = totalOrders;
 
   return (
     <div className="account-dashboard">
@@ -113,7 +117,6 @@ export default function AccountDashboardPage() {
               <p>
                 <Link to="/account/settings">{translateText('account.myProfile')}</Link>
                 <span aria-hidden>·</span>
-                <Link to="/account/service/tax">{translateText('account.tax')}</Link>
               </p>
             </div>
             <Link to="/contact" className="account-support">
@@ -123,9 +126,8 @@ export default function AccountDashboardPage() {
           </div>
 
           <div className="account-stats">
-            <Stat icon={MessageSquare} value={formatNumber(unread.total)} label={translateText('account.unreadMessages')} to="/account/messages" />
+            <Stat icon={MessageSquare} value={formatNumber(unread.buyer_total ?? unread.total)} label={translateText('account.unreadMessages')} to="/account/messages" />
             <Stat icon={Package} value={orderCount === null ? '—' : formatNumber(orderCount)} label={translateText('account.newQuotes')} to="/account/orders" />
-            <Stat icon={Ticket} value={formatNumber(0)} label={translateText('account.coupons')} to="/account/service/coupons" />
           </div>
         </section>
 
@@ -154,13 +156,7 @@ export default function AccountDashboardPage() {
                 done={false}
                 to="/account/payment"
               />
-              <CompleteCard
-                icon={Ticket}
-                title={translateText('account.addTax')}
-                hint={translateText('account.addTaxHint')}
-                done={false}
-                to="/account/service/tax"
-              />
+
             </div>
           ) : null}
         </section>
@@ -175,10 +171,10 @@ export default function AccountDashboardPage() {
           </div>
 
           <div className="account-order-chips">
-            {['account.ordersAll', 'account.confirming', 'account.unpaid', 'account.preparing', 'account.delivering', 'account.refunds'].map(
-              (key) => (
-                <Link key={key} to="/account/orders" className="chip">
-                  {translateText(key)}
+            {ORDER_FILTERS.map(
+              (item) => (
+                <Link key={item.key} to={`/account/orders?status=${item.key}`} className="chip">
+                  {translateText(item.label)}
                 </Link>
               ),
             )}

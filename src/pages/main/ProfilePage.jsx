@@ -123,7 +123,7 @@ function ImageUploadSlot({ label, fileId, uploading, error, onPick, onRemove, on
               type="button"
               onClick={onRemove}
               disabled={uploading}
-              className="bg-black/75 text-white rounded-full p-1.5 hover:bg-red-600"
+              className="bg-black/75 text-white rounded-full p-1.5 hover:bg-red-600 icon-control"
               aria-label={translateText('حذف تصویر')}
               title={translateText('حذف تصویر')}
             >
@@ -433,7 +433,7 @@ function ProfilePage() {
           <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             <div
               className="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-2xl grid place-items-center font-black text-xl sm:text-2xl"
-              style={{ background: 'var(--primary-color)', color: 'var(--on-primary' }}
+              style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
               aria-hidden="true"
             >
               {userInitial(user)}
@@ -648,7 +648,7 @@ function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => removeAddress(a._id)}
-                    className="text-red-400 p-2"
+                    className="text-red-400 p-2 icon-control"
                     aria-label={translateText('حذف نشانی')}
                     title={translateText('حذف نشانی')}
                   >

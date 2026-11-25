@@ -39,7 +39,7 @@ function PanelPageHeader({
           {Icon ? (
             <span
               className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl"
-              style={{ background: 'var(--primary-color)', color: '#242424' }}
+              style={{ background: 'var(--primary-color)', color: 'var(--on-primary)' }}
             >
               <Icon size={22} />
             </span>

@@ -324,7 +324,7 @@ function CounterPage() {
               type="button"
               onClick={() => load(true)}
               disabled={refreshing}
-              className="btn-ghost !py-2 !px-2.5 text-xs flex items-center gap-1.5 disabled:opacity-60"
+              className="btn-ghost !py-2 !px-2.5 text-xs flex items-center gap-1.5 disabled:opacity-60 icon-control"
               title={translateText('به‌روزرسانی')}
             >
               <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />

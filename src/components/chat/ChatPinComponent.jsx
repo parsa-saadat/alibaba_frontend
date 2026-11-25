@@ -54,7 +54,7 @@ function ChatPinComponent({ pin, onRemove, compact = false }) {
       {onRemove && (
         <button
           type="button"
-          className="chat-pin-remove"
+          className="chat-pin-remove icon-control"
           aria-label={translateText('chat.removePin')}
           title={translateText('chat.removePin')}
           onClick={(event) => {

@@ -1,3 +1,4 @@
+import { ORDER_FILTERS } from '../../../utils/helpers/orderFilters';
 import { CancellationInfo } from '../../../components/orders/OrderPartsComponent';
 import {
   formatOrderPrice as formatPrice,
@@ -8,7 +9,7 @@ import {
 import { t as translateText } from '../../../i18n/runtime.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   Banknote,
@@ -38,11 +39,6 @@ function statusTone(status = '') {
   return '#ff6a00';
 }
 
-const FILTERS = [
-  { key: 'all', label: translateText('همه سفارش‌ها') },
-  { key: 'pending', label: translateText('در انتظار پرداخت') },
-  { key: 'paid', label: translateText('پرداخت‌شده') },
-];
 
 function Chip({ tone, children }) {
   return (
@@ -97,10 +93,20 @@ function OrdersPage() {
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requested = searchParams.get('status') || 'all';
+  const filter = ORDER_FILTERS.some(item=>item.key===requested) ? requested : 'all';
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1',10) || 1);
+  const [totalPages,setTotalPages] = useState(0);
+  const [stats,setStats] = useState({count:0,paid:0,spent:0});
+  const setFilter = key => {setExpanded(null);setSearchParams(prev=>{const next=new URLSearchParams(prev);next.set('status',key);next.delete('page');return next;});};
+  const setPage = number => setSearchParams(prev=>{const next=new URLSearchParams(prev);next.set('page',String(number));return next;});
+
   const [payBusy, setPayBusy] = useState('');
 
+  const requestRef = React.useRef(0);
   const load = useCallback(() => {
+    const requestId = ++requestRef.current;
     if (!user) {
       setLoading(false);
       return;
@@ -108,14 +114,17 @@ function OrdersPage() {
     setLoading(true);
     setError('');
     axios
-      .get(`${API}/orders?limit=50`, authHeaders())
+      .get(`${API}/orders`, {...authHeaders(),params:{limit:20,page,status:filter,desc:true,scope:'buyer'}})
       .then((res) => {
+        if(requestId!==requestRef.current)return;
         const body = res.data?.body;
+        setTotalPages(body?.totalPages || 0);
+        setStats(body?.summary || {count:body?.total ?? body?.data?.length ?? 0,paid:0,spent:0});
         setOrders(Array.isArray(body) ? body : body?.data || []);
       })
-      .catch(() => setError(translateText('دریافت سفارش‌ها ناموفق بود.')))
-      .finally(() => setLoading(false));
-  }, [user]);
+      .catch(() => {if(requestId===requestRef.current)setError(translateText('دریافت سفارش‌ها ناموفق بود.'));})
+      .finally(() => {if(requestId===requestRef.current)setLoading(false);});
+  }, [user,filter,page]);
 
   useEffect(() => {
     load();
@@ -123,23 +132,7 @@ function OrdersPage() {
 
   const payStatusOf = (order) => order.payment?.status || order.payment_status || 'pending';
 
-  const filtered = useMemo(() => {
-    if (filter === 'all') return orders;
-    return orders.filter((order) => {
-      const status = payStatusOf(order);
-      if (filter === 'paid') return status === 'paid';
-      return status !== 'paid';
-    });
-  }, [orders, filter]);
-
-  const stats = useMemo(() => {
-    const paid = orders.filter((o) => payStatusOf(o) === 'paid');
-    const spent = paid.reduce(
-      (sum, o) => sum + Number(o.final_amount ?? o.total_amount ?? o.amount ?? 0),
-      0,
-    );
-    return { count: orders.length, paid: paid.length, spent };
-  }, [orders]);
+  const filtered = orders;
 
   const payOrder = (orderId) => {
     setPayBusy(orderId);
@@ -243,9 +236,9 @@ function OrdersPage() {
           </div>
         )}
 
-        {stats.count > 0 && (
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            {FILTERS.map((item) => {
+        {(
+          <div className="order-filter-bar mt-3" aria-label={translateText('account.orders')}>
+            {ORDER_FILTERS.map((item) => {
               const active = filter === item.key;
               return (
                 <button
@@ -256,11 +249,11 @@ function OrdersPage() {
                   className="rounded-full px-3 py-1.5 text-[11px] font-bold transition"
                   style={
                     active
-                      ? { background: 'var(--primary-color)', color: 'var(--on-primary' }
+                      ? { background: 'var(--primary-color)', color: 'var(--on-primary)' }
                       : { background: 'var(--card2)', border: '1px solid var(--border)' }
                   }
                 >
-                  {item.label}
+                  {translateText(item.label)}
                 </button>
               );
             })}
@@ -268,6 +261,11 @@ function OrdersPage() {
         )}
       </header>
 
+      {totalPages>1&&<nav className="order-pagination" aria-label={translateText('account.orders')}>
+        <button type="button" className="btn-ghost" disabled={page<=1||loading} onClick={()=>setPage(page-1)} aria-label={translateText('قبلی')}>‹</button>
+        <span>{toFa(page)} / {toFa(totalPages)}</span>
+        <button type="button" className="btn-ghost" disabled={page>=totalPages||loading} onClick={()=>setPage(page+1)} aria-label={translateText('بعدی')}>›</button>
+      </nav>}
       {/* لیست */}
       <div className="mt-4 space-y-3">
         {loading ? (
@@ -296,18 +294,18 @@ function OrdersPage() {
               <ClipboardList size={28} style={{ color: 'var(--accent-text)' }} />
             </span>
             <h2 className="mt-4 text-base font-black">
-              {orders.length === 0
+              {stats.count === 0 && filter === 'all'
                 ? translateText('هنوز سفارشی ثبت نکرده‌اید')
                 : translateText('سفارشی با این فیلتر نیست')}
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-xs leading-6 muted">
-              {orders.length === 0
+              {stats.count === 0 && filter === 'all'
                 ? translateText(
                     'اولین خریدتان را انجام دهید تا وضعیت سفارش و مرسوله‌ها اینجا نمایش داده شود.',
                   )
                 : translateText('فیلتر را عوض کنید تا سفارش‌های دیگر را ببینید.')}
             </p>
-            {orders.length === 0 ? (
+            {stats.count === 0 && filter === 'all' ? (
               <Link to="/products" className="btn-primary mt-5 inline-flex items-center gap-2">
                 {translateText('شروع خرید ')}
               </Link>
@@ -331,7 +329,7 @@ function OrdersPage() {
               .filter(Boolean);
 
             return (
-              <article key={order._id} className="card overflow-hidden rounded-2xl">
+              <article data-order-id={order._id} key={order._id} className="card overflow-hidden rounded-2xl">
                 {/* ردیف اصلی */}
                 <button
                   type="button"

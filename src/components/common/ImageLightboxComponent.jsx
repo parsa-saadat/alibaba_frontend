@@ -112,7 +112,7 @@ export default function ImageLightboxComponent({
           >
             <ZoomIn size={20} />
           </button>
-          <button type="button" aria-label={t('بستن')} onClick={() => dialog.current.close()}>
+          <button className="icon-control" type="button" aria-label={t('بستن')} onClick={() => dialog.current.close()}>
             <X size={25} />
           </button>
         </div>
@@ -172,10 +172,10 @@ export default function ImageLightboxComponent({
           </div>
           {gallery.length > 1 && (
             <div className="image-viewer-arrows">
-              <button type="button" aria-label={t('reviews.previous')} onClick={() => move(-1)}>
+              <button className="icon-control" type="button" aria-label={t('reviews.previous')} onClick={() => move(-1)}>
                 <ChevronUp size={23} />
               </button>
-              <button type="button" aria-label={t('reviews.next')} onClick={() => move(1)}>
+              <button className="icon-control" type="button" aria-label={t('reviews.next')} onClick={() => move(1)}>
                 <ChevronDown size={23} />
               </button>
             </div>

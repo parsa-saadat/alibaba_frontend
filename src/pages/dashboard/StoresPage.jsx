@@ -249,7 +249,7 @@ function StoresPage() {
                   active
                     ? {
                         background: 'var(--primary-color)',
-                        color: '#242424',
+                        color: 'var(--on-primary)',
                         borderColor: 'transparent',
                       }
                     : undefined
@@ -283,7 +283,7 @@ function StoresPage() {
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2"
+              className="btn-ghost !p-1 absolute start-2 top-1/2 -translate-y-1/2 icon-control"
               aria-label={translateText('پاک کردن جستجو')}
             >
               <X size={13} />
@@ -512,7 +512,7 @@ function StoresPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => setDeleteTarget(store)}
-                      className="btn-ghost !p-2 ms-auto disabled:opacity-50"
+                      className="btn-ghost !p-2 ms-auto disabled:opacity-50 icon-control"
                       style={{ color: '#e53935' }}
                       title={translateText('حذف یا مسدودسازی فروشگاه')}
                     >

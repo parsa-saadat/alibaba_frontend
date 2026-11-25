@@ -55,6 +55,8 @@ function RecentlyViewedComponent({
   subtitle = translateText("محصولاتی که در این مرورگر باز کرده‌اید"),
   moreTo = null,
   className = '',
+  showClear = true,
+  showEmpty = false,
 }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +90,7 @@ function RecentlyViewedComponent({
         /* شناسه‌های نامعتبر از تاریخچه حذف می‌شوند تا دفعه‌ی بعد درخواستی نرود */
         const alive = ids.filter((id) => !missingCache.has(id));
         if (alive.length !== ids.length) {
-          writeList('history', alive);
+          writeList('history', readList('history').filter(id => !missingCache.has(String(id))));
         }
       })
       .finally(() => {
@@ -101,7 +103,7 @@ function RecentlyViewedComponent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature]);
 
-  if (!loading && products.length === 0) return null;
+  if (!loading && products.length === 0) return showEmpty ? <p className="card rounded-2xl p-5 text-sm muted">{translateText('account.noHistory')}</p> : null;
 
   const clear = () => {
     writeList('history', []);
@@ -129,7 +131,7 @@ function RecentlyViewedComponent({
         products={products}
         loading={loading}
         moreTo={moreTo}
-        extra={extra}
+        extra={showClear ? extra : null}
         emptyText={translateText("هنوز محصولی مشاهده نکرده‌اید")}
       />
     </div>

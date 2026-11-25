@@ -426,7 +426,7 @@ function SellerEditorModalComponent({ seller, onClose, onSaved }) {
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="btn-ghost !p-2"
+            className="btn-ghost !p-2 icon-control"
             aria-label={translateText("بستن")}
           >
             <X size={16} />

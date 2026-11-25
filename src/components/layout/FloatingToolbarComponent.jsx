@@ -16,7 +16,7 @@ function FloatingToolbarComponent() {
       className="floating-toolbar card hidden min-[1720px]:flex fixed top-1/2 -translate-y-1/2 z-40 flex-col shadow-xl"
     >
       <Link
-        to="/profile"
+        to="/account"
         aria-label={translateText('فروشنده شوید ')}
         title={translateText('فروشنده شوید ')}
         className={item}

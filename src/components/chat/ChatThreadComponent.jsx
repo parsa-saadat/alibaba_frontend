@@ -16,7 +16,7 @@ const PAGE = 30;
  */
 function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, readOnlyReason = '', autoFocusComposer = false }) {
   const { user } = useShop();
-  const { on, publish, setActiveConversation } = useChat();
+  const { on, publish, setActiveConversation, consumePin } = useChat();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
    * پین گفتگو: بک‌اند آن را با عنوان/تصویر/قیمت محصول آبریزی کرده است.
    * `raw` همان چیزی است که همراه پیام ذخیره می‌شود.
    */
-  const pin = useMemo(() => {
+  const contextPin = useMemo(() => {
     const hydrated = conversation?.pin;
     if (hydrated && (hydrated.title || hydrated.product_id || hydrated.store_id)) {
       return {
@@ -73,6 +73,10 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
       },
     };
   }, [conversation]);
+
+  const [pinPending, setPinPending] = useState(Boolean(conversation?._composePin));
+  useEffect(() => { setPinPending(Boolean(conversation?._composePin)); }, [conversation?._id, conversation?._composeNonce]);
+  const pin = pinPending ? contextPin : null;
 
   const scrollToEnd = useCallback((behavior = 'auto') => {
     const node = scrollerRef.current;
@@ -174,14 +178,19 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
       if (editing) {
         const res = await editMessage(editing, body);
         if (res?.message) setMessages((prev) => prev.map((m) => (String(m._id) === String(editing) ? res.message : m)));
-        return;
+        return true;
       }
-      await sendMessage(id, { body, images, pin: pin?.raw || null });
+      const res = await sendMessage(id, { body, images, pin: pin?.raw || null });
+      if (res?.message) setMessages(prev => prev.some(row => String(row._id) === String(res.message._id)) ? prev : [...prev, res.message]);
+      setPinPending(false);
+      consumePin(id, conversation?._composeNonce);
       if (Date.now() - typingSentAt.current > 2000) {
         typingSentAt.current = 0;
       }
+      return true;
     } catch (err) {
       setError(err?.response?.data?.message || translateText('chat.sendError'));
+      return false;
     }
   };
 
@@ -236,8 +245,8 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
       <header className="chat-thread-head">
         <div className="chat-thread-id">
           {onBack ? (
-            <button type="button" className="chat-action chat-back" aria-label={translateText('chat.back')} onClick={onBack}>
-              <ArrowRight size={16} />
+            <button type="button" className="chat-action chat-back icon-control" aria-label={translateText('chat.back')} onClick={onBack}>
+              <ArrowRight className="logical-icon" size={16} />
             </button>
           ) : null}
           <span className={`chat-avatar${counterpartOnline ? ' is-online' : ''}`} aria-hidden>
@@ -252,7 +261,7 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
           </span>
         </div>
         {onClose ? (
-          <button type="button" className="chat-action" aria-label={translateText('chat.close')} onClick={onClose}>
+          <button type="button" className="chat-action chat-thread-close icon-control" aria-label={translateText('chat.close')} onClick={onClose}>
             <X size={16} />
           </button>
         ) : null}
@@ -268,7 +277,7 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
       {error ? (
         <div className="chat-error-bar" role="alert">
           <span>{error}</span>
-          <button type="button" className="chat-action" aria-label={translateText('chat.dismiss')} onClick={() => setError('')}>
+          <button type="button" className="chat-action icon-control" aria-label={translateText('chat.dismiss')} onClick={() => setError('')}>
             <X size={13} />
           </button>
         </div>
@@ -322,6 +331,7 @@ function ChatThreadComponent({ conversation, onBack, onClose, readOnly = false, 
 
       <ChatComposerComponent
         pin={pin}
+        onRemovePin={() => { setPinPending(false); consumePin(id, conversation?._composeNonce); }}
         onSend={send}
         disabled={readOnly}
         disabledReason={readOnlyReason || translateText('chat.readOnlyBlocked')}
