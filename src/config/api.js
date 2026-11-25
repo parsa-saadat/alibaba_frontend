@@ -2,6 +2,6 @@
 export const API =
   import.meta.env.VITE_APP_API_URL ||
   import.meta.env.VITE_API_URL ||
-  '/api';
+  'http://185.204.197.23:3000';
 
 export default API;
